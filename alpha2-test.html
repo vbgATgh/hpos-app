@@ -1,0 +1,791 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0b1018">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="HPOS">
+  <title>HPOS</title>
+  <style>
+:root{
+  color-scheme:dark;
+  --bg:#0b1018;--panel:#121a25;--panel2:#172231;--line:#253247;--text:#edf4ff;--muted:#9bacbf;
+  --green:#38d996;--orange:#ffb45c;--red:#ff6b72;--blue:#70a7ff;--yellow:#e9d56d;--radius:16px;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Roboto,Arial,sans-serif;
+}
+*{box-sizing:border-box} html,body{margin:0;background:var(--bg);color:var(--text);min-height:100%;font-size:16px}
+button,input,select,textarea{font:inherit} button{cursor:pointer}
+.app-shell{min-height:100vh}.topbar{position:sticky;top:0;z-index:20;height:64px;padding:env(safe-area-inset-top) 14px 0;display:flex;align-items:center;gap:12px;background:rgba(11,16,24,.94);backdrop-filter:blur(18px);border-bottom:1px solid rgba(255,255,255,.06)}
+.top-title{min-width:0;flex:1;display:flex;flex-direction:column}.top-title strong{font-size:17px}.top-title small{color:var(--muted);font-size:12px;margin-top:2px}.top-actions{display:flex;gap:8px}.icon-btn,.fab-mini{border:0;background:var(--panel2);color:var(--text);border-radius:12px;width:42px;height:42px;font-size:20px;display:grid;place-items:center}.fab-mini{background:var(--green);color:#082015;font-weight:800}
+.main{width:min(100%,1100px);margin:0 auto;padding:18px 14px calc(40px + env(safe-area-inset-bottom))}.section-head{display:flex;gap:10px;align-items:flex-end;justify-content:space-between;margin:8px 0 12px}.section-head h1,.section-head h2{margin:0}.section-head h1{font-size:25px}.section-head h2{font-size:19px}.section-head p{margin:4px 0 0;color:var(--muted);font-size:13px}.stack{display:grid;gap:12px}.grid{display:grid;gap:12px}.grid.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
+.card{background:linear-gradient(180deg,var(--panel),#101722);border:1px solid var(--line);border-radius:var(--radius);padding:15px;box-shadow:0 10px 28px rgba(0,0,0,.12)}.card.soft{background:var(--panel)}.card h3{margin:0 0 8px;font-size:16px}.card p{color:var(--muted);margin:5px 0;line-height:1.4}.metric .label{color:var(--muted);font-size:12px}.metric .value{font-size:24px;font-weight:750;margin-top:5px}.metric .sub{color:var(--muted);font-size:12px;margin-top:4px}.metric.compact .value{font-size:19px}
+.badge{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line);border-radius:999px;padding:4px 8px;color:var(--muted);font-size:12px;white-space:nowrap}.badge.good{color:var(--green);border-color:rgba(56,217,150,.35)}.badge.warn{color:var(--orange);border-color:rgba(255,180,92,.35)}.badge.bad{color:var(--red);border-color:rgba(255,107,114,.35)}.badge.info{color:var(--blue);border-color:rgba(112,167,255,.35)}
+.briefing-hero{padding:18px}.briefing-hero .status{font-size:19px;font-weight:750;line-height:1.35}.briefing-grid{display:grid;gap:10px;margin-top:12px}.brief-block{border-top:1px solid var(--line);padding-top:12px}.brief-block:first-child{border-top:0;padding-top:0}.brief-block h4{margin:0 0 7px;font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}.brief-block ul{margin:0;padding-left:18px}.brief-block li{margin:5px 0;line-height:1.35}
+.action-card{border-left:4px solid var(--blue)}.action-card.critical{border-left-color:var(--red)}.action-card.warn{border-left-color:var(--orange)}.action-card.info{border-left-color:var(--blue)}.action-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.btn{border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:11px;padding:10px 12px;font-weight:650}.btn.primary{background:var(--green);color:#082015;border-color:transparent}.btn.danger{color:var(--red)}.btn.link{background:transparent}.btn.small{padding:7px 9px;font-size:13px}.btn:disabled{opacity:.45;cursor:not-allowed}
+.position-card .top,.list-row .top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.position-card .name{font-weight:750;font-size:17px}.position-card .symbol{color:var(--muted);font-size:12px;margin-top:3px}.position-card .money{text-align:right;font-weight:750}.position-card .meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}.position-card .details{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:12px}.kv{background:rgba(255,255,255,.025);padding:9px;border-radius:10px}.kv span{display:block;color:var(--muted);font-size:11px}.kv strong{display:block;margin-top:3px;font-size:14px}
+.empty{padding:26px 16px;text-align:center;color:var(--muted)}.empty .emoji{font-size:32px;margin-bottom:8px}.list-row{padding:13px 0;border-top:1px solid var(--line)}.list-row:first-child{border-top:0}.list-row .sub{color:var(--muted);font-size:12px;margin-top:4px}.list-row .right{text-align:right;white-space:nowrap}.rule-source{font-size:11px;color:var(--muted);margin-top:7px}
+.progress{height:9px;background:#0c121b;border-radius:99px;overflow:hidden;margin-top:9px}.progress>span{display:block;height:100%;background:var(--green);border-radius:inherit}.progress.warn>span{background:var(--orange)}.progress.bad>span{background:var(--red)}
+.data-strip{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.data-pill{padding:10px;border-radius:12px;background:rgba(255,255,255,.03);border:1px solid var(--line)}.data-pill strong{display:block;font-size:12px}.data-pill small{display:block;color:var(--muted);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.drawer{position:fixed;z-index:60;inset:0 auto 0 0;width:min(86vw,330px);background:#0e1621;border-right:1px solid var(--line);transform:translateX(-102%);transition:.2s ease;padding:calc(14px + env(safe-area-inset-top)) 12px 18px;display:flex;flex-direction:column}.drawer.open{transform:none}.backdrop{position:fixed;z-index:50;inset:0;background:rgba(0,0,0,.52);opacity:0;pointer-events:none;transition:.2s}.backdrop.open{opacity:1;pointer-events:auto}.drawer-head{display:flex;align-items:center;gap:10px;padding:2px 2px 14px}.drawer-head>div:nth-child(2){flex:1;display:flex;flex-direction:column}.drawer-head small{color:var(--muted);font-size:11px}.brand-mark{width:40px;height:40px;border-radius:12px;background:var(--green);color:#082015;font-weight:900;display:grid;place-items:center}.nav-list{display:grid;gap:4px}.nav-btn{width:100%;text-align:left;border:0;background:transparent;color:var(--text);padding:12px;border-radius:11px;display:flex;align-items:center;gap:11px}.nav-btn.active,.nav-btn:hover{background:var(--panel2)}.nav-btn span:last-child{flex:1}.nav-count{font-size:11px;border-radius:99px;background:var(--red);padding:2px 6px;color:white}.drawer-foot{margin-top:auto;padding:12px;color:var(--muted);border-top:1px solid var(--line);font-size:12px}.status-line{margin-bottom:4px}
+.modal-wrap{position:fixed;z-index:100;inset:0;background:rgba(0,0,0,.65);display:flex;align-items:flex-end;justify-content:center}.modal{width:min(100%,620px);max-height:92vh;overflow:auto;background:#111a26;border:1px solid var(--line);border-radius:22px 22px 0 0;padding:16px 14px calc(18px + env(safe-area-inset-bottom))}.modal-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px}.modal-head h2{font-size:20px;margin:0}.action-sheet{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.action-choice{border:1px solid var(--line);background:var(--panel);border-radius:14px;padding:15px;text-align:left;color:var(--text)}.action-choice strong{display:block}.action-choice small{display:block;color:var(--muted);margin-top:4px}
+.form{display:grid;gap:13px}.field{display:grid;gap:6px}.field label{font-size:13px;color:var(--muted)}.field input,.field select,.field textarea{width:100%;border:1px solid var(--line);background:#0c131d;color:var(--text);border-radius:11px;padding:11px 12px;outline:none}.field textarea{min-height:92px;resize:vertical}.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--green)}.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}.field-help{font-size:11px;color:var(--muted)}.switch-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid var(--line)}.switch-row:first-child{border-top:0}.switch{width:48px;height:28px;border-radius:99px;background:#263247;border:0;position:relative}.switch:after{content:"";position:absolute;width:22px;height:22px;border-radius:50%;background:#fff;left:3px;top:3px;transition:.15s}.switch.on{background:var(--green)}.switch.on:after{left:23px}
+.setting{padding:14px 0;border-top:1px solid var(--line)}.setting:first-child{border-top:0}.setting-head{display:flex;justify-content:space-between;gap:12px}.setting-head strong{font-size:14px}.setting-head small{color:var(--muted)}.setting input[type=range]{width:100%;accent-color:var(--green);margin:12px 0 3px}.setting-value{font-weight:800}.standard-note{font-size:11px;color:var(--muted)}.override-dot{color:var(--orange)}
+.impact{border:1px solid rgba(112,167,255,.35);background:rgba(112,167,255,.06);border-radius:12px;padding:12px;margin-top:12px}.impact h4{margin:0 0 7px}.impact ul{margin:0;padding-left:18px;color:var(--muted)}
+.toast{position:fixed;z-index:120;left:50%;bottom:calc(18px + env(safe-area-inset-bottom));transform:translate(-50%,20px);opacity:0;background:#1d2939;color:var(--text);border:1px solid var(--line);border-radius:12px;padding:10px 14px;transition:.2s;pointer-events:none;max-width:90vw;text-align:center}.toast.show{opacity:1;transform:translate(-50%,0)}
+.notice{border-radius:12px;padding:12px;border:1px solid var(--line);background:rgba(255,255,255,.025)}.notice.error{border-color:rgba(255,107,114,.4);color:#ffd9dc}.notice.warn{border-color:rgba(255,180,92,.4)}.notice.info{border-color:rgba(112,167,255,.4)}
+details{border-top:1px solid var(--line);padding:10px 0}summary{cursor:pointer;font-weight:650}.hide{display:none!important}
+@media(min-width:760px){.grid.metrics{grid-template-columns:repeat(4,minmax(0,1fr))}.data-strip{grid-template-columns:repeat(4,1fr)}.position-list{grid-template-columns:repeat(2,minmax(0,1fr));display:grid;gap:12px}.position-list .card{height:100%}.briefing-grid{grid-template-columns:repeat(2,1fr)}.brief-block{border-top:0;border-left:1px solid var(--line);padding:0 0 0 12px}.brief-block:first-child{border-left:0;padding-left:0}}
+@media(min-width:1050px){.drawer{transform:none;width:260px}.backdrop,#menuBtn,.drawer #drawerClose{display:none}.topbar{margin-left:260px}.main{margin-left:calc(260px + max(0px,(100vw - 260px - 1100px)/2));margin-right:auto}.drawer-foot{padding-bottom:18px}}
+
+</style>
+</head>
+<body>
+  <div id="app" class="app-shell">
+    <aside id="drawer" class="drawer" aria-hidden="true">
+      <div class="drawer-head">
+        <div class="brand-mark">H</div>
+        <div><strong>HPOS</strong><small>Local Analyst</small></div>
+        <button id="drawerClose" class="icon-btn" aria-label="Menü schließen">×</button>
+      </div>
+      <nav id="nav" class="nav-list"></nav>
+      <div class="drawer-foot">
+        <div id="storageBadge" class="status-line">Lokal · Schema v3</div>
+        <small>Keine Server · keine API-Pflicht</small>
+      </div>
+    </aside>
+    <div id="backdrop" class="backdrop"></div>
+
+    <header class="topbar">
+      <button id="menuBtn" class="icon-btn" aria-label="Menü öffnen">☰</button>
+      <div class="top-title"><strong id="pageTitle">Dashboard</strong><small id="pageSubtitle">HPOS Briefing</small></div>
+      <div class="top-actions">
+        <button id="aiBtn" class="icon-btn" aria-label="Mit ChatGPT analysieren" title="Mit ChatGPT analysieren">✦</button>
+        <button id="globalAdd" class="fab-mini" aria-label="Neuer Eintrag">＋</button>
+      </div>
+    </header>
+
+    <div style="padding:6px 14px;font-size:11px;opacity:.65;background:#141b27;border-bottom:1px solid rgba(255,255,255,.06)">ALPHA 2 · Safari-Test · kein Produktiv-Release</div>
+    <main id="main" class="main" tabindex="-1"></main>
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    <div id="modalRoot"></div>
+  </div>
+  <script>
+
+/* === core/utils.mjs === */
+const nowIso = () => new Date().toISOString();
+const uuid = () => globalThis.crypto?.randomUUID?.() ?? `id-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+const round = (value, digits = 2) => {
+  if (value === null || value === undefined || Number.isNaN(Number(value))) return null;
+  const f = 10 ** digits;
+  return Math.round((Number(value) + Number.EPSILON) * f) / f;
+};
+const isFiniteNumber = v => typeof v === 'number' && Number.isFinite(v);
+const deepClone = value => structuredClone(value);
+const byDateAsc = (a,b) => String(a.date ?? a.createdAt ?? '').localeCompare(String(b.date ?? b.createdAt ?? ''));
+const normalizeSource = s => String(s ?? '').trim();
+const normalizeTicker = s => String(s ?? '').trim().toUpperCase();
+const statusRank = { UNKNOWN: 0, H1: 1, H2: 2, H0: 3 };
+function daysBetween(a,b){
+  const da = new Date(a); const db = new Date(b);
+  if (Number.isNaN(da.getTime()) || Number.isNaN(db.getTime())) return null;
+  return Math.floor((db-da)/86400000);
+}
+function stableStringify(obj){
+  const seen = new WeakSet();
+  const sort = v => {
+    if (v && typeof v === 'object') {
+      if (seen.has(v)) throw new TypeError('Circular structure');
+      seen.add(v);
+      if (Array.isArray(v)) return v.map(sort);
+      return Object.keys(v).sort().reduce((o,k)=>{o[k]=sort(v[k]); return o;},{});
+    }
+    return v;
+  };
+  return JSON.stringify(sort(obj));
+}
+
+
+
+/* === core/standard-profile.mjs === */
+const STANDARD_PROFILE = Object.freeze({
+  profileId: 'HPOS_STANDARD_2026_06',
+  label: 'HPOS Standard',
+  readOnly: true,
+  rules: Object.freeze({
+    sukukTargetPct: { ruleId:'ALLOC.SUKUK.TARGET', type:'TARGET', value:15, unit:'PCT', configurable:true, source:'HPOS Masterfile / Masterbefehl', sourceDate:null, sourceNote:'Konsolidierter Masterfile-Stand; kein eindeutiges Regeldatum zugewiesen.' },
+    healthcareCapPct: { ruleId:'SECTOR.HEALTHCARE.CAP', type:'MAX_CAP', value:30, unit:'PCT', configurable:true, source:'HPOS Masterfile', sourceDate:null, sourceNote:'Konsolidierter Masterfile-Stand; kein eindeutiges Regeldatum zugewiesen.' },
+    cashMinPct: { ruleId:'LIQUIDITY.CASH.MIN', type:'MINIMUM', value:2, unit:'PCT', configurable:true, source:'HPOS Masterfile', sourceDate:null, sourceNote:'Konsolidierter Masterfile-Stand; kein eindeutiges Regeldatum zugewiesen.' },
+    minPositionEur: { ruleId:'POSITION.MIN.REVIEW', type:'REVIEW_TRIGGER', value:300, unit:'EUR', configurable:true, source:'HPOS Masterfile / Masterbefehl', sourceDate:null, sourceNote:'Konsolidierter Masterfile-Stand; kein eindeutiges Regeldatum zugewiesen.' },
+    watchlistMax: { ruleId:'WATCHLIST.MAX', type:'LIMIT', value:15, unit:'COUNT', configurable:true, source:'HPOS Masterfile / Architektur', sourceDate:'2026-06-12' },
+    dividendGoalNetMonthlyEur: { ruleId:'GOAL.DIVIDEND.NET.MONTHLY', type:'GOAL', value:100, unit:'EUR_MONTH', configurable:true, source:'HPOS Masterfile / Projektziel', sourceDate:'2026-06-24' },
+    dividendGoalDate: { ruleId:'GOAL.DIVIDEND.DATE', type:'GOAL', value:'2029-10', unit:'YYYY-MM', configurable:true, source:'HPOS Masterfile', sourceDate:'2026-06-24' },
+    halalH0Action: { ruleId:'HALAL.H0.VETO', type:'HARD_VETO', value:'VETO_EXIT_REVIEW', configurable:true, source:'HPOS Masterfile / Masterbefehl', sourceDate:null, sourceNote:'Konsolidierter Masterfile-Stand; kein eindeutiges Regeldatum zugewiesen.' },
+    halalH2Action: { ruleId:'HALAL.H2.FREEZE', type:'WORKFLOW', value:'FREEZE_REVIEW', configurable:true, source:'HPOS Masterfile', sourceDate:null, sourceNote:'Konsolidierter Masterfile-Stand; kein eindeutiges Regeldatum zugewiesen.' },
+    halalSourcePriority: { ruleId:'HALAL.SOURCE.PRIORITY', type:'SOURCE_POLICY', value:['Musaffa','Zoya'], configurable:true, source:'HPOS Masterbefehl v3.0 (ältere generische Regel)', sourceDate:'2026-05-08' },
+    nvoException: { ruleId:'ASSET.NVO.H2', type:'ASSET_EXCEPTION', value:'H2', configurable:false, source:'HPOS Masterfile (Einzeltitel-Ausnahme)', sourceDate:'2026-06-27', match:{isin:'DK0062498333', ticker:'NVO'} }
+  }),
+  productDefaults: Object.freeze({
+    cashMode: { value:'OFF', source:'Produktentscheidung v1.3.1', note:'Verhindert fiktiv negatives Cash bei unvollständigen Verrechnungskontodaten.' },
+    halalConflictPolicy: { value:'CONFLICT_TO_H2', source:'Produktentscheidung v1.3.1', note:'Konservativer Default; keine globale historische HPOS-Regel.' }
+  })
+});
+
+const RULE_BY_ID = Object.freeze(Object.fromEntries(
+  Object.values(STANDARD_PROFILE.rules).map(rule => [rule.ruleId, rule])
+));
+
+
+
+/* === core/model.mjs === */
+
+
+function createEmptyState(at = nowIso()){
+  return {
+    appMeta: { schemaVersion:3, appVersion:'1.3.0-alpha.1', createdAt:at, updatedAt:at, migrationHistory:[], lastSuccessfulLoadAt:null },
+    standardProfile: deepClone(STANDARD_PROFILE),
+    userProfile: { overrides:{}, cashMode:STANDARD_PROFILE.productDefaults.cashMode.value, halalSourcePriority:null, halalConflictPolicy:STANDARD_PROFILE.productDefaults.halalConflictPolicy.value, customRules:[], ui:{} },
+    assets: [], transactions: [], halalChecks: [], watchlistEntries: [], reviews: [], alertState: [], newsEntries: [],
+    dataStatus: {
+      portfolio:{state:'UNKNOWN',source:'local',asOf:null,lastAttemptAt:null,message:'Noch keine Portfoliodaten erfasst.'},
+      prices:{state:'UNKNOWN',source:null,asOf:null,lastAttemptAt:null,message:'Kurse nicht aktualisiert.'},
+      halal:{state:'UNKNOWN',source:null,asOf:null,lastAttemptAt:null,message:'Halal-Status nicht vollständig geprüft.'},
+      news:{state:'UNKNOWN',source:null,asOf:null,lastAttemptAt:null,message:'News nicht aktualisiert.'}
+    },
+    diagnostics: []
+  };
+}
+
+function getEffectiveProfile(state){
+  const rules = {};
+  for (const [key, rule] of Object.entries(state.standardProfile.rules)) {
+    const overridePresent = Object.prototype.hasOwnProperty.call(state.userProfile.overrides ?? {}, key);
+    rules[key] = { ...rule, standardValue:rule.value, effectiveValue: overridePresent ? state.userProfile.overrides[key] : rule.value, overridden:overridePresent };
+  }
+  if (Array.isArray(state.userProfile.halalSourcePriority) && state.userProfile.halalSourcePriority.length) {
+    rules.halalSourcePriority = { ...rules.halalSourcePriority, effectiveValue:[...state.userProfile.halalSourcePriority], overridden:true };
+  }
+  return {
+    rules,
+    cashMode: state.userProfile.cashMode ?? state.standardProfile.productDefaults.cashMode.value,
+    halalConflictPolicy: state.userProfile.halalConflictPolicy ?? state.standardProfile.productDefaults.halalConflictPolicy.value,
+    customRules: Array.isArray(state.userProfile.customRules) ? state.userProfile.customRules.filter(r=>r.active!==false) : []
+  };
+}
+
+function setOverride(state,key,value){
+  const rule = state.standardProfile.rules[key];
+  if (!rule) throw new Error(`Unbekannter Strategieparameter: ${key}`);
+  if (!rule.configurable) throw new Error(`Parameter ist nicht konfigurierbar: ${key}`);
+  state.userProfile.overrides[key] = value;
+  state.appMeta.updatedAt = nowIso();
+  return state;
+}
+
+function resetOverride(state,key){
+  delete state.userProfile.overrides[key];
+  if (key === 'halalSourcePriority') state.userProfile.halalSourcePriority = null;
+  state.appMeta.updatedAt = nowIso();
+  return state;
+}
+
+function resetAllOverrides(state){
+  state.userProfile.overrides = {};
+  state.userProfile.halalSourcePriority = null;
+  state.userProfile.halalConflictPolicy = state.standardProfile.productDefaults.halalConflictPolicy.value;
+  state.appMeta.updatedAt = nowIso();
+  return state;
+}
+
+
+
+/* === core/validation.mjs === */
+const ROOT_ARRAYS = ['assets','transactions','halalChecks','watchlistEntries','reviews','alertState','newsEntries','diagnostics'];
+function validateV3State(state){
+  const errors=[];
+  if (!state || typeof state !== 'object') return {ok:false,errors:['State ist kein Objekt.']};
+  if (state.appMeta?.schemaVersion !== 3) errors.push('schemaVersion muss 3 sein.');
+  for (const key of ROOT_ARRAYS) if (!Array.isArray(state[key])) errors.push(`${key} muss ein Array sein.`);
+  if (!state.standardProfile?.readOnly) errors.push('standardProfile.readOnly muss true sein.');
+  if (!state.userProfile || typeof state.userProfile !== 'object') errors.push('userProfile fehlt.');
+  if (state.userProfile?.customRules !== undefined && !Array.isArray(state.userProfile.customRules)) errors.push('userProfile.customRules muss ein Array sein.');
+  const ids = new Set();
+  for (const a of state.assets ?? []) {
+    if (!a.assetId) errors.push('Asset ohne assetId.');
+    else if (ids.has(a.assetId)) errors.push(`Doppelte assetId: ${a.assetId}`);
+    else ids.add(a.assetId);
+    if (!a.name) errors.push(`Asset ${a.assetId ?? '?'} ohne name.`);
+    if (!a.assetClass) errors.push(`Asset ${a.assetId ?? '?'} ohne assetClass.`);
+  }
+  return {ok:errors.length===0,errors};
+}
+
+
+
+/* === core/asset-service.mjs === */
+
+function findAsset(state,{assetId,isin,ticker,exchange,name}={}){
+  if (assetId) return state.assets.find(a=>a.assetId===assetId) ?? null;
+  if (isin) {
+    const m=state.assets.filter(a=>a.isin && a.isin.toUpperCase()===String(isin).toUpperCase());
+    if (m.length===1) return m[0];
+  }
+  if (ticker) {
+    const nt=normalizeTicker(ticker), ex=String(exchange??'').toUpperCase();
+    const m=state.assets.filter(a=>normalizeTicker(a.ticker)===nt && (!ex || String(a.exchange??'').toUpperCase()===ex));
+    if (m.length===1) return m[0];
+  }
+  if (name) {
+    const nn=String(name).trim().toLowerCase();
+    const m=state.assets.filter(a=>String(a.name).trim().toLowerCase()===nn);
+    if (m.length===1) return m[0];
+  }
+  return null;
+}
+
+function upsertAsset(state,input){
+  let asset=findAsset(state,input);
+  if (!asset) {
+    asset={assetId:input.assetId??uuid(),name:input.name||input.ticker||input.isin||'Unbenannt',assetClass:input.assetClass||'UNKNOWN',createdAt:nowIso(),updatedAt:nowIso()};
+    state.assets.push(asset);
+  }
+  for (const k of ['name','assetClass','isin','wkn','ticker','exchange','currency','sector']) if (input[k]!==undefined && input[k]!==null && input[k]!=='') asset[k]=input[k];
+  if (input.priceQuote) asset.priceQuote={...input.priceQuote};
+  asset.updatedAt=nowIso();
+  return asset;
+}
+
+
+
+/* === core/snapshot-engine.mjs === */
+
+
+function freshPosition(asset){return {assetId:asset.assetId,name:asset.name,ticker:asset.ticker??null,isin:asset.isin??null,assetClass:asset.assetClass,sector:asset.sector??null,currency:asset.currency??'EUR',qty:0,avgCost:null,costValue:0,lastReferencePrice:null,lastReferenceAt:null};}
+
+function buildSnapshot(state, {asOf=new Date().toISOString()}={}){
+  const effective=getEffectiveProfile(state);
+  const positions=new Map(state.assets.map(a=>[a.assetId,freshPosition(a)]));
+  let cash = effective.cashMode==='TRACKED' ? 0 : null;
+  const diagnostics=[];
+  const txs=[...state.transactions].sort(byDateAsc);
+  for (const tx of txs) {
+    if (tx.type==='CASH_IN' && effective.cashMode==='TRACKED') { cash += Number(tx.amount||0); continue; }
+    if (tx.type==='CASH_OUT' && effective.cashMode==='TRACKED') { cash -= Number(tx.amount||0); continue; }
+    if (tx.type==='DIVIDEND' && effective.cashMode==='TRACKED') { cash += Number(tx.amount||0); continue; }
+    if (!['BUY','SELL','OPENING_POSITION'].includes(tx.type)) continue;
+    const p=positions.get(tx.assetId);
+    if (!p) { diagnostics.push({code:'TX_ASSET_MISSING',severity:'ERROR',transactionId:tx.transactionId,message:'Transaktion verweist auf unbekanntes Asset.'}); continue; }
+    const qty=Number(tx.qty||0), price=Number(tx.price||0);
+    if (tx.type==='BUY' || tx.type==='OPENING_POSITION') {
+      const oldCost=(p.avgCost??0)*p.qty;
+      const addCost=qty*price;
+      p.qty += qty;
+      p.avgCost = p.qty>0 ? (oldCost+addCost)/p.qty : null;
+      p.costValue = p.qty*(p.avgCost??0);
+      if (Number.isFinite(price) && price>=0){p.lastReferencePrice=price;p.lastReferenceAt=tx.date;}
+      if (tx.type==='BUY' && effective.cashMode==='TRACKED') cash -= addCost;
+    } else if (tx.type==='SELL') {
+      if (qty>p.qty) diagnostics.push({code:'OVERSELL_IN_JOURNAL',severity:'ERROR',transactionId:tx.transactionId,message:`Verkauf ${qty} > Bestand ${p.qty}.`});
+      p.qty=Math.max(0,p.qty-qty); p.costValue=p.qty*(p.avgCost??0);
+      if (Number.isFinite(price) && price>=0){p.lastReferencePrice=price;p.lastReferenceAt=tx.date;}
+      if (effective.cashMode==='TRACKED') cash += qty*price;
+    }
+  }
+  const active=[];
+  for (const p of positions.values()) {
+    if (p.qty<=0) continue;
+    const asset=state.assets.find(a=>a.assetId===p.assetId);
+    const q=asset?.priceQuote;
+    const hasQuote=q && Number.isFinite(Number(q.price));
+    const valuationPrice=hasQuote?Number(q.price):(Number.isFinite(Number(p.lastReferencePrice))?Number(p.lastReferencePrice):null);
+    const valuationSource=hasQuote?'PRICE_QUOTE':(valuationPrice!==null?'TRANSACTION_REFERENCE':'UNKNOWN');
+    const marketValue=valuationPrice===null?null:p.qty*valuationPrice;
+    const performancePct=(hasQuote && p.avgCost!==null && p.avgCost!==0)?((Number(q.price)-p.avgCost)/p.avgCost*100):null;
+    active.push({...p,valuationPrice,valuationSource,marketValue,performancePct,priceAsOf:hasQuote?(q.asOf??null):(p.lastReferenceAt??null)});
+  }
+  const allValued=active.every(p=>p.marketValue!==null);
+  const holdingsValue=allValued?active.reduce((s,p)=>s+p.marketValue,0):null;
+  const netWorth=(holdingsValue!==null && cash!==null)?holdingsValue+cash:null;
+  const allocationBase=holdingsValue!==null ? holdingsValue + (cash!==null?Math.max(cash,0):0) : null;
+  const sukukValue=allValued?active.filter(p=>/sukuk/i.test(p.assetClass||'')).reduce((s,p)=>s+p.marketValue,0):null;
+  const healthcareValue=allValued?active.filter(p=>/health/i.test(p.sector||'')).reduce((s,p)=>s+p.marketValue,0):null;
+  const sukukPct=allocationBase && sukukValue!==null ? sukukValue/allocationBase*100 : null;
+  const healthcarePct=allocationBase && healthcareValue!==null ? healthcareValue/allocationBase*100 : null;
+  const cashPct=(effective.cashMode==='TRACKED' && allocationBase && cash!==null)?cash/allocationBase*100:null;
+  return {
+    asOf, effectiveProfile:effective, positions:active, cash,
+    totals:{holdingsValue:round(holdingsValue),netWorth:round(netWorth),allocationBase:round(allocationBase)},
+    allocations:{sukukValue:round(sukukValue),sukukPct:round(sukukPct),healthcareValue:round(healthcareValue),healthcarePct:round(healthcarePct),cashPct:round(cashPct)},
+    completeness:{allPositionsValued:allValued,hasCurrentQuotes:active.length>0 && active.every(p=>p.valuationSource==='PRICE_QUOTE')},
+    diagnostics
+  };
+}
+
+
+
+/* === core/transaction-service.mjs === */
+
+
+function validateTransaction(state, tx){
+  const errors=[],warnings=[];
+  if (!tx.type) errors.push('Typ fehlt.');
+  if (!tx.date) errors.push('Datum fehlt.');
+  if (['BUY','SELL','OPENING_POSITION'].includes(tx.type)) {
+    if (!tx.assetId) errors.push('Asset fehlt.');
+    if (!(Number(tx.qty)>0)) errors.push('Stückzahl muss >0 sein.');
+    if (!(Number(tx.price)>=0)) errors.push('Preis muss >=0 sein.');
+  }
+  if (['DIVIDEND','CASH_IN','CASH_OUT'].includes(tx.type) && !(Number(tx.amount)>0)) errors.push('Betrag muss >0 sein.');
+  const snap=buildSnapshot(state);
+  const pos=snap.positions.find(p=>p.assetId===tx.assetId);
+  if (tx.type==='SELL' && Number(tx.qty)>(pos?.qty??0) && !tx.allowOversell) errors.push('Verkauf über vorhandene Stückzahl ist nicht erlaubt.');
+  if (tx.type==='BUY' && snap.effectiveProfile.cashMode==='TRACKED') {
+    const cost=Number(tx.qty)*Number(tx.price);
+    if ((snap.cash??0)<cost && !tx.allowNegativeCash) errors.push('Cash reicht für diesen Kauf nicht. Einzahlung erfassen oder negativen Cash ausdrücklich bestätigen.');
+    else if ((snap.cash??0)<cost) warnings.push('Negativer Cash wurde ausdrücklich zugelassen.');
+  }
+  return {ok:errors.length===0,errors,warnings};
+}
+
+function addTransaction(state,input){
+  const tx={transactionId:input.transactionId??uuid(),createdAt:input.createdAt??nowIso(),enteredBy:input.enteredBy??'user',...input};
+  const check=validateTransaction(state,tx);
+  if (!check.ok) return {ok:false,errors:check.errors,warnings:check.warnings,state};
+  state.transactions.push(tx); state.appMeta.updatedAt=nowIso();
+  return {ok:true,transaction:tx,warnings:check.warnings,state};
+}
+
+function removeTransaction(state,transactionId){
+  const n=state.transactions.length;
+  state.transactions=state.transactions.filter(t=>t.transactionId!==transactionId);
+  if (state.transactions.length===n) return {ok:false,error:'Transaktion nicht gefunden.'};
+  state.appMeta.updatedAt=nowIso(); return {ok:true,state};
+}
+
+
+
+/* === core/halal-engine.mjs === */
+
+
+const sourceEq=(a,b)=>String(a??'').trim().toLowerCase()===String(b??'').trim().toLowerCase();
+function getEffectiveHalal(state,asset){
+  const exception=state.standardProfile.rules.nvoException;
+  const nvoMatch=(exception.match.isin && asset.isin===exception.match.isin) || (exception.match.ticker && String(asset.ticker??'').toUpperCase()===exception.match.ticker);
+  const checks=state.halalChecks.filter(c=>c.assetId===asset.assetId).sort((a,b)=>String(b.checkedAt).localeCompare(String(a.checkedAt)));
+  if (nvoMatch) return {status:'H2',conflict:true,reason:'Explizite NVO-Einzelregel im neueren Masterfile.',ruleId:exception.ruleId,checks};
+  if (!checks.length) return {status:'UNKNOWN',conflict:false,reason:'Keine Halal-Prüfung hinterlegt.',ruleId:null,checks:[]};
+  const latestBySource=[];
+  for (const c of checks) if (!latestBySource.some(x=>sourceEq(x.source,c.source))) latestBySource.push(c);
+  const statuses=[...new Set(latestBySource.map(c=>c.status))];
+  if (statuses.length===1) return {status:statuses[0],conflict:false,reason:'Aktuelle Quellen stimmen überein oder es liegt nur eine Quelle vor.',ruleId:statuses[0]==='H0'?'HALAL.H0.VETO':statuses[0]==='H2'?'HALAL.H2.FREEZE':null,checks:latestBySource};
+  const effective=getEffectiveProfile(state), policy=effective.halalConflictPolicy, priority=effective.rules.halalSourcePriority.effectiveValue;
+  if (policy==='STRICTEST') {
+    const strict=[...latestBySource].sort((a,b)=>statusRank[b.status]-statusRank[a.status])[0];
+    return {status:strict.status,conflict:true,reason:'Quellenkonflikt; strengstes Urteil gemäß Nutzerpolitik.',ruleId:'HALAL.SOURCE.POLICY',checks:latestBySource};
+  }
+  if (policy==='PRIORITY_SOURCE') {
+    for (const src of priority) {
+      const c=latestBySource.find(x=>sourceEq(x.source,src));
+      if (c) return {status:c.status,conflict:true,reason:`Quellenkonflikt; ${src} entscheidet gemäß Nutzerpriorität.`,ruleId:'HALAL.SOURCE.POLICY',checks:latestBySource};
+    }
+    return {status:'UNKNOWN',conflict:true,reason:'Quellenkonflikt; keine priorisierte Quelle vorhanden.',ruleId:'HALAL.SOURCE.POLICY',checks:latestBySource};
+  }
+  return {status:'H2',conflict:true,reason:'Quellenkonflikt → H2/manuelle Prüfung gemäß Produktdefault/Nutzerpolitik.',ruleId:'HALAL.SOURCE.POLICY',checks:latestBySource};
+}
+
+
+
+/* === core/rule-engine.mjs === */
+
+
+function outcome(ruleId,status,actual,target,message,action,extra={}){return {ruleId,status,actual,target,message,action,...extra};}
+function evaluateRules(state,snapshot){
+  const r=snapshot.effectiveProfile.rules, out=[];
+  const suk=snapshot.allocations.sukukPct;
+  if (suk===null) out.push(outcome(r.sukukTargetPct.ruleId,'UNKNOWN',null,r.sukukTargetPct.effectiveValue,'Sukuk-Ziel derzeit nicht prüfbar, weil Bewertungsdaten fehlen.','Fehlende Bewertungsdaten ergänzen.',{source:r.sukukTargetPct.source}));
+  else if (suk<r.sukukTargetPct.effectiveValue) out.push(outcome(r.sukukTargetPct.ruleId,'WARN',round(suk),r.sukukTargetPct.effectiveValue,`Sukuk liegt ${round(r.sukukTargetPct.effectiveValue-suk,1)} Prozentpunkte unter Ziel.`, 'Nächste Kapitalallokation bevorzugt auf Sukuk prüfen.',{source:r.sukukTargetPct.source}));
+  else out.push(outcome(r.sukukTargetPct.ruleId,'OK',round(suk),r.sukukTargetPct.effectiveValue,'Sukuk-Ziel erreicht oder überschritten.','Keine regelbedingte Aktion.',{source:r.sukukTargetPct.source}));
+
+  const hc=snapshot.allocations.healthcarePct;
+  if (hc===null) out.push(outcome(r.healthcareCapPct.ruleId,'UNKNOWN',null,r.healthcareCapPct.effectiveValue,'Healthcare-Cap derzeit nicht prüfbar.','Bewertungsdaten ergänzen.',{source:r.healthcareCapPct.source}));
+  else if (hc>r.healthcareCapPct.effectiveValue) out.push(outcome(r.healthcareCapPct.ruleId,'WARN',round(hc),r.healthcareCapPct.effectiveValue,`Healthcare liegt ${round(hc-r.healthcareCapPct.effectiveValue,1)} Prozentpunkte über Cap.`,'Weitere Healthcare-Käufe vermeiden und Abbau/Rebalancing prüfen.',{source:r.healthcareCapPct.source}));
+  else out.push(outcome(r.healthcareCapPct.ruleId,'OK',round(hc),r.healthcareCapPct.effectiveValue,'Healthcare liegt innerhalb des Caps.','Keine regelbedingte Aktion.',{source:r.healthcareCapPct.source}));
+
+  if (snapshot.effectiveProfile.cashMode!=='TRACKED') out.push(outcome(r.cashMinPct.ruleId,'UNKNOWN',null,r.cashMinPct.effectiveValue,'Cashtracking ist ausgeschaltet; Cashregel ist nicht prüfbar.','Nur bei gewünschter Vollbuchhaltung Cashtracking aktivieren.',{source:r.cashMinPct.source}));
+  else if (snapshot.allocations.cashPct===null) out.push(outcome(r.cashMinPct.ruleId,'UNKNOWN',null,r.cashMinPct.effectiveValue,'Cashquote ist nicht berechenbar.','Bewertungsdaten prüfen.',{source:r.cashMinPct.source}));
+  else if (snapshot.allocations.cashPct<r.cashMinPct.effectiveValue) out.push(outcome(r.cashMinPct.ruleId,'WARN',round(snapshot.allocations.cashPct),r.cashMinPct.effectiveValue,'Cashquote liegt unter Minimum.','Liquidität prüfen.',{source:r.cashMinPct.source}));
+  else out.push(outcome(r.cashMinPct.ruleId,'OK',round(snapshot.allocations.cashPct),r.cashMinPct.effectiveValue,'Cashquote liegt über Minimum.','Keine regelbedingte Aktion.',{source:r.cashMinPct.source}));
+
+  for (const p of snapshot.positions) {
+    if (p.marketValue===null) out.push(outcome(r.minPositionEur.ruleId,'UNKNOWN',null,r.minPositionEur.effectiveValue,`${p.name}: Mindestpositionswert nicht prüfbar.`,'Kurs/Referenzwert ergänzen.',{assetId:p.assetId,source:r.minPositionEur.source}));
+    else if (p.marketValue<r.minPositionEur.effectiveValue) out.push(outcome(r.minPositionEur.ruleId,'WARN',round(p.marketValue),r.minPositionEur.effectiveValue,`${p.name}: Position unter Mindestwert.`,'T90/Review: These prüfen; aufstocken oder Exit entscheiden, kein automatischer Verkauf.',{assetId:p.assetId,source:r.minPositionEur.source}));
+  }
+
+  const activeWatchlist=state.watchlistEntries.filter(w=>w.status!=='ARCHIVED').length;
+  if (activeWatchlist>r.watchlistMax.effectiveValue) out.push(outcome(r.watchlistMax.ruleId,'WARN',activeWatchlist,r.watchlistMax.effectiveValue,'Watchlist-Limit überschritten.','Watchlist bereinigen oder Limit bewusst im Cockpit ändern.',{source:r.watchlistMax.source}));
+  else out.push(outcome(r.watchlistMax.ruleId,'OK',activeWatchlist,r.watchlistMax.effectiveValue,'Watchlist innerhalb des Limits.','Keine regelbedingte Aktion.',{source:r.watchlistMax.source}));
+
+  for (const cr of snapshot.effectiveProfile.customRules ?? []) {
+    if (cr.template==='MAX_SINGLE_POSITION_PCT') {
+      if (!snapshot.totals.allocationBase) out.push(outcome(cr.ruleId,'UNKNOWN',null,cr.value,`${cr.label}: derzeit nicht prüfbar.`,'Bewertungsdaten ergänzen.',{source:'Nutzerregel'}));
+      else for (const p of snapshot.positions) {
+        if (p.marketValue===null) continue;
+        const actual=round(p.marketValue/snapshot.totals.allocationBase*100);
+        if (actual>Number(cr.value)) out.push(outcome(cr.ruleId,'WARN',actual,Number(cr.value),`${p.name}: ${cr.label} überschritten.`,'Positionsgröße prüfen; kein automatischer Verkauf.',{assetId:p.assetId,source:'Nutzerregel'}));
+      }
+    } else if (cr.template==='SECTOR_CAP') {
+      if (!snapshot.totals.allocationBase) out.push(outcome(cr.ruleId,'UNKNOWN',null,cr.value,`${cr.label}: derzeit nicht prüfbar.`,'Bewertungsdaten ergänzen.',{source:'Nutzerregel'}));
+      else {
+        const value=snapshot.positions.filter(p=>String(p.sector??'').toLowerCase()===String(cr.sector??'').toLowerCase()).reduce((sum,p)=>sum+(p.marketValue??0),0);
+        const actual=round(value/snapshot.totals.allocationBase*100);
+        if (actual>Number(cr.value)) out.push(outcome(cr.ruleId,'WARN',actual,Number(cr.value),`${cr.label}: ${cr.sector} liegt über dem gesetzten Cap.`,'Weitere Käufe in diesem Sektor prüfen/vermeiden.',{source:'Nutzerregel'}));
+      }
+    }
+  }
+
+  for (const p of snapshot.positions) {
+    const asset=state.assets.find(a=>a.assetId===p.assetId); const h=getEffectiveHalal(state,asset);
+    if (h.status==='H0') out.push(outcome('HALAL.H0.VETO','CRITICAL','H0','H1',`${p.name}: H0 – Hard Veto.`,'Keine Aufstockung; Exit-/Veto-Review nach aktiver HPOS-Regel.',{assetId:p.assetId,halal:h,source:r.halalH0Action.source}));
+    else if (h.status==='H2') out.push(outcome(h.ruleId==='ASSET.NVO.H2'?'ASSET.NVO.H2':'HALAL.H2.FREEZE','WARN','H2','H1',`${p.name}: H2 – Freeze/Review${h.conflict?' (Quellenkonflikt)':''}.`,'Nicht aufstocken; Prüfung/Review durchführen.',{assetId:p.assetId,halal:h,source:h.ruleId==='ASSET.NVO.H2'?r.nvoException.source:r.halalH2Action.source}));
+    else if (h.status==='UNKNOWN') out.push(outcome('HALAL.STATUS.UNKNOWN','UNKNOWN','UNKNOWN','H1',`${p.name}: Halal-Status unbekannt.`,'Vor Kauf/Aufstockung Halal-Prüfung dokumentieren.',{assetId:p.assetId,halal:h,source:null}));
+  }
+  return out;
+}
+
+
+
+/* === core/trigger-engine.mjs === */
+
+const sevRank={CRITICAL:4,WARN:3,UNKNOWN:2,INFO:1,OK:0};
+function keyOf(r){return `${r.ruleId}:${r.assetId??'GLOBAL'}`;}
+function buildAlerts(state,ruleResults,{now=nowIso()}={}){
+  const workflow=new Map((state.alertState??[]).map(s=>[s.alertKey,s]));
+  return ruleResults.filter(r=>['CRITICAL','WARN','UNKNOWN'].includes(r.status)).map(r=>{
+    const alertKey=keyOf(r), saved=workflow.get(alertKey)??{status:'NEW'};
+    const snoozed=saved.status==='SNOOZED' && saved.snoozedUntil && new Date(saved.snoozedUntil)>new Date(now);
+    return {alertKey,title:r.message,severity:r.status==='CRITICAL'?'CRITICAL':r.status==='WARN'?'WARN':'INFO',actual:r.actual,target:r.target,ruleId:r.ruleId,reason:r.message,action:r.action,dataAsOf:now,status:snoozed?'SNOOZED':saved.status??'NEW',snoozedUntil:saved.snoozedUntil??null,assetId:r.assetId??null,source:r.source??null};
+  }).sort((a,b)=>sevRank[b.severity]-sevRank[a.severity] || a.title.localeCompare(b.title));
+}
+function setAlertWorkflow(state,alertKey,status,{snoozedUntil=null}={}){
+  const allowed=['NEW','REVIEW','SNOOZED','DONE']; if(!allowed.includes(status)) throw new Error('Ungültiger Alert-Status.');
+  const existing=state.alertState.find(a=>a.alertKey===alertKey); const patch={alertKey,status,snoozedUntil:status==='SNOOZED'?snoozedUntil:null,acknowledgedAt:status==='DONE'?nowIso():null};
+  if(existing) Object.assign(existing,patch); else state.alertState.push(patch); return state;
+}
+
+
+
+/* === core/briefing-engine.mjs === */
+function fmt(v,unit=''){return v===null||v===undefined?'unbekannt':`${v}${unit}`;}
+function buildBriefing(state,snapshot,alerts,{previousSnapshot=null}={}){
+  const visible=alerts.filter(a=>a.status!=='DONE' && a.status!=='SNOOZED');
+  const critical=visible.filter(a=>a.severity==='CRITICAL').length, warn=visible.filter(a=>a.severity==='WARN').length, info=visible.filter(a=>a.severity==='INFO').length;
+  const statusText=critical?`🔴 ${critical} kritische Punkte, ${warn} Warnungen.`:warn?`🟠 ${warn} Punkte benötigen Aufmerksamkeit.`:info?`🟡 ${info} Punkte sind derzeit nicht vollständig prüfbar.`:'🟢 Keine aktive Regelabweichung aus den vollständig prüfbaren lokalen Daten.';
+  const changes=[];
+  if(previousSnapshot){
+    if(previousSnapshot.allocations?.sukukPct!==snapshot.allocations.sukukPct) changes.push(`Sukuk: ${fmt(previousSnapshot.allocations?.sukukPct,'%')} → ${fmt(snapshot.allocations.sukukPct,'%')}`);
+    if(previousSnapshot.totals?.holdingsValue!==snapshot.totals.holdingsValue) changes.push(`Depotwert: ${fmt(previousSnapshot.totals?.holdingsValue,' €')} → ${fmt(snapshot.totals.holdingsValue,' €')}`);
+  }
+  if(!changes.length) changes.push(previousSnapshot?'Keine belegte relevante Änderung aus den gespeicherten Snapshot-Werten.':'Noch kein Vergleichssnapshot vorhanden.');
+  const actions=visible.filter(a=>['CRITICAL','WARN'].includes(a.severity)).slice(0,5).map(a=>`${a.action} [${a.ruleId}]`);
+  if(!actions.length) actions.push('Keine konkrete Aktion aus einer aktiven Regelabweichung ableitbar.');
+  const chances=[];
+  const wl=state.watchlistEntries.filter(w=>w.status!=='ARCHIVED');
+  if(wl.length) chances.push(`${wl.length} Watchlist-Kandidat(en) vorhanden; ohne belegten Kurs-/Triggerwert keine Kaufchance behauptet.`); else chances.push('Keine Watchlist-Chance aus lokalen Daten ableitbar.');
+  const today=new Date(snapshot.asOf), due=state.reviews.filter(r=>r.status!=='DONE' && r.dueAt && new Date(r.dueAt)<=new Date(today.getTime()+30*86400000));
+  const dates=due.length?due.slice(0,5).map(r=>`${r.type}: fällig ${r.dueAt}`):['Keine dokumentierte Review-Fälligkeit in den nächsten 30 Tagen.'];
+  return {asOf:snapshot.asOf,blocks:[
+    {id:'status',title:'Status',items:[statusText]},
+    {id:'changes',title:'Seit letztem Check',items:changes},
+    {id:'actions',title:'Handlungen',items:actions},
+    {id:'opportunities',title:'Chancen',items:chances},
+    {id:'dates',title:'Termine',items:dates}
+  ]};
+}
+
+
+
+/* === core/storage-service.mjs === */
+
+
+const STORAGE_KEY='hposStateV3';
+function saveState(storage,state){const v=validateV3State(state);if(!v.ok)throw new Error(`Speichern blockiert: ${v.errors.join(' | ')}`);state.appMeta.updatedAt=nowIso();storage.setItem(STORAGE_KEY,JSON.stringify(state));return true;}
+function loadState(storage){const raw=storage.getItem(STORAGE_KEY);if(raw===null)return {ok:false,kind:'EMPTY',message:'Noch kein lokaler HPOS-v3-Zustand vorhanden.'};let parsed;try{parsed=JSON.parse(raw);}catch(e){return {ok:false,kind:'PARSE_ERROR',message:'Lokale HPOS-Daten sind nicht lesbar.',error:String(e),raw};}const v=validateV3State(parsed);if(!v.ok)return {ok:false,kind:'VALIDATION_ERROR',message:'Lokale HPOS-Daten entsprechen nicht Schema v3.',errors:v.errors,raw};parsed.appMeta.lastSuccessfulLoadAt=nowIso();return {ok:true,state:parsed};}
+
+
+
+/* === core/migration-v12.mjs === */
+
+
+
+
+
+const mapType={Kauf:'BUY',Verkauf:'SELL','Bestandsübernahme':'OPENING_POSITION',Dividende:'DIVIDEND',Einzahlung:'CASH_IN',Auszahlung:'CASH_OUT'};
+function migrateV12(v12,{at=nowIso()}={}){
+  if(!v12||typeof v12!=='object')return {ok:false,errors:['V1.2-Zustand fehlt oder ist ungültig.']};
+  const target=createEmptyState(at); target.appMeta.migrationHistory.push({from:2,to:3,at,status:'STARTED'});
+  const symbolAsset=new Map();
+  const ensure=(obj={})=>{const symbol=String(obj.symbol??obj.ticker??'').trim().toUpperCase(); if(symbolAsset.has(symbol)&&symbol)return symbolAsset.get(symbol); const a=upsertAsset(target,{name:obj.name||symbol||'Unbenannt',ticker:symbol||undefined,assetClass:obj.assetClass||'UNKNOWN',sector:obj.sector||undefined,currency:'EUR'}); if(symbol)symbolAsset.set(symbol,a); return a;};
+  for(const p of v12.positions??[])ensure(p); for(const t of v12.transactions??[])if(t.symbol)ensure(t); for(const w of v12.watchlist??[])if(w.symbol)ensure(w); for(const h of v12.halal??[])if(h.symbol)ensure(h);
+  for(const t of v12.transactions??[]){const type=mapType[t.type];if(!type)continue;const asset=['BUY','SELL','OPENING_POSITION','DIVIDEND'].includes(type)&&t.symbol?ensure(t):null;target.transactions.push({transactionId:t.id??uuid(),type,date:t.date??at.slice(0,10),createdAt:t.createdAt??at,enteredBy:'migration-v1.2',assetId:asset?.assetId,qty:Number(t.qty||0)||undefined,price:Number(t.price||0),amount:Number(t.amount||0)||undefined,legacySource:'v1.2'});}
+  // Rebuild and balance legacy position quantities so no saved position is silently lost.
+  let snap=buildSnapshot(target);
+  const earliest=(target.transactions.map(t=>t.date).sort()[0]??at.slice(0,10));
+  for(const p of v12.positions??[]){const a=ensure(p);const cur=snap.positions.find(x=>x.assetId===a.assetId)?.qty??0;const diff=Number(p.qty||0)-cur;if(Math.abs(diff)>1e-9){if(diff>0)target.transactions.unshift({transactionId:uuid(),type:'OPENING_POSITION',date:earliest,createdAt:at,enteredBy:'migration-v1.2-balance',assetId:a.assetId,qty:diff,price:Number(p.avg??p.price??0),legacySource:'v1.2-position-balance'});else target.diagnostics.push({code:'MIGRATION_NEGATIVE_POSITION_DIFF',severity:'WARN',assetId:a.assetId,message:`V1.2 gespeicherter Bestand liegt ${Math.abs(diff)} Stück unter dem aus Journal ableitbaren Bestand; nicht still korrigiert.`});}}
+  for(const w of v12.watchlist??[]){const a=ensure(w);target.watchlistEntries.push({watchlistId:uuid(),assetId:a.assetId,bucket:String(w.bucket??'C').startsWith('A')?'A':String(w.bucket??'C').startsWith('B')?'B':'C',thesis:w.note??'',entryTrigger:null,reviewDate:null,createdAt:at,status:'ACTIVE'});}
+  for(const h of v12.halal??[]){const a=ensure(h);target.halalChecks.push({checkId:uuid(),assetId:a.assetId,source:h.source||'Legacy v1.2',status:['H1','H2','H0'].includes(h.status)?h.status:'UNKNOWN',checkedAt:h.date||at.slice(0,10),evidenceRef:null,note:'Aus v1.2 migriert',enteredBy:'migration-v1.2',updatedAt:at});}
+  target.newsEntries=(v12.news??[]).map(n=>({...n,newsId:n.newsId??uuid(),enteredBy:n.enteredBy??'migration-v1.2',updatedAt:n.updatedAt??at}));
+  target.userProfile.cashMode='OFF';
+  if(v12.cash!==undefined && Number(v12.cash)!==0)target.diagnostics.push({code:'LEGACY_CASH_PRESERVED_AS_DIAGNOSTIC',severity:'WARN',message:`V1.2 Cash ${Number(v12.cash)} € wurde nicht als aktiver Cashbestand übernommen, weil Cashtracking in v1.3 standardmäßig AUS ist. Wert bleibt im Migrationshinweis erhalten.`,legacyCash:Number(v12.cash)});
+  target.dataStatus.portfolio={state:target.transactions.length||target.assets.length?'CURRENT':'UNKNOWN',source:'migration-v1.2',asOf:at,lastAttemptAt:at,message:'Aus V1.2 migriert; Bewertungsdaten können Referenzwerte sein.'};
+  target.dataStatus.news={state:target.newsEntries.length?'STALE':'UNKNOWN',source:target.newsEntries.length?'migration-v1.2':null,asOf:null,lastAttemptAt:at,message:target.newsEntries.length?'Legacy-News migriert; Aktualität nicht bestätigt.':'News nicht aktualisiert.'};
+  target.appMeta.migrationHistory[0].status='COMPLETED';target.appMeta.updatedAt=at;
+  const v=validateV3State(target);return v.ok?{ok:true,state:target}:{ok:false,errors:v.errors};
+}
+
+
+
+/* === core/migration-service.mjs === */
+
+
+
+
+const LEGACY_STORAGE_KEY='hposState';
+function migrateStorageV12ToV3(storage,{at=nowIso()}={}){
+  const raw=storage.getItem(LEGACY_STORAGE_KEY);
+  if(raw===null)return {ok:false,kind:'NO_LEGACY',message:'Kein V1.2-Zustand gefunden.'};
+  let legacy;
+  try{legacy=JSON.parse(raw);}catch(e){return {ok:false,kind:'LEGACY_PARSE_ERROR',message:'V1.2-Daten sind nicht lesbar.',error:String(e)};}
+  const backupKey=`${LEGACY_STORAGE_KEY}_backup_${at.replace(/[:.]/g,'-')}`;
+  // Sicherung wird angelegt, bevor irgendein Zielzustand geschrieben wird.
+  storage.setItem(backupKey,raw);
+  const migrated=migrateV12(legacy,{at});
+  if(!migrated.ok)return {ok:false,kind:'MIGRATION_ERROR',errors:migrated.errors,backupKey};
+  const valid=validateV3State(migrated.state);
+  if(!valid.ok)return {ok:false,kind:'TARGET_VALIDATION_ERROR',errors:valid.errors,backupKey};
+  // Erst nach erfolgreicher Migration + Validierung wird das produktive v3-Ziel ersetzt.
+  storage.setItem(STORAGE_KEY,JSON.stringify(migrated.state));
+  return {ok:true,state:migrated.state,backupKey,targetKey:STORAGE_KEY};
+}
+
+
+
+/* === core/backup.mjs === */
+
+
+function exportBackup(state){const v=validateV3State(state);if(!v.ok)throw new Error(`Backup abgebrochen: ${v.errors.join(' | ')}`);return {format:'HPOS_BACKUP',schemaVersion:3,exportedAt:nowIso(),payload:deepClone(state)};}
+function importBackup(backup){if(backup?.format!=='HPOS_BACKUP'||backup?.schemaVersion!==3) return {ok:false,errors:['Kein unterstütztes HPOS-Schema-v3-Backup.']};const v=validateV3State(backup.payload);return v.ok?{ok:true,state:deepClone(backup.payload)}:{ok:false,errors:v.errors};}
+function equivalentState(a,b){return stableStringify(a)===stableStringify(b);}
+
+
+
+/* === core/handoff.mjs === */
+
+function safe(obj){return JSON.stringify(obj,null,2);}
+function buildAiHandoff(state,snapshot,alerts,{includeSensitiveNotes=false}={}){
+  const strategy=Object.fromEntries(Object.entries(snapshot.effectiveProfile.rules).map(([k,r])=>[k,{value:r.effectiveValue,standard:r.standardValue,overridden:r.overridden,ruleId:r.ruleId}]));
+  const portfolio=snapshot.positions.map(p=>({assetId:p.assetId,name:p.name,ticker:p.ticker,isin:p.isin,qty:p.qty,marketValue:p.marketValue,valuationSource:p.valuationSource,performancePct:p.performancePct,halal:getEffectiveHalal(state,state.assets.find(a=>a.assetId===p.assetId)).status}));
+  const halal=state.assets.map(a=>({assetId:a.assetId,name:a.name,effective:getEffectiveHalal(state,a),checks:state.halalChecks.filter(c=>c.assetId===a.assetId).map(c=>({source:c.source,status:c.status,checkedAt:c.checkedAt,evidenceRef:c.evidenceRef??null,note:includeSensitiveNotes?(c.note??null):undefined}))}));
+  const watchlist=state.watchlistEntries.map(w=>({assetId:w.assetId,bucket:w.bucket,status:w.status,thesis:includeSensitiveNotes?w.thesis:'[aus Preview entfernt]',entryTrigger:w.entryTrigger??null,reviewDate:w.reviewDate??null}));
+  const payload={dataStatus:state.dataStatus,effectiveStrategy:{cashMode:snapshot.effectiveProfile.cashMode,halalConflictPolicy:snapshot.effectiveProfile.halalConflictPolicy,halalSourcePriority:snapshot.effectiveProfile.rules.halalSourcePriority.effectiveValue,rules:strategy},portfolio,alerts:alerts.map(a=>({severity:a.severity,ruleId:a.ruleId,actual:a.actual,target:a.target,reason:a.reason,action:a.action,dataAsOf:a.dataAsOf})),halal,watchlist,reviews:state.reviews};
+  const missing=[]; if(!snapshot.completeness.hasCurrentQuotes)missing.push('Aktuelle Kurse sind nicht für alle Positionen bestätigt.'); if(state.dataStatus.news.state!=='CURRENT')missing.push(`News: ${state.dataStatus.news.state} – ${state.dataStatus.news.message}`); if(halal.some(h=>h.effective.status==='UNKNOWN'))missing.push('Mindestens ein Halal-Status ist unbekannt.');
+  const prompt=`<CONTEXT>\nHPOS-Datenstand:\n${safe(state.dataStatus)}\n\nEffektive Strategie:\n${safe(payload.effectiveStrategy)}\n\nPortfolio:\n${safe(portfolio)}\n\nOffene Trigger:\n${safe(payload.alerts)}\n\nHalal-Prüfungen:\n${safe(halal)}\n\nWatchlist:\n${safe(watchlist)}\n\nReviews/Termine:\n${safe(state.reviews)}\n\nFehlende/veraltete Daten:\n${safe(missing)}\n</CONTEXT>\n\n<OBJECTIVE>\nErzeuge das HPOS-Briefing und priorisiere konkrete nächste Handlungen nach den aktiven Regeln.\n</OBJECTIVE>\n\n<STYLE>\nPräzise, kompakt, entscheidungsorientiert, regelbasiert und nachvollziehbar.\n</STYLE>\n\n<TONE>\nSachlich und ruhig. Keine Scheinsicherheit.\n</TONE>\n\n<AUDIENCE>\nHPOS-Anwender.\n</AUDIENCE>\n\n<RESPONSE>\nStatus → Veränderungen → Risiken/Regelverletzungen → Handlungen → Chancen → Termine → Fehlende Daten. Nenne bei Handlungsempfehlungen die relevante Regel oder den belegten externen Auslöser.\n</RESPONSE>\n\n<GUARDRAILS>\nErfinde keine Kurse, News, Halal-Status, Dividenden oder Ereignisse. Kennzeichne unbekannte oder veraltete Werte. Weise Quellenkonflikte offen aus. Trenne App-Daten von extern recherchierten Informationen.\n</GUARDRAILS>`;
+  return {payload,missing,prompt};
+}
+
+
+/* === app === */
+const APP_VERSION='1.3.0-alpha.2';
+const $=(s,r=document)=>r.querySelector(s); const $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+const eur=v=>v===null||v===undefined||Number.isNaN(Number(v))?'unbekannt':new Intl.NumberFormat('de-DE',{style:'currency',currency:'EUR'}).format(Number(v));
+const pct=v=>v===null||v===undefined||Number.isNaN(Number(v))?'unbekannt':`${Number(v).toLocaleString('de-DE',{maximumFractionDigits:1})} %`;
+const dateFmt=v=>{if(!v)return 'unbekannt';const d=new Date(v);return Number.isNaN(d.getTime())?String(v):new Intl.DateTimeFormat('de-DE',{dateStyle:'medium'}).format(d)};
+const isoDate=()=>new Date().toISOString().slice(0,10);
+const clone=o=>structuredClone(o);
+let state=null, snapshot=null, rules=[], alerts=[], briefing=null, previousSnapshot=null, currentPage='dashboard', loadProblem=null;
+
+const NAV=[
+  ['dashboard','⌂','Dashboard'],['portfolio','◫','Portfolio'],['radar','◎','Radar'],['watchlist','☆','Watchlist'],['news','◉','News'],['income','€','Income'],['more','⋯','Mehr']
+];
+const TITLES={dashboard:['Dashboard','HPOS Briefing'],portfolio:['Portfolio','Bestände & Status'],radar:['Radar','Regeln & Trigger'],watchlist:['Watchlist','A · B · C'],news:['News','Datenstand & Analyse'],income:['Income','Dividendenziel'],more:['Mehr','Strategie & Verwaltung'],halal:['Halal Register','Prüfungen & Quellen'],strategy:['Strategie-Cockpit','Meine HPOS Regeln'],transactions:['Transaktionen','Journal'],data:['Daten & Backup','Lokal & kontrolliert'],diagnostics:['Diagnose','Datenqualität']};
+
+function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('show');clearTimeout(toast._t);toast._t=setTimeout(()=>t.classList.remove('show'),2400);}
+function diagnose(code,message,severity='INFO'){state?.diagnostics?.push({at:new Date().toISOString(),code,message,severity});}
+function persist(){try{saveState(localStorage,state);return true}catch(e){diagnose('SAVE_FAILED',String(e),'ERROR');toast('Speichern fehlgeschlagen');return false;}}
+function recompute(){snapshot=buildSnapshot(state);rules=evaluateRules(state,snapshot);alerts=buildAlerts(state,rules);briefing=buildBriefing(state,snapshot,alerts,{previousSnapshot});}
+function rememberSnapshot(){state.userProfile.ui=state.userProfile.ui||{};state.userProfile.ui.lastSnapshot={asOf:snapshot.asOf,totals:snapshot.totals,allocations:snapshot.allocations};persist();}
+
+function init(){
+  const loaded=loadState(localStorage);
+  if(loaded.ok){state=loaded.state;previousSnapshot=state.userProfile.ui?.lastSnapshot??null;}
+  else if(loaded.kind==='EMPTY'){
+    const mig=migrateStorageV12ToV3(localStorage);
+    if(mig.ok){state=mig.state;toast('V1.2-Daten sicher nach v1.3 migriert');}
+    else if(mig.kind==='NO_LEGACY'){state=createEmptyState();persist();}
+    else{loadProblem=mig;}
+  }else{loadProblem=loaded;}
+  if(loadProblem){renderFatal();return;}
+  state.appMeta.appVersion=APP_VERSION;
+  recompute();renderNav();route(location.hash.slice(1)||'dashboard',false);rememberSnapshot();registerSW();
+}
+
+function renderFatal(){
+  $('#main').innerHTML=`<div class="section-head"><div><h1>HPOS konnte lokale Daten nicht sicher laden</h1><p>Es wurde nichts überschrieben.</p></div></div><div class="card"><div class="notice error"><strong>${esc(loadProblem?.kind||'FEHLER')}</strong><p>${esc(loadProblem?.message||'Unbekannter Ladefehler')}</p></div><div class="action-row"><button class="btn" id="downloadRaw">Rohdaten sichern</button><button class="btn danger" id="freshStart">Lokalen Neustart erzwingen</button></div><p class="rule-source">Ein Neustart löscht den aktuell fehlerhaften lokalen HPOS-Zustand. Vorher Rohdaten sichern.</p></div>`;
+  $('#downloadRaw')?.addEventListener('click',()=>downloadText('HPOS_Rohdaten_Fehler.txt',loadProblem.raw||JSON.stringify(loadProblem,null,2),'text/plain'));
+  $('#freshStart')?.addEventListener('click',()=>{if(confirm('Lokalen HPOS-Zustand wirklich neu anlegen?')){localStorage.removeItem('hposStateV3');location.reload();}});
+}
+
+function registerSW(){ /* single-file Safari-Test: Service Worker bewusst deaktiviert */ }
+function renderNav(){
+  const activeAlerts=alerts.filter(a=>!['DONE','SNOOZED'].includes(a.status)).length;
+  $('#nav').innerHTML=NAV.map(([id,ic,label])=>`<button class="nav-btn ${currentPage===id?'active':''}" data-route="${id}"><span>${ic}</span><span>${label}</span>${id==='radar'&&activeAlerts?`<span class="nav-count">${activeAlerts}</span>`:''}</button>`).join('');
+  $$('.nav-btn').forEach(b=>b.onclick=()=>route(b.dataset.route));
+}
+function route(page,push=true){
+  if(!TITLES[page])page='dashboard';currentPage=page;if(push)history.replaceState(null,'',`#${page}`);
+  const [t,s]=TITLES[page];$('#pageTitle').textContent=t;$('#pageSubtitle').textContent=s;closeDrawer();renderNav();
+  const fn={dashboard:renderDashboard,portfolio:renderPortfolio,radar:renderRadar,watchlist:renderWatchlist,news:renderNews,income:renderIncome,more:renderMore,halal:renderHalal,strategy:renderStrategy,transactions:renderTransactions,data:renderData,diagnostics:renderDiagnostics}[page];
+  fn();$('#main').focus({preventScroll:true});window.scrollTo({top:0,behavior:'auto'});
+}
+function openDrawer(){ $('#drawer').classList.add('open');$('#backdrop').classList.add('open');$('#drawer').setAttribute('aria-hidden','false');}
+function closeDrawer(){ $('#drawer').classList.remove('open');$('#backdrop').classList.remove('open');$('#drawer').setAttribute('aria-hidden','true');}
+$('#menuBtn').onclick=openDrawer;$('#drawerClose').onclick=closeDrawer;$('#backdrop').onclick=closeDrawer;
+$('#globalAdd').onclick=()=>openActionSheet();$('#aiBtn').onclick=()=>openAiHandoff();
+
+function dataStateBadge(ds){const c=ds.state==='CURRENT'?'good':ds.state==='STALE'?'warn':ds.state==='ERROR'?'bad':'info';return `<span class="badge ${c}">${esc(ds.state)}</span>`;}
+function statusClass(s){return s==='CRITICAL'||s==='H0'?'bad':s==='WARN'||s==='H2'?'warn':s==='H1'||s==='OK'?'good':'info';}
+function renderDataStrip(){return `<div class="data-strip">${['portfolio','prices','halal','news'].map(k=>{const d=state.dataStatus[k];return `<div class="data-pill"><strong>${k==='portfolio'?'Portfolio':k==='prices'?'Kurse':k==='halal'?'Halal':'News'} ${dataStateBadge(d)}</strong><small>${esc(d.message||'')}</small></div>`}).join('')}</div>`;}
+
+function renderDashboard(){
+  recompute();const active=alerts.filter(a=>!['DONE','SNOOZED'].includes(a.status));const top=active.slice(0,3);
+  $('#main').innerHTML=`
+    <div class="section-head"><div><h1>Heute</h1><p>${new Intl.DateTimeFormat('de-DE',{dateStyle:'full'}).format(new Date())}</p></div><button class="btn small" id="refreshLocal">Neu prüfen</button></div>
+    <div class="grid metrics">
+      ${metric('Depotwert',snapshot.positions.length?eur(snapshot.totals.holdingsValue):'—',snapshot.positions.length?(snapshot.completeness.hasCurrentQuotes?'aktuelle Kurse':'Referenzwerte möglich'):'noch kein Bestand')}
+      ${metric('Sukuk',snapshot.positions.length?pct(snapshot.allocations.sukukPct):'—',`Ziel ${pct(snapshot.effectiveProfile.rules.sukukTargetPct.effectiveValue)}`)}
+      ${metric('Healthcare',snapshot.positions.length?pct(snapshot.allocations.healthcarePct):'—',`Cap ${pct(snapshot.effectiveProfile.rules.healthcareCapPct.effectiveValue)}`)}
+      ${metric('Offene Punkte',String(active.length),active.some(a=>a.severity==='CRITICAL')?'kritisch prüfen':'Radar')}
+    </div>
+    <div class="card briefing-hero" style="margin-top:12px"><div class="status">${esc(briefing.blocks[0].items[0])}</div><div class="briefing-grid">${briefing.blocks.slice(1).map(b=>`<div class="brief-block"><h4>${esc(b.title)}</h4><ul>${b.items.map(i=>`<li>${esc(i)}</li>`).join('')}</ul></div>`).join('')}</div><div class="action-row"><button class="btn primary" id="openRadar">Radar öffnen</button><button class="btn" id="chatAnalyse">Mit ChatGPT analysieren</button></div></div>
+    <div class="section-head"><div><h2>Wichtig jetzt</h2><p>Zustand → Relevanz → Aktion</p></div></div>
+    <div class="stack">${top.length?top.map(alertCard).join(''):`<div class="card empty"><div class="emoji">✓</div>Keine offenen lokalen Regelhinweise.</div>`}</div>
+    <div class="section-head"><div><h2>Datenstand</h2><p>HPOS behauptet keine Aktualität ohne Beleg.</p></div></div>${renderDataStrip()}`;
+  $('#refreshLocal').onclick=()=>{recompute();toast('Lokale Regeln neu geprüft');renderDashboard();};$('#openRadar').onclick=()=>route('radar');$('#chatAnalyse').onclick=openAiHandoff;
+  bindAlertButtons();
+}
+function metric(label,value,sub){return `<div class="card metric"><div class="label">${esc(label)}</div><div class="value">${esc(value)}</div><div class="sub">${esc(sub)}</div></div>`;}
+function alertCard(a){return `<div class="card action-card ${a.severity.toLowerCase()}" data-alert="${esc(a.alertKey)}"><div class="top"><div><span class="badge ${statusClass(a.severity)}">${esc(a.severity)}</span><h3 style="margin-top:9px">${esc(a.title)}</h3></div><span class="badge">${esc(a.status)}</span></div><p>${esc(a.action)}</p><div class="rule-source">Regel ${esc(a.ruleId)} · Ist ${esc(a.actual??'unbekannt')} · Soll ${esc(a.target??'unbekannt')}</div><div class="action-row"><button class="btn small" data-alert-act="REVIEW">Prüfen</button><button class="btn small" data-alert-act="SNOOZED">30 Tage</button><button class="btn small" data-alert-act="DONE">Erledigt</button></div></div>`;}
+function bindAlertButtons(){ $$('[data-alert]').forEach(card=>{$$('[data-alert-act]',card).forEach(b=>b.onclick=()=>{const status=b.dataset.alertAct;const opts=status==='SNOOZED'?{snoozedUntil:new Date(Date.now()+30*86400000).toISOString()}:{};setAlertWorkflow(state,card.dataset.alert,status,opts);persist();recompute();toast(status==='SNOOZED'?'30 Tage zurückgestellt':status==='DONE'?'Erledigt':'Zur Prüfung markiert');route(currentPage,false);});});}
+
+function renderPortfolio(){
+  recompute();const pos=snapshot.positions;
+  $('#main').innerHTML=`<div class="section-head"><div><h1>Portfolio</h1><p>${pos.length} Position${pos.length===1?'':'en'} · mobile Kartenansicht</p></div><button class="btn primary small" id="portfolioAdd">＋ Erfassen</button></div>
+  <div class="position-list">${pos.length?pos.map(positionCard).join(''):`<div class="card empty"><div class="emoji">◫</div>Noch kein Bestand. Nutze „Bestand übernehmen“ für bestehende Positionen.</div>`}</div>`;
+  $('#portfolioAdd').onclick=()=>openActionSheet(['OPENING_POSITION','BUY','SELL']);$$('[data-price]').forEach(b=>b.onclick=()=>openPriceForm(b.dataset.price));
+}
+function positionCard(p){const asset=state.assets.find(a=>a.assetId===p.assetId),h=getEffectiveHalal(state,asset);return `<div class="card position-card"><div class="top"><div><div class="name">${esc(p.name)}</div><div class="symbol">${esc([p.ticker,p.isin].filter(Boolean).join(' · ')||p.assetClass)}</div></div><div class="money">${eur(p.marketValue)}<div class="symbol">${p.performancePct===null?'Performance unbekannt':pct(p.performancePct)}</div></div></div><div class="meta"><span class="badge ${statusClass(h.status)}">${esc(h.status)}</span><span class="badge">${esc(p.assetClass)}</span>${p.sector?`<span class="badge">${esc(p.sector)}</span>`:''}<span class="badge ${p.valuationSource==='PRICE_QUOTE'?'good':'warn'}">${p.valuationSource==='PRICE_QUOTE'?'Kurs':'Referenz'}</span></div><div class="details"><div class="kv"><span>Stück</span><strong>${Number(p.qty).toLocaleString('de-DE')}</strong></div><div class="kv"><span>Ø Einstand</span><strong>${eur(p.avgCost)}</strong></div><div class="kv"><span>Bewertung</span><strong>${eur(p.valuationPrice)}</strong></div><div class="kv"><span>Datenstand</span><strong>${esc(dateFmt(p.priceAsOf))}</strong></div></div><div class="action-row"><button class="btn small" data-price="${esc(p.assetId)}">Kurs aktualisieren</button></div></div>`;}
+
+function renderRadar(){
+  recompute();const open=alerts.filter(a=>a.status!=='DONE'),done=alerts.filter(a=>a.status==='DONE');
+  $('#main').innerHTML=`<div class="section-head"><div><h1>Radar</h1><p>${open.filter(a=>a.status!=='SNOOZED').length} aktiv · jede Meldung ist rückverfolgbar</p></div></div><div class="stack">${open.length?open.map(alertCard).join(''):`<div class="card empty"><div class="emoji">◎</div>Keine offenen Trigger.</div>`}</div>${done.length?`<details style="margin-top:14px"><summary>Erledigte Hinweise (${done.length})</summary><div class="stack" style="margin-top:10px">${done.map(alertCard).join('')}</div></details>`:''}`;bindAlertButtons();
+}
+
+function renderWatchlist(){
+  const active=state.watchlistEntries.filter(w=>w.status!=='ARCHIVED');const limit=snapshot.effectiveProfile.rules.watchlistMax.effectiveValue;
+  $('#main').innerHTML=`<div class="section-head"><div><h1>Watchlist</h1><p>${active.length} von ${limit} · A Engpass · B Compounder · C Spezialfall</p></div><button class="btn primary small" id="watchAdd">＋ Titel</button></div><div class="stack">${active.length?active.map(watchCard).join(''):`<div class="card empty"><div class="emoji">☆</div>Noch keine Kandidaten.</div>`}</div>`;
+  $('#watchAdd').onclick=()=>openEntryModal('WATCHLIST');$$('[data-watch-remove]').forEach(b=>b.onclick=()=>{const w=state.watchlistEntries.find(x=>x.watchlistId===b.dataset.watchRemove);if(w){w.status='ARCHIVED';persist();recompute();renderWatchlist();}});
+}
+function watchCard(w){const a=state.assets.find(x=>x.assetId===w.assetId),h=a?getEffectiveHalal(state,a):{status:'UNKNOWN'};return `<div class="card list-row"><div class="top"><div><strong>${esc(a?.name||'Unbekannt')}</strong><div class="sub">${esc(a?.ticker||a?.isin||'keine Kennung')}</div></div><div class="right"><span class="badge">Lager ${esc(w.bucket)}</span> <span class="badge ${statusClass(h.status)}">${esc(h.status)}</span></div></div>${w.entryTrigger?`<p>Trigger: ${esc(w.entryTrigger)}</p>`:''}${w.reviewDate?`<p>Review: ${esc(dateFmt(w.reviewDate))}</p>`:''}<div class="action-row"><button class="btn small danger" data-watch-remove="${esc(w.watchlistId)}">Archivieren</button></div></div>`;}
+
+function renderNews(){
+  const ds=state.dataStatus.news;const items=[...state.newsEntries].sort((a,b)=>String(b.publishedAt||b.updatedAt||'').localeCompare(String(a.publishedAt||a.updatedAt||'')));
+  $('#main').innerHTML=`<div class="section-head"><div><h1>News</h1><p>Keine erfundene Aktualität</p></div><button class="btn small" id="newsAi">Mit ChatGPT prüfen</button></div><div class="card"><div class="top"><div><h3>Datenstatus</h3><p>${esc(ds.message)}</p></div>${dataStateBadge(ds)}</div></div><div class="section-head"><div><h2>Gespeicherte Meldungen</h2></div></div><div class="stack">${items.length?items.map(n=>`<div class="card"><strong>${esc(n.title||'Meldung')}</strong><p>${esc(n.summary||n.note||'Keine Zusammenfassung gespeichert.')}</p><div class="rule-source">${esc(n.source||'Quelle unbekannt')} · ${esc(dateFmt(n.publishedAt||n.updatedAt))}</div></div>`).join(''):`<div class="card empty"><div class="emoji">◉</div>News sind nicht aktualisiert. HPOS interpretiert das nicht als „keine News“.</div>`}</div>`;$('#newsAi').onclick=openAiHandoff;
+}
+
+function renderIncome(){
+  const year=new Date().getFullYear();const divs=state.transactions.filter(t=>t.type==='DIVIDEND');const ytd=divs.filter(t=>String(t.date).startsWith(String(year))).reduce((s,t)=>s+Number(t.amount||0),0);const months=new Date().getMonth()+1;const avg=ytd/months;const goal=Number(snapshot.effectiveProfile.rules.dividendGoalNetMonthlyEur.effectiveValue);const progress=goal>0?Math.min(100,avg/goal*100):0;
+  $('#main').innerHTML=`<div class="section-head"><div><h1>Income</h1><p>Netto-Dividendenziel</p></div><button class="btn primary small" id="divAdd">＋ Dividende</button></div><div class="grid metrics">${metric(`${year} erhalten`,eur(ytd),'lokal erfasste Dividenden')}${metric('Ø pro Monat',eur(avg),`${months} Monat(e) berücksichtigt`)}${metric('Ziel',eur(goal),'pro Monat')}${metric('Zieldatum',esc(snapshot.effectiveProfile.rules.dividendGoalDate.effectiveValue),'HPOS Strategie')}</div><div class="card" style="margin-top:12px"><h3>Zielerreichung</h3><div class="progress ${progress<50?'warn':''}"><span style="width:${progress}%"></span></div><p>${pct(progress)} des monatlichen Ziels auf Basis des YTD-Monatsdurchschnitts.</p><div class="notice info">Nächste erwartete Dividende: unbekannt. Ohne belegten Termin erfindet HPOS keinen Auszahlungszeitpunkt.</div></div>`;$('#divAdd').onclick=()=>openEntryModal('DIVIDEND');
+}
+
+function renderMore(){
+  const items=[['halal','☑','Halal Register','Prüfungen, Quellen und Konflikte'],['strategy','⚙','Strategie-Cockpit','Ziele, Limits und Quellenpriorität'],['transactions','↕','Transaktionen','Käufe, Verkäufe und Ereignisse'],['data','⇩','Daten & Backup','Sichern, wiederherstellen, zurücksetzen'],['diagnostics','!','Diagnose','Datenqualität und technische Hinweise']];
+  $('#main').innerHTML=`<div class="section-head"><div><h1>Mehr</h1><p>Verwaltung ohne Technikballast</p></div></div><div class="card">${items.map(([r,i,t,s])=>`<button class="nav-btn" data-more="${r}"><span>${i}</span><span><strong>${t}</strong><small style="display:block;color:var(--muted);margin-top:3px">${s}</small></span><span>›</span></button>`).join('')}</div>`;$$('[data-more]').forEach(b=>b.onclick=()=>route(b.dataset.more));
+}
+
+function renderHalal(){
+  const assets=state.assets;$('#main').innerHTML=`<div class="section-head"><div><h1>Halal Register</h1><p>Historie bleibt erhalten · effektiver Status wird berechnet</p></div><button class="btn primary small" id="halalAdd">＋ Prüfung</button></div><div class="stack">${assets.length?assets.map(a=>{const h=getEffectiveHalal(state,a);const checks=state.halalChecks.filter(c=>c.assetId===a.assetId).sort((x,y)=>String(y.checkedAt).localeCompare(String(x.checkedAt)));return `<div class="card"><div class="top"><div><strong>${esc(a.name)}</strong><div class="sub">${esc(a.ticker||a.isin||a.assetClass)}</div></div><span class="badge ${statusClass(h.status)}">${esc(h.status)}</span></div><p>${esc(h.reason)}</p>${checks.length?`<div class="rule-source">${checks.slice(0,3).map(c=>`${esc(c.source)} ${esc(c.status)} · ${esc(dateFmt(c.checkedAt))}`).join('<br>')}</div>`:'<div class="rule-source">Noch keine Prüfung hinterlegt.</div>'}</div>`}).join(''):`<div class="card empty">Noch keine Assets vorhanden.</div>`}</div>`;$('#halalAdd').onclick=()=>openEntryModal('HALAL');
+}
+
+function renderStrategy(){
+  const eff=getEffectiveProfile(state),r=eff.rules;const sources=r.halalSourcePriority.effectiveValue||['Musaffa','Zoya'];
+  $('#main').innerHTML=`<div class="section-head"><div><h1>Strategie-Cockpit</h1><p>HPOS Standard bleibt unverändert. Du änderst nur Overrides.</p></div><button class="btn" id="resetStrategy">HPOS Standard</button></div>
+  <form id="strategyForm" class="card">
+    ${rangeSetting('sukukTargetPct','Sukuk-Ziel',r.sukukTargetPct,0,40,1,'%')}
+    ${rangeSetting('healthcareCapPct','Healthcare-Maximum',r.healthcareCapPct,0,60,1,'%')}
+    ${rangeSetting('cashMinPct','Cash-Mindestquote',r.cashMinPct,0,20,1,'%')}
+    <div class="setting"><div class="setting-head"><div><strong>Cashtracking</strong><div class="standard-note">App-Standard: AUS</div></div><select id="cashMode"><option value="OFF" ${eff.cashMode==='OFF'?'selected':''}>AUS</option><option value="TRACKED" ${eff.cashMode==='TRACKED'?'selected':''}>TRACKED</option></select></div><div class="field-help">Nur TRACKED führt Verrechnungscash und aktiviert die Cashregel.</div></div>
+    ${numberSetting('minPositionEur','Mindestpositionswert',r.minPositionEur,'€',10)}
+    ${numberSetting('watchlistMax','Watchlist-Maximum',r.watchlistMax,'Titel',1)}
+    ${numberSetting('dividendGoalNetMonthlyEur','Dividendenziel netto / Monat',r.dividendGoalNetMonthlyEur,'€',5)}
+    <div class="setting"><div class="setting-head"><div><strong>Dividenden-Zieldatum</strong><div class="standard-note">Standard ${esc(r.dividendGoalDate.standardValue)}</div></div><input id="dividendGoalDate" type="month" value="${esc(r.dividendGoalDate.effectiveValue)}"></div></div>
+    <details><summary>Erweiterte Einstellungen</summary><div class="setting"><div class="field"><label>Halal-Quelle 1</label><select id="source1">${sourceOptions(sources[0])}</select></div><div class="field" style="margin-top:8px"><label>Halal-Quelle 2</label><select id="source2">${sourceOptions(sources[1]||'Musaffa')}</select></div><div class="field" style="margin-top:8px"><label>Bei Quellenkonflikt</label><select id="conflictPolicy"><option value="CONFLICT_TO_H2" ${eff.halalConflictPolicy==='CONFLICT_TO_H2'?'selected':''}>Konflikt → H2 / manuelle Prüfung</option><option value="PRIORITY_SOURCE" ${eff.halalConflictPolicy==='PRIORITY_SOURCE'?'selected':''}>Prioritätsquelle entscheidet</option><option value="STRICTEST" ${eff.halalConflictPolicy==='STRICTEST'?'selected':''}>Strengstes Urteil entscheidet</option></select></div></div><div class="setting"><div class="setting-head"><div><strong>Eigene Zusatzregeln</strong><div class="standard-note">Nur feste, lokal berechenbare Vorlagen</div></div><button type="button" class="btn small" id="customRuleAdd">＋ Regel</button></div><div id="customRuleList" style="margin-top:8px">${customRuleRows(state.userProfile.customRules||[])}</div></div></details>
+    <div id="impactPreview" class="impact"><h4>Auswirkung</h4><p>Ändere einen Wert. HPOS berechnet die Wirkung vor dem Speichern.</p></div>
+    <div class="action-row"><button class="btn primary" type="submit">Änderungen übernehmen</button></div>
+  </form>`;
+  $('#strategyForm').addEventListener('input',renderImpactPreview);$('#strategyForm').onsubmit=e=>{e.preventDefault();applyStrategyForm();};$('#customRuleAdd').onclick=()=>openCustomRuleForm();bindCustomRuleDelete();$('#resetStrategy').onclick=()=>{if(confirm('Alle persönlichen Strategie-Overrides auf HPOS Standard zurücksetzen?')){resetAllOverrides(state);state.userProfile.cashMode=state.standardProfile.productDefaults.cashMode.value;persist();recompute();toast('HPOS Standard wiederhergestellt');renderStrategy();}};renderImpactPreview();
+}
+function rangeSetting(key,label,r,min,max,step,unit){return `<div class="setting"><div class="setting-head"><div><strong>${esc(label)}</strong><div class="standard-note">Standard ${esc(r.standardValue)}${unit} ${r.overridden?'<span class="override-dot">· geändert</span>':''}</div></div><span class="setting-value" id="${key}Val">${esc(r.effectiveValue)}${unit}</span></div><input data-strategy="${key}" id="${key}" type="range" min="${min}" max="${max}" step="${step}" value="${esc(r.effectiveValue)}"></div>`;}
+function numberSetting(key,label,r,unit,step){return `<div class="setting"><div class="setting-head"><div><strong>${esc(label)}</strong><div class="standard-note">Standard ${esc(r.standardValue)} ${unit} ${r.overridden?'<span class="override-dot">· geändert</span>':''}</div></div><input data-strategy="${key}" id="${key}" type="number" min="0" step="${step}" value="${esc(r.effectiveValue)}" style="width:92px"></div></div>`;}
+function sourceOptions(sel){return ['Musaffa','Zoya','Sharlife'].map(x=>`<option value="${x}" ${x===sel?'selected':''}>${x}</option>`).join('');}
+function strategyDraft(){const d=clone(state);for(const k of ['sukukTargetPct','healthcareCapPct','cashMinPct','minPositionEur','watchlistMax','dividendGoalNetMonthlyEur']){const el=$(`#${k}`);if(el)setOverride(d,k,Number(el.value));}setOverride(d,'dividendGoalDate',$('#dividendGoalDate').value);d.userProfile.cashMode=$('#cashMode').value;const s1=$('#source1')?.value,s2=$('#source2')?.value;if(s1&&s2&&s1===s2)throw new Error('Halal-Quelle 1 und 2 müssen unterschiedlich sein.');d.userProfile.halalSourcePriority=[...new Set([s1,s2].filter(Boolean))];d.userProfile.halalConflictPolicy=$('#conflictPolicy')?.value||'CONFLICT_TO_H2';return d;}
+function renderImpactPreview(){try{for(const k of ['sukukTargetPct','healthcareCapPct','cashMinPct']){const el=$(`#${k}`),v=$(`#${k}Val`);if(el&&v)v.textContent=`${el.value}%`;}const d=strategyDraft(),s2=buildSnapshot(d),r2=evaluateRules(d,s2),a2=buildAlerts(d,r2);const before=alerts.filter(a=>!['DONE','SNOOZED'].includes(a.status)).length,after=a2.filter(a=>!['DONE','SNOOZED'].includes(a.status)).length;$('#impactPreview').innerHTML=`<h4>Auswirkung vor Speichern</h4><ul><li>Sukuk-Ziel: ${pct(snapshot.effectiveProfile.rules.sukukTargetPct.effectiveValue)} → ${pct(s2.effectiveProfile.rules.sukukTargetPct.effectiveValue)}</li><li>Aktuelle Sukukquote: ${pct(s2.allocations.sukukPct)}</li><li>Offene Regelhinweise: ${before} → ${after}</li><li>Halal-Priorität: ${esc(s2.effectiveProfile.rules.halalSourcePriority.effectiveValue.join(' → '))}</li></ul>`;}catch(e){$('#impactPreview').innerHTML=`<h4>Auswirkung</h4><p>Vorschau derzeit nicht berechenbar: ${esc(e.message)}</p>`;}}
+function applyStrategyForm(){try{const d=strategyDraft();state.userProfile=d.userProfile;persist();recompute();toast('Strategie aktualisiert');renderStrategy();renderNav();}catch(e){toast(e.message);}}
+
+function renderTransactions(){
+  const tx=[...state.transactions].sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+  $('#main').innerHTML=`<div class="section-head"><div><h1>Transaktionen</h1><p>${tx.length} Ereignis${tx.length===1?'':'se'}</p></div><button class="btn primary small" id="txAdd">＋ Erfassen</button></div><div class="card">${tx.length?tx.map(t=>txRow(t)).join(''):`<div class="empty">Noch keine Transaktionen.</div>`}</div>`;$('#txAdd').onclick=()=>openActionSheet(['BUY','SELL','OPENING_POSITION','DIVIDEND','CASH_IN','CASH_OUT']);$$('[data-tx-del]').forEach(b=>b.onclick=()=>{if(confirm('Transaktion löschen? Bestände werden anschließend neu berechnet.')){removeTransaction(state,b.dataset.txDel);persist();recompute();renderTransactions();}});
+}
+function txRow(t){const a=state.assets.find(x=>x.assetId===t.assetId);const label={BUY:'Kauf',SELL:'Verkauf',OPENING_POSITION:'Bestand übernommen',DIVIDEND:'Dividende',CASH_IN:'Einzahlung',CASH_OUT:'Auszahlung'}[t.type]||t.type;const amount=['BUY','SELL','OPENING_POSITION'].includes(t.type)?Number(t.qty||0)*Number(t.price||0):Number(t.amount||0);return `<div class="list-row"><div class="top"><div><strong>${esc(label)}${a?` · ${esc(a.name)}`:''}</strong><div class="sub">${esc(dateFmt(t.date))}${t.qty?` · ${esc(t.qty)} Stk.`:''}</div></div><div class="right"><strong>${eur(amount)}</strong></div></div><div class="action-row"><button class="btn small danger" data-tx-del="${esc(t.transactionId)}">Löschen</button></div></div>`;}
+
+function renderData(){
+  $('#main').innerHTML=`<div class="section-head"><div><h1>Daten & Backup</h1><p>Kein Login · keine Cloud-Datenbank</p></div></div><div class="stack"><div class="card"><h3>Backup</h3><p>Sichere Portfolio, Strategie, Halal-Prüfungen und Watchlist in einer Datei.</p><div class="action-row"><button class="btn primary" id="backupExport">Backup erstellen</button><label class="btn" for="backupImport">Backup wiederherstellen</label><input id="backupImport" type="file" accept="application/json,.json" class="hide"></div></div><div class="card"><h3>Lokale Daten</h3><p>Schema v${state.appMeta.schemaVersion} · App ${esc(APP_VERSION)}</p><div class="action-row"><button class="btn danger" id="resetLocal">Daten zurücksetzen</button></div></div><div class="card"><h3>Datenstand</h3>${renderDataStrip()}</div></div>`;
+  $('#backupExport').onclick=()=>{try{downloadText(`HPOS_Backup_${isoDate()}.json`,JSON.stringify(exportBackup(state),null,2),'application/json');toast('Backup erstellt');}catch(e){toast(e.message);}};
+  $('#backupImport').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;try{const parsed=JSON.parse(await f.text());const imp=importBackup(parsed);if(!imp.ok)throw new Error(imp.errors.join(' | '));if(!confirm('Aktuellen lokalen Stand durch dieses Backup ersetzen?'))return;state=imp.state;persist();recompute();toast('Backup wiederhergestellt');route('dashboard');}catch(err){toast(`Import abgebrochen: ${err.message}`);}};
+  $('#resetLocal').onclick=()=>{if(confirm('Wirklich alle lokalen HPOS-Daten zurücksetzen? Vorher Backup empfohlen.')){state=createEmptyState();persist();previousSnapshot=null;recompute();toast('Lokaler Stand zurückgesetzt');route('dashboard');}};
+}
+function renderDiagnostics(){const v=validateV3State(state);$('#main').innerHTML=`<div class="section-head"><div><h1>Diagnose</h1><p>Transparenz statt stiller Fehler</p></div></div><div class="card"><h3>Schema-Prüfung</h3><div class="notice ${v.ok?'info':'error'}">${v.ok?'Schema v3 ist gültig.':esc(v.errors.join(' · '))}</div><p>Snapshot-Diagnosen: ${snapshot.diagnostics.length}</p><p>Lokale Diagnoseeinträge: ${state.diagnostics.length}</p></div><div class="stack" style="margin-top:12px">${[...state.diagnostics,...snapshot.diagnostics].slice(-20).reverse().map(d=>`<div class="card"><strong>${esc(d.code)}</strong><p>${esc(d.message)}</p><div class="rule-source">${esc(d.severity||'INFO')} · ${esc(d.at||'')}</div></div>`).join('')}</div>`;}
+
+const ACTIONS={
+  BUY:['Kauf','Wertpapier kaufen'],SELL:['Verkauf','Bestand reduzieren'],OPENING_POSITION:['Bestand übernehmen','Bestehenden Bestand ohne Cash erfassen'],DIVIDEND:['Dividende','Ausschüttung erfassen'],CASH_IN:['Einzahlung','Cash hinzufügen'],CASH_OUT:['Auszahlung','Cash reduzieren'],WATCHLIST:['Watchlist-Kandidat','Titel beobachten'],HALAL:['Halal-Prüfung','Quelle und Status dokumentieren']
+};
+function openActionSheet(only=null){const keys=only||Object.keys(ACTIONS);openModal('Neuer Eintrag',`<div class="action-sheet">${keys.map(k=>`<button class="action-choice" data-action="${k}"><strong>${ACTIONS[k][0]}</strong><small>${ACTIONS[k][1]}</small></button>`).join('')}</div>`);$$('[data-action]').forEach(b=>b.onclick=()=>openEntryModal(b.dataset.action));}
+function openModal(title,body){$('#modalRoot').innerHTML=`<div class="modal-wrap"><div class="modal"><div class="modal-head"><h2>${esc(title)}</h2><button class="icon-btn" data-modal-close>×</button></div>${body}</div></div>`;$('[data-modal-close]').onclick=closeModal;$('.modal-wrap').onclick=e=>{if(e.target.classList.contains('modal-wrap'))closeModal();};}
+function closeModal(){ $('#modalRoot').innerHTML=''; }
+function assetFields({allowNew=true}={}){const opts=state.assets.map(a=>`<option value="${esc(a.assetId)}">${esc(a.name)}${a.ticker?` · ${esc(a.ticker)}`:''}</option>`).join('');return `<div class="field"><label>Wertpapier</label><select id="assetSelect"><option value="">${allowNew?'Neues Wertpapier anlegen':'Bitte wählen'}</option>${opts}</select></div>${allowNew?`<div id="newAssetFields"><div class="field"><label>Name</label><input id="assetName" placeholder="z. B. Rio Tinto"></div><div class="two"><div class="field"><label>Ticker</label><input id="assetTicker" placeholder="RIO"></div><div class="field"><label>ISIN</label><input id="assetIsin" placeholder="optional"></div></div><div class="two"><div class="field"><label>Assetklasse</label><select id="assetClass"><option>Equity</option><option>Sukuk</option><option>ETF</option><option>Fund</option><option>Other</option></select></div><div class="field"><label>Sektor</label><input id="assetSector" placeholder="optional"></div></div></div>`:''}`;}
+function bindAssetToggle(){const s=$('#assetSelect'),n=$('#newAssetFields');if(s&&n){const f=()=>n.classList.toggle('hide',!!s.value);s.onchange=f;f();}}
+function resolveAsset(){const selected=$('#assetSelect')?.value;if(selected)return state.assets.find(a=>a.assetId===selected);const name=$('#assetName')?.value?.trim();if(!name)throw new Error('Name des Wertpapiers fehlt.');return upsertAsset(state,{name,ticker:$('#assetTicker')?.value?.trim()||undefined,isin:$('#assetIsin')?.value?.trim()||undefined,assetClass:$('#assetClass')?.value||'UNKNOWN',sector:$('#assetSector')?.value?.trim()||undefined,currency:'EUR'});}
+function openEntryModal(type){
+  if(type==='WATCHLIST')return openWatchlistForm();if(type==='HALAL')return openHalalForm();
+  const assetRelated=['BUY','SELL','OPENING_POSITION','DIVIDEND'].includes(type);const moneyOnly=['CASH_IN','CASH_OUT'].includes(type);
+  openModal(ACTIONS[type][0],`<form id="entryForm" class="form">${assetRelated?assetFields({allowNew:type!=='SELL'&&type!=='DIVIDEND'}):''}<div class="field"><label>Datum</label><input id="txDate" type="date" value="${isoDate()}"></div>${['BUY','SELL','OPENING_POSITION'].includes(type)?`<div class="two"><div class="field"><label>Stückzahl</label><input id="txQty" type="number" min="0.000001" step="any" inputmode="decimal"></div><div class="field"><label>Preis je Stück</label><input id="txPrice" type="number" min="0" step="any" inputmode="decimal"></div></div>`:''}${type==='DIVIDEND'||moneyOnly?`<div class="field"><label>Betrag</label><input id="txAmount" type="number" min="0.01" step="0.01" inputmode="decimal"></div>`:''}${type==='BUY'&&snapshot.effectiveProfile.cashMode==='TRACKED'?`<div class="notice warn">Cashtracking ist aktiv. Käufe werden gegen verfügbares Cash geprüft.</div>`:''}<button class="btn primary" type="submit">Speichern</button></form>`);bindAssetToggle();$('#entryForm').onsubmit=e=>{e.preventDefault();try{const a=assetRelated?resolveAsset():null;const tx={type,date:$('#txDate').value,assetId:a?.assetId};if(['BUY','SELL','OPENING_POSITION'].includes(type)){tx.qty=Number($('#txQty').value);tx.price=Number($('#txPrice').value);}else tx.amount=Number($('#txAmount').value);const r=addTransaction(state,tx);if(!r.ok)throw new Error(r.errors.join(' | '));state.dataStatus.portfolio={state:'CURRENT',source:'local',asOf:new Date().toISOString(),lastAttemptAt:new Date().toISOString(),message:'Lokale Ereignisse aktualisiert.'};persist();recompute();closeModal();toast(`${ACTIONS[type][0]} gespeichert`);route(type==='DIVIDEND'?'income':type.startsWith('CASH')?'transactions':'portfolio',false);}catch(err){toast(err.message);}};
+}
+function openWatchlistForm(){openModal('Watchlist-Kandidat',`<form id="watchForm" class="form">${assetFields()}<div class="two"><div class="field"><label>Lager</label><select id="watchBucket"><option value="A">A · Engpass</option><option value="B">B · Compounder</option><option value="C">C · Spezialfall</option></select></div><div class="field"><label>Review</label><input id="watchReview" type="date"></div></div><div class="field"><label>Einstiegs-/Beobachtungstrigger</label><input id="watchTrigger" placeholder="z. B. unter 80 €"></div><div class="field"><label>Investmentthese / Notiz</label><textarea id="watchThesis" placeholder="Warum ist der Titel interessant?"></textarea></div><button class="btn primary" type="submit">Zur Watchlist</button></form>`);bindAssetToggle();$('#watchForm').onsubmit=e=>{e.preventDefault();try{const limit=getEffectiveProfile(state).rules.watchlistMax.effectiveValue;if(state.watchlistEntries.filter(w=>w.status!=='ARCHIVED').length>=limit)throw new Error(`Watchlist-Limit ${limit} erreicht. Im Strategie-Cockpit bewusst erhöhen oder bereinigen.`);const a=resolveAsset();state.watchlistEntries.push({watchlistId:crypto.randomUUID(),assetId:a.assetId,bucket:$('#watchBucket').value,thesis:$('#watchThesis').value,entryTrigger:$('#watchTrigger').value||null,reviewDate:$('#watchReview').value||null,createdAt:new Date().toISOString(),status:'ACTIVE'});persist();recompute();closeModal();toast('Watchlist-Kandidat gespeichert');route('watchlist',false);}catch(err){toast(err.message);}};}
+function openHalalForm(){openModal('Halal-Prüfung',`<form id="halalForm" class="form">${assetFields()}<div class="two"><div class="field"><label>Quelle</label><select id="halalSource"><option>Zoya</option><option>Musaffa</option><option>Sharlife</option><option>Manuell</option></select></div><div class="field"><label>Status</label><select id="halalStatus"><option>H1</option><option>H2</option><option>H0</option><option>UNKNOWN</option></select></div></div><div class="field"><label>Prüfdatum</label><input id="halalDate" type="date" value="${isoDate()}"></div><div class="field"><label>Beleg / Referenz</label><input id="halalEvidence" placeholder="URL, Screenshot, Notiz-ID ..."></div><div class="field"><label>Notiz</label><textarea id="halalNote"></textarea></div><button class="btn primary" type="submit">Prüfung speichern</button></form>`);bindAssetToggle();$('#halalForm').onsubmit=e=>{e.preventDefault();try{const a=resolveAsset();state.halalChecks.push({checkId:crypto.randomUUID(),assetId:a.assetId,source:$('#halalSource').value,status:$('#halalStatus').value,checkedAt:$('#halalDate').value,evidenceRef:$('#halalEvidence').value||null,note:$('#halalNote').value||null,enteredBy:'user',updatedAt:new Date().toISOString()});const activeAssetIds=new Set(buildSnapshot(state).positions.map(p=>p.assetId));const allChecked=[...activeAssetIds].every(id=>getEffectiveHalal(state,state.assets.find(x=>x.assetId===id)).status!=='UNKNOWN');state.dataStatus.halal={state:allChecked&&activeAssetIds.size?'CURRENT':'STALE',source:'manual',asOf:$('#halalDate').value,lastAttemptAt:new Date().toISOString(),message:allChecked&&activeAssetIds.size?'Alle aktiven Positionen besitzen einen effektiven Halal-Status.':'Manuelle Prüfungen vorhanden; mindestens eine aktive Position ist noch nicht vollständig bewertet.'};persist();recompute();closeModal();toast('Halal-Prüfung gespeichert');route('halal',false);}catch(err){toast(err.message);}};}
+function openPriceForm(assetId){const a=state.assets.find(x=>x.assetId===assetId);if(!a)return;openModal('Kurs aktualisieren',`<form id="priceForm" class="form"><div class="notice info"><strong>${esc(a.name)}</strong><p>Manueller Kurs. HPOS kennzeichnet die Quelle sichtbar.</p></div><div class="field"><label>Kurs</label><input id="priceValue" type="number" min="0" step="any" inputmode="decimal" value="${esc(a.priceQuote?.price??'')}"></div><div class="field"><label>Stand</label><input id="priceDate" type="datetime-local"></div><button class="btn primary" type="submit">Kurs speichern</button></form>`);$('#priceForm').onsubmit=e=>{e.preventDefault();const price=Number($('#priceValue').value);if(!Number.isFinite(price)||price<0)return toast('Gültigen Kurs eingeben');a.priceQuote={price,asOf:$('#priceDate').value?new Date($('#priceDate').value).toISOString():new Date().toISOString(),source:'manual',enteredBy:'user'};recompute();state.dataStatus.prices={state:snapshot.completeness.hasCurrentQuotes?'CURRENT':'STALE',source:'manual',asOf:a.priceQuote.asOf,lastAttemptAt:new Date().toISOString(),message:snapshot.completeness.hasCurrentQuotes?'Alle aktiven Positionen besitzen einen bestätigten manuellen Kurs.':'Kurse nur teilweise manuell aktualisiert.'};persist();recompute();closeModal();toast('Kurs gespeichert');renderPortfolio();};}
+
+function customRuleRows(rows){if(!rows.length)return '<div class="field-help">Keine Zusatzregel aktiv.</div>';return rows.map(r=>`<div class="list-row"><div class="top"><div><strong>${esc(r.label)}</strong><div class="sub">${esc(r.template==='MAX_SINGLE_POSITION_PCT'?'Max. Einzelposition':`Sektor-Cap ${r.sector||''}`)} · ${pct(r.value)}</div></div><button type="button" class="btn small danger" data-custom-rule-del="${esc(r.ruleId)}">Löschen</button></div></div>`).join('');}
+function bindCustomRuleDelete(){ $$('[data-custom-rule-del]').forEach(b=>b.onclick=()=>{state.userProfile.customRules=(state.userProfile.customRules||[]).filter(r=>r.ruleId!==b.dataset.customRuleDel);persist();recompute();toast('Zusatzregel gelöscht');renderStrategy();});}
+function openCustomRuleForm(){openModal('Eigene Zusatzregel',`<form id="customRuleForm" class="form"><div class="field"><label>Vorlage</label><select id="customTemplate"><option value="MAX_SINGLE_POSITION_PCT">Maximale Einzelposition</option><option value="SECTOR_CAP">Sektor-Maximum</option></select></div><div class="field"><label>Name</label><input id="customLabel" value="Maximale Einzelposition"></div><div class="field hide" id="customSectorWrap"><label>Sektor</label><input id="customSector" placeholder="z. B. Technology"></div><div class="field"><label>Grenzwert in %</label><input id="customValue" type="number" min="1" max="100" step="1" value="20"></div><div class="notice info">Zusatzregeln stammen vom Nutzer und werden als solche gekennzeichnet. Sie verändern keine HPOS-Originalregel.</div><button class="btn primary" type="submit">Regel hinzufügen</button></form>`);const t=$('#customTemplate'),w=$('#customSectorWrap'),l=$('#customLabel');t.onchange=()=>{const sec=t.value==='SECTOR_CAP';w.classList.toggle('hide',!sec);l.value=sec?'Sektor-Maximum':'Maximale Einzelposition';};$('#customRuleForm').onsubmit=e=>{e.preventDefault();const template=t.value,value=Number($('#customValue').value),sector=$('#customSector').value.trim();if(!Number.isFinite(value)||value<=0||value>100)return toast('Grenzwert muss zwischen 1 und 100 % liegen');if(template==='SECTOR_CAP'&&!sector)return toast('Sektor fehlt');state.userProfile.customRules=state.userProfile.customRules||[];state.userProfile.customRules.push({ruleId:`USER.${template}.${crypto.randomUUID()}`,type:'USER_CUSTOM',template,label:$('#customLabel').value.trim()||'Zusatzregel',value,sector:template==='SECTOR_CAP'?sector:null,active:true,createdAt:new Date().toISOString()});persist();recompute();closeModal();toast('Zusatzregel hinzugefügt');renderStrategy();};}
+
+function openAiHandoff(){recompute();const h=buildAiHandoff(state,snapshot,alerts);openModal('Mit ChatGPT analysieren',`<div class="stack"><div class="notice info">HPOS sendet nichts automatisch. Du kopierst den strukturierten Analyseauftrag bewusst.</div>${h.missing.length?`<div class="notice warn"><strong>Fehlend / veraltet</strong><ul>${h.missing.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`:'<div class="notice info">Keine fehlenden Daten vom Handoff-Builder erkannt.</div>'}<div class="action-row"><button class="btn primary" id="copyPrompt">Analyseauftrag kopieren</button></div></div>`);$('#copyPrompt').onclick=async()=>{try{await navigator.clipboard.writeText(h.prompt);toast('Analyseauftrag kopiert');closeModal();}catch(e){openModal('Analyseauftrag',`<div class="field"><textarea style="min-height:55vh">${esc(h.prompt)}</textarea></div>`);}};}
+function downloadText(name,text,type){const blob=new Blob([text],{type});const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);}
+
+window.addEventListener('hashchange',()=>route(location.hash.slice(1)||'dashboard',false));
+init();
+
+console.info('HPOS v1.3.0-alpha2 Safari single-file test loaded');
+
+</script>
+</body>
+</html>
