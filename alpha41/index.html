@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#0b1018">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>HPOS Alpha 4.1 Safari-Test</title>
+<title>HPOS Alpha 4.1.1 Safari-Test</title>
 <style>
 :root{
   color-scheme:dark;
@@ -50,6 +50,14 @@ details{border-top:1px solid var(--line);padding:10px 0}summary{cursor:pointer;f
 
 .alpha-banner{padding:6px 14px;font-size:11px;color:var(--muted);background:#141b27;border-bottom:1px solid rgba(255,255,255,.06)}
 
+
+/* Alpha 4.1.1: interaktiver Datenstand + native Visualisierung */
+.data-status-row{width:100%;border-left:0;border-right:0;border-bottom:0;background:transparent;color:var(--text);text-align:left;font:inherit;cursor:pointer}
+.data-status-row:active{background:rgba(255,255,255,.03)}
+.data-status-tail{display:flex;align-items:center;gap:8px;flex:0 0 auto}
+.data-status-tail .chev{font-size:19px;color:var(--muted);line-height:1}
+.allocation-card{overflow:hidden}.allocation-body{display:grid;grid-template-columns:122px minmax(0,1fr);gap:16px;align-items:center;margin-top:12px}.allocation-donut{width:122px;height:122px;border-radius:50%;display:grid;place-items:center;position:relative}.allocation-donut::after{content:"";position:absolute;inset:22px;border-radius:50%;background:var(--panel)}.allocation-donut>div{position:relative;z-index:1;display:grid;text-align:center}.allocation-donut strong{font-size:24px}.allocation-donut small{font-size:10px;color:var(--muted)}.allocation-legend{display:grid;gap:8px;min-width:0}.allocation-legend>div{display:grid;grid-template-columns:10px minmax(0,1fr) auto;gap:8px;align-items:center;font-size:12px}.allocation-legend>div>span:nth-child(2){overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.legend-dot{width:9px;height:9px;border-radius:50%}.allocation-legend strong{font-size:11px}
+@media(max-width:420px){.allocation-body{grid-template-columns:104px minmax(0,1fr);gap:12px}.allocation-donut{width:104px;height:104px}.allocation-donut::after{inset:19px}}
 </style>
 </head>
 <body>
@@ -78,7 +86,7 @@ details{border-top:1px solid var(--line);padding:10px 0}summary{cursor:pointer;f
       </div>
     </header>
 
-    <div class="alpha-banner">ALPHA 4.1 · Safari-Test · kein Produktiv-Release</div>
+    <div class="alpha-banner">ALPHA 4.1.1 · Safari-Test · kein Produktiv-Release</div>
     <main id="main" class="main" tabindex="-1"></main>
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
     <div id="modalRoot"></div>
@@ -155,7 +163,7 @@ function sameValue(a,b){ return JSON.stringify(a)===JSON.stringify(b); }
 
 function createEmptyState(at = nowIso()){
   return {
-    appMeta: { schemaVersion:3, appVersion:'1.3.0-alpha.4.1', createdAt:at, updatedAt:at, migrationHistory:[], lastSuccessfulLoadAt:null },
+    appMeta: { schemaVersion:3, appVersion:'1.3.0-alpha.4.1.1', createdAt:at, updatedAt:at, migrationHistory:[], lastSuccessfulLoadAt:null },
     standardProfile: deepClone(STANDARD_PROFILE),
     userProfile: { overrides:{}, cashMode:STANDARD_PROFILE.productDefaults.cashMode.value, halalSourcePriority:null, halalConflictPolicy:STANDARD_PROFILE.productDefaults.halalConflictPolicy.value, customRules:[], ui:{} },
     assets: [], transactions: [], halalChecks: [], watchlistEntries: [], reviews: [], alertState: [], newsEntries: [],
@@ -294,12 +302,12 @@ function buildSnapshot(state, {asOf=new Date().toISOString()}={}){
       p.qty += qty;
       p.avgCost = p.qty>0 ? (oldCost+addCost)/p.qty : null;
       p.costValue = p.qty*(p.avgCost??0);
-      if (Number.isFinite(price) && price>=0){p.lastReferencePrice=price;p.lastReferenceAt=tx.date;}
+      if (Number.isFinite(price) && price>=0 && tx.useAsReference!==false){p.lastReferencePrice=price;p.lastReferenceAt=tx.date;}
       if (tx.type==='BUY' && effective.cashMode==='TRACKED') cash -= addCost;
     } else if (tx.type==='SELL') {
       if (qty>p.qty) diagnostics.push({code:'OVERSELL_IN_JOURNAL',severity:'ERROR',transactionId:tx.transactionId,message:`Verkauf ${qty} > Bestand ${p.qty}.`});
       p.qty=Math.max(0,p.qty-qty); p.costValue=p.qty*(p.avgCost??0);
-      if (Number.isFinite(price) && price>=0){p.lastReferencePrice=price;p.lastReferenceAt=tx.date;}
+      if (Number.isFinite(price) && price>=0 && tx.useAsReference!==false){p.lastReferencePrice=price;p.lastReferenceAt=tx.date;}
       if (effective.cashMode==='TRACKED') cash += qty*price;
     }
   }
@@ -460,17 +468,32 @@ function evaluateRules(state,snapshot){
 /* === core/trigger-engine.mjs === */
 const sevRank={CRITICAL:4,WARN:3,UNKNOWN:2,INFO:1,OK:0};
 function keyOf(r){return `${r.ruleId}:${r.assetId??'GLOBAL'}`;}
+function fingerprintOf(r){return JSON.stringify({status:r.status,actual:r.actual??null,target:r.target??null,message:r.message??'',action:r.action??''});}
 function buildAlerts(state,ruleResults,{now=nowIso()}={}){
-  const workflow=new Map((state.alertState??[]).map(s=>[s.alertKey,s]));
-  return ruleResults.filter(r=>['CRITICAL','WARN','UNKNOWN'].includes(r.status)).map(r=>{
-    const alertKey=keyOf(r), saved=workflow.get(alertKey)??{status:'NEW'};
+  state.alertState=Array.isArray(state.alertState)?state.alertState:[];
+  const workflow=new Map(state.alertState.map(s=>[s.alertKey,s]));
+  const activeRules=ruleResults.filter(r=>['CRITICAL','WARN','UNKNOWN'].includes(r.status));
+  const activeKeys=new Set(activeRules.map(keyOf));
+  for(const saved of state.alertState){if(!activeKeys.has(saved.alertKey)) saved.conditionActive=false;}
+  return activeRules.map(r=>{
+    const alertKey=keyOf(r), currentFingerprint=fingerprintOf(r);
+    const saved=workflow.get(alertKey)??{status:'NEW',conditionActive:true};
     const snoozed=saved.status==='SNOOZED' && saved.snoozedUntil && new Date(saved.snoozedUntil)>new Date(now);
-    return {alertKey,title:r.message,severity:r.status==='CRITICAL'?'CRITICAL':r.status==='WARN'?'WARN':'INFO',actual:r.actual,target:r.target,ruleId:r.ruleId,reason:r.message,action:r.action,dataAsOf:now,status:saved.status==='SNOOZED'?(snoozed?'SNOOZED':'NEW'):(saved.status??'NEW'),snoozedUntil:saved.snoozedUntil??null,assetId:r.assetId??null,source:r.source??null};
+    let status=saved.status??'NEW';
+    if(saved.conditionActive===false) status='NEW';
+    else if(status==='SNOOZED'&&!snoozed) status='NEW';
+    else if(status==='DONE'&&saved.fingerprint&&saved.fingerprint!==currentFingerprint) status='NEW';
+    saved.conditionActive=true;saved.lastSeenAt=now;workflow.set(alertKey,saved);
+    return {alertKey,title:r.message,severity:r.status==='CRITICAL'?'CRITICAL':r.status==='WARN'?'WARN':'INFO',actual:r.actual,target:r.target,ruleId:r.ruleId,reason:r.message,action:r.action,dataAsOf:now,status,snoozedUntil:saved.snoozedUntil??null,assetId:r.assetId??null,source:r.source??null,fingerprint:currentFingerprint};
   }).sort((a,b)=>sevRank[b.severity]-sevRank[a.severity] || a.title.localeCompare(b.title));
 }
-function setAlertWorkflow(state,alertKey,status,{snoozedUntil=null}={}){
+function setAlertWorkflow(state,alertKey,status,{snoozedUntil=null,fingerprint=null}={}){
   const allowed=['NEW','REVIEW','SNOOZED','DONE']; if(!allowed.includes(status)) throw new Error('Ungültiger Alert-Status.');
-  const existing=state.alertState.find(a=>a.alertKey===alertKey); const patch={alertKey,status,snoozedUntil:status==='SNOOZED'?snoozedUntil:null,acknowledgedAt:status==='DONE'?nowIso():null};
+  state.alertState=Array.isArray(state.alertState)?state.alertState:[];
+  const existing=state.alertState.find(a=>a.alertKey===alertKey);
+  const patch={alertKey,status,snoozedUntil:status==='SNOOZED'?snoozedUntil:null,acknowledgedAt:status==='DONE'?nowIso():null,conditionActive:true};
+  if(status==='DONE'&&fingerprint) patch.fingerprint=fingerprint;
+  if(status!=='DONE') patch.fingerprint=null;
   if(existing) Object.assign(existing,patch); else state.alertState.push(patch); return state;
 }
 
@@ -610,7 +633,8 @@ function buildAssetInsight(state,snapshot,alerts,assetId){
   if(news.length) statements.push(`${news.length} gespeicherte News-Meldung${news.length===1?'':'en'} ist/sind diesem Asset zugeordnet.`);
   if(!statements.length) statements.push('Aus den lokal belegten Daten ergibt sich aktuell keine besondere HPOS-Aktion.');
 
-  return {asset,position,halal,alerts:assetAlerts,activeAlerts:active,snoozedAlerts:snoozed,watchlist,news,transactions,weightPct,summary:statements.join(' ')};
+  const halalWorkflow=halal.status==='H0'?'VETO':halal.status==='H2'?'FREEZE':halal.status==='UNKNOWN'?'REVIEW_REQUIRED':'CLEAR';
+  return {asset,position,halal,halalWorkflow,alerts:assetAlerts,activeAlerts:active,snoozedAlerts:snoozed,watchlist,news,transactions,weightPct,summary:statements.join(' ')};
 }
 
 function buildIntegratedAssetViews(state,snapshot,alerts){
@@ -653,7 +677,7 @@ function buildIncomeSummary(state,snapshot,{year=new Date().getFullYear()}={}){
 
 
 /* === app.mjs === */
-const APP_VERSION='1.3.0-alpha.4.1';
+const APP_VERSION='1.3.0-alpha.4.1.1';
 const $=(s,r=document)=>r.querySelector(s); const $$=(s,r=document)=>[...r.querySelectorAll(s)];
 const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 const eur=v=>v===null||v===undefined||Number.isNaN(Number(v))?'unbekannt':new Intl.NumberFormat('de-DE',{style:'currency',currency:'EUR'}).format(Number(v));
@@ -713,9 +737,12 @@ $('#menuBtn').onclick=openDrawer;$('#drawerClose').onclick=closeDrawer;$('#backd
 $('#globalAdd').onclick=()=>openActionSheet();$('#aiBtn').onclick=()=>openAiHandoff();
 
 function dataStateBadge(ds){const c=ds.state==='CURRENT'?'good':ds.state==='STALE'?'warn':ds.state==='ERROR'?'bad':'info';return `<span class="badge ${c}">${esc(ds.state)}</span>`;}
-function statusClass(s){return s==='CRITICAL'||s==='H0'?'bad':s==='WARN'||s==='H2'?'warn':s==='H1'||s==='OK'?'good':'info';}
+function statusClass(s){return s==='CRITICAL'||s==='H0'||s==='VETO'?'bad':s==='WARN'||s==='H2'||s==='FREEZE'?'warn':s==='H1'||s==='OK'||s==='CLEAR'?'good':'info';}
 function friendlyDataState(s){return s==='CURRENT'?'Aktuell':s==='STALE'?'Prüfen':s==='ERROR'?'Fehler':'Unbekannt';}
-function renderDataStrip(){return `<div class="data-status-card card">${['portfolio','prices','halal','news'].map(k=>{const d=state.dataStatus[k],label=k==='portfolio'?'Portfolio':k==='prices'?'Kurse':k==='halal'?'Halal':'News';return `<div class="data-status-row"><div><strong>${label}</strong><small>${esc(d.message||'')}</small></div><span class="badge ${d.state==='CURRENT'?'good':d.state==='STALE'?'warn':d.state==='ERROR'?'bad':'info'}">${friendlyDataState(d.state)}</span></div>`}).join('')}</div>`;}
+function dataLabel(k){return k==='portfolio'?'Portfolio':k==='prices'?'Kurse':k==='halal'?'Halal':'News';}
+function renderDataStrip(){return `<div class="data-status-card card">${['portfolio','prices','halal','news'].map(k=>{const d=state.dataStatus[k];return `<button class="data-status-row" data-data-status="${k}"><div><strong>${dataLabel(k)}</strong><small>${esc(d.message||'')}</small></div><div class="data-status-tail"><span class="badge ${d.state==='CURRENT'?'good':d.state==='STALE'?'warn':d.state==='ERROR'?'bad':'info'}">${friendlyDataState(d.state)}</span><span class="chev">›</span></div></button>`}).join('')}</div>`;}
+function bindDataStatus(){ $$('[data-data-status]').forEach(b=>b.onclick=()=>openDataStatus(b.dataset.dataStatus)); }
+function openDataStatus(key){const d=state.dataStatus[key]||{state:'UNKNOWN'};const action=key==='portfolio'?['Portfolio öffnen','portfolio']:key==='prices'?['Positionen / Kurse öffnen','portfolio']:key==='halal'?['Halal Register öffnen','halal']:['News öffnen','news'];openModal(`Datenstand · ${dataLabel(key)}`,`<div class="stack"><div class="card soft"><div class="top generic-top"><div><strong>${esc(dataLabel(key))}</strong><p>${esc(d.message||'Keine Statusmeldung.')}</p></div>${dataStateBadge(d)}</div><div class="details"><div class="kv"><span>Quelle</span><strong>${esc(d.source||'unbekannt')}</strong></div><div class="kv"><span>Stand</span><strong>${esc(dateFmt(d.asOf))}</strong></div><div class="kv"><span>Letzter Versuch</span><strong>${esc(dateFmt(d.lastAttemptAt))}</strong></div></div></div><div class="action-row"><button class="btn primary" id="dataStatusOpen">${esc(action[0])}</button></div></div>`);$('#dataStatusOpen').onclick=()=>{closeModal();route(action[1]);};}
 
 function renderDashboard(){
   recompute();const active=alerts.filter(a=>!['DONE','SNOOZED'].includes(a.status));const signals=buildDashboardSignals(state,snapshot,alerts,{limit:4});
@@ -735,7 +762,7 @@ function renderDashboard(){
     <div class="card compact-summary"><div><strong>${newsCount} gespeicherte News</strong><small>${state.dataStatus.news.state==='CURRENT'?'News-Daten aktuell markiert':state.dataStatus.news.message}</small></div><div><strong>${watchCount} Watchlist-Kandidaten</strong><small>Trigger werden nur mit belegten Daten bewertet.</small></div><div class="action-row"><button class="btn small" id="openNews">News öffnen</button><button class="btn small" id="openWatch">Watchlist öffnen</button></div></div>
     <div class="section-head"><div><h2>Datenstand</h2><p>HPOS behauptet keine Aktualität ohne Beleg.</p></div></div>${renderDataStrip()}`;
   $('#refreshLocal').onclick=()=>{recompute();toast('Lokale Regeln neu geprüft');renderDashboard();};$('#openRadar').onclick=()=>route('radar');$('#chatAnalyse').onclick=openAiHandoff;$('#openNews').onclick=()=>route('news');$('#openWatch').onclick=()=>route('watchlist');
-  $$('[data-signal-asset]').forEach(b=>b.onclick=()=>openAsset(b.dataset.signalAsset));
+  $$('[data-signal-asset]').forEach(b=>b.onclick=()=>openAsset(b.dataset.signalAsset));bindDataStatus();
 }
 function linkedSignalCard(s){const c=s.severity==='CRITICAL'?'critical':s.severity==='WARN'?'warn':'info';return `<button class="card linked-signal ${c}" ${s.assetId?`data-signal-asset="${esc(s.assetId)}"`:''}><div><span class="badge ${statusClass(s.severity)}">${esc(s.severity)}</span><strong>${esc(s.title)}</strong><p>${esc(s.summary)}</p></div><span class="chev">${s.assetId?'›':''}</span></button>`;}
 function metric(label,value,sub){return `<div class="card metric"><div class="label">${esc(label)}</div><div class="value">${esc(value)}</div><div class="sub">${esc(sub)}</div></div>`;}
@@ -745,16 +772,20 @@ function alertCard(a,{workflow=true}={}){
   const actions=!workflow?'':isSnoozed?`<div class="action-row"><button class="btn small" data-alert-act="NEW">Wieder aktivieren</button></div>`:`<div class="action-row"><button class="btn small" data-alert-act="REVIEW">Prüfen</button>${isCritical?'':`<button class="btn small" data-alert-act="SNOOZED">Zurückstellen</button>`}<button class="btn small" data-alert-act="DONE">Erledigt</button></div>`;
   return `<div class="card action-card ${a.severity.toLowerCase()}" data-alert="${esc(a.alertKey)}"><div class="top"><div><span class="badge ${statusClass(a.severity)}">${esc(a.severity)}</span><h3 style="margin-top:9px">${esc(a.title)}</h3></div><span class="badge">${esc(statusLabel)}</span></div><p>${esc(a.action)}</p><details class="rule-details"><summary>Warum?</summary><div class="rule-source">Regel ${esc(a.ruleId)} · Ist ${esc(a.actual??'unbekannt')} · Soll ${esc(a.target??'unbekannt')}</div></details>${actions}</div>`;
 }
-function bindAlertButtons(){ $$('[data-alert]').forEach(card=>{$$('[data-alert-act]',card).forEach(b=>b.onclick=()=>{const status=b.dataset.alertAct;const opts=status==='SNOOZED'?{snoozedUntil:new Date(Date.now()+30*86400000).toISOString()}:{};setAlertWorkflow(state,card.dataset.alert,status,opts);persist();recompute();toast(status==='SNOOZED'?'30 Tage zurückgestellt':status==='DONE'?'Erledigt':status==='NEW'?'Wieder aktiviert':'Zur Prüfung markiert');route(currentPage,false);});});}
+function bindAlertButtons(){ $$('[data-alert]').forEach(card=>{$$('[data-alert-act]',card).forEach(b=>b.onclick=()=>{const status=b.dataset.alertAct,current=alerts.find(a=>a.alertKey===card.dataset.alert);const opts=status==='SNOOZED'?{snoozedUntil:new Date(Date.now()+30*86400000).toISOString(),fingerprint:current?.fingerprint}:status==='DONE'?{fingerprint:current?.fingerprint}:{};setAlertWorkflow(state,card.dataset.alert,status,opts);persist();recompute();toast(status==='SNOOZED'?'30 Tage zurückgestellt':status==='DONE'?'Erledigt':status==='NEW'?'Wieder aktiviert':'Zur Prüfung markiert');route(currentPage,false);});});}
 
 function renderPortfolio(){
   recompute();const views=buildIntegratedAssetViews(state,snapshot,alerts);
   $('#main').innerHTML=`<div class="section-head"><div><h1>Portfolio</h1><p>${views.length} Position${views.length===1?'':'en'} · kompakte mobile Ansicht</p></div><button class="btn primary small" id="portfolioAdd">＋ Erfassen</button></div>
-  <div class="card portfolio-list">${views.length?views.map(portfolioRow).join(''):`<div class="empty"><div class="emoji">◫</div>Noch kein Bestand. Nutze „Bestand übernehmen“ für bestehende Positionen.</div>`}</div>`;
+  ${allocationViz(views)}
+  <div class="card portfolio-list" style="margin-top:12px">${views.length?views.map(portfolioRow).join(''):`<div class="empty"><div class="emoji">◫</div>Noch kein Bestand. Nutze „Bestand übernehmen“ für bestehende Positionen.</div>`}</div>`;
   $('#portfolioAdd').onclick=()=>openActionSheet(['OPENING_POSITION','BUY','SELL']);$$('[data-open-asset]').forEach(b=>b.onclick=()=>openAsset(b.dataset.openAsset));
 }
-function portfolioRow(v){const p=v.position,h=v.halal;return `<button class="portfolio-row" data-open-asset="${esc(p.assetId)}"><div class="asset-avatar">${esc((p.ticker||p.name||'?').slice(0,2).toUpperCase())}</div><div class="asset-main"><div class="asset-title">${esc(p.name)}</div><div class="asset-sub">${esc(p.ticker||p.isin||p.assetClass)} · ${v.weightPct===null?'Gewichtung unbekannt':pct(v.weightPct)}</div><div class="asset-badges"><span class="badge ${statusClass(h.status)}">${esc(h.status)}</span>${v.activeAlerts.length?`<span class="badge warn">${v.activeAlerts.length} aktiv</span>`:''}${v.snoozedAlerts.length?`<span class="badge">${v.snoozedAlerts.length} zurückgestellt</span>`:''}${v.news.length?`<span class="badge info">${v.news.length} News</span>`:''}</div></div><div class="asset-value"><strong>${eur(p.marketValue)}</strong><small>${p.valuationSource==='PRICE_QUOTE'?(p.performancePct===null?'Kurs':pct(p.performancePct)):'Referenz'}</small><span>›</span></div></button>`;}
+function allocationViz(views){const rows=views.filter(v=>v.weightPct!==null&&Number(v.weightPct)>0);if(!rows.length)return `<div class="card empty">Allokation ist ohne bewertbare Positionen nicht darstellbar.</div>`;const colors=['#38d996','#70a7ff','#ffb45c','#e9d56d','#c89cff','#66d9e8','#ff7b9c','#a8d672'];let cursor=0;const parts=[];rows.forEach((v,i)=>{const start=cursor;cursor=Math.min(100,cursor+Number(v.weightPct));parts.push(`${colors[i%colors.length]} ${start}% ${cursor}%`);});if(cursor<100)parts.push(`#253247 ${cursor}% 100%`);const basis=snapshot.completeness.hasCurrentQuotes?'bestätigte Kurse':'Referenzwerte · keine Live-Bewertung';return `<div class="card allocation-card"><div class="top generic-top"><div><h3>Portfolio-Allokation</h3><p>${esc(basis)}</p></div><strong>${eur(snapshot.totals.holdingsValue)}</strong></div><div class="allocation-body"><div class="allocation-donut" style="background:conic-gradient(${parts.join(',')})"><div><strong>${rows.length}</strong><small>Positionen</small></div></div><div class="allocation-legend">${rows.map((v,i)=>`<div><span class="legend-dot" style="background:${colors[i%colors.length]}"></span><span>${esc(v.asset?.name||v.position?.name||'Asset')}</span><strong>${pct(v.weightPct)}</strong></div>`).join('')}</div></div></div>`;}
+function portfolioRow(v){const p=v.position,h=v.halal,w=v.halalWorkflow;const workflow=w==='FREEZE'?`<span class="badge warn">FREEZE</span>`:w==='VETO'?`<span class="badge bad">VETO</span>`:'';return `<button class="portfolio-row" data-open-asset="${esc(p.assetId)}"><div class="asset-avatar">${esc((p.ticker||p.name||'?').slice(0,2).toUpperCase())}</div><div class="asset-main"><div class="asset-title">${esc(p.name)}</div><div class="asset-sub">${esc(p.ticker||p.isin||p.assetClass)} · ${v.weightPct===null?'Gewichtung unbekannt':pct(v.weightPct)}</div><div class="asset-badges"><span class="badge ${statusClass(h.status)}">${esc(h.status)}</span>${workflow}${v.activeAlerts.length?`<span class="badge warn">${v.activeAlerts.length} aktiv</span>`:''}${v.snoozedAlerts.length?`<span class="badge">${v.snoozedAlerts.length} zurückgestellt</span>`:''}${v.news.length?`<span class="badge info">${v.news.length} News</span>`:''}</div></div><div class="asset-value"><strong>${eur(p.marketValue)}</strong><small>${p.valuationSource==='PRICE_QUOTE'?(p.performancePct===null?'Kurs':pct(p.performancePct)):'Referenz'}</small><span>›</span></div></button>`;}
 function openAsset(assetId,tab='overview'){currentAssetId=assetId;currentAssetTab=tab;route('asset');}
+function halalWorkflowLabel(v){return v.halalWorkflow==='FREEZE'?'H2 · FREEZE':v.halalWorkflow==='VETO'?'H0 · VETO':v.halal.status;}
+function halalWorkflowNotice(v){return v.halalWorkflow==='FREEZE'?`<div class="notice warn"><strong>FREEZE aktiv</strong><p>Nicht aufstocken; Review durchführen. Regel HALAL.H2.FREEZE.</p></div>`:v.halalWorkflow==='VETO'?`<div class="notice error"><strong>VETO aktiv</strong><p>Keine Aufstockung; Exit-/Veto-Review. Regel HALAL.H0.VETO.</p></div>`:v.halal.status==='UNKNOWN'?`<div class="notice info"><strong>Keine Freigabe</strong><p>Halal-Status unbekannt; vor Kauf oder Aufstockung prüfen.</p></div>`:'';}
 function renderAssetDetail(){
   recompute();const v=currentAssetId?buildAssetInsight(state,snapshot,alerts,currentAssetId):null;if(!v?.asset){route('portfolio');return;}const p=v.position,a=v.asset,h=v.halal;
   const tabs=[['overview','Überblick'],['hpos','HPOS'],['halal','Halal'],['activities','Aktivitäten'],['news','News']];
@@ -765,9 +796,9 @@ function renderAssetDetail(){
   $('[data-price-detail]')?.addEventListener('click',()=>openPriceForm(a.assetId));$('[data-add-news]')?.addEventListener('click',()=>openNewsForm(a.assetId));$('[data-add-halal]')?.addEventListener('click',()=>openHalalForm(a.assetId));bindAlertButtons();
 }
 function renderAssetTab(v,tab){const p=v.position,a=v.asset,h=v.halal;
-  if(tab==='overview')return `<div class="grid metrics">${metric('Wert',p?eur(p.marketValue):'—',p?.valuationSource==='PRICE_QUOTE'?'bestätigter Kurs':'Referenzwert')}${metric('Gewichtung',v.weightPct===null?'—':pct(v.weightPct),'am bewertbaren Portfolio')}${metric('Halal',h.status,h.conflict?'Quellenkonflikt':'effektiver Status')}${metric('Aktive Hinweise',String(v.activeAlerts.length),v.snoozedAlerts.length?`${v.snoozedAlerts.length} zurückgestellt`:'keine zurückgestellt')}</div><div class="card insight-card" style="margin-top:12px"><h3>HPOS Einordnung</h3><p>${esc(v.summary)}</p></div><div class="card" style="margin-top:12px"><div class="details"><div class="kv"><span>Stück</span><strong>${p?Number(p.qty).toLocaleString('de-DE'):'—'}</strong></div><div class="kv"><span>Ø Einstand</span><strong>${p?eur(p.avgCost):'—'}</strong></div><div class="kv"><span>Bewertung</span><strong>${p?eur(p.valuationPrice):'—'}</strong></div><div class="kv"><span>Datenstand</span><strong>${p?esc(dateFmt(p.priceAsOf)):'—'}</strong></div></div>${p?`<div class="action-row"><button class="btn small" data-price-detail>Kurs aktualisieren</button></div>`:''}</div>`;
+  if(tab==='overview')return `<div class="grid metrics">${metric('Wert',p?eur(p.marketValue):'—',p?.valuationSource==='PRICE_QUOTE'?'bestätigter Kurs':'Referenzwert')}${metric('Gewichtung',v.weightPct===null?'—':pct(v.weightPct),'am bewertbaren Portfolio')}${metric('Halal',halalWorkflowLabel(v),h.conflict?'Quellenkonflikt':'effektiver Status')}${metric('Aktive Hinweise',String(v.activeAlerts.length),v.snoozedAlerts.length?`${v.snoozedAlerts.length} zurückgestellt`:'keine zurückgestellt')}</div><div style="margin-top:12px">${halalWorkflowNotice(v)}</div><div class="card insight-card" style="margin-top:12px"><h3>HPOS Einordnung</h3><p>${esc(v.summary)}</p></div><div class="card" style="margin-top:12px"><div class="details"><div class="kv"><span>Stück</span><strong>${p?Number(p.qty).toLocaleString('de-DE'):'—'}</strong></div><div class="kv"><span>Ø Einstand</span><strong>${p?eur(p.avgCost):'—'}</strong></div><div class="kv"><span>Bewertung</span><strong>${p?eur(p.valuationPrice):'—'}</strong></div><div class="kv"><span>Datenstand</span><strong>${p?esc(dateFmt(p.priceAsOf)):'—'}</strong></div></div>${p?`<div class="action-row"><button class="btn small" data-price-detail>Kurs aktualisieren</button></div>`:''}</div>`;
   if(tab==='hpos')return `<div class="stack">${v.alerts.length?v.alerts.map(x=>alertCard(x)).join(''):`<div class="card empty">Keine assetbezogenen HPOS-Hinweise.</div>`}</div>`;
-  if(tab==='halal'){const checks=state.halalChecks.filter(c=>c.assetId===a.assetId).sort((x,y)=>String(y.checkedAt).localeCompare(String(x.checkedAt)));return `<div class="card"><div class="top"><div><h3>Effektiver Status</h3><p>${esc(h.reason)}</p></div><span class="badge ${statusClass(h.status)}">${esc(h.status)}</span></div>${checks.length?checks.map(c=>`<div class="list-row"><div class="top"><div><strong>${esc(c.source)}</strong><div class="sub">${esc(dateFmt(c.checkedAt))}</div></div><span class="badge ${statusClass(c.status)}">${esc(c.status)}</span></div>${c.evidenceRef?`<div class="rule-source">Beleg: ${esc(c.evidenceRef)}</div>`:''}</div>`).join(''):`<div class="empty">Noch keine Halal-Prüfung hinterlegt.</div>`}<div class="action-row"><button class="btn primary small" data-add-halal>＋ Prüfung erfassen</button></div></div>`;}
+  if(tab==='halal'){const checks=state.halalChecks.filter(c=>c.assetId===a.assetId).sort((x,y)=>String(y.checkedAt).localeCompare(String(x.checkedAt)));return `<div class="stack">${halalWorkflowNotice(v)}<div class="card"><div class="top"><div><h3>Effektiver Status</h3><p>${esc(h.reason)}</p></div><div class="asset-badges"><span class="badge ${statusClass(h.status)}">${esc(h.status)}</span>${v.halalWorkflow==='FREEZE'?'<span class="badge warn">FREEZE</span>':v.halalWorkflow==='VETO'?'<span class="badge bad">VETO</span>':''}</div></div>${checks.length?checks.map(c=>`<div class="list-row"><div class="top"><div><strong>${esc(c.source)}</strong><div class="sub">${esc(dateFmt(c.checkedAt))}</div></div><span class="badge ${statusClass(c.status)}">${esc(c.status)}</span></div>${c.evidenceRef?`<div class="rule-source">Beleg: ${esc(c.evidenceRef)}</div>`:''}</div>`).join(''):`<div class="empty">Noch keine Halal-Prüfung hinterlegt.</div>`}<div class="action-row"><button class="btn primary small" data-add-halal>＋ Prüfung erfassen</button></div></div></div>`;}
   if(tab==='activities')return `<div class="card">${v.transactions.length?v.transactions.map(t=>txRow(t,{deletable:false})).join(''):`<div class="empty">Noch keine Aktivitäten zu diesem Asset.</div>`}</div>`;
   if(tab==='news')return `<div class="section-head"><div><h2>News</h2><p>${v.news.length} gespeicherte Meldung${v.news.length===1?'':'en'}</p></div><button class="btn primary small" data-add-news>＋ Meldung</button></div><div class="stack">${v.news.length?v.news.map(newsCard).join(''):`<div class="card empty">Keine belegte News zu diesem Asset gespeichert.</div>`}</div>`;
   return '';
@@ -862,7 +893,7 @@ function renderData(){
   $('#main').innerHTML=`<div class="section-head"><div><h1>Daten & Backup</h1><p>Kein Login · keine Cloud-Datenbank</p></div></div><div class="stack"><div class="card"><h3>Backup</h3><p>Sichere Portfolio, Strategie, Halal-Prüfungen und Watchlist in einer Datei.</p><div class="action-row"><button class="btn primary" id="backupExport">Backup erstellen</button><label class="btn" for="backupImport">Backup wiederherstellen</label><input id="backupImport" type="file" accept="application/json,.json" class="hide"></div></div><div class="card"><h3>Lokale Daten</h3><p>Schema v${state.appMeta.schemaVersion} · App ${esc(APP_VERSION)}</p><div class="action-row"><button class="btn danger" id="resetLocal">Daten zurücksetzen</button></div></div><div class="card"><h3>Datenstand</h3>${renderDataStrip()}</div></div>`;
   $('#backupExport').onclick=()=>{try{downloadText(`HPOS_Backup_${isoDate()}.json`,JSON.stringify(exportBackup(state),null,2),'application/json');toast('Backup erstellt');}catch(e){toast(e.message);}};
   $('#backupImport').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;try{const parsed=JSON.parse(await f.text());const imp=importBackup(parsed);if(!imp.ok)throw new Error(imp.errors.join(' | '));if(!confirm('Aktuellen lokalen Stand durch dieses Backup ersetzen?'))return;state=imp.state;persist();recompute();toast('Backup wiederhergestellt');route('dashboard');}catch(err){toast(`Import abgebrochen: ${err.message}`);}};
-  $('#resetLocal').onclick=()=>{if(confirm('Wirklich alle lokalen HPOS-Daten zurücksetzen? Vorher Backup empfohlen.')){state=createEmptyState();persist();previousSnapshot=null;recompute();toast('Lokaler Stand zurückgesetzt');route('dashboard');}};
+  $('#resetLocal').onclick=()=>{if(confirm('Wirklich alle lokalen HPOS-Daten zurücksetzen? Vorher Backup empfohlen.')){state=createEmptyState();persist();previousSnapshot=null;recompute();toast('Lokaler Stand zurückgesetzt');route('dashboard');}};bindDataStatus();
 }
 function renderDiagnostics(){const v=validateV3State(state);$('#main').innerHTML=`<div class="section-head"><div><h1>Diagnose</h1><p>Transparenz statt stiller Fehler</p></div></div><div class="card"><h3>Schema-Prüfung</h3><div class="notice ${v.ok?'info':'error'}">${v.ok?'Schema v3 ist gültig.':esc(v.errors.join(' · '))}</div><p>Snapshot-Diagnosen: ${snapshot.diagnostics.length}</p><p>Lokale Diagnoseeinträge: ${state.diagnostics.length}</p></div><div class="stack" style="margin-top:12px">${[...state.diagnostics,...snapshot.diagnostics].slice(-20).reverse().map(d=>`<div class="card"><strong>${esc(d.code)}</strong><p>${esc(d.message)}</p><div class="rule-source">${esc(d.severity||'INFO')} · ${esc(d.at||'')}</div></div>`).join('')}</div>`;}
 
@@ -875,13 +906,43 @@ function closeModal(){ $('#modalRoot').innerHTML=''; }
 function assetFields({allowNew=true}={}){const opts=state.assets.map(a=>`<option value="${esc(a.assetId)}">${esc(a.name)}${a.ticker?` · ${esc(a.ticker)}`:''}</option>`).join('');return `<div class="field"><label>Wertpapier</label><select id="assetSelect"><option value="">${allowNew?'Neues Wertpapier anlegen':'Bitte wählen'}</option>${opts}</select></div>${allowNew?`<div id="newAssetFields"><div class="field"><label>Name</label><input id="assetName" placeholder="z. B. Rio Tinto"></div><div class="two"><div class="field"><label>Ticker</label><input id="assetTicker" placeholder="RIO"></div><div class="field"><label>ISIN</label><input id="assetIsin" placeholder="optional"></div></div><div class="two"><div class="field"><label>Assetklasse</label><select id="assetClass"><option>Equity</option><option>Sukuk</option><option>ETF</option><option>Fund</option><option>Other</option></select></div><div class="field"><label>Sektor</label><input id="assetSector" placeholder="optional"></div></div></div>`:''}`;}
 function bindAssetToggle(){const s=$('#assetSelect'),n=$('#newAssetFields');if(s&&n){const f=()=>n.classList.toggle('hide',!!s.value);s.onchange=f;f();}}
 function resolveAsset(){const selected=$('#assetSelect')?.value;if(selected)return state.assets.find(a=>a.assetId===selected);const name=$('#assetName')?.value?.trim();if(!name)throw new Error('Name des Wertpapiers fehlt.');return upsertAsset(state,{name,ticker:$('#assetTicker')?.value?.trim()||undefined,isin:$('#assetIsin')?.value?.trim()||undefined,assetClass:$('#assetClass')?.value||'UNKNOWN',sector:$('#assetSector')?.value?.trim()||undefined,currency:'EUR'});}
+function referenceDecisionFor(assetId,price,type){
+  if(!['BUY','SELL'].includes(type)) return true;
+  const p=snapshot.positions.find(x=>x.assetId===assetId);
+  if(!p||p.valuationSource==='PRICE_QUOTE'||!Number.isFinite(Number(p.valuationPrice))||Number(p.valuationPrice)<=0||!Number.isFinite(Number(price))) return true;
+  const old=Number(p.valuationPrice), deviation=Math.abs(Number(price)-old)/old*100;
+  if(deviation<25) return true;
+  return confirm(`Der Transaktionspreis ${eur(price)} weicht um ${deviation.toLocaleString('de-DE',{maximumFractionDigits:1})} % vom bisherigen Referenzwert ${eur(old)} ab.\n\nOK = als neue Bewertungsbasis übernehmen.\nAbbrechen = Transaktion speichern, bisherigen Referenzwert behalten.`);
+}
 function openEntryModal(type){
   if(type==='WATCHLIST')return openWatchlistForm();if(type==='HALAL')return openHalalForm();if(type==='NEWS')return openNewsForm();
   const assetRelated=['BUY','SELL','OPENING_POSITION','DIVIDEND'].includes(type);const moneyOnly=['CASH_IN','CASH_OUT'].includes(type);
-  openModal(ACTIONS[type][0],`<form id="entryForm" class="form">${assetRelated?assetFields({allowNew:type!=='SELL'&&type!=='DIVIDEND'}):''}<div class="field"><label>Datum</label><input id="txDate" type="date" value="${isoDate()}"></div>${['BUY','SELL','OPENING_POSITION'].includes(type)?`<div class="two"><div class="field"><label>Stückzahl</label><input id="txQty" type="number" min="0.000001" step="any" inputmode="decimal"></div><div class="field"><label>Preis je Stück</label><input id="txPrice" type="number" min="0" step="any" inputmode="decimal"></div></div>`:''}${type==='DIVIDEND'||moneyOnly?`<div class="field"><label>Betrag</label><input id="txAmount" type="number" min="0.01" step="0.01" inputmode="decimal"></div>`:''}${type==='BUY'&&snapshot.effectiveProfile.cashMode==='TRACKED'?`<div class="notice warn">Cashtracking ist aktiv. Käufe werden gegen verfügbares Cash geprüft.</div>`:''}<button class="btn primary" type="submit">Speichern</button></form>`);bindAssetToggle();$('#entryForm').onsubmit=e=>{e.preventDefault();try{const a=assetRelated?resolveAsset():null;const tx={type,date:$('#txDate').value,assetId:a?.assetId};if(['BUY','SELL','OPENING_POSITION'].includes(type)){tx.qty=Number($('#txQty').value);tx.price=Number($('#txPrice').value);}else tx.amount=Number($('#txAmount').value);const r=addTransaction(state,tx);if(!r.ok)throw new Error(r.errors.join(' | '));state.dataStatus.portfolio={state:'CURRENT',source:'local',asOf:new Date().toISOString(),lastAttemptAt:new Date().toISOString(),message:'Lokale Ereignisse aktualisiert.'};persist();recompute();closeModal();toast(`${ACTIONS[type][0]} gespeichert`);route(type==='DIVIDEND'?'income':type.startsWith('CASH')?'transactions':'portfolio',false);}catch(err){toast(err.message);}};
+  const valuationNote=['BUY','SELL','OPENING_POSITION'].includes(type)?`<div class="notice info">Transaktionspreise dienen ohne aktuellen Kurs nur als Referenz. Starke Abweichungen werden vor Übernahme als Bewertungsbasis bestätigt.</div>`:'';
+  openModal(ACTIONS[type][0],`<form id="entryForm" class="form">${assetRelated?assetFields({allowNew:type!=='SELL'&&type!=='DIVIDEND'}):''}<div class="field"><label>Datum</label><input id="txDate" type="date" value="${isoDate()}"></div>${['BUY','SELL','OPENING_POSITION'].includes(type)?`<div class="two"><div class="field"><label>Stückzahl</label><input id="txQty" type="number" min="0.000001" step="any" inputmode="decimal"></div><div class="field"><label>Preis je Stück</label><input id="txPrice" type="number" min="0" step="any" inputmode="decimal"></div></div>`:''}${valuationNote}${type==='DIVIDEND'||moneyOnly?`<div class="field"><label>Betrag</label><input id="txAmount" type="number" min="0.01" step="0.01" inputmode="decimal"></div>`:''}${type==='BUY'&&snapshot.effectiveProfile.cashMode==='TRACKED'?`<div class="notice warn">Cashtracking ist aktiv. Käufe werden gegen verfügbares Cash geprüft.</div>`:''}<button class="btn primary" type="submit">Speichern</button></form>`);
+  bindAssetToggle();
+  $('#entryForm').onsubmit=e=>{e.preventDefault();try{
+    const a=assetRelated?resolveAsset():null;const tx={type,date:$('#txDate').value,assetId:a?.assetId};let referenceKept=false;
+    if(['BUY','SELL','OPENING_POSITION'].includes(type)){tx.qty=Number($('#txQty').value);tx.price=Number($('#txPrice').value);tx.useAsReference=referenceDecisionFor(a?.assetId,tx.price,type);referenceKept=tx.useAsReference===false;}else tx.amount=Number($('#txAmount').value);
+    const r=addTransaction(state,tx);if(!r.ok)throw new Error(r.errors.join(' | '));
+    state.dataStatus.portfolio={state:'CURRENT',source:'local',asOf:new Date().toISOString(),lastAttemptAt:new Date().toISOString(),message:'Lokale Ereignisse aktualisiert.'};persist();recompute();closeModal();toast(referenceKept?`${ACTIONS[type][0]} gespeichert · Referenzwert unverändert`:`${ACTIONS[type][0]} gespeichert`);route(type==='DIVIDEND'?'income':type.startsWith('CASH')?'transactions':'portfolio',false);
+  }catch(err){toast(err.message);}};
 }
+
 function openWatchlistForm(){openModal('Watchlist-Kandidat',`<form id="watchForm" class="form">${assetFields()}<div class="two"><div class="field"><label>Lager</label><select id="watchBucket"><option value="A">A · Engpass</option><option value="B">B · Compounder</option><option value="C">C · Spezialfall</option></select></div><div class="field"><label>Review</label><input id="watchReview" type="date"></div></div><div class="field"><label>Einstiegs-/Beobachtungstrigger</label><input id="watchTrigger" placeholder="z. B. unter 80 €"></div><div class="field"><label>Investmentthese / Notiz</label><textarea id="watchThesis" placeholder="Warum ist der Titel interessant?"></textarea></div><button class="btn primary" type="submit">Zur Watchlist</button></form>`);bindAssetToggle();$('#watchForm').onsubmit=e=>{e.preventDefault();try{const limit=getEffectiveProfile(state).rules.watchlistMax.effectiveValue;if(state.watchlistEntries.filter(w=>w.status!=='ARCHIVED').length>=limit)throw new Error(`Watchlist-Limit ${limit} erreicht. Im Strategie-Cockpit bewusst erhöhen oder bereinigen.`);const a=resolveAsset();state.watchlistEntries.push({watchlistId:crypto.randomUUID(),assetId:a.assetId,bucket:$('#watchBucket').value,thesis:$('#watchThesis').value,entryTrigger:$('#watchTrigger').value||null,reviewDate:$('#watchReview').value||null,createdAt:new Date().toISOString(),status:'ACTIVE'});persist();recompute();closeModal();toast('Watchlist-Kandidat gespeichert');route('watchlist',false);}catch(err){toast(err.message);}};}
-function openHalalForm(assetId=null){openModal('Halal-Prüfung',`<form id="halalForm" class="form">${assetFields()}<div class="two"><div class="field"><label>Quelle</label><select id="halalSource"><option>Zoya</option><option>Musaffa</option><option>Sharlife</option><option>Manuell</option></select></div><div class="field"><label>Status</label><select id="halalStatus"><option>H1</option><option>H2</option><option>H0</option><option>UNKNOWN</option></select></div></div><div class="field"><label>Prüfdatum</label><input id="halalDate" type="date" value="${isoDate()}"></div><div class="field"><label>Beleg / Referenz</label><input id="halalEvidence" placeholder="URL, Screenshot, Notiz-ID ..."></div><div class="field"><label>Notiz</label><textarea id="halalNote"></textarea></div><button class="btn primary" type="submit">Prüfung speichern</button></form>`);bindAssetToggle();if(assetId&&$('#assetSelect')){$('#assetSelect').value=assetId;$('#assetSelect').dispatchEvent(new Event('change'));}$('#halalForm').onsubmit=e=>{e.preventDefault();try{const a=resolveAsset();state.halalChecks.push({checkId:crypto.randomUUID(),assetId:a.assetId,source:$('#halalSource').value,status:$('#halalStatus').value,checkedAt:$('#halalDate').value,evidenceRef:$('#halalEvidence').value||null,note:$('#halalNote').value||null,enteredBy:'user',updatedAt:new Date().toISOString()});const activeAssetIds=new Set(buildSnapshot(state).positions.map(p=>p.assetId));const allChecked=[...activeAssetIds].every(id=>getEffectiveHalal(state,state.assets.find(x=>x.assetId===id)).status!=='UNKNOWN');state.dataStatus.halal={state:allChecked&&activeAssetIds.size?'CURRENT':'STALE',source:'manual',asOf:$('#halalDate').value,lastAttemptAt:new Date().toISOString(),message:allChecked&&activeAssetIds.size?'Alle aktiven Positionen besitzen einen effektiven Halal-Status.':'Manuelle Prüfungen vorhanden; mindestens eine aktive Position ist noch nicht vollständig bewertet.'};persist();recompute();closeModal();toast('Halal-Prüfung gespeichert');if(assetId){currentAssetId=a.assetId;currentAssetTab='halal';renderAssetDetail();}else route('halal',false);}catch(err){toast(err.message);}};}
+function halalSourceOptions(){const pref=getEffectiveProfile(state).rules.halalSourcePriority.effectiveValue||[];const all=[...pref,'Musaffa','Zoya','Sharlife','Manuell'];return [...new Set(all)].map(x=>`<option>${esc(x)}</option>`).join('');}
+function openHalalForm(assetId=null){
+  openModal('Halal-Prüfung',`<form id="halalForm" class="form">${assetFields()}<div class="two"><div class="field"><label>Quelle</label><select id="halalSource">${halalSourceOptions()}</select></div><div class="field"><label>Status</label><select id="halalStatus" required><option value="">Status auswählen</option><option>H1</option><option>H2</option><option>H0</option><option>UNKNOWN</option></select></div></div><div class="notice info">H2 erzeugt automatisch FREEZE/Review. H0 erzeugt automatisch VETO/Exit-Review. UNKNOWN ist keine Kauf-/Aufstockungsfreigabe.</div><div class="field"><label>Prüfdatum</label><input id="halalDate" type="date" value="${isoDate()}"></div><div class="field"><label>Beleg / Referenz</label><input id="halalEvidence" placeholder="URL, Screenshot, Notiz-ID ..."></div><div class="field"><label>Notiz</label><textarea id="halalNote"></textarea></div><button class="btn primary" type="submit">Prüfung speichern</button></form>`);
+  bindAssetToggle();if(assetId&&$('#assetSelect')){$('#assetSelect').value=assetId;$('#assetSelect').dispatchEvent(new Event('change'));}
+  $('#halalForm').onsubmit=e=>{e.preventDefault();try{
+    const a=resolveAsset(),status=$('#halalStatus').value;if(!status)throw new Error('Halal-Status auswählen.');
+    state.halalChecks.push({checkId:crypto.randomUUID(),assetId:a.assetId,source:$('#halalSource').value,status,checkedAt:$('#halalDate').value,evidenceRef:$('#halalEvidence').value||null,note:$('#halalNote').value||null,enteredBy:'user',updatedAt:new Date().toISOString()});
+    const activeAssetIds=new Set(buildSnapshot(state).positions.map(p=>p.assetId));const allChecked=[...activeAssetIds].every(id=>getEffectiveHalal(state,state.assets.find(x=>x.assetId===id)).status!=='UNKNOWN');
+    state.dataStatus.halal={state:allChecked&&activeAssetIds.size?'CURRENT':'STALE',source:'manual',asOf:$('#halalDate').value,lastAttemptAt:new Date().toISOString(),message:allChecked&&activeAssetIds.size?'Alle aktiven Positionen besitzen einen effektiven Halal-Status.':'Manuelle Prüfungen vorhanden; mindestens eine aktive Position ist noch nicht vollständig bewertet.'};
+    persist();recompute();const effective=getEffectiveHalal(state,a);closeModal();toast(effective.status==='H2'?'Prüfung gespeichert · FREEZE aktiv':effective.status==='H0'?'Prüfung gespeichert · VETO aktiv':'Halal-Prüfung gespeichert');
+    if(assetId){currentAssetId=a.assetId;currentAssetTab='halal';renderAssetDetail();}else route('halal',false);
+  }catch(err){toast(err.message);}};
+}
+
 function openPriceForm(assetId){const a=state.assets.find(x=>x.assetId===assetId);if(!a)return;openModal('Kurs aktualisieren',`<form id="priceForm" class="form"><div class="notice info"><strong>${esc(a.name)}</strong><p>Manueller Kurs. HPOS kennzeichnet die Quelle sichtbar.</p></div><div class="field"><label>Kurs</label><input id="priceValue" type="number" min="0" step="any" inputmode="decimal" value="${esc(a.priceQuote?.price??'')}"></div><div class="field"><label>Stand</label><input id="priceDate" type="datetime-local"></div><button class="btn primary" type="submit">Kurs speichern</button></form>`);$('#priceForm').onsubmit=e=>{e.preventDefault();const price=Number($('#priceValue').value);if(!Number.isFinite(price)||price<0)return toast('Gültigen Kurs eingeben');a.priceQuote={price,asOf:$('#priceDate').value?new Date($('#priceDate').value).toISOString():new Date().toISOString(),source:'manual',enteredBy:'user'};recompute();state.dataStatus.prices={state:snapshot.completeness.hasCurrentQuotes?'CURRENT':'STALE',source:'manual',asOf:a.priceQuote.asOf,lastAttemptAt:new Date().toISOString(),message:snapshot.completeness.hasCurrentQuotes?'Alle aktiven Positionen besitzen einen bestätigten manuellen Kurs.':'Kurse nur teilweise manuell aktualisiert.'};persist();recompute();closeModal();toast('Kurs gespeichert');if(currentPage==='asset'&&currentAssetId===assetId)renderAssetDetail();else renderPortfolio();};}
 
 function customRuleRows(rows){if(!rows.length)return '<div class="field-help">Keine Zusatzregel aktiv.</div>';return rows.map(r=>`<div class="list-row"><div class="top"><div><strong>${esc(r.label)}</strong><div class="sub">${esc(r.template==='MAX_SINGLE_POSITION_PCT'?'Max. Einzelposition':`Sektor-Cap ${r.sector||''}`)} · ${pct(r.value)}</div></div><button type="button" class="btn small danger" data-custom-rule-del="${esc(r.ruleId)}">Löschen</button></div></div>`).join('');}
