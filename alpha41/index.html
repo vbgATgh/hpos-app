@@ -6,6 +6,9 @@
 <meta name="theme-color" content="#0b1018">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>HPOS Alpha 4.1.3-fix1 Safari-Test</title>
 <style>
 :root{
@@ -92,11 +95,19 @@ details{border-top:1px solid var(--line);padding:10px 0}summary{cursor:pointer;f
       </div>
     </header>
 
-    <div class="alpha-banner">ALPHA 4.1.3-fix1 · Safari-Test · kein Produktiv-Release</div>
+    <div class="alpha-banner">ALPHA 4.1.3-fix2 · Safari-Test · kein Produktiv-Release</div>
     <main id="main" class="main" tabindex="-1"></main>
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
     <div id="modalRoot"></div>
   </div>
+<script>
+// Alpha-Test: alte Service-Worker dieses Testpfads entfernen, damit kein veraltetes index.html ausgeliefert wird.
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then(regs => {
+    regs.filter(r => r.scope.includes('/hpos-app/alpha41/')).forEach(r => r.unregister());
+  }).catch(() => {});
+}
+</script>
 <script>
 /* === core/utils.mjs === */
 const nowIso = () => new Date().toISOString();
@@ -738,7 +749,7 @@ function buildHalalPortfolioSummary(state,snapshot){
 }
 
 /* === app.mjs === */
-const APP_VERSION='1.3.0-alpha.4.1.3-fix1';
+const APP_VERSION='1.3.0-alpha.4.1.3-fix2';
 const $=(s,r=document)=>r.querySelector(s); const $$=(s,r=document)=>[...r.querySelectorAll(s)];
 const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 const eur=v=>v===null||v===undefined||Number.isNaN(Number(v))?'unbekannt':new Intl.NumberFormat('de-DE',{style:'currency',currency:'EUR'}).format(Number(v));
@@ -771,7 +782,7 @@ function init(){
   }else{loadProblem=loaded;}
   if(loadProblem){renderFatal();return;}
   state.appMeta.appVersion=APP_VERSION;
-  recompute();renderNav();route(location.hash.slice(1)||'dashboard',false);rememberSnapshot();registerSW();
+  recompute();renderNav();route(location.hash.slice(1)||'dashboard',false);rememberSnapshot();
 }
 
 function renderFatal(){
