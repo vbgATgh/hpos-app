@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#0b1018">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>HPOS Alpha 4.1.3 Safari-Test</title>
+<title>HPOS Alpha 4.1.3-fix1 Safari-Test</title>
 <style>
 :root{
   color-scheme:dark;
@@ -92,7 +92,7 @@ details{border-top:1px solid var(--line);padding:10px 0}summary{cursor:pointer;f
       </div>
     </header>
 
-    <div class="alpha-banner">ALPHA 4.1.3 · Safari-Test · kein Produktiv-Release</div>
+    <div class="alpha-banner">ALPHA 4.1.3-fix1 · Safari-Test · kein Produktiv-Release</div>
     <main id="main" class="main" tabindex="-1"></main>
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
     <div id="modalRoot"></div>
@@ -160,7 +160,6 @@ const RULE_BY_ID = Object.freeze(Object.fromEntries(
 ));
 
 /* === core/model.mjs === */
-import { deepClone, nowIso } from './utils.mjs';
 
 function sameValue(a,b){ return JSON.stringify(a)===JSON.stringify(b); }
 
@@ -280,7 +279,6 @@ function upsertAsset(state,input){
 }
 
 /* === core/snapshot-engine.mjs === */
-import { getEffectiveProfile } from './model.mjs';
 
 function freshPosition(asset){return {assetId:asset.assetId,name:asset.name,ticker:asset.ticker??null,isin:asset.isin??null,assetClass:asset.assetClass,sector:asset.sector??null,currency:asset.currency??'EUR',qty:0,avgCost:null,costValue:0,lastReferencePrice:null,lastReferenceAt:null};}
 
@@ -350,7 +348,6 @@ function buildSnapshot(state, {asOf=new Date().toISOString()}={}){
 }
 
 /* === core/transaction-service.mjs === */
-import { nowIso, uuid } from './utils.mjs';
 
 function validateTransaction(state, tx){
   const errors=[],warnings=[];
@@ -389,7 +386,6 @@ function removeTransaction(state,transactionId){
 }
 
 /* === core/halal-engine.mjs === */
-import { statusRank } from './utils.mjs';
 
 const sourceEq=(a,b)=>String(a??'').trim().toLowerCase()===String(b??'').trim().toLowerCase();
 function getEffectiveHalal(state,asset){
@@ -418,7 +414,6 @@ function getEffectiveHalal(state,asset){
 }
 
 /* === core/rule-engine.mjs === */
-import { round } from './utils.mjs';
 
 function outcome(ruleId,status,actual,target,message,action,extra={}){return {ruleId,status,actual,target,message,action,...extra};}
 function evaluateRules(state,snapshot){
@@ -560,14 +555,11 @@ function buildBriefing(state,snapshot,alerts,{previousSnapshot=null}={}){
 }
 
 /* === core/storage-service.mjs === */
-import { nowIso } from './utils.mjs';
 const STORAGE_KEY='hposStateV3';
 function saveState(storage,state){const v=validateV3State(state);if(!v.ok)throw new Error(`Speichern blockiert: ${v.errors.join(' | ')}`);state.appMeta.updatedAt=nowIso();storage.setItem(STORAGE_KEY,JSON.stringify(state));return true;}
 function loadState(storage){const raw=storage.getItem(STORAGE_KEY);if(raw===null)return {ok:false,kind:'EMPTY',message:'Noch kein lokaler HPOS-v3-Zustand vorhanden.'};let parsed;try{parsed=JSON.parse(raw);}catch(e){return {ok:false,kind:'PARSE_ERROR',message:'Lokale HPOS-Daten sind nicht lesbar.',error:String(e),raw};}const v=validateV3State(parsed);if(!v.ok)return {ok:false,kind:'VALIDATION_ERROR',message:'Lokale HPOS-Daten entsprechen nicht Schema v3.',errors:v.errors,raw};parsed.appMeta.lastSuccessfulLoadAt=nowIso();return {ok:true,state:parsed};}
 
 /* === core/migration-v12.mjs === */
-import { upsertAsset } from './asset-service.mjs';
-import { buildSnapshot } from './snapshot-engine.mjs';
 const mapType={Kauf:'BUY',Verkauf:'SELL','Bestandsübernahme':'OPENING_POSITION',Dividende:'DIVIDEND',Einzahlung:'CASH_IN',Auszahlung:'CASH_OUT'};
 function migrateV12(v12,{at=nowIso()}={}){
   if(!v12||typeof v12!=='object')return {ok:false,errors:['V1.2-Zustand fehlt oder ist ungültig.']};
@@ -592,8 +584,6 @@ function migrateV12(v12,{at=nowIso()}={}){
 }
 
 /* === core/migration-service.mjs === */
-import { STORAGE_KEY } from './storage-service.mjs';
-import { nowIso } from './utils.mjs';
 
 const LEGACY_STORAGE_KEY='hposState';
 function migrateStorageV12ToV3(storage,{at=nowIso()}={}){
@@ -614,7 +604,6 @@ function migrateStorageV12ToV3(storage,{at=nowIso()}={}){
 }
 
 /* === core/backup.mjs === */
-import { validateV3State } from './validation.mjs';
 function exportBackup(state){const v=validateV3State(state);if(!v.ok)throw new Error(`Backup abgebrochen: ${v.errors.join(' | ')}`);return {format:'HPOS_BACKUP',schemaVersion:3,exportedAt:nowIso(),payload:deepClone(state)};}
 function importBackup(backup){if(backup?.format!=='HPOS_BACKUP'||backup?.schemaVersion!==3) return {ok:false,errors:['Kein unterstütztes HPOS-Schema-v3-Backup.']};const v=validateV3State(backup.payload);return v.ok?{ok:true,state:deepClone(backup.payload)}:{ok:false,errors:v.errors};}
 function equivalentState(a,b){return stableStringify(a)===stableStringify(b);}
@@ -637,7 +626,6 @@ function buildAiHandoff(state,snapshot,alerts,{includeSensitiveNotes=false}={}){
 }
 
 /* === core/integration-layer.mjs === */
-import { round } from './utils.mjs';
 
 const integrationActiveAlert = a => !['DONE','SNOOZED'].includes(a.status);
 const integrationSevRank = {CRITICAL:4,WARN:3,INFO:2,UNKNOWN:1};
@@ -750,7 +738,7 @@ function buildHalalPortfolioSummary(state,snapshot){
 }
 
 /* === app.mjs === */
-const APP_VERSION='1.3.0-alpha.4.1.3';
+const APP_VERSION='1.3.0-alpha.4.1.3-fix1';
 const $=(s,r=document)=>r.querySelector(s); const $$=(s,r=document)=>[...r.querySelectorAll(s)];
 const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 const eur=v=>v===null||v===undefined||Number.isNaN(Number(v))?'unbekannt':new Intl.NumberFormat('de-DE',{style:'currency',currency:'EUR'}).format(Number(v));
