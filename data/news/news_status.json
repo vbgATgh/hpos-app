@@ -2,14 +2,24 @@
   "schemaVersion": 1,
   "state": "CURRENT",
   "source": "github-actions/google-news-rss",
-  "asOf": "2026-08-27T07:25:32Z",
-  "lastAttemptAt": "2026-08-27T07:25:32Z",
+  "asOf": "2026-08-27T07:29:10Z",
+  "lastAttemptAt": "2026-08-27T07:29:10Z",
   "message": "News-Abruf erfolgreich: 11 Abfragen geprüft.",
   "queriesTotal": 11,
   "queriesOk": 11,
   "queriesFailed": 0,
-  "articlesFetchedThisRun": 86,
-  "articlesStored": 78,
+  "articlesFetchedThisRun": 85,
+  "articlesStored": 79,
+  "articlesByAsset": {
+    "JNJ": 31,
+    "RIO_TINTO": 18,
+    "SPACEX": 19,
+    "XIAOMI": 11
+  },
+  "articlesByScope": {
+    "PORTFOLIO": 18,
+    "WATCHLIST": 61
+  },
   "queryResults": [
     {
       "assetKey": "ISWD",
@@ -63,7 +73,7 @@
       "assetKey": "XIAOMI",
       "query": "\"Xiaomi\" earnings OR guidance OR results",
       "ok": true,
-      "items": 4
+      "items": 3
     },
     {
       "assetKey": "JNJ",
