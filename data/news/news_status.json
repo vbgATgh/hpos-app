@@ -2,23 +2,22 @@
   "schemaVersion": 1,
   "state": "CURRENT",
   "source": "github-actions/google-news-rss-discovery",
-  "asOf": "2026-08-27T17:53:43Z",
-  "lastAttemptAt": "2026-08-27T17:53:43Z",
+  "asOf": "2026-08-27T21:50:01Z",
+  "lastAttemptAt": "2026-08-27T21:50:01Z",
   "message": "Discovery-News aktualisiert: 27 konfigurierte Abfragen erfolgreich. Öffentliches Asset-Universum: 22 Titel; Primärquellen-Registry: 19/19. Depot-/Watchlist-Scope bleibt lokal.",
   "queriesTotal": 27,
   "queriesOk": 27,
   "queriesFailed": 0,
-  "articlesFetchedThisRun": 138,
-  "articlesStored": 301,
+  "articlesFetchedThisRun": 143,
+  "articlesStored": 309,
   "articlesByAsset": {
-    "JNJ": 34,
+    "JNJ": 36,
     "PQ_ATFREQUENT09": 7,
     "PQ_AU000000LTR4": 2,
     "PQ_AU000000SIG5": 4,
     "PQ_CH0012005267": 1,
     "PQ_DE000A3E5D56": 16,
     "PQ_FR0006174348": 1,
-    "PQ_IE00BTN1Y115": 1,
     "PQ_US0028241000": 2,
     "PQ_US46120E6023": 11,
     "PQ_US48581R2058": 2,
@@ -35,21 +34,21 @@
     "PUB_CH0012005267": 12,
     "PUB_DE000A3E5D56": 6,
     "PUB_DK0062498333": 1,
-    "PUB_FR0000120073": 10,
+    "PUB_FR0000120073": 11,
     "PUB_FR0006174348": 5,
     "PUB_GB0006640972": 1,
-    "PUB_GB00B2B0DG97": 5,
-    "PUB_IE00BTN1Y115": 10,
-    "PUB_US0028241000": 12,
+    "PUB_GB00B2B0DG97": 6,
+    "PUB_IE00BTN1Y115": 12,
+    "PUB_US0028241000": 13,
     "PUB_US58933Y1055": 14,
-    "PUB_US94106L1098": 11,
+    "PUB_US94106L1098": 13,
     "RIO_TINTO": 23,
     "SPACEX": 35,
     "XIAOMI": 13
   },
   "articlesByScope": {
-    "UNIVERSE": 194,
-    "UNKNOWN": 107
+    "UNIVERSE": 203,
+    "UNKNOWN": 106
   },
   "queryResults": [
     {
@@ -104,7 +103,7 @@
       "assetKey": "XIAOMI",
       "query": "\"Xiaomi\" earnings OR guidance OR results",
       "ok": true,
-      "items": 2
+      "items": 3
     },
     {
       "assetKey": "JNJ",
@@ -116,7 +115,7 @@
       "assetKey": "JNJ",
       "query": "\"Johnson & Johnson\" earnings OR dividend OR FDA",
       "ok": true,
-      "items": 9
+      "items": 10
     },
     {
       "assetKey": "PUB_DK0062498333",
@@ -128,7 +127,7 @@
       "assetKey": "PUB_US0028241000",
       "query": "\"Abbott Laboratories\"",
       "ok": true,
-      "items": 11
+      "items": 12
     },
     {
       "assetKey": "PUB_DE000A3E5D56",
@@ -152,7 +151,7 @@
       "assetKey": "PUB_US94106L1098",
       "query": "\"Waste Management\"",
       "ok": true,
-      "items": 11
+      "items": 12
     },
     {
       "assetKey": "PUB_US5797802064",
@@ -182,7 +181,7 @@
       "assetKey": "PUB_IE00BTN1Y115",
       "query": "\"Medtronic\"",
       "ok": true,
-      "items": 10
+      "items": 11
     },
     {
       "assetKey": "PUB_US58933Y1055",
