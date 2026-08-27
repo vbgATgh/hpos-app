@@ -26,6 +26,11 @@ def chart(symbol,range_,interval):
     meta=result.get('meta') or {}
     return points,meta
 
+def normalize_currency(points, price, currency):
+    if currency == 'GBp':
+        return [[t,round(v/100.0,6)] for t,v in points], (round(float(price)/100.0,6) if price is not None else None), 'GBP'
+    return points, price, currency
+
 def main():
     cfg=load(CFG); generated=nowz(); summary={'schemaVersion':1,'generatedAt':generated,'provider':cfg.get('provider'),'assetIndex':{},'assets':{},'errors':[]}
     ok=0
@@ -38,6 +43,9 @@ def main():
             except Exception: intraday=[]
             if len(daily)<2: raise RuntimeError('too few daily points')
             currency=meta.get('currency') or 'UNKNOWN'; price=meta.get('regularMarketPrice')
+            daily,price,currency=normalize_currency(daily,price,currency)
+            if intraday:
+                intraday,_,_=normalize_currency(intraday,None,meta.get('currency') or 'UNKNOWN')
             body={'schemaVersion':1,'state':'CURRENT','assetKey':key,'symbol':a['symbol'],'provider':cfg.get('provider'),'asOf':generated,'currency':currency,'regularMarketPrice':price,'daily':daily,'intraday':intraday}
             dump(OUT/f'{key}.json',body,True)
             tail=daily[-30:]
