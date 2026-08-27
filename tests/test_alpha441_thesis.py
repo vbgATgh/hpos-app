@@ -9,13 +9,13 @@ class Alpha441Tests(unittest.TestCase):
         self.assertIn("hal==='H0'",t)
         self.assertIn("hal==='H2'",t)
         self.assertIn("UNKNOWN ist keine Kauf-/Aufstockungsfreigabe",t)
-        self.assertNotIn('automatisches Kaufsignal', t.lower().replace('kein automatisches kaufsignal',''))
 
     def test_methodology_is_explicit(self):
         t=Path('docs/alpha441-thesis-methodology.md').read_text(encoding='utf-8')
         self.assertIn('These → Evidenz → Risiken → Katalysatoren → Invalidierung',t)
-        self.assertIn('Harte Gates',t)
+        self.assertIn('Hard Gates',t)
         self.assertIn('keine nicht belegten Agentenregeln erfunden',t)
+        self.assertIn('Momentum allein erzeugt nie ein Kaufsignal',t)
 
     def test_patcher_contract(self):
         t=Path('scripts/apply_hpos_alpha441.py').read_text(encoding='utf-8')
