@@ -1,0 +1,60 @@
+name: HPOS Alpha 4.3.2 Version Hotfix CI
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [hotfix-alpha432-version-refresh-20260827]
+    paths:
+      - '.github/workflows/hpos-alpha432-hotfix-ci.yml'
+      - 'scripts/apply_hpos_alpha431.py'
+      - 'scripts/apply_hpos_alpha432.py'
+      - '.github/workflows/hpos-news.yml'
+      - 'alpha41/index.html'
+      - 'alpha41/alpha432.js'
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Versionsmigration und Idempotenz
+        run: |
+          python scripts/apply_hpos_alpha431.py
+          python scripts/apply_hpos_alpha432.py
+          cp alpha41/index.html /tmp/first.html
+          python scripts/apply_hpos_alpha431.py
+          python scripts/apply_hpos_alpha432.py
+          cmp -s alpha41/index.html /tmp/first.html
+          python - <<'PY'
+          from pathlib import Path
+          t=Path('alpha41/index.html').read_text(encoding='utf-8')
+          assert "const APP_VERSION='1.3.0-alpha.4.3.2';" in t
+          assert "const APP_VERSION='1.3.0-alpha.4.3.1.2';" not in t
+          assert 'ALPHA 4.3.2 · Halal & News Hardening' in t
+          assert t.count('alpha432.js') == 1
+          print('Versions-Patcher: OK')
+          PY
+      - name: JavaScript prüfen
+        run: |
+          node --check alpha41/alpha432.js
+          python - <<'PY'
+          from pathlib import Path
+          t=Path('alpha41/index.html').read_text(encoding='utf-8')
+          js=t.split('<script>',1)[1].split('</script>',1)[0]
+          Path('/tmp/inline.js').write_text(js,encoding='utf-8')
+          PY
+          node --check /tmp/inline.js
+      - name: Browser Smoke
+        run: |
+          python -m http.server 8000 >/tmp/hpos.log 2>&1 &
+          sleep 2
+          google-chrome --headless=new --no-sandbox --disable-gpu --virtual-time-budget=5000 --dump-dom 'http://127.0.0.1:8000/alpha41/?hotfix=432#dashboard' >/tmp/home.html
+          grep -q 'ALPHA 4.3.2' /tmp/home.html
+          grep -q 'Gesamtdepot' /tmp/home.html
