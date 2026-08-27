@@ -96,8 +96,8 @@ jobs:
           assert t.index('privacy-local43-shim.js') < t.index('alpha43.js')
           assert not Path('data/portfolio/parqet_snapshot.json').exists()
           legacy=Path('alpha41/alpha43.js').read_text(encoding='utf-8')
-          assert 'Cardinal Energy + Savaria = Trade Republic' not in legacy
-          assert '343 Parqet-Aktivitäten' not in legacy
+          assert "brokerRule:'Lokale Brokerzuordnung; nicht im öffentlichen Code gespeichert.'" in legacy
+          assert 'Eine gegebenenfalls umfangreichere externe Aktivitätshistorie ist nicht vollständig als lokales Journal gespiegelt.' in legacy
           assert not any(line.lstrip().startswith('import ') for line in js.splitlines())
           market=Path('config/market_sources.json').read_text(encoding='utf-8')
           assert '"assetKey":"SPACEX"' in market and '"enabled":false' in market
