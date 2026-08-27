@@ -10,7 +10,7 @@
     {"assetKey":"JNJ","symbol":"JNJ","name":"Johnson & Johnson","aliases":["J&J","JNJ","Johnson & Johnson"],"enabled":true},
     {"assetKey":"XIAOMI","symbol":"1810.HK","name":"Xiaomi Corporation","aliases":["Xiaomi","1810.HK"],"enabled":true},
     {"assetKey":"ISWD","symbol":"ISWD.L","name":"iShares MSCI World Islamic UCITS ETF","isin":"IE00B27YCN58","aliases":["ISWD","IE00B27YCN58"],"enabled":true},
-    {"assetKey":"SUKUK","symbol":"SKUK.L","name":"iShares $ Sukuk UCITS ETF","isin":"IE000929U2U9","aliases":["SKUK","Sukuk","IE000929U2U9"],"enabled":true},
+    {"assetKey":"SUKUK","symbol":"SKUK.AS","name":"iShares $ Sukuk UCITS ETF","isin":"IE000929U2U9","aliases":["SKUK","Sukuk","IE000929U2U9"],"enabled":true},
     {"assetKey":"SPACEX","symbol":"SPCX","name":"SpaceX","aliases":["SpaceX","SPCX"],"enabled":true}
   ]
 }
