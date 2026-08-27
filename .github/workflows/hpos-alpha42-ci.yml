@@ -10,6 +10,7 @@ on:
       - 'alpha41/ux-42-core.js'
       - 'alpha41/news-42.js'
       - 'scripts/apply_hpos_ux42.py'
+      - 'scripts/apply_hpos_ux42_auditfix.py'
       - 'scripts/fetch_hpos_market.py'
       - 'scripts/fetch_hpos_direct_news.py'
       - 'config/market_sources.json'
@@ -38,6 +39,8 @@ jobs:
         run: python -m unittest tests.test_news_fetch -v
       - name: Alpha 4.2 integrieren
         run: python scripts/apply_hpos_ux42.py
+      - name: Audit-Korrekturen anwenden
+        run: python scripts/apply_hpos_ux42_auditfix.py
       - name: Syntax und Invarianten
         shell: bash
         run: |
@@ -51,6 +54,8 @@ jobs:
           assert 'ux-42-core.js' in t and 'news-42.js' in t
           js=t.split('<script>',1)[1].split('</script>',1)[0]
           assert not any(line.lstrip().startswith('import ') for line in js.splitlines())
+          ux=Path('alpha41/ux-42-core.js').read_text(encoding='utf-8')
+          assert 'sameCurrency' in ux and 'Depotwährung' in ux
           w=Path('.github/workflows/hpos-news.yml').read_text(encoding='utf-8')
           assert "name: HPOS Data Refresh" in w
           assert "timezone: 'Europe/Berlin'" in w
@@ -81,14 +86,14 @@ jobs:
       - name: Generierte Alpha-Dateien committen
         shell: bash
         run: |
-          git add alpha41/index.html data/news data/market || true
+          git add alpha41/index.html alpha41/ux-42-core.js data/news data/market || true
           if git diff --cached --quiet; then
             echo 'Keine generierten Änderungen.'
             exit 0
           fi
           git config user.name 'hpos-alpha42-bot'
           git config user.email 'hpos-alpha42-bot@users.noreply.github.com'
-          git commit -m 'chore(alpha42): Integration und Daten-Snapshots aktualisieren'
+          git commit -m 'chore(alpha42): Audit-Fixes und Daten-Snapshots aktualisieren'
           git pull --rebase origin "$GITHUB_REF_NAME"
           git push origin HEAD:"$GITHUB_REF_NAME"
       - name: Marktdatenstatus ausgeben
