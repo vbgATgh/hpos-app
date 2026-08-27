@@ -94,6 +94,7 @@ jobs:
           git config user.name 'hpos-alpha42-bot'
           git config user.email 'hpos-alpha42-bot@users.noreply.github.com'
           git commit -m 'chore(alpha42): Währungsprüfung im Kurschart aktivieren'
+          git restore data/news data/market || true
           git pull --rebase origin "$GITHUB_REF_NAME"
           git push origin HEAD:"$GITHUB_REF_NAME"
       - name: Marktdatenstatus ausgeben
