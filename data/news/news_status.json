@@ -2,14 +2,14 @@
   "schemaVersion": 1,
   "state": "CURRENT",
   "source": "github-actions/google-news-rss-discovery",
-  "asOf": "2026-08-27T12:13:44Z",
-  "lastAttemptAt": "2026-08-27T12:13:44Z",
+  "asOf": "2026-08-27T12:17:15Z",
+  "lastAttemptAt": "2026-08-27T12:17:15Z",
   "message": "Discovery-News aktualisiert: 42 konfigurierte Abfragen erfolgreich. Depot: 19 Titel vollständig; Watchlist: 18/60 Titel in diesem Rotationslauf.",
   "queriesTotal": 42,
   "queriesOk": 42,
   "queriesFailed": 0,
   "articlesFetchedThisRun": 222,
-  "articlesStored": 270,
+  "articlesStored": 273,
   "articlesByAsset": {
     "JNJ": 35,
     "PQ_ATFREQUENT09": 6,
@@ -33,16 +33,16 @@
     "PQ_US8725401090": 12,
     "PQ_US8825081040": 12,
     "PQ_US9037311076": 7,
-    "PQ_US9078181081": 7,
+    "PQ_US9078181081": 8,
     "PQ_US94106L1098": 10,
     "PQ_US98423F1093": 3,
     "RIO_TINTO": 22,
-    "SPACEX": 30,
+    "SPACEX": 32,
     "XIAOMI": 15
   },
   "articlesByScope": {
     "PORTFOLIO": 109,
-    "WATCHLIST": 161
+    "WATCHLIST": 164
   },
   "queryResults": [
     {
@@ -85,7 +85,7 @@
       "assetKey": "SPACEX",
       "query": "\"SpaceX\"",
       "ok": true,
-      "items": 11
+      "items": 12
     },
     {
       "assetKey": "XIAOMI",
@@ -109,7 +109,7 @@
       "assetKey": "JNJ",
       "query": "\"Johnson & Johnson\" earnings OR dividend OR FDA",
       "ok": true,
-      "items": 9
+      "items": 8
     },
     {
       "assetKey": "PQ_DK0062498333",
