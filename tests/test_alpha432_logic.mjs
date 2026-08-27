@@ -8,6 +8,8 @@ const end=src.indexOf('getEffectiveHalal=getEffectiveHalal432;');
 assert.ok(start>=0&&end>start,'Halal-Logik in alpha432.js nicht gefunden');
 const code=src.slice(start,end)+`\nthis.api={compareChecks432,sourceState432,latestSources432,getEffectiveHalal432};`;
 const sandbox={
+  srcEq432:(a,b)=>String(a??'').trim().toLowerCase()===String(b??'').trim().toLowerCase(),
+  strictRank432:{H0:4,H2:3,UNKNOWN:2,H1:1},
   getEffectiveProfile:()=>({halalConflictPolicy:'MANUAL_REVIEW',rules:{halalSourcePriority:{effectiveValue:['Musaffa','Zoya']}}}),
 };
 vm.createContext(sandbox);vm.runInContext(code,sandbox);
