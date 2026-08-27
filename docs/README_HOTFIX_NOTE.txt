@@ -1,0 +1,1 @@
+Hotfix abgeschlossen; siehe ALPHA432_VERSION_HOTFIX.md und ALPHA432_VERSION_HOTFIX_AUDIT.md.
