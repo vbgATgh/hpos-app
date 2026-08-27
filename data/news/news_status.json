@@ -1,24 +1,24 @@
 {
   "schemaVersion": 1,
   "state": "CURRENT",
-  "source": "github-actions/google-news-rss",
-  "asOf": "2026-08-27T07:29:55Z",
-  "lastAttemptAt": "2026-08-27T07:29:55Z",
-  "message": "News-Abruf erfolgreich: 11 Abfragen geprüft.",
+  "source": "github-actions/google-news-rss-discovery",
+  "asOf": "2026-08-27T07:32:37Z",
+  "lastAttemptAt": "2026-08-27T07:32:37Z",
+  "message": "Discovery-News aktualisiert: 11 konfigurierte Abfragen erfolgreich.",
   "queriesTotal": 11,
   "queriesOk": 11,
   "queriesFailed": 0,
   "articlesFetchedThisRun": 85,
-  "articlesStored": 79,
+  "articlesStored": 81,
   "articlesByAsset": {
     "JNJ": 31,
     "RIO_TINTO": 18,
-    "SPACEX": 19,
+    "SPACEX": 21,
     "XIAOMI": 11
   },
   "articlesByScope": {
     "PORTFOLIO": 18,
-    "WATCHLIST": 61
+    "WATCHLIST": 63
   },
   "queryResults": [
     {
