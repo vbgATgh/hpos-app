@@ -1,14 +1,81 @@
 {
   "schemaVersion": 1,
-  "state": "UNKNOWN",
+  "state": "CURRENT",
   "source": "github-actions/google-news-rss",
-  "asOf": null,
-  "lastAttemptAt": null,
-  "message": "Automatischer News-Abruf noch nicht ausgeführt.",
-  "queriesTotal": 0,
-  "queriesOk": 0,
+  "asOf": "2026-08-27T07:25:32Z",
+  "lastAttemptAt": "2026-08-27T07:25:32Z",
+  "message": "News-Abruf erfolgreich: 11 Abfragen geprüft.",
+  "queriesTotal": 11,
+  "queriesOk": 11,
   "queriesFailed": 0,
-  "articlesFetchedThisRun": 0,
-  "articlesStored": 0,
-  "queryResults": []
+  "articlesFetchedThisRun": 86,
+  "articlesStored": 78,
+  "queryResults": [
+    {
+      "assetKey": "ISWD",
+      "query": "\"iShares MSCI World Islamic UCITS ETF\"",
+      "ok": true,
+      "items": 0
+    },
+    {
+      "assetKey": "ISWD",
+      "query": "\"IE00B27YCN58\"",
+      "ok": true,
+      "items": 0
+    },
+    {
+      "assetKey": "RIO_TINTO",
+      "query": "\"Rio Tinto\"",
+      "ok": true,
+      "items": 18
+    },
+    {
+      "assetKey": "RIO_TINTO",
+      "query": "\"Rio Tinto\" earnings OR production OR guidance OR dividend",
+      "ok": true,
+      "items": 2
+    },
+    {
+      "assetKey": "SUKUK",
+      "query": "\"iShares $ Sukuk UCITS ETF\"",
+      "ok": true,
+      "items": 0
+    },
+    {
+      "assetKey": "SUKUK",
+      "query": "\"IE000929U2U9\"",
+      "ok": true,
+      "items": 0
+    },
+    {
+      "assetKey": "SPACEX",
+      "query": "\"SpaceX\"",
+      "ok": true,
+      "items": 19
+    },
+    {
+      "assetKey": "XIAOMI",
+      "query": "\"Xiaomi Corporation\"",
+      "ok": true,
+      "items": 7
+    },
+    {
+      "assetKey": "XIAOMI",
+      "query": "\"Xiaomi\" earnings OR guidance OR results",
+      "ok": true,
+      "items": 4
+    },
+    {
+      "assetKey": "JNJ",
+      "query": "\"Johnson & Johnson\"",
+      "ok": true,
+      "items": 20
+    },
+    {
+      "assetKey": "JNJ",
+      "query": "\"Johnson & Johnson\" earnings OR dividend OR FDA",
+      "ok": true,
+      "items": 16
+    }
+  ]
 }
