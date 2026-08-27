@@ -2,13 +2,13 @@
   "schemaVersion": 1,
   "state": "CURRENT",
   "source": "github-actions/google-news-rss-discovery",
-  "asOf": "2026-08-27T07:34:47Z",
-  "lastAttemptAt": "2026-08-27T07:34:47Z",
+  "asOf": "2026-08-27T07:38:58Z",
+  "lastAttemptAt": "2026-08-27T07:38:58Z",
   "message": "Discovery-News aktualisiert: 11 konfigurierte Abfragen erfolgreich.",
   "queriesTotal": 11,
   "queriesOk": 11,
   "queriesFailed": 0,
-  "articlesFetchedThisRun": 86,
+  "articlesFetchedThisRun": 85,
   "articlesStored": 82,
   "articlesByAsset": {
     "JNJ": 31,
@@ -73,7 +73,7 @@
       "assetKey": "XIAOMI",
       "query": "\"Xiaomi\" earnings OR guidance OR results",
       "ok": true,
-      "items": 4
+      "items": 3
     },
     {
       "assetKey": "JNJ",
