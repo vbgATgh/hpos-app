@@ -26,7 +26,7 @@ permissions:
 jobs:
   privacy-boundary:
     runs-on: ubuntu-24.04
-    timeout-minutes: 8
+    timeout-minutes: 10
     steps:
       - name: Repository auschecken
         uses: actions/checkout@v6
@@ -68,6 +68,20 @@ jobs:
           assert 'Eine gegebenenfalls umfangreichere externe Aktivitätshistorie ist nicht vollständig als lokales Journal gespiegelt.' in legacy
           print('Alpha 4.3.3 local privacy production invariants: OK')
           PY
+
+      - name: Browser Smoke Local Projection
+        shell: bash
+        run: |
+          python -m http.server 8000 >/tmp/hpos433-server.log 2>&1 &
+          sleep 2
+          google-chrome --headless=new --no-sandbox --disable-gpu --virtual-time-budget=7000 --dump-dom 'http://127.0.0.1:8000/alpha41/?ci=433#dashboard' >/tmp/hpos433-home.html
+          grep -q 'ALPHA 4.3.3' /tmp/hpos433-home.html
+          grep -q 'Gesamtdepot' /tmp/hpos433-home.html
+          google-chrome --headless=new --no-sandbox --disable-gpu --virtual-time-budget=5000 --dump-dom 'http://127.0.0.1:8000/alpha41/?ci=433#data' >/tmp/hpos433-data.html
+          grep -q 'Privacy Boundary' /tmp/hpos433-data.html
+          grep -q 'Verschlüsseltes Backup' /tmp/hpos433-data.html
+          grep -q 'LOCAL ONLY' /tmp/hpos433-data.html
+          echo 'Alpha 4.3.3 browser privacy smoke: OK'
 
       - name: Öffentliche Datenpipeline ohne Depot-Snapshot testen
         run: |
