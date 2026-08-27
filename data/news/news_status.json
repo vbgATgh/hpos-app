@@ -2,23 +2,47 @@
   "schemaVersion": 1,
   "state": "CURRENT",
   "source": "github-actions/google-news-rss-discovery",
-  "asOf": "2026-08-27T10:12:40Z",
-  "lastAttemptAt": "2026-08-27T10:12:40Z",
-  "message": "Discovery-News aktualisiert: 11 konfigurierte Abfragen erfolgreich.",
-  "queriesTotal": 11,
-  "queriesOk": 11,
+  "asOf": "2026-08-27T12:13:44Z",
+  "lastAttemptAt": "2026-08-27T12:13:44Z",
+  "message": "Discovery-News aktualisiert: 42 konfigurierte Abfragen erfolgreich. Depot: 19 Titel vollständig; Watchlist: 18/60 Titel in diesem Rotationslauf.",
+  "queriesTotal": 42,
+  "queriesOk": 42,
   "queriesFailed": 0,
-  "articlesFetchedThisRun": 86,
-  "articlesStored": 100,
+  "articlesFetchedThisRun": 222,
+  "articlesStored": 270,
   "articlesByAsset": {
     "JNJ": 35,
+    "PQ_ATFREQUENT09": 6,
+    "PQ_AU000000LTR4": 2,
+    "PQ_AU000000SIG5": 5,
+    "PQ_CA14150G4007": 2,
+    "PQ_CH0012005267": 11,
+    "PQ_DE000A3E5D56": 12,
+    "PQ_DK0062498333": 1,
+    "PQ_FR0000120073": 9,
+    "PQ_FR0006174348": 5,
+    "PQ_GB0006640972": 1,
+    "PQ_GB00B2B0DG97": 5,
+    "PQ_IE00BTN1Y115": 8,
+    "PQ_US0028241000": 11,
+    "PQ_US46120E6023": 11,
+    "PQ_US48581R2058": 3,
+    "PQ_US4943681035": 10,
+    "PQ_US58933Y1055": 12,
+    "PQ_US6742152076": 3,
+    "PQ_US8725401090": 12,
+    "PQ_US8825081040": 12,
+    "PQ_US9037311076": 7,
+    "PQ_US9078181081": 7,
+    "PQ_US94106L1098": 10,
+    "PQ_US98423F1093": 3,
     "RIO_TINTO": 22,
-    "SPACEX": 29,
-    "XIAOMI": 14
+    "SPACEX": 30,
+    "XIAOMI": 15
   },
   "articlesByScope": {
-    "PORTFOLIO": 22,
-    "WATCHLIST": 78
+    "PORTFOLIO": 109,
+    "WATCHLIST": 161
   },
   "queryResults": [
     {
@@ -37,13 +61,13 @@
       "assetKey": "RIO_TINTO",
       "query": "\"Rio Tinto\"",
       "ok": true,
-      "items": 18
+      "items": 10
     },
     {
       "assetKey": "RIO_TINTO",
       "query": "\"Rio Tinto\" earnings OR production OR guidance OR dividend",
       "ok": true,
-      "items": 2
+      "items": 1
     },
     {
       "assetKey": "SUKUK",
@@ -61,31 +85,221 @@
       "assetKey": "SPACEX",
       "query": "\"SpaceX\"",
       "ok": true,
-      "items": 19
+      "items": 11
     },
     {
       "assetKey": "XIAOMI",
       "query": "\"Xiaomi Corporation\"",
       "ok": true,
-      "items": 8
+      "items": 7
     },
     {
       "assetKey": "XIAOMI",
       "query": "\"Xiaomi\" earnings OR guidance OR results",
       "ok": true,
-      "items": 4
+      "items": 3
     },
     {
       "assetKey": "JNJ",
       "query": "\"Johnson & Johnson\"",
       "ok": true,
-      "items": 20
+      "items": 12
     },
     {
       "assetKey": "JNJ",
       "query": "\"Johnson & Johnson\" earnings OR dividend OR FDA",
       "ok": true,
-      "items": 15
+      "items": 9
+    },
+    {
+      "assetKey": "PQ_DK0062498333",
+      "query": "\"Novo Nordisk 'B'\"",
+      "ok": true,
+      "items": 1
+    },
+    {
+      "assetKey": "PQ_US0028241000",
+      "query": "\"Abbott Laboratories\"",
+      "ok": true,
+      "items": 11
+    },
+    {
+      "assetKey": "PQ_DE000A3E5D56",
+      "query": "\"Fuchs\"",
+      "ok": true,
+      "items": 12
+    },
+    {
+      "assetKey": "PQ_CH0012005267",
+      "query": "\"NOVARTIS\"",
+      "ok": true,
+      "items": 11
+    },
+    {
+      "assetKey": "PQ_GB00B2425G68",
+      "query": "\"CRANEWARE PLC\"",
+      "ok": true,
+      "items": 0
+    },
+    {
+      "assetKey": "PQ_US94106L1098",
+      "query": "\"Waste Management\"",
+      "ok": true,
+      "items": 10
+    },
+    {
+      "assetKey": "PQ_US5797802064",
+      "query": "\"McCormick & Co\"",
+      "ok": true,
+      "items": 0
+    },
+    {
+      "assetKey": "PQ_FR0006174348",
+      "query": "\"Bureau Veritas\"",
+      "ok": true,
+      "items": 5
+    },
+    {
+      "assetKey": "PQ_IE00B27YCP72",
+      "query": "\"iShares MSCI Emerging Markets Islamic UCITS ETF - USD DIS\"",
+      "ok": true,
+      "items": 0
+    },
+    {
+      "assetKey": "PQ_FR0000120073",
+      "query": "\"Air Liquide\"",
+      "ok": true,
+      "items": 9
+    },
+    {
+      "assetKey": "PQ_IE00BTN1Y115",
+      "query": "\"Medtronic\"",
+      "ok": true,
+      "items": 8
+    },
+    {
+      "assetKey": "PQ_US58933Y1055",
+      "query": "\"Merck & Co., Inc.\"",
+      "ok": true,
+      "items": 12
+    },
+    {
+      "assetKey": "PQ_GB00B2B0DG97",
+      "query": "\"Relx Plc\"",
+      "ok": true,
+      "items": 5
+    },
+    {
+      "assetKey": "PQ_GB0006640972",
+      "query": "\"4IMPRINT GROUP\"",
+      "ok": true,
+      "items": 1
+    },
+    {
+      "assetKey": "PQ_CA14150G4007",
+      "query": "\"Cardinal Energy\"",
+      "ok": true,
+      "items": 3
+    },
+    {
+      "assetKey": "PQ_CA8051121090",
+      "query": "\"SAVARIA CORP.\"",
+      "ok": true,
+      "items": 0
+    },
+    {
+      "assetKey": "PQ_ATFREQUENT09",
+      "query": "\"Frequentis\"",
+      "ok": true,
+      "items": 6
+    },
+    {
+      "assetKey": "PQ_AU000000LTR4",
+      "query": "\"Liontown Resources\"",
+      "ok": true,
+      "items": 2
+    },
+    {
+      "assetKey": "PQ_AU000000SIG5",
+      "query": "\"Sigma Healthcare\"",
+      "ok": true,
+      "items": 5
+    },
+    {
+      "assetKey": "PQ_US46120E6023",
+      "query": "\"Intuitive Surgical\"",
+      "ok": true,
+      "items": 11
+    },
+    {
+      "assetKey": "PQ_US48581R2058",
+      "query": "\"Kaspi.kz\"",
+      "ok": true,
+      "items": 3
+    },
+    {
+      "assetKey": "PQ_US4943681035",
+      "query": "\"Kimberly-Clark\"",
+      "ok": true,
+      "items": 10
+    },
+    {
+      "assetKey": "PQ_US5324571083",
+      "query": "\"Eli Lilly & Co\"",
+      "ok": true,
+      "items": 0
+    },
+    {
+      "assetKey": "PQ_US6556631025",
+      "query": "\"Nordson Co.\"",
+      "ok": true,
+      "items": 0
+    },
+    {
+      "assetKey": "PQ_US6742152076",
+      "query": "\"Chord Energy\"",
+      "ok": true,
+      "items": 3
+    },
+    {
+      "assetKey": "PQ_US74967R1068",
+      "query": "\"RMR GROUP INC.CL.A DL-,01\"",
+      "ok": true,
+      "items": 0
+    },
+    {
+      "assetKey": "PQ_US8725401090",
+      "query": "\"TJX Companies\"",
+      "ok": true,
+      "items": 12
+    },
+    {
+      "assetKey": "PQ_US8825081040",
+      "query": "\"Texas Instruments\"",
+      "ok": true,
+      "items": 12
+    },
+    {
+      "assetKey": "PQ_US9037311076",
+      "query": "\"UL Solutions Inc\"",
+      "ok": true,
+      "items": 7
+    },
+    {
+      "assetKey": "PQ_US9078181081",
+      "query": "\"Union Pacific\"",
+      "ok": true,
+      "items": 7
+    },
+    {
+      "assetKey": "PQ_US98423F1093",
+      "query": "\"Xometry\"",
+      "ok": true,
+      "items": 3
     }
-  ]
+  ],
+  "portfolioAssetsConfigured": 19,
+  "watchlistAssetsConfigured": 60,
+  "watchlistAssetsFetchedThisRun": 18,
+  "watchlistRotationHours": 12
 }
