@@ -1,9 +1,9 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "lookbackDays": 14,
   "retentionDays": 45,
-  "maxItemsPerQuery": 20,
-  "maxStoredItems": 250,
+  "maxItemsPerQuery": 12,
+  "maxStoredItems": 350,
   "language": "de",
   "country": "DE",
   "providers": {
@@ -11,6 +11,14 @@
       "enabled": true,
       "baseUrl": "https://news.google.com/rss/search"
     }
+  },
+  "parqetSync": {
+    "enabled": true,
+    "snapshotPath": "data/portfolio/parqet_snapshot.json",
+    "portfolioAlways": true,
+    "watchlistBatchSize": 15,
+    "watchlistRotationHours": 12,
+    "note": "Alle realen Depotpositionen werden pro Lauf gesucht. Parqet-Watchlist-Titel werden rotierend durchsucht, damit der Discovery-Abruf performant und robust bleibt."
   },
   "assets": [
     {
@@ -28,6 +36,7 @@
       "assetKey": "RIO_TINTO",
       "name": "Rio Tinto",
       "ticker": "RIO",
+      "isin": "GB0007188757",
       "aliases": ["RIO TINTO", "Rio Tinto", "RIO"],
       "enabled": true,
       "scope": "PORTFOLIO",
@@ -50,6 +59,7 @@
       "name": "SpaceX",
       "aliases": ["SPACEX", "SpaceX"],
       "enabled": true,
+      "priority": true,
       "scope": "WATCHLIST",
       "queries": ["\"SpaceX\""],
       "primaryDomains": ["spacex.com"]
@@ -58,8 +68,10 @@
       "assetKey": "XIAOMI",
       "name": "Xiaomi Corporation",
       "ticker": "1810.HK",
+      "isin": "KYG9830T1067",
       "aliases": ["XIAOMI", "Xiaomi", "Xiaomi Corporation", "1810.HK"],
       "enabled": true,
+      "priority": true,
       "scope": "WATCHLIST",
       "queries": ["\"Xiaomi Corporation\"", "\"Xiaomi\" earnings OR guidance OR results"],
       "primaryDomains": ["mi.com"]
@@ -68,21 +80,13 @@
       "assetKey": "JNJ",
       "name": "Johnson & Johnson",
       "ticker": "JNJ",
+      "isin": "US4781601046",
       "aliases": ["J&J", "JJ", "JNJ", "Johnson & Johnson"],
       "enabled": true,
+      "priority": true,
       "scope": "WATCHLIST",
       "queries": ["\"Johnson & Johnson\"", "\"Johnson & Johnson\" earnings OR dividend OR FDA"],
       "primaryDomains": ["jnj.com"]
-    },
-    {
-      "assetKey": "RLEX",
-      "name": "RLEX",
-      "aliases": ["RLEX"],
-      "enabled": false,
-      "scope": "PORTFOLIO",
-      "queries": [],
-      "primaryDomains": [],
-      "note": "Bewusst deaktiviert: reale Gesellschaft/ISIN zunächst eindeutig zuordnen. HPOS setzt RLEX nicht automatisch mit RELX plc gleich."
     },
     {
       "assetKey": "TEST",
