@@ -83,17 +83,17 @@ jobs:
           grep -q 'Schnellzugriff' /tmp/hpos-dom.html
           grep -q 'ALPHA 4.2' /tmp/hpos-dom.html
           echo 'Browser smoke: OK'
-      - name: Generierte Alpha-Dateien committen
+      - name: Audit-Korrektur committen
         shell: bash
         run: |
-          git add alpha41/index.html alpha41/ux-42-core.js data/news data/market || true
+          git add alpha41/ux-42-core.js || true
           if git diff --cached --quiet; then
-            echo 'Keine generierten Änderungen.'
+            echo 'Keine UX-Audit-Änderung.'
             exit 0
           fi
           git config user.name 'hpos-alpha42-bot'
           git config user.email 'hpos-alpha42-bot@users.noreply.github.com'
-          git commit -m 'chore(alpha42): Audit-Fixes und Daten-Snapshots aktualisieren'
+          git commit -m 'chore(alpha42): Währungsprüfung im Kurschart aktivieren'
           git pull --rebase origin "$GITHUB_REF_NAME"
           git push origin HEAD:"$GITHUB_REF_NAME"
       - name: Marktdatenstatus ausgeben
