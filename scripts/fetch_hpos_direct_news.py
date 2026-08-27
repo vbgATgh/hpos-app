@@ -8,7 +8,7 @@ ROOT=Path(__file__).resolve().parents[1]; FEED=ROOT/'data'/'news'/'news_feed.jso
 UA='HPOS-PersonalResearch/1.0 (+https://github.com/vbgATgh/hpos-app)'; TIMEOUT=10
 JNJ_RSS='https://www.jnj.com/rss-feed/all'
 RIO_PAGE='https://www.riotinto.com/en/invest'
-RIO_DIRECT_LIMIT=5
+DIRECT_LIMIT_PER_ASSET=5
 
 def znow(): return dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace('+00:00','Z')
 def clean(v): return re.sub(r'\s+',' ',re.sub(r'<[^>]+>',' ',html.unescape(v or ''))).strip()
@@ -69,11 +69,12 @@ def main():
         for title,summary,url,d in rows:
             if d and d<cutoff:continue
             new.append({'newsId':nid('JNJ',title,url),'assetKey':'JNJ','title':title,'source':'Johnson & Johnson','sourceUrl':'https://www.jnj.com/','url':url,'publishedAt':iso(d),'sourceTier':'PRIMARY','primarySource':True,'provider':'JNJ_OFFICIAL_RSS'});n+=1
+            if n>=DIRECT_LIMIT_PER_ASSET:break
         results.append({'source':'Johnson & Johnson RSS','ok':True,'items':n});print(f'[OK] JNJ official RSS: {n}')
     except Exception as e:results.append({'source':'Johnson & Johnson RSS','ok':False,'error':str(e)});print(f'[WARN] JNJ RSS: {e}')
     try:
         rows=rio_rows(get(RIO_PAGE));n=0
-        for title,url in rows[:RIO_DIRECT_LIMIT]:
+        for title,url in rows[:DIRECT_LIMIT_PER_ASSET]:
             new.append({'newsId':nid('RIO_TINTO',title,url),'assetKey':'RIO_TINTO','title':title,'source':'Rio Tinto','sourceUrl':RIO_PAGE,'url':url,'publishedAt':None,'sourceTier':'PRIMARY','primarySource':True,'provider':'RIO_TINTO_OFFICIAL'});n+=1
         results.append({'source':'Rio Tinto Invest','ok':True,'items':n});print(f'[OK] Rio Tinto official: {n}')
     except Exception as e:results.append({'source':'Rio Tinto Invest','ok':False,'error':str(e)});print(f'[WARN] Rio Tinto: {e}')
