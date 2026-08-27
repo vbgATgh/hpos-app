@@ -3,7 +3,7 @@ name: HPOS Alpha 4.3.2 Version Hotfix CI
 on:
   workflow_dispatch:
   push:
-    branches: [hotfix-alpha432-version-refresh-20260827]
+    branches: [hotfix-alpha432-version-refresh-20260827, hotfix-alpha432-forward-idempotency-20260827]
     paths:
       - '.github/workflows/hpos-alpha432-hotfix-ci.yml'
       - 'scripts/apply_hpos_alpha431.py'
@@ -27,7 +27,7 @@ jobs:
           python-version: '3.12'
       - name: Regressionstest Versions-Patcher
         run: python -m unittest tests.test_alpha432_version_patch -v
-      - name: Versionsmigration und Idempotenz
+      - name: Forward-Idempotenz auf aktuellem Alpha-Stand
         run: |
           python scripts/apply_hpos_alpha431.py
           python scripts/apply_hpos_alpha432.py
@@ -38,11 +38,11 @@ jobs:
           python - <<'PY'
           from pathlib import Path
           t=Path('alpha41/index.html').read_text(encoding='utf-8')
-          assert "const APP_VERSION='1.3.0-alpha.4.3.2';" in t
-          assert "const APP_VERSION='1.3.0-alpha.4.3.1.2';" not in t
-          assert 'ALPHA 4.3.2 · Halal & News Hardening' in t
+          assert "const APP_VERSION='1.3.0-alpha.4.3.3';" in t
+          assert 'ALPHA 4.3.3 · Privacy Boundary' in t
           assert t.count('alpha432.js') == 1
-          print('Versions-Patcher: OK')
+          assert t.count('alpha433.js') == 1
+          print('Alpha 4.3.2 Forward-Patcher auf 4.3.3: OK')
           PY
       - name: JavaScript prüfen
         run: |
@@ -58,6 +58,6 @@ jobs:
         run: |
           python -m http.server 8000 >/tmp/hpos.log 2>&1 &
           sleep 2
-          google-chrome --headless=new --no-sandbox --disable-gpu --virtual-time-budget=5000 --dump-dom 'http://127.0.0.1:8000/alpha41/?hotfix=432#dashboard' >/tmp/home.html
-          grep -q 'ALPHA 4.3.2' /tmp/home.html
+          google-chrome --headless=new --no-sandbox --disable-gpu --virtual-time-budget=5000 --dump-dom 'http://127.0.0.1:8000/alpha41/?hotfix=432forward#dashboard' >/tmp/home.html
+          grep -q 'ALPHA 4.3.3' /tmp/home.html
           grep -q 'Gesamtdepot' /tmp/home.html
