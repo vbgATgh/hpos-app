@@ -8,6 +8,7 @@ ROOT=Path(__file__).resolve().parents[1]; FEED=ROOT/'data'/'news'/'news_feed.jso
 UA='HPOS-PersonalResearch/1.0 (+https://github.com/vbgATgh/hpos-app)'; TIMEOUT=10
 JNJ_RSS='https://www.jnj.com/rss-feed/all'
 RIO_PAGE='https://www.riotinto.com/en/invest'
+DIRECT_LIMIT_PER_ASSET=5
 
 def znow(): return dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace('+00:00','Z')
 def clean(v): return re.sub(r'\s+',' ',re.sub(r'<[^>]+>',' ',html.unescape(v or ''))).strip()
@@ -39,7 +40,6 @@ class Links(HTMLParser):
             self.href=None;self.buf=[]
 def rio_title(text):
     title=re.sub(r'^\d{1,2}\s+[A-Za-z]+\s+20\d{2}\s+','',text).strip()
-    # Die Investor-Seite hängt bei manchen Links den Meldungstext an den Titel.
     title=re.split(r'\s+[A-Z][A-Z .\'-]{2,},\s+(?:Australia|Canada|United States|USA|UK|Mongolia|Guinea)\s*[-–—]{1,2}\s*',title,maxsplit=1)[0].strip()
     title=re.split(r'\s*--\s*\(BUSINESS WIRE\)\s*--\s*',title,maxsplit=1)[0].strip()
     if len(title)>180:title=title[:177].rstrip()+'…'
@@ -54,19 +54,27 @@ def rio_rows(payload):
         seen.add(url);out.append((title,url))
     return out
 
+def is_managed_direct(x):
+    key=x.get('assetKey');source=x.get('source');provider=x.get('provider')
+    return ((key=='RIO_TINTO' and (provider=='RIO_TINTO_OFFICIAL' or source=='Rio Tinto') and x.get('primarySource'))
+            or (key=='JNJ' and (provider=='JNJ_OFFICIAL_RSS' or source=='Johnson & Johnson') and x.get('primarySource')))
+
 def main():
     cfg=json.loads(CFG.read_text(encoding='utf-8'));feed=json.loads(FEED.read_text(encoding='utf-8')) if FEED.exists() else {'schemaVersion':1,'items':[],'assetIndex':{}}
-    items=list(feed.get('items',[]));new=[];results=[];cutoff=dt.datetime.now(dt.timezone.utc)-dt.timedelta(days=int(cfg.get('lookbackDays',14)))
+    # Direktadapter sind Snapshot-Quellen: alte Adaptereinträge werden ersetzt, nicht kumuliert.
+    items=[x for x in list(feed.get('items',[])) if not is_managed_direct(x)]
+    new=[];results=[];cutoff=dt.datetime.now(dt.timezone.utc)-dt.timedelta(days=int(cfg.get('lookbackDays',14)))
     try:
         rows=rss(get(JNJ_RSS));n=0
         for title,summary,url,d in rows:
             if d and d<cutoff:continue
             new.append({'newsId':nid('JNJ',title,url),'assetKey':'JNJ','title':title,'source':'Johnson & Johnson','sourceUrl':'https://www.jnj.com/','url':url,'publishedAt':iso(d),'sourceTier':'PRIMARY','primarySource':True,'provider':'JNJ_OFFICIAL_RSS'});n+=1
+            if n>=DIRECT_LIMIT_PER_ASSET:break
         results.append({'source':'Johnson & Johnson RSS','ok':True,'items':n});print(f'[OK] JNJ official RSS: {n}')
     except Exception as e:results.append({'source':'Johnson & Johnson RSS','ok':False,'error':str(e)});print(f'[WARN] JNJ RSS: {e}')
     try:
         rows=rio_rows(get(RIO_PAGE));n=0
-        for title,url in rows[:20]:
+        for title,url in rows[:DIRECT_LIMIT_PER_ASSET]:
             new.append({'newsId':nid('RIO_TINTO',title,url),'assetKey':'RIO_TINTO','title':title,'source':'Rio Tinto','sourceUrl':RIO_PAGE,'url':url,'publishedAt':None,'sourceTier':'PRIMARY','primarySource':True,'provider':'RIO_TINTO_OFFICIAL'});n+=1
         results.append({'source':'Rio Tinto Invest','ok':True,'items':n});print(f'[OK] Rio Tinto official: {n}')
     except Exception as e:results.append({'source':'Rio Tinto Invest','ok':False,'error':str(e)});print(f'[WARN] Rio Tinto: {e}')
