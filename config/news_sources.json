@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 1,
+  "lookbackDays": 14,
+  "retentionDays": 45,
+  "maxItemsPerQuery": 20,
+  "maxStoredItems": 250,
+  "language": "de",
+  "country": "DE",
+  "providers": {
+    "googleNewsRss": {
+      "enabled": true,
+      "baseUrl": "https://news.google.com/rss/search"
+    }
+  },
+  "assets": [
+    {
+      "assetKey": "ISWD",
+      "name": "iShares MSCI World Islamic UCITS ETF",
+      "ticker": "ISWD",
+      "isin": "IE00B27YCN58",
+      "aliases": ["ISWD", "iShares MSCI World Islamic UCITS ETF"],
+      "enabled": true,
+      "scope": "PORTFOLIO",
+      "queries": ["\"iShares MSCI World Islamic UCITS ETF\"", "\"IE00B27YCN58\""],
+      "primaryDomains": ["ishares.com", "blackrock.com"]
+    },
+    {
+      "assetKey": "RIO_TINTO",
+      "name": "Rio Tinto",
+      "ticker": "RIO",
+      "aliases": ["RIO TINTO", "Rio Tinto", "RIO"],
+      "enabled": true,
+      "scope": "PORTFOLIO",
+      "queries": ["\"Rio Tinto\"", "\"Rio Tinto\" earnings OR production OR guidance OR dividend"],
+      "primaryDomains": ["riotinto.com"]
+    },
+    {
+      "assetKey": "SUKUK",
+      "name": "iShares $ Sukuk UCITS ETF",
+      "ticker": "SKUK",
+      "isin": "IE000929U2U9",
+      "aliases": ["Sukuk", "SUK", "SKUK", "iShares $ Sukuk UCITS ETF"],
+      "enabled": true,
+      "scope": "PORTFOLIO",
+      "queries": ["\"iShares $ Sukuk UCITS ETF\"", "\"IE000929U2U9\""],
+      "primaryDomains": ["ishares.com", "blackrock.com"]
+    },
+    {
+      "assetKey": "SPACEX",
+      "name": "SpaceX",
+      "aliases": ["SPACEX", "SpaceX"],
+      "enabled": true,
+      "scope": "WATCHLIST",
+      "queries": ["\"SpaceX\""],
+      "primaryDomains": ["spacex.com"]
+    },
+    {
+      "assetKey": "XIAOMI",
+      "name": "Xiaomi Corporation",
+      "ticker": "1810.HK",
+      "aliases": ["XIAOMI", "Xiaomi", "Xiaomi Corporation", "1810.HK"],
+      "enabled": true,
+      "scope": "WATCHLIST",
+      "queries": ["\"Xiaomi Corporation\"", "\"Xiaomi\" earnings OR guidance OR results"],
+      "primaryDomains": ["mi.com"]
+    },
+    {
+      "assetKey": "JNJ",
+      "name": "Johnson & Johnson",
+      "ticker": "JNJ",
+      "aliases": ["J&J", "JJ", "JNJ", "Johnson & Johnson"],
+      "enabled": true,
+      "scope": "WATCHLIST",
+      "queries": ["\"Johnson & Johnson\"", "\"Johnson & Johnson\" earnings OR dividend OR FDA"],
+      "primaryDomains": ["jnj.com"]
+    },
+    {
+      "assetKey": "RLEX",
+      "name": "RLEX",
+      "aliases": ["RLEX"],
+      "enabled": false,
+      "scope": "PORTFOLIO",
+      "queries": [],
+      "primaryDomains": [],
+      "note": "Bewusst deaktiviert: reale Gesellschaft/ISIN zunächst eindeutig zuordnen. HPOS setzt RLEX nicht automatisch mit RELX plc gleich."
+    },
+    {
+      "assetKey": "TEST",
+      "name": "Test Aktie",
+      "aliases": ["Test Aktie", "TEST"],
+      "enabled": false,
+      "scope": "TEST",
+      "queries": [],
+      "primaryDomains": [],
+      "note": "Testwert. Keine externe News-Suche."
+    }
+  ]
+}
