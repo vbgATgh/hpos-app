@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "state": "UNKNOWN",
+  "source": "github-actions/google-news-rss",
+  "asOf": null,
+  "lastAttemptAt": null,
+  "message": "Automatischer News-Abruf noch nicht ausgeführt.",
+  "queriesTotal": 0,
+  "queriesOk": 0,
+  "queriesFailed": 0,
+  "articlesFetchedThisRun": 0,
+  "articlesStored": 0,
+  "queryResults": []
+}
