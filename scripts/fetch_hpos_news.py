@@ -243,17 +243,17 @@ def main() -> int:
         }, compact=True)
 
     if ok_count == 0:
-        state, message = "ERROR", "Kein News-Abruf erfolgreich. Letzter vorhandener Feed bleibt unverändert."
+        state, message = "ERROR", "Kein Discovery-Abruf erfolgreich. Letzter vorhandener News-Snapshot bleibt unverändert."
     elif fail_count:
-        state, message = "STALE", f"News nur teilweise aktualisiert: {ok_count} Abfragen erfolgreich, {fail_count} fehlgeschlagen."
+        state, message = "STALE", f"Discovery-News nur teilweise aktualisiert: {ok_count} Abfragen erfolgreich, {fail_count} fehlgeschlagen."
     else:
-        state, message = "CURRENT", f"News-Abruf erfolgreich: {ok_count} Abfragen geprüft."
+        state, message = "CURRENT", f"Discovery-News aktualisiert: {ok_count} konfigurierte Abfragen erfolgreich."
 
     previous_status = load_json(STATUS_PATH, {})
     write_json(STATUS_PATH, {
         "schemaVersion": 1,
         "state": state,
-        "source": "github-actions/google-news-rss",
+        "source": "github-actions/google-news-rss-discovery",
         "asOf": fetched_at if ok_count else previous_status.get("asOf"),
         "lastAttemptAt": fetched_at,
         "message": message,
