@@ -26,6 +26,23 @@ class Alpha433PrivacyBoundaryTest(unittest.TestCase):
         self.assertFalse(any(x in text for x in forbidden),forbidden)
         self.assertIn("'scope':'UNIVERSE'",text)
 
+    def test_legacy_alpha43_snapshot_request_is_local_only(self):
+        shim=(ROOT/'alpha41/privacy-local43-shim.js').read_text(encoding='utf-8')
+        for required in ('HPOS_LOCAL_STATE','LOCAL_ONLY','window.fetch=function','localProjection433','X-HPOS-Privacy'):
+            self.assertIn(required,shim)
+        index=(ROOT/'alpha41/index.html').read_text(encoding='utf-8')
+        self.assertEqual(1,index.count('privacy-local43-shim.js'))
+        self.assertLess(index.index('privacy-local43-shim.js'),index.index('alpha43.js'))
+
+    def test_legacy_source_uses_generic_local_privacy_text(self):
+        text=(ROOT/'alpha41/alpha43.js').read_text(encoding='utf-8')
+        self.assertIn("brokerRule:'Lokale Brokerzuordnung; nicht im öffentlichen Code gespeichert.'",text)
+        self.assertIn('Eine gegebenenfalls umfangreichere externe Aktivitätshistorie ist nicht vollständig als lokales Journal gespiegelt.',text)
+
+    def test_obsolete_snapshot_ci_workflows_are_removed(self):
+        for name in ('hpos-alpha43-ci.yml','hpos-alpha431-ci.yml','hpos-alpha432-ci.yml'):
+            self.assertFalse((ROOT/'.github/workflows'/name).exists(),name)
+
     def test_privacy_ui_uses_client_side_encryption(self):
         text=(ROOT/'alpha41/alpha433.js').read_text(encoding='utf-8')
         for required in ('AES-GCM','PBKDF2','250000','HPOS_ENCRYPTED_BACKUP_V1','crypto.subtle.encrypt','crypto.subtle.decrypt'):
@@ -37,5 +54,6 @@ class Alpha433PrivacyBoundaryTest(unittest.TestCase):
         self.assertIn("1.3.0-alpha.4.3.2",script)
         self.assertIn("1.3.0-alpha.4.3.3",script)
         self.assertIn("t.count('alpha433.js')!=1",script)
+        self.assertIn("t.count('privacy-local43-shim.js')!=1",script)
 
 if __name__=='__main__': unittest.main()

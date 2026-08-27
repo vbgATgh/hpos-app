@@ -4,9 +4,12 @@ on:
   push:
     branches:
       - alpha433-privacy-boundary-20260827
+      - alpha433-local-projection-hotfix-20260827
   pull_request:
     paths:
       - '.gitignore'
+      - 'alpha41/privacy-local43-shim.js'
+      - 'alpha41/alpha43.js'
       - 'alpha41/alpha433.js'
       - 'scripts/apply_hpos_alpha433.py'
       - 'scripts/fetch_hpos_news_portfolio.py'
@@ -23,7 +26,7 @@ permissions:
 jobs:
   privacy-boundary:
     runs-on: ubuntu-24.04
-    timeout-minutes: 8
+    timeout-minutes: 10
     steps:
       - name: Repository auschecken
         uses: actions/checkout@v6
@@ -47,6 +50,8 @@ jobs:
       - name: JavaScript und Produktionsinvarianten prüfen
         shell: bash
         run: |
+          node --check alpha41/privacy-local43-shim.js
+          node --check alpha41/alpha43.js
           node --check alpha41/alpha433.js
           python - <<'PY'
           from pathlib import Path
@@ -55,9 +60,28 @@ jobs:
           assert 'ALPHA 4.3.3 · Privacy Boundary' in t
           assert '<title>HPOS Alpha 4.3.3 · Privacy Boundary</title>' in t
           assert t.count('alpha433.js') == 1
+          assert t.count('privacy-local43-shim.js') == 1
+          assert t.index('privacy-local43-shim.js') < t.index('alpha43.js')
           assert not Path('data/portfolio/parqet_snapshot.json').exists()
-          print('Alpha 4.3.3 privacy production invariants: OK')
+          legacy=Path('alpha41/alpha43.js').read_text(encoding='utf-8')
+          assert "brokerRule:'Lokale Brokerzuordnung; nicht im öffentlichen Code gespeichert.'" in legacy
+          assert 'Eine gegebenenfalls umfangreichere externe Aktivitätshistorie ist nicht vollständig als lokales Journal gespiegelt.' in legacy
+          print('Alpha 4.3.3 local privacy production invariants: OK')
           PY
+
+      - name: Browser Smoke Local Projection
+        shell: bash
+        run: |
+          python -m http.server 8000 >/tmp/hpos433-server.log 2>&1 &
+          sleep 2
+          google-chrome --headless=new --no-sandbox --disable-gpu --virtual-time-budget=7000 --dump-dom 'http://127.0.0.1:8000/alpha41/?ci=433#dashboard' >/tmp/hpos433-home.html
+          grep -q 'ALPHA 4.3.3' /tmp/hpos433-home.html
+          grep -q 'Gesamtdepot' /tmp/hpos433-home.html
+          google-chrome --headless=new --no-sandbox --disable-gpu --virtual-time-budget=5000 --dump-dom 'http://127.0.0.1:8000/alpha41/?ci=433#data' >/tmp/hpos433-data.html
+          grep -q 'Privacy Boundary' /tmp/hpos433-data.html
+          grep -q 'Verschlüsseltes Backup' /tmp/hpos433-data.html
+          grep -q 'LOCAL ONLY' /tmp/hpos433-data.html
+          echo 'Alpha 4.3.3 browser privacy smoke: OK'
 
       - name: Öffentliche Datenpipeline ohne Depot-Snapshot testen
         run: |
@@ -81,3 +105,6 @@ jobs:
         run: |
           test ! -e data/portfolio/parqet_snapshot.json
           ! git grep -n -E '"shares"[[:space:]]*:|"purchaseValue"[[:space:]]*:|"purchasePrice"[[:space:]]*:|"holdingId"[[:space:]]*:' -- 'data/**' ':!data/market/**' ':!data/news/**'
+          test ! -e .github/workflows/hpos-alpha43-ci.yml
+          test ! -e .github/workflows/hpos-alpha431-ci.yml
+          test ! -e .github/workflows/hpos-alpha432-ci.yml
