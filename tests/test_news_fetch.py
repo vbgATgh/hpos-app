@@ -21,13 +21,15 @@ class NewsTests(unittest.TestCase):
         rows = news.parse_google_rss(SAMPLE, ASSET, "2026-08-27T07:00:00Z", 3650, 20)
         self.assertEqual(len(rows), 2)
         self.assertTrue(rows[0]["primarySource"])
-        self.assertEqual(rows[0]["sourceType"], "PRIMARY")
+        self.assertEqual(rows[0]["source"], "Rio Tinto")
         self.assertFalse(rows[1]["primarySource"])
 
-    def test_dedupe_same_asset_title(self):
-        row = {"newsId":"a","assetKey":"RIO_TINTO","title":"Same title","publishedAt":"2026-08-27T06:00:00Z"}
+    def test_dedupe_same_asset_title_and_compacts_fields(self):
+        row = {"newsId":"a","assetKey":"RIO_TINTO","title":"Same title","publishedAt":"2026-08-27T06:00:00Z","provider":"DROP_ME"}
         row2 = {"newsId":"b","assetKey":"RIO_TINTO","title":"Same title","publishedAt":"2026-08-27T05:00:00Z"}
-        self.assertEqual(len(news.dedupe([row,row2])), 1)
+        result = news.dedupe([row,row2])
+        self.assertEqual(len(result), 1)
+        self.assertNotIn("provider", result[0])
 
     def test_asset_index_contains_aliases(self):
         idx = news.asset_index({"assets":[{"assetKey":"SUKUK","name":"Fund","aliases":["Sukuk"],"enabled":True}]})
