@@ -4,7 +4,7 @@ import datetime as dt, email.utils, hashlib, html, json, re, urllib.request, xml
 from pathlib import Path
 
 ROOT=Path(__file__).resolve().parents[1]; FEED=ROOT/'data'/'news'/'news_feed.json'; CFG=ROOT/'config'/'news_sources.json'
-UA='HPOS-PersonalResearch/1.0 (+https://github.com/vbgATgh/hpos-app)'
+UA='HPOS-PersonalResearch/1.0 (+https://github.com/vbgATgh/hpos-app)'; TIMEOUT=8
 NASDAQ=[('Nasdaq Stocks','https://www.nasdaq.com/feed/rssoutbound?category=Stocks'),('Nasdaq Earnings','https://www.nasdaq.com/feed/rssoutbound?category=Earnings'),('Nasdaq ETFs','https://www.nasdaq.com/feed/rssoutbound?category=ETFs')]
 SEC_JNJ='https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000200406&owner=include&count=40&output=atom'
 
@@ -12,7 +12,7 @@ def znow(): return dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isofo
 def clean(v): return re.sub(r'\s+',' ',re.sub(r'<[^>]+>',' ',html.unescape(v or ''))).strip()
 def get(url):
     req=urllib.request.Request(url,headers={'User-Agent':UA,'Accept':'application/rss+xml, application/atom+xml, application/xml, text/xml, */*'})
-    with urllib.request.urlopen(req,timeout=25) as r:return r.read()
+    with urllib.request.urlopen(req,timeout=TIMEOUT) as r:return r.read()
 def parse_date(v):
     if not v:return None
     try:
@@ -53,8 +53,7 @@ def main():
                 for a in assets:
                     if is_match(title+' '+summary,a):
                         new.append({'newsId':nid(a['assetKey'],title,link),'assetKey':a['assetKey'],'title':title,'source':'Nasdaq','sourceUrl':'https://www.nasdaq.com/','url':link,'publishedAt':iso(d),'sourceTier':'PROFESSIONAL','provider':'NASDAQ_RSS'}); matched+=1; break
-            results.append({'source':label,'ok':True,'items':matched})
-            print(f'[OK] {label}: {matched}')
+            results.append({'source':label,'ok':True,'items':matched}); print(f'[OK] {label}: {matched}')
         except Exception as e: results.append({'source':label,'ok':False,'error':str(e)}); print(f'[WARN] {label}: {e}')
     try:
         rows=atom_items(get(SEC_JNJ)); matched=0
@@ -67,7 +66,9 @@ def main():
     for x in items:
         if 'sourceTier' not in x:x['sourceTier']='PRIMARY' if x.get('primarySource') else 'DISCOVERY'
     merged=new+items; seen=set(); out=[]
-    merged.sort(key=lambda x:(str(x.get('publishedAt') or ''),-rank.get(x.get('sourceTier','DISCOVERY'),9)),reverse=True)
+    merged.sort(key=lambda x:(rank.get(x.get('sourceTier','DISCOVERY'),9),str(x.get('publishedAt') or '')), reverse=False)
+    merged=sorted(merged,key=lambda x:str(x.get('publishedAt') or ''),reverse=True)
+    merged=sorted(merged,key=lambda x:rank.get(x.get('sourceTier','DISCOVERY'),9))
     for x in merged:
         key=x.get('url') or (x.get('assetKey'),re.sub(r'\W+','',str(x.get('title','')).lower()))
         if key in seen:continue
