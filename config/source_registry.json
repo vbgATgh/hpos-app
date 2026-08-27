@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "updatedAt": "2026-08-27",
+  "policy": {
+    "newsPriority": ["PRIMARY", "PROFESSIONAL", "RESEARCH", "DISCOVERY"],
+    "halalSeparate": true,
+    "notes": "Quellen liefern Fakten/Daten; Halal-Status wird ausschließlich durch das Halal-Register und seine Quellenpolitik bestimmt."
+  },
+  "sources": [
+    {"id":"SEC_EDGAR","name":"SEC EDGAR","tier":"PRIMARY","use":"US-Filings, 10-K/10-Q/8-K, Form 4","automationMode":"RSS/ATOM","cost":"FREE","url":"https://www.sec.gov/edgar"},
+    {"id":"IR_RIO","name":"Rio Tinto Investor Relations / Releases","tier":"PRIMARY","use":"Unternehmensmeldungen, Ergebnisse, Produktion, Dividenden","automationMode":"DIRECT_PAGE/DISCOVERY","cost":"FREE","url":"https://www.riotinto.com/news/releases"},
+    {"id":"IR_JNJ","name":"Johnson & Johnson Investor Relations","tier":"PRIMARY","use":"Ergebnisse, Dividenden, Unternehmensmeldungen","automationMode":"DIRECT_PAGE/SEC","cost":"FREE","url":"https://www.investor.jnj.com/"},
+    {"id":"ISHARES","name":"iShares / BlackRock","tier":"PRIMARY","use":"ETF-/Sukuk-Produktdaten und Emittenteninformationen","automationMode":"DIRECT_PAGE","cost":"FREE","url":"https://www.ishares.com/"},
+    {"id":"NASDAQ","name":"Nasdaq","tier":"PROFESSIONAL","use":"Markt-, Earnings-, ETF- und Aktien-News; RSS-Kategorien","automationMode":"RSS","cost":"FREE","url":"https://www.nasdaq.com/nasdaq-RSS-Feeds"},
+    {"id":"REUTERS","name":"Reuters","tier":"PROFESSIONAL","use":"Unternehmens- und Marktnews","automationMode":"DISCOVERY/WEB","cost":"FREE_WEB","url":"https://www.reuters.com/markets/"},
+    {"id":"MARKETSCREENER","name":"MarketScreener","tier":"RESEARCH","use":"Projekt-Hauptquelle für News, Analystenkonsens, Kursziele, Earnings, Ex-Dividende und Agenda","automationMode":"DISCOVERY/WEB","cost":"FREE_WEB","url":"https://www.marketscreener.com/"},
+    {"id":"AKTIENFINDER","name":"Aktienfinder","tier":"RESEARCH","use":"Dividenden- und Qualitätsanalyse","automationMode":"MANUAL/WEB","cost":"FREE_WEB","url":"https://aktienfinder.net/"},
+    {"id":"TIPRANKS","name":"TipRanks","tier":"RESEARCH","use":"Analystenmeinungen und Konsens","automationMode":"MANUAL/WEB","cost":"FREE_WEB","url":"https://www.tipranks.com/"},
+    {"id":"INVESTING","name":"Investing.com","tier":"RESEARCH","use":"Marktdaten, Termine, Unternehmensdaten","automationMode":"MANUAL/WEB","cost":"FREE_WEB","url":"https://www.investing.com/"},
+    {"id":"BOERSE_DE","name":"boerse.de","tier":"RESEARCH","use":"Kurs- und Unternehmensrecherche","automationMode":"MANUAL/WEB","cost":"FREE_WEB","url":"https://www.boerse.de/"},
+    {"id":"FINANZNACHRICHTEN","name":"FinanzNachrichten.de","tier":"RESEARCH","use":"News-Aggregation und deutschsprachige Marktnews","automationMode":"MANUAL/WEB","cost":"FREE_WEB","url":"https://www.finanznachrichten.de/"},
+    {"id":"GOOGLE_NEWS","name":"Google News RSS","tier":"DISCOVERY","use":"Breite Discovery-Schicht; nicht als alleinige Qualitätsquelle","automationMode":"RSS","cost":"FREE","url":"https://news.google.com/"},
+    {"id":"MUSAFFA","name":"Musaffa","tier":"HALAL","use":"Shariah-/Halal-Screening","automationMode":"MANUAL/EXTERNAL","cost":"FREE_WEB","url":"https://musaffa.com/"},
+    {"id":"ZOYA","name":"Zoya","tier":"HALAL","use":"Shariah-/Halal-Screening","automationMode":"MANUAL/EXTERNAL","cost":"FREE_WEB","url":"https://zoya.finance/"},
+    {"id":"SHARLIFE","name":"Sharlife","tier":"HALAL","use":"zusätzliche Halal-Prüfquelle","automationMode":"MANUAL/EXTERNAL","cost":"FREE_WEB"},
+    {"id":"MUSLIM_XCHANGE","name":"Muslim Xchange","tier":"HALAL","use":"Halal-Screening, Purification/Zakat als spätere Datenquelle","automationMode":"MANUAL/API_LATER","cost":"UNKNOWN","url":"https://muslimxchange.com/"}
+  ]
+}

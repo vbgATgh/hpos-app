@@ -1,0 +1,97 @@
+name: HPOS Alpha 4.2 CI
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [alpha42-ux-analytics-20260827]
+    paths:
+      - '.github/workflows/hpos-alpha42-ci.yml'
+      - '.github/workflows/hpos-news.yml'
+      - 'alpha41/ux-42-core.js'
+      - 'alpha41/news-42.js'
+      - 'scripts/apply_hpos_ux42.py'
+      - 'scripts/fetch_hpos_market.py'
+      - 'scripts/fetch_hpos_direct_news.py'
+      - 'config/market_sources.json'
+      - 'config/source_registry.json'
+      - 'config/news_sources.json'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: hpos-alpha42-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Bestehende News-Tests
+        run: python -m unittest tests.test_news_fetch -v
+      - name: Alpha 4.2 integrieren
+        run: python scripts/apply_hpos_ux42.py
+      - name: Syntax und Invarianten
+        shell: bash
+        run: |
+          node --check alpha41/news-414.js
+          node --check alpha41/ux-42-core.js
+          node --check alpha41/news-42.js
+          python - <<'PY'
+          from pathlib import Path
+          t=Path('alpha41/index.html').read_text(encoding='utf-8')
+          assert '1.3.0-alpha.4.2' in t
+          assert 'ux-42-core.js' in t and 'news-42.js' in t
+          js=t.split('<script>',1)[1].split('</script>',1)[0]
+          assert not any(line.lstrip().startswith('import ') for line in js.splitlines())
+          w=Path('.github/workflows/hpos-news.yml').read_text(encoding='utf-8')
+          assert "name: HPOS Data Refresh" in w
+          assert "timezone: 'Europe/Berlin'" in w
+          assert 'fetch_hpos_market.py' in w and 'fetch_hpos_direct_news.py' in w
+          assert '1.3.0-alpha.4.1.4' not in w
+          print('Alpha 4.2 invariants: OK')
+          PY
+      - name: Discovery-News aktualisieren
+        continue-on-error: true
+        run: python scripts/fetch_hpos_news.py
+      - name: Direktquellen ergänzen
+        continue-on-error: true
+        run: python scripts/fetch_hpos_direct_news.py
+      - name: Marktdaten abrufen
+        id: market
+        continue-on-error: true
+        run: python scripts/fetch_hpos_market.py
+      - name: Statischer Browser-Smoke-Test
+        shell: bash
+        run: |
+          python -m http.server 8000 >/tmp/hpos-server.log 2>&1 &
+          sleep 2
+          google-chrome --headless=new --no-sandbox --disable-gpu --virtual-time-budget=2500 --dump-dom 'http://127.0.0.1:8000/alpha41/#dashboard' >/tmp/hpos-dom.html
+          grep -q 'bottom42' /tmp/hpos-dom.html
+          grep -q 'Schnellzugriff' /tmp/hpos-dom.html
+          grep -q 'ALPHA 4.2' /tmp/hpos-dom.html
+          echo 'Browser smoke: OK'
+      - name: Generierte Alpha-Dateien committen
+        shell: bash
+        run: |
+          git add alpha41/index.html data/news data/market || true
+          if git diff --cached --quiet; then
+            echo 'Keine generierten Änderungen.'
+            exit 0
+          fi
+          git config user.name 'hpos-alpha42-bot'
+          git config user.email 'hpos-alpha42-bot@users.noreply.github.com'
+          git commit -m 'chore(alpha42): Integration und Daten-Snapshots aktualisieren'
+          git pull --rebase origin "$GITHUB_REF_NAME"
+          git push origin HEAD:"$GITHUB_REF_NAME"
+      - name: Marktdatenstatus ausgeben
+        if: always()
+        run: |
+          if [ -f data/market/market_summary.json ]; then python -m json.tool data/market/market_summary.json | head -80; fi

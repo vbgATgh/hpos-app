@@ -2,23 +2,23 @@
   "schemaVersion": 1,
   "state": "CURRENT",
   "source": "github-actions/google-news-rss-discovery",
-  "asOf": "2026-08-27T07:38:58Z",
-  "lastAttemptAt": "2026-08-27T07:38:58Z",
+  "asOf": "2026-08-27T09:18:36Z",
+  "lastAttemptAt": "2026-08-27T09:18:36Z",
   "message": "Discovery-News aktualisiert: 11 konfigurierte Abfragen erfolgreich.",
   "queriesTotal": 11,
   "queriesOk": 11,
   "queriesFailed": 0,
   "articlesFetchedThisRun": 85,
-  "articlesStored": 82,
+  "articlesStored": 97,
   "articlesByAsset": {
-    "JNJ": 31,
-    "RIO_TINTO": 18,
-    "SPACEX": 22,
-    "XIAOMI": 11
+    "JNJ": 35,
+    "RIO_TINTO": 22,
+    "SPACEX": 27,
+    "XIAOMI": 13
   },
   "articlesByScope": {
-    "PORTFOLIO": 18,
-    "WATCHLIST": 64
+    "PORTFOLIO": 22,
+    "WATCHLIST": 75
   },
   "queryResults": [
     {
@@ -73,7 +73,7 @@
       "assetKey": "XIAOMI",
       "query": "\"Xiaomi\" earnings OR guidance OR results",
       "ok": true,
-      "items": 3
+      "items": 4
     },
     {
       "assetKey": "JNJ",
@@ -85,7 +85,7 @@
       "assetKey": "JNJ",
       "query": "\"Johnson & Johnson\" earnings OR dividend OR FDA",
       "ok": true,
-      "items": 16
+      "items": 15
     }
   ]
 }
