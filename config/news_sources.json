@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "lookbackDays": 14,
   "retentionDays": 45,
   "maxItemsPerQuery": 12,
@@ -12,13 +12,11 @@
       "baseUrl": "https://news.google.com/rss/search"
     }
   },
-  "parqetSync": {
+  "assetUniverse": {
     "enabled": true,
-    "snapshotPath": "data/portfolio/parqet_snapshot.json",
-    "portfolioAlways": true,
-    "watchlistBatchSize": 15,
-    "watchlistRotationHours": 12,
-    "note": "Alle realen Depotpositionen werden pro Lauf gesucht. Parqet-Watchlist-Titel werden rotierend durchsucht, damit der Discovery-Abruf performant und robust bleibt."
+    "registryPath": "config/asset_sources.json",
+    "scope": "UNIVERSE",
+    "note": "Öffentliches, neutrales Asset-Universum. Es enthält keine Information darüber, ob ein Wert lokal gehalten oder beobachtet wird. Depot- und Watchlist-Scope werden ausschließlich im Browser aus lokalen HPOS-Daten abgeleitet."
   },
   "assets": [
     {
@@ -28,7 +26,7 @@
       "isin": "IE00B27YCN58",
       "aliases": ["ISWD", "iShares MSCI World Islamic UCITS ETF"],
       "enabled": true,
-      "scope": "PORTFOLIO",
+      "scope": "UNIVERSE",
       "queries": ["\"iShares MSCI World Islamic UCITS ETF\"", "\"IE00B27YCN58\""],
       "primaryDomains": ["ishares.com", "blackrock.com"]
     },
@@ -39,7 +37,7 @@
       "isin": "GB0007188757",
       "aliases": ["RIO TINTO", "Rio Tinto", "RIO"],
       "enabled": true,
-      "scope": "PORTFOLIO",
+      "scope": "UNIVERSE",
       "queries": ["\"Rio Tinto\"", "\"Rio Tinto\" earnings OR production OR guidance OR dividend"],
       "primaryDomains": ["riotinto.com"]
     },
@@ -50,7 +48,7 @@
       "isin": "IE000929U2U9",
       "aliases": ["Sukuk", "SUK", "SKUK", "iShares $ Sukuk UCITS ETF"],
       "enabled": true,
-      "scope": "PORTFOLIO",
+      "scope": "UNIVERSE",
       "queries": ["\"iShares $ Sukuk UCITS ETF\"", "\"IE000929U2U9\""],
       "primaryDomains": ["ishares.com", "blackrock.com"]
     },
@@ -60,7 +58,7 @@
       "aliases": ["SPACEX", "SpaceX"],
       "enabled": true,
       "priority": true,
-      "scope": "WATCHLIST",
+      "scope": "UNIVERSE",
       "queries": ["\"SpaceX\""],
       "primaryDomains": ["spacex.com"]
     },
@@ -72,7 +70,7 @@
       "aliases": ["XIAOMI", "Xiaomi", "Xiaomi Corporation", "1810.HK"],
       "enabled": true,
       "priority": true,
-      "scope": "WATCHLIST",
+      "scope": "UNIVERSE",
       "queries": ["\"Xiaomi Corporation\"", "\"Xiaomi\" earnings OR guidance OR results"],
       "primaryDomains": ["mi.com"]
     },
@@ -84,7 +82,7 @@
       "aliases": ["J&J", "JJ", "JNJ", "Johnson & Johnson"],
       "enabled": true,
       "priority": true,
-      "scope": "WATCHLIST",
+      "scope": "UNIVERSE",
       "queries": ["\"Johnson & Johnson\"", "\"Johnson & Johnson\" earnings OR dividend OR FDA"],
       "primaryDomains": ["jnj.com"]
     },

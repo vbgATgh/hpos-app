@@ -1,0 +1,8 @@
+# HPOS Privacy Boundary – private/local artifacts must never enter the public repository
+data/portfolio/parqet_snapshot*.json
+data/private/
+private/
+*.hpos-private.json
+*.hpos-backup.json
+*.hpos-backup.enc.json
+config/private-*.json

@@ -1,0 +1,83 @@
+name: HPOS Alpha 4.3.3 Privacy Boundary CI
+
+on:
+  push:
+    branches:
+      - alpha433-privacy-boundary-20260827
+  pull_request:
+    paths:
+      - '.gitignore'
+      - 'alpha41/alpha433.js'
+      - 'scripts/apply_hpos_alpha433.py'
+      - 'scripts/fetch_hpos_news_portfolio.py'
+      - 'config/news_sources.json'
+      - 'config/asset_sources.json'
+      - 'tests/test_alpha432_sources.py'
+      - 'tests/test_alpha433_privacy.py'
+      - '.github/workflows/hpos-alpha433-privacy-ci.yml'
+      - '.github/workflows/hpos-news.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  privacy-boundary:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - name: Repository auschecken
+        uses: actions/checkout@v6
+
+      - name: Python einrichten
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Privacy- und Quellenregressionen testen
+        run: |
+          python -m unittest tests.test_alpha432_sources tests.test_alpha433_privacy -v
+
+      - name: Alpha 4.3.3 Patcherkette zweimal anwenden
+        run: |
+          python scripts/apply_hpos_alpha433.py
+          cp alpha41/index.html /tmp/alpha433-once.html
+          python scripts/apply_hpos_alpha433.py
+          cmp /tmp/alpha433-once.html alpha41/index.html
+
+      - name: JavaScript und Produktionsinvarianten prüfen
+        shell: bash
+        run: |
+          node --check alpha41/alpha433.js
+          python - <<'PY'
+          from pathlib import Path
+          t=Path('alpha41/index.html').read_text(encoding='utf-8')
+          assert "const APP_VERSION='1.3.0-alpha.4.3.3';" in t
+          assert 'ALPHA 4.3.3 · Privacy Boundary' in t
+          assert '<title>HPOS Alpha 4.3.3 · Privacy Boundary</title>' in t
+          assert t.count('alpha433.js') == 1
+          assert not Path('data/portfolio/parqet_snapshot.json').exists()
+          print('Alpha 4.3.3 privacy production invariants: OK')
+          PY
+
+      - name: Öffentliche Datenpipeline ohne Depot-Snapshot testen
+        run: |
+          python - <<'PY'
+          import importlib.util, json
+          from pathlib import Path
+          root=Path('.')
+          spec=importlib.util.spec_from_file_location('scope433',root/'scripts/fetch_hpos_news_portfolio.py')
+          mod=importlib.util.module_from_spec(spec);spec.loader.exec_module(mod)
+          cfg=json.loads((root/'config/news_sources.json').read_text())
+          reg=json.loads((root/'config/asset_sources.json').read_text())['assets']
+          runtime,meta=mod.expand(cfg,reg)
+          assert meta['registryAssets'] >= 19
+          assert meta['primaryMapped'] == meta['registryAssets']
+          assert all(a.get('scope') in ('UNIVERSE','TEST') for a in runtime['assets'])
+          print(meta)
+          PY
+
+      - name: Leak-Guard
+        shell: bash
+        run: |
+          test ! -e data/portfolio/parqet_snapshot.json
+          ! git grep -n -E '"shares"[[:space:]]*:|"purchaseValue"[[:space:]]*:|"purchasePrice"[[:space:]]*:|"holdingId"[[:space:]]*:' -- 'data/**' ':!data/market/**' ':!data/news/**'

@@ -3,7 +3,7 @@
 Priorisierung nach Nutzen, Datenintegrität, Sicherheit und mobilem Bedienaufwand. HPOS soll kein Parqet-Klon werden, sondern ein nachvollziehbares persönliches Investment-Betriebssystem aus Portfolio, Halal, Strategie, Income, Risiko, News und Decision Support.
 
 ## P0 – zwingend vor Produktionsreife
-1. **Privacy Boundary**: reale Stückzahlen, Einstandswerte, Transaktionen, Dividenden, Brokerzuordnung, Strategie und Halal-Historie aus dem öffentlichen Repository entfernen. Öffentlicher Code/öffentliche Marktdaten strikt von privaten Nutzerdaten trennen. Verschlüsseltes/local-first Backup und Restore-Test.
+1. **Privacy Boundary**: reale Stückzahlen, Einstandswerte, Transaktionen, Dividenden, Brokerzuordnung, Strategie und Halal-Historie aus dem öffentlichen Repository entfernen. Öffentlicher Code/öffentliche Marktdaten strikt von privaten Nutzerdaten trennen. Verschlüsseltes/local-first Backup und Restore-Test. **Alpha 4.3.3: Current-Tree/Runtime umgesetzt und CI-gesichert; vollständige öffentliche P0-Freigabe bleibt bis History-Purge bzw. sauberem Public-Rebuild offen.**
 2. **Vollständiges Transaktions-Ledger**: Käufe, Verkäufe, Ein-/Auszahlungen, Dividenden, Steuern, Gebühren, Splits, Spin-offs, Fusionen, Bezugsrechte und FX-Ereignisse chronologisch korrekt.
 3. **Echte historische Depotperformance**: TTWROR und IZF/XIRR aus tatsächlichen Cashflows und wechselnden Beständen; 7T/30T/1J/YTD/Max nicht nur als aktuelle-Bestände-Kursproxy.
 4. **Provider-Redundanz und Datenqualität**: Markt-/FX-/Newsadapter mit Plausibilitätsprüfung, CURRENT/STALE/ERROR, Fallback und Corporate-Action-Bereinigung.

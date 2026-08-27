@@ -1,10 +1,11 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "updatedAt": "2026-08-27",
   "policy": {
-    "purpose": "Offizielle Primärquellen je realer Depotposition. Diese Registry ist getrennt von Discovery-News und erzeugt keine Halal-Einstufung.",
+    "purpose": "Öffentliche Registry offizieller Primärquellen für das HPOS Asset-Universum. Die Registry enthält ausschließlich generische Asset-/Quellenmetadaten und keine Information über lokale Bestände, Watchlists, Broker, Stückzahlen, Einstandswerte, Strategie oder Halal-Historie.",
     "automation": "DIRECT_WHERE_SUPPORTED",
     "fallback": "OFFICIAL_PAGE_REFERENCE",
+    "privacyBoundary": "PUBLIC_GENERIC_ONLY",
     "note": "Eine Quelle wird nur als PRIMARY bezeichnet, wenn sie dem Emittenten/Fondsanbieter oder einem offiziellen Filing-/Melderegister zugeordnet ist."
   },
   "assets": [
