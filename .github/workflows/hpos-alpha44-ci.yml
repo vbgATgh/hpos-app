@@ -1,0 +1,56 @@
+name: HPOS Alpha 4.4 Decision Engine CI
+on:
+  push:
+    branches: [alpha44-decision-engine-20260827]
+    paths:
+      - 'alpha41/alpha44.js'
+      - 'scripts/apply_hpos_alpha44.py'
+      - 'tests/test_alpha44_decision.py'
+      - '.github/workflows/hpos-alpha44-ci.yml'
+permissions:
+  contents: write
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Tests
+        run: python -m unittest tests.test_alpha44_decision -v
+      - name: Alpha 4.4 integrieren und Idempotenz
+        run: |
+          python scripts/apply_hpos_alpha44.py
+          cp alpha41/index.html /tmp/alpha44.html
+          python scripts/apply_hpos_alpha44.py
+          cmp -s alpha41/index.html /tmp/alpha44.html
+      - name: Syntax und Invarianten
+        run: |
+          node --check alpha41/alpha44.js
+          python - <<'PY'
+          from pathlib import Path
+          t=Path('alpha41/index.html').read_text(encoding='utf-8')
+          assert "const APP_VERSION='1.3.0-alpha.4.4';" in t
+          assert 'ALPHA 4.4 · Decision Engine' in t
+          assert t.count('alpha44.js') == 1
+          assert t.index('alpha433.js') < t.index('alpha44.js')
+          print('Alpha 4.4 integration: OK')
+          PY
+      - name: Browser Smoke
+        run: |
+          python -m http.server 8000 >/tmp/hpos44.log 2>&1 &
+          sleep 2
+          google-chrome --headless=new --no-sandbox --disable-gpu --virtual-time-budget=7000 --dump-dom 'http://127.0.0.1:8000/alpha41/?ci=44#dashboard' >/tmp/home44.html
+          grep -q 'ALPHA 4.4' /tmp/home44.html
+          grep -q 'Gesamtdepot' /tmp/home44.html
+      - name: Integration sichern
+        run: |
+          git add alpha41/index.html
+          if git diff --cached --quiet; then exit 0; fi
+          git config user.name 'hpos-alpha44-bot'
+          git config user.email 'hpos-alpha44-bot@users.noreply.github.com'
+          git commit -m 'chore(alpha44): Decision Engine integrieren'
+          git pull --rebase origin "$GITHUB_REF_NAME"
+          git push origin HEAD:"$GITHUB_REF_NAME"

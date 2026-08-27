@@ -15,6 +15,7 @@ on:
       - 'scripts/apply_hpos_alpha431.py'
       - 'scripts/apply_hpos_alpha432.py'
       - 'scripts/apply_hpos_alpha433.py'
+      - 'scripts/apply_hpos_alpha44.py'
       - 'config/news_sources.json'
       - 'config/market_sources.json'
       - 'config/source_registry.json'
@@ -23,6 +24,7 @@ on:
       - 'tests/test_alpha432_sources.py'
       - 'tests/test_alpha432_version_patch.py'
       - 'tests/test_alpha433_privacy.py'
+      - 'tests/test_alpha44_decision.py'
       - 'alpha41/news-414.js'
       - 'alpha41/news-42.js'
       - 'alpha41/ux-42-core.js'
@@ -32,6 +34,7 @@ on:
       - 'alpha41/alpha431.js'
       - 'alpha41/alpha432.js'
       - 'alpha41/alpha433.js'
+      - 'alpha41/alpha44.js'
   schedule:
     - cron: '15 6 * * *'
       timezone: 'Europe/Berlin'
@@ -59,9 +62,9 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Parser, Version, Quellen und Privacy-Invarianten testen
+      - name: Parser, Version, Quellen, Privacy und Decision Engine testen
         run: |
-          python -m unittest tests.test_news_fetch tests.test_alpha432_sources tests.test_alpha432_version_patch tests.test_alpha433_privacy -v
+          python -m unittest tests.test_news_fetch tests.test_alpha432_sources tests.test_alpha432_version_patch tests.test_alpha433_privacy tests.test_alpha44_decision -v
 
       - name: UI-Integration sicherstellen
         run: |
@@ -70,6 +73,7 @@ jobs:
           python scripts/apply_hpos_alpha431.py
           python scripts/apply_hpos_alpha432.py
           python scripts/apply_hpos_alpha433.py
+          python scripts/apply_hpos_alpha44.py
 
       - name: JavaScript und Startinvarianten prüfen
         shell: bash
@@ -83,18 +87,19 @@ jobs:
           node --check alpha41/alpha431.js
           node --check alpha41/alpha432.js
           node --check alpha41/alpha433.js
+          node --check alpha41/alpha44.js
           python - <<'PY'
           from pathlib import Path
           t=Path('alpha41/index.html').read_text(encoding='utf-8')
           js=t.split('<script>',1)[1].split('</script>',1)[0]
           Path('/tmp/hpos-inline.js').write_text(js,encoding='utf-8')
-          assert "const APP_VERSION='1.3.0-alpha.4.3.3';" in t
-          assert 'ALPHA 4.3.3 · Privacy Boundary' in t
-          for name in ['news-414.js','ux-42-core.js','news-42.js','ux-421.js','privacy-local43-shim.js','alpha43.js','alpha431.js','alpha432.js','alpha433.js']:
+          assert "const APP_VERSION='1.3.0-alpha.4.4';" in t
+          assert 'ALPHA 4.4 · Decision Engine' in t
+          for name in ['news-414.js','ux-42-core.js','news-42.js','ux-421.js','privacy-local43-shim.js','alpha43.js','alpha431.js','alpha432.js','alpha433.js','alpha44.js']:
               assert name in t, name
-          assert t.count('alpha433.js') == 1
+          assert t.count('alpha44.js') == 1
           assert t.count('privacy-local43-shim.js') == 1
-          assert t.index('privacy-local43-shim.js') < t.index('alpha43.js')
+          assert t.index('privacy-local43-shim.js') < t.index('alpha43.js') < t.index('alpha44.js')
           assert not Path('data/portfolio/parqet_snapshot.json').exists()
           legacy=Path('alpha41/alpha43.js').read_text(encoding='utf-8')
           assert "brokerRule:'Lokale Brokerzuordnung; nicht im öffentlichen Code gespeichert.'" in legacy
@@ -102,7 +107,7 @@ jobs:
           assert not any(line.lstrip().startswith('import ') for line in js.splitlines())
           market=Path('config/market_sources.json').read_text(encoding='utf-8')
           assert '"assetKey":"SPACEX"' in market and '"enabled":false' in market
-          print('Alpha 4.3.3 production + local privacy invariants: OK')
+          print('Alpha 4.4 production + privacy invariants: OK')
           PY
           node --check /tmp/hpos-inline.js
 
