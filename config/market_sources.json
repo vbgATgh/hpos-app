@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "provider": "YAHOO_CHART_UNOFFICIAL",
+  "historyRange": "5y",
+  "historyInterval": "1d",
+  "intradayRange": "1d",
+  "intradayInterval": "5m",
+  "assets": [
+    {"assetKey":"RIO_TINTO","symbol":"RIO.L","name":"Rio Tinto","aliases":["RIO","Rio Tinto"],"enabled":true},
+    {"assetKey":"JNJ","symbol":"JNJ","name":"Johnson & Johnson","aliases":["J&J","JNJ","Johnson & Johnson"],"enabled":true},
+    {"assetKey":"XIAOMI","symbol":"1810.HK","name":"Xiaomi Corporation","aliases":["Xiaomi","1810.HK"],"enabled":true},
+    {"assetKey":"ISWD","symbol":"ISWD.L","name":"iShares MSCI World Islamic UCITS ETF","isin":"IE00B27YCN58","aliases":["ISWD","IE00B27YCN58"],"enabled":true},
+    {"assetKey":"SUKUK","symbol":"SKUK.L","name":"iShares $ Sukuk UCITS ETF","isin":"IE000929U2U9","aliases":["SKUK","Sukuk","IE000929U2U9"],"enabled":true},
+    {"assetKey":"SPACEX","symbol":"SPCX","name":"SpaceX","aliases":["SpaceX","SPCX"],"enabled":true}
+  ]
+}
