@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "updatedAt": "2026-08-27",
+  "policy": {
+    "purpose": "Offizielle Primärquellen je realer Depotposition. Diese Registry ist getrennt von Discovery-News und erzeugt keine Halal-Einstufung.",
+    "automation": "DIRECT_WHERE_SUPPORTED",
+    "fallback": "OFFICIAL_PAGE_REFERENCE",
+    "note": "Eine Quelle wird nur als PRIMARY bezeichnet, wenn sie dem Emittenten/Fondsanbieter oder einem offiziellen Filing-/Melderegister zugeordnet ist."
+  },
+  "assets": [
+    {"isin":"IE00B27YCN58","name":"iShares MSCI World Islamic UCITS ETF - USD DIS","sourceName":"iShares / BlackRock","url":"https://www.ishares.com/","domain":"ishares.com","registry":"Fondsanbieter","automationMode":"OFFICIAL_PAGE_REFERENCE"},
+    {"isin":"IE000929U2U9","name":"iShares $ Sukuk UCITS ETF - USD DIS","sourceName":"iShares / BlackRock","url":"https://www.ishares.com/","domain":"ishares.com","registry":"Fondsanbieter","automationMode":"OFFICIAL_PAGE_REFERENCE"},
+    {"isin":"DK0062498333","name":"Novo Nordisk B","sourceName":"Novo Nordisk Investors","url":"https://www.novonordisk.com/investors.html","domain":"novonordisk.com","registry":"Unternehmen","automationMode":"OFFICIAL_PAGE_REFERENCE"},
+    {"isin":"US0028241000","name":"Abbott Laboratories","sourceName":"Abbott Investors","url":"https://www.abbott.com/investors.html","domain":"abbott.com","registry":"Unternehmen + SEC","automationMode":"OFFICIAL_PAGE_REFERENCE"},
+    {"isin":"DE000A3E5D56","name":"FUCHS SE Vz","sourceName":"FUCHS Investor Relations","url":"https://www.fuchs.com/group/investor-relations/","domain":"fuchs.com","registry":"Unternehmen","automationMode":"OFFICIAL_PAGE_REFERENCE"},
+    {"isin":"CH0012005267","name":"Novartis","sourceName":"Novartis Investors","url":"https://www.novartis.com/investors","domain":"novartis.com","registry":"Unternehmen","automationMode":"OFFICIAL_PAGE_REFERENCE"},
+    {"isin":"GB00B2425G68","name":"Craneware PLC","sourceName":"The Craneware Group Investors","url":"https://www.thecranewaregroup.com/company/investors/","domain":"thecranewaregroup.com","registry":"Unternehmen + RNS","automationMode":"OFFICIAL_PAGE_REFERENCE"},
+    {"isin":"US94106L1098","name":"Waste Management","sourceName":"WM Investor Relations","url":"https://investors.wm.com/","domain":"investors.wm.com","registry":"Unternehmen + SEC","automationMode":"OFFICIAL_PAGE_REFERENCE"},
+    {"isin":"US5797802064","name":"McCormick & Co","sourceName":"McCormick Investor Relations","url":"https://ir.mccormick.com/","domain":"ir.mccormick.com","registry":"Unternehmen + SEC","automationMode":"OFFICIAL_PAGE_REFERENCE"},
+    {"isin":"FR0006174348","name":"Bureau Veritas","sourceName":"Bureau Veritas Investors","url":"https://group.bureauveritas.com/investors","domain":"group.bureauveritas.com","registry":"Unternehmen","automationMode":"OFFICIAL_PAGE_REFERENCE"},
+    {"isin":"IE00B27YCP72","name":"iShares MSCI Emerging Markets Islamic UCITS ETF - USD DIS","sourceName":"iShares / BlackRock","url":"https://www.ishares.com/","domain":"ishares.com","registry":"Fondsanbieter","automationMode":"OFFICIAL_PAGE_REFERENCE"},
+    {"isin":"FR0000120073","name":"Air Liquide","sourceName":"Air Liquide Investors","url":"https://www.airliquide.com/investors","domain":"airliquide.com","registry":"Unternehmen","automationMode":"OFFICIAL_PAGE_REFERENCE"},
+    {"isin":"IE00BTN1Y115","name":"Medtronic","sourceName":"Medtronic Investor Relations","url":"https://investorrelations.medtronic.com/","domain":"investorrelations.medtronic.com","registry":"Unternehmen + SEC","automationMode":"OFFICIAL_PAGE_REFERENCE"},
+    {"isin":"GB0007188757","name":"Rio Tinto","sourceName":"Rio Tinto Investors / Releases","url":"https://www.riotinto.com/en/invest","domain":"riotinto.com","registry":"Unternehmen","automationMode":"DIRECT_SUPPORTED"},
+    {"isin":"US58933Y1055","name":"Merck & Co., Inc.","sourceName":"Merck Investor Relations","url":"https://www.merck.com/investor-relations/","domain":"merck.com","registry":"Unternehmen + SEC","automationMode":"OFFICIAL_PAGE_REFERENCE"},
+    {"isin":"GB00B2B0DG97","name":"RELX PLC","sourceName":"RELX Investors","url":"https://www.relx.com/investors","domain":"relx.com","registry":"Unternehmen + RNS","automationMode":"OFFICIAL_PAGE_REFERENCE"},
+    {"isin":"GB0006640972","name":"4imprint Group PLC","sourceName":"4imprint Investors","url":"https://investors.4imprint.com/investors/","domain":"investors.4imprint.com","registry":"Unternehmen + RNS","automationMode":"OFFICIAL_PAGE_REFERENCE"},
+    {"isin":"CA14150G4007","name":"Cardinal Energy","sourceName":"Cardinal Energy Investors","url":"https://cardinalenergy.ca/investors/investor-information/","domain":"cardinalenergy.ca","registry":"Unternehmen + SEDAR+","automationMode":"OFFICIAL_PAGE_REFERENCE"},
+    {"isin":"CA8051121090","name":"Savaria Corp.","sourceName":"Savaria Investor Information","url":"https://corp.savaria.com/investor-news","domain":"corp.savaria.com","registry":"Unternehmen + SEDAR+","automationMode":"OFFICIAL_PAGE_REFERENCE"}
+  ]
+}
