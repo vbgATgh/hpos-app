@@ -1,6 +1,7 @@
 name: TEMP Alpha 4.3.3 Local Projection Build
 
 on:
+  workflow_dispatch:
   push:
     branches: [alpha433-local-projection-hotfix-20260827]
 
