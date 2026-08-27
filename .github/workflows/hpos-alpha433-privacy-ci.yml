@@ -4,11 +4,15 @@ on:
   push:
     branches:
       - alpha433-privacy-boundary-20260827
+      - alpha433-local-projection-hotfix-20260827
   pull_request:
     paths:
       - '.gitignore'
+      - 'alpha41/privacy-local43-shim.js'
+      - 'alpha41/alpha43.js'
       - 'alpha41/alpha433.js'
       - 'scripts/apply_hpos_alpha433.py'
+      - 'scripts/sanitize_alpha43_privacy.py'
       - 'scripts/fetch_hpos_news_portfolio.py'
       - 'config/news_sources.json'
       - 'config/asset_sources.json'
@@ -37,6 +41,12 @@ jobs:
         run: |
           python -m unittest tests.test_alpha432_sources tests.test_alpha433_privacy -v
 
+      - name: Legacy-Privacy-Sanitizer muss idempotent sein
+        run: |
+          cp alpha41/alpha43.js /tmp/alpha43-before.js
+          python scripts/sanitize_alpha43_privacy.py
+          cmp /tmp/alpha43-before.js alpha41/alpha43.js
+
       - name: Alpha 4.3.3 Patcherkette zweimal anwenden
         run: |
           python scripts/apply_hpos_alpha433.py
@@ -47,6 +57,8 @@ jobs:
       - name: JavaScript und Produktionsinvarianten prüfen
         shell: bash
         run: |
+          node --check alpha41/privacy-local43-shim.js
+          node --check alpha41/alpha43.js
           node --check alpha41/alpha433.js
           python - <<'PY'
           from pathlib import Path
@@ -55,8 +67,13 @@ jobs:
           assert 'ALPHA 4.3.3 · Privacy Boundary' in t
           assert '<title>HPOS Alpha 4.3.3 · Privacy Boundary</title>' in t
           assert t.count('alpha433.js') == 1
+          assert t.count('privacy-local43-shim.js') == 1
+          assert t.index('privacy-local43-shim.js') < t.index('alpha43.js')
           assert not Path('data/portfolio/parqet_snapshot.json').exists()
-          print('Alpha 4.3.3 privacy production invariants: OK')
+          legacy=Path('alpha41/alpha43.js').read_text(encoding='utf-8')
+          assert 'Cardinal Energy + Savaria = Trade Republic' not in legacy
+          assert '343 Parqet-Aktivitäten' not in legacy
+          print('Alpha 4.3.3 local privacy production invariants: OK')
           PY
 
       - name: Öffentliche Datenpipeline ohne Depot-Snapshot testen
@@ -81,3 +98,5 @@ jobs:
         run: |
           test ! -e data/portfolio/parqet_snapshot.json
           ! git grep -n -E '"shares"[[:space:]]*:|"purchaseValue"[[:space:]]*:|"purchasePrice"[[:space:]]*:|"holdingId"[[:space:]]*:' -- 'data/**' ':!data/market/**' ':!data/news/**'
+          ! git grep -n -F 'Cardinal Energy + Savaria = Trade Republic'
+          ! git grep -n -F '343 Parqet-Aktivitäten'
