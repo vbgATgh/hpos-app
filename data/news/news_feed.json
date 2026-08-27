@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": null,
+  "provider": "GOOGLE_NEWS_RSS",
+  "lookbackDays": 14,
+  "retentionDays": 45,
+  "count": 0,
+  "assetIndex": {
+    "ISWD": {"name":"iShares MSCI World Islamic UCITS ETF","ticker":"ISWD","isin":"IE00B27YCN58","aliases":["ISWD","iShares MSCI World Islamic UCITS ETF"],"scope":"PORTFOLIO","enabled":true},
+    "RIO_TINTO": {"name":"Rio Tinto","ticker":"RIO","isin":null,"aliases":["RIO TINTO","Rio Tinto","RIO"],"scope":"PORTFOLIO","enabled":true},
+    "SUKUK": {"name":"iShares $ Sukuk UCITS ETF","ticker":"SKUK","isin":"IE000929U2U9","aliases":["Sukuk","SUK","SKUK","iShares $ Sukuk UCITS ETF"],"scope":"PORTFOLIO","enabled":true},
+    "SPACEX": {"name":"SpaceX","ticker":null,"isin":null,"aliases":["SPACEX","SpaceX"],"scope":"WATCHLIST","enabled":true},
+    "XIAOMI": {"name":"Xiaomi Corporation","ticker":"1810.HK","isin":null,"aliases":["XIAOMI","Xiaomi","Xiaomi Corporation","1810.HK"],"scope":"WATCHLIST","enabled":true},
+    "JNJ": {"name":"Johnson & Johnson","ticker":"JNJ","isin":null,"aliases":["J&J","JJ","JNJ","Johnson & Johnson"],"scope":"WATCHLIST","enabled":true},
+    "RLEX": {"name":"RLEX","ticker":null,"isin":null,"aliases":["RLEX"],"scope":"PORTFOLIO","enabled":false},
+    "TEST": {"name":"Test Aktie","ticker":null,"isin":null,"aliases":["Test Aktie","TEST"],"scope":"TEST","enabled":false}
+  },
+  "items": []
+}
