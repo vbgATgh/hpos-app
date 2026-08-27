@@ -54,9 +54,16 @@ def rio_rows(payload):
         seen.add(url);out.append((title,url))
     return out
 
+def is_managed_direct(x):
+    key=x.get('assetKey');source=x.get('source');provider=x.get('provider')
+    return ((key=='RIO_TINTO' and (provider=='RIO_TINTO_OFFICIAL' or source=='Rio Tinto') and x.get('primarySource'))
+            or (key=='JNJ' and (provider=='JNJ_OFFICIAL_RSS' or source=='Johnson & Johnson') and x.get('primarySource')))
+
 def main():
     cfg=json.loads(CFG.read_text(encoding='utf-8'));feed=json.loads(FEED.read_text(encoding='utf-8')) if FEED.exists() else {'schemaVersion':1,'items':[],'assetIndex':{}}
-    items=list(feed.get('items',[]));new=[];results=[];cutoff=dt.datetime.now(dt.timezone.utc)-dt.timedelta(days=int(cfg.get('lookbackDays',14)))
+    # Direktadapter sind Snapshot-Quellen: alte Adaptereinträge werden ersetzt, nicht kumuliert.
+    items=[x for x in list(feed.get('items',[])) if not is_managed_direct(x)]
+    new=[];results=[];cutoff=dt.datetime.now(dt.timezone.utc)-dt.timedelta(days=int(cfg.get('lookbackDays',14)))
     try:
         rows=rss(get(JNJ_RSS));n=0
         for title,summary,url,d in rows:
