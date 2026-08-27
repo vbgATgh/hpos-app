@@ -1,0 +1,120 @@
+name: HPOS Alpha 4.3 CI
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [alpha43-real-portfolio-20260827]
+    paths:
+      - '.github/workflows/hpos-alpha43-ci.yml'
+      - 'alpha41/alpha43.js'
+      - 'data/portfolio/parqet_snapshot.json'
+      - 'scripts/apply_hpos_alpha43.py'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: hpos-alpha43-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Bestehende News-Tests
+        run: python -m unittest tests.test_news_fetch -v
+      - name: Alpha 4.3 integrieren
+        run: python scripts/apply_hpos_alpha43.py
+      - name: Syntax prüfen
+        run: |
+          node --check alpha41/news-414.js
+          node --check alpha41/ux-42-core.js
+          node --check alpha41/news-42.js
+          node --check alpha41/ux-421.js
+          node --check alpha41/alpha43.js
+      - name: Parqet Snapshot Audit
+        run: |
+          python - <<'PY'
+          import json, math
+          from pathlib import Path
+          p=json.loads(Path('data/portfolio/parqet_snapshot.json').read_text(encoding='utf-8'))
+          assert p['schemaVersion']==1
+          assert len(p['holdings'])==19, len(p['holdings'])
+          assert len(p['watchlist'])==58, len(p['watchlist'])
+          assert all(float(h['currentValue'])>=1 for h in p['holdings'])
+          assert all(w.get('excludeFromPortfolioTotals') is True for w in p['watchlist'])
+          tr={h['isin'] for h in p['holdings'] if h['broker']=='TRADE_REPUBLIC'}
+          assert tr=={'CA14150G4007','CA8051121090'}, tr
+          assert all(h['broker']=='SCALABLE' for h in p['holdings'] if h['isin'] not in tr)
+          sec=sum(float(h['currentValue']) for h in p['holdings'])
+          cash=sum(float(c['value']) for c in p['cash'])
+          assert abs(sec+cash-p['kpis']['importedPortfolioTotal'])<0.001
+          assert abs(p['kpis']['scalableTotal']+p['kpis']['tradeRepublicTotal']-p['kpis']['importedPortfolioTotal'])<0.001
+          assert abs(p['kpis']['importedPortfolioTotal']+p['kpis']['markerValueExcluded']-p['kpis']['parqetReportedTotal'])<0.001
+          assert p['reconciliation']['status']=='OK'
+          print('Parqet reconciliation: OK', sec+cash)
+          PY
+      - name: Integrations-Invarianten
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          t=Path('alpha41/index.html').read_text(encoding='utf-8')
+          assert 'ALPHA 4.3 · Real Portfolio' in t
+          assert '1.3.0-alpha.4.3' in t
+          assert 'alpha43.js' in t
+          js=t.split('<script>',1)[1].split('</script>',1)[0]
+          assert not any(line.lstrip().startswith('import ') for line in js.splitlines())
+          u=Path('alpha41/alpha43.js').read_text(encoding='utf-8')
+          for marker in ['Gesamtdepot','TRADE_REPUBLIC','PARQET_MARKER','Watchlist','Analyse','Einstellungen','hposPreParqetBackupV3']:
+              assert marker in u, marker
+          assert Path('data/portfolio/parqet_snapshot.json').stat().st_size < 30000
+          assert Path('alpha41/alpha43.js').stat().st_size < 60000
+          print('Alpha 4.3 invariants: OK')
+          PY
+      - name: Browser Smoke Home
+        run: |
+          python -m http.server 8000 >/tmp/hpos43-server.log 2>&1 &
+          sleep 2
+          google-chrome --headless=new --no-sandbox --disable-gpu --virtual-time-budget=6000 --dump-dom 'http://127.0.0.1:8000/alpha41/?ci=43#dashboard' >/tmp/hpos43-home.html
+          grep -q 'Gesamtdepot' /tmp/hpos43-home.html
+          grep -q 'Depotverteilung' /tmp/hpos43-home.html
+          grep -q 'Scalable Capital' /tmp/hpos43-home.html
+          grep -q 'Trade Republic' /tmp/hpos43-home.html
+          grep -q 'ALPHA 4.3' /tmp/hpos43-home.html
+          grep -q 'bottom43' /tmp/hpos43-home.html
+          echo 'Home smoke: OK'
+      - name: Browser Smoke Depot, Income, Analyse, Watchlist
+        run: |
+          google-chrome --headless=new --no-sandbox --disable-gpu --virtual-time-budget=6000 --dump-dom 'http://127.0.0.1:8000/alpha41/?ci=43#portfolio' >/tmp/hpos43-depot.html
+          grep -q '19 reale Positionen' /tmp/hpos43-depot.html
+          grep -q 'Cardinal Energy' /tmp/hpos43-depot.html
+          grep -q 'SAVARIA' /tmp/hpos43-depot.html
+          google-chrome --headless=new --no-sandbox --disable-gpu --virtual-time-budget=6000 --dump-dom 'http://127.0.0.1:8000/alpha41/?ci=43#income' >/tmp/hpos43-income.html
+          grep -q 'Monatsentwicklung' /tmp/hpos43-income.html
+          grep -q 'Netto-Ausschüttungen aus Parqet' /tmp/hpos43-income.html
+          google-chrome --headless=new --no-sandbox --disable-gpu --virtual-time-budget=6000 --dump-dom 'http://127.0.0.1:8000/alpha41/?ci=43#analysis' >/tmp/hpos43-analysis.html
+          grep -q 'Halal Register' /tmp/hpos43-analysis.html
+          grep -q 'Watchlist' /tmp/hpos43-analysis.html
+          google-chrome --headless=new --no-sandbox --disable-gpu --virtual-time-budget=6000 --dump-dom 'http://127.0.0.1:8000/alpha41/?ci=43#watchlist' >/tmp/hpos43-watch.html
+          grep -q 'Werte fließen nicht in das Depot ein' /tmp/hpos43-watch.html
+          grep -q 'Johnson &amp; Johnson' /tmp/hpos43-watch.html
+          echo 'Depot/Income/Analyse/Watchlist smoke: OK'
+      - name: Integration committen
+        run: |
+          git add alpha41/index.html
+          if git diff --cached --quiet; then
+            echo 'Keine generierte Änderung.'
+            exit 0
+          fi
+          git config user.name 'hpos-alpha43-bot'
+          git config user.email 'hpos-alpha43-bot@users.noreply.github.com'
+          git commit -m 'chore(alpha43): Integration nach CI sichern'
+          git pull --rebase origin "$GITHUB_REF_NAME"
+          git push origin HEAD:"$GITHUB_REF_NAME"
