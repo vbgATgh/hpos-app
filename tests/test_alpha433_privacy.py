@@ -34,10 +34,10 @@ class Alpha433PrivacyBoundaryTest(unittest.TestCase):
         self.assertEqual(1,index.count('privacy-local43-shim.js'))
         self.assertLess(index.index('privacy-local43-shim.js'),index.index('alpha43.js'))
 
-    def test_legacy_source_contains_no_personal_broker_assertion_or_exact_activity_count(self):
+    def test_legacy_source_uses_generic_local_privacy_text(self):
         text=(ROOT/'alpha41/alpha43.js').read_text(encoding='utf-8')
-        for forbidden in ('Cardinal Energy + Savaria = Trade Republic','343 Parqet-Aktivitäten'):
-            self.assertNotIn(forbidden,text)
+        self.assertIn("brokerRule:'Lokale Brokerzuordnung; nicht im öffentlichen Code gespeichert.'",text)
+        self.assertIn('Eine gegebenenfalls umfangreichere externe Aktivitätshistorie ist nicht vollständig als lokales Journal gespiegelt.',text)
 
     def test_obsolete_snapshot_ci_workflows_are_removed(self):
         for name in ('hpos-alpha43-ci.yml','hpos-alpha431-ci.yml','hpos-alpha432-ci.yml'):
