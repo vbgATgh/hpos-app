@@ -20,7 +20,7 @@ permissions:
 
 concurrency:
   group: hpos-alpha42-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   audit:
@@ -83,7 +83,8 @@ jobs:
           git config user.name 'hpos-alpha42-bot'
           git config user.email 'hpos-alpha42-bot@users.noreply.github.com'
           git commit -m 'chore(alpha42): Integration und Daten-Snapshots aktualisieren'
-          git push
+          git pull --rebase origin "$GITHUB_REF_NAME"
+          git push origin HEAD:"$GITHUB_REF_NAME"
       - name: Marktdatenstatus ausgeben
         if: always()
         run: |
