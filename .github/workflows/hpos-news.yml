@@ -17,6 +17,7 @@ on:
       - 'alpha41/news-414.js'
       - 'alpha41/news-42.js'
       - 'alpha41/ux-42-core.js'
+      - 'alpha41/ux-421.js'
   schedule:
     - cron: '15 6 * * *'
       timezone: 'Europe/Berlin'
@@ -47,7 +48,7 @@ jobs:
       - name: Parser und Datenlogik testen
         run: python -m unittest tests.test_news_fetch -v
 
-      - name: Alpha 4.2 Integration sicherstellen
+      - name: Alpha 4.2.1 Integration sicherstellen
         run: python scripts/apply_hpos_ux42.py
 
       - name: JavaScript und Startinvarianten prüfen
@@ -56,15 +57,18 @@ jobs:
           node --check alpha41/news-414.js
           node --check alpha41/ux-42-core.js
           node --check alpha41/news-42.js
+          node --check alpha41/ux-421.js
           python - <<'PY'
           from pathlib import Path
           t=Path('alpha41/index.html').read_text(encoding='utf-8')
           js=t.split('<script>',1)[1].split('</script>',1)[0]
           Path('/tmp/hpos-inline.js').write_text(js,encoding='utf-8')
-          assert '1.3.0-alpha.4.2' in t
-          assert 'news-414.js' in t and 'ux-42-core.js' in t and 'news-42.js' in t
+          assert '1.3.0-alpha.4.2.1' in t
+          assert 'news-414.js' in t and 'ux-42-core.js' in t and 'news-42.js' in t and 'ux-421.js' in t
           assert not any(line.lstrip().startswith('import ') for line in js.splitlines())
-          print('Alpha 4.2 invariants: OK')
+          market=Path('config/market_sources.json').read_text(encoding='utf-8')
+          assert '"assetKey":"SPACEX"' in market and '"enabled":false' in market
+          print('Alpha 4.2.1 invariants: OK')
           PY
           node --check /tmp/hpos-inline.js
 
@@ -78,7 +82,7 @@ jobs:
         continue-on-error: true
         run: python scripts/fetch_hpos_direct_news.py
 
-      - name: Kurs-Snapshots aktualisieren
+      - name: Kurs- und EUR-Snapshots aktualisieren
         id: market
         continue-on-error: true
         run: python scripts/fetch_hpos_market.py
@@ -93,7 +97,7 @@ jobs:
           fi
           git config user.name 'hpos-data-bot'
           git config user.email 'hpos-data-bot@users.noreply.github.com'
-          git commit -m 'chore(data): News und Marktdaten aktualisieren'
+          git commit -m 'chore(data): News, Marktdaten und EUR-Referenzen aktualisieren'
           git pull --rebase origin "$GITHUB_REF_NAME"
           git push origin HEAD:"$GITHUB_REF_NAME"
 

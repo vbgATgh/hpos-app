@@ -1,9 +1,10 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "updatedAt": "2026-08-27",
   "policy": {
     "newsPriority": ["PRIMARY", "PROFESSIONAL", "RESEARCH", "DISCOVERY"],
     "halalSeparate": true,
+    "halalAutomation": "Nur mit belastbarer, zulässiger API/Feed-Quelle. Fehlt diese, bleibt der automatische Status UNKNOWN und wird niemals zu H1 hochgestuft.",
     "notes": "Quellen liefern Fakten/Daten; Halal-Status wird ausschließlich durch das Halal-Register und seine Quellenpolitik bestimmt."
   },
   "sources": [
@@ -19,6 +20,8 @@
     {"id":"INVESTING","name":"Investing.com","tier":"RESEARCH","use":"Marktdaten, Termine, Unternehmensdaten","automationMode":"MANUAL/WEB","cost":"FREE_WEB","url":"https://www.investing.com/"},
     {"id":"BOERSE_DE","name":"boerse.de","tier":"RESEARCH","use":"Kurs- und Unternehmensrecherche","automationMode":"MANUAL/WEB","cost":"FREE_WEB","url":"https://www.boerse.de/"},
     {"id":"FINANZNACHRICHTEN","name":"FinanzNachrichten.de","tier":"RESEARCH","use":"News-Aggregation und deutschsprachige Marktnews","automationMode":"MANUAL/WEB","cost":"FREE_WEB","url":"https://www.finanznachrichten.de/"},
+    {"id":"YAHOO_CHART","name":"Yahoo Finance Chart Endpoint","tier":"MARKET_DATA","use":"Kursverlauf und Intraday-Snapshots; in HPOS ausdrücklich als inoffizielle Datenquelle gekennzeichnet","automationMode":"HTTP_SNAPSHOT","cost":"FREE_WEB"},
+    {"id":"FRANKFURTER_ECB","name":"Frankfurter / ECB Referenzkurse","tier":"MARKET_DATA","use":"Aktuelle FX-Umrechnung nach EUR","automationMode":"API","cost":"FREE","url":"https://frankfurter.dev/"},
     {"id":"GOOGLE_NEWS","name":"Google News RSS","tier":"DISCOVERY","use":"Breite Discovery-Schicht; nicht als alleinige Qualitätsquelle","automationMode":"RSS","cost":"FREE","url":"https://news.google.com/"},
     {"id":"MUSAFFA","name":"Musaffa","tier":"HALAL","use":"Shariah-/Halal-Screening","automationMode":"MANUAL/EXTERNAL","cost":"FREE_WEB","url":"https://musaffa.com/"},
     {"id":"ZOYA","name":"Zoya","tier":"HALAL","use":"Shariah-/Halal-Screening","automationMode":"MANUAL/EXTERNAL","cost":"FREE_WEB","url":"https://zoya.finance/"},
