@@ -3,13 +3,12 @@ from pathlib import Path
 p=Path('alpha41/index.html')
 t=p.read_text(encoding='utf-8')
 changed=False
-for old,new in [
-    ('ALPHA 4.3 · Real Portfolio','ALPHA 4.3.1 · Usability'),
-    ('1.3.0-alpha.4.3','1.3.0-alpha.4.3.1'),
-    ('HPOS Alpha 4.3 · Real Portfolio','HPOS Alpha 4.3.1 · Usability')
-]:
-    if old in t:
-        t=t.replace(old,new);changed=True
+if 'ALPHA 4.3.1 · Usability' not in t and 'ALPHA 4.3 · Real Portfolio' in t:
+    t=t.replace('ALPHA 4.3 · Real Portfolio','ALPHA 4.3.1 · Usability');changed=True
+if '1.3.0-alpha.4.3.1' not in t and '1.3.0-alpha.4.3' in t:
+    t=t.replace('1.3.0-alpha.4.3','1.3.0-alpha.4.3.1');changed=True
+if 'HPOS Alpha 4.3.1 · Usability' not in t and 'HPOS Alpha 4.3 · Real Portfolio' in t:
+    t=t.replace('HPOS Alpha 4.3 · Real Portfolio','HPOS Alpha 4.3.1 · Usability');changed=True
 if 'alpha431.js' not in t:
     marker='<script src="./alpha43.js"></script>'
     if marker not in t:
