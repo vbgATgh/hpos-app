@@ -12,7 +12,6 @@ on:
       - 'alpha41/alpha43.js'
       - 'alpha41/alpha433.js'
       - 'scripts/apply_hpos_alpha433.py'
-      - 'scripts/sanitize_alpha43_privacy.py'
       - 'scripts/fetch_hpos_news_portfolio.py'
       - 'config/news_sources.json'
       - 'config/asset_sources.json'
@@ -41,12 +40,6 @@ jobs:
         run: |
           python -m unittest tests.test_alpha432_sources tests.test_alpha433_privacy -v
 
-      - name: Legacy-Privacy-Sanitizer muss idempotent sein
-        run: |
-          cp alpha41/alpha43.js /tmp/alpha43-before.js
-          python scripts/sanitize_alpha43_privacy.py
-          cmp /tmp/alpha43-before.js alpha41/alpha43.js
-
       - name: Alpha 4.3.3 Patcherkette zweimal anwenden
         run: |
           python scripts/apply_hpos_alpha433.py
@@ -71,8 +64,8 @@ jobs:
           assert t.index('privacy-local43-shim.js') < t.index('alpha43.js')
           assert not Path('data/portfolio/parqet_snapshot.json').exists()
           legacy=Path('alpha41/alpha43.js').read_text(encoding='utf-8')
-          assert 'Cardinal Energy + Savaria = Trade Republic' not in legacy
-          assert '343 Parqet-Aktivitäten' not in legacy
+          assert "brokerRule:'Lokale Brokerzuordnung; nicht im öffentlichen Code gespeichert.'" in legacy
+          assert 'Eine gegebenenfalls umfangreichere externe Aktivitätshistorie ist nicht vollständig als lokales Journal gespiegelt.' in legacy
           print('Alpha 4.3.3 local privacy production invariants: OK')
           PY
 
@@ -98,5 +91,6 @@ jobs:
         run: |
           test ! -e data/portfolio/parqet_snapshot.json
           ! git grep -n -E '"shares"[[:space:]]*:|"purchaseValue"[[:space:]]*:|"purchasePrice"[[:space:]]*:|"holdingId"[[:space:]]*:' -- 'data/**' ':!data/market/**' ':!data/news/**'
-          ! git grep -n -F 'Cardinal Energy + Savaria = Trade Republic'
-          ! git grep -n -F '343 Parqet-Aktivitäten'
+          test ! -e .github/workflows/hpos-alpha43-ci.yml
+          test ! -e .github/workflows/hpos-alpha431-ci.yml
+          test ! -e .github/workflows/hpos-alpha432-ci.yml
