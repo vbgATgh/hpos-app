@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "state": "CURRENT",
   "source": "github-actions/google-news-rss",
-  "asOf": "2026-08-27T07:29:10Z",
-  "lastAttemptAt": "2026-08-27T07:29:10Z",
+  "asOf": "2026-08-27T07:29:55Z",
+  "lastAttemptAt": "2026-08-27T07:29:55Z",
   "message": "News-Abruf erfolgreich: 11 Abfragen geprüft.",
   "queriesTotal": 11,
   "queriesOk": 11,
@@ -43,7 +43,7 @@
       "assetKey": "RIO_TINTO",
       "query": "\"Rio Tinto\" earnings OR production OR guidance OR dividend",
       "ok": true,
-      "items": 2
+      "items": 1
     },
     {
       "assetKey": "SUKUK",
@@ -73,7 +73,7 @@
       "assetKey": "XIAOMI",
       "query": "\"Xiaomi\" earnings OR guidance OR results",
       "ok": true,
-      "items": 3
+      "items": 4
     },
     {
       "assetKey": "JNJ",
