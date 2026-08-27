@@ -37,10 +37,17 @@ class Links(HTMLParser):
             text=clean(' '.join(self.buf));href=self.href
             if text and ('/news/releases/' in href or 'businesswire.com/news/' in href):self.rows.append((text,href))
             self.href=None;self.buf=[]
+def rio_title(text):
+    title=re.sub(r'^\d{1,2}\s+[A-Za-z]+\s+20\d{2}\s+','',text).strip()
+    # Die Investor-Seite hängt bei manchen Links den Meldungstext an den Titel.
+    title=re.split(r'\s+[A-Z][A-Z .\'-]{2,},\s+(?:Australia|Canada|United States|USA|UK|Mongolia|Guinea)\s*[-–—]{1,2}\s*',title,maxsplit=1)[0].strip()
+    title=re.split(r'\s*--\s*\(BUSINESS WIRE\)\s*--\s*',title,maxsplit=1)[0].strip()
+    if len(title)>180:title=title[:177].rstrip()+'…'
+    return title
 def rio_rows(payload):
     p=Links();p.feed(payload.decode('utf-8','ignore'));out=[];seen=set()
     for text,href in p.rows:
-        title=re.sub(r'^\d{1,2}\s+[A-Za-z]+\s+20\d{2}\s+','',text).strip()
+        title=rio_title(text)
         if len(title)<18:continue
         url=urllib.parse.urljoin(RIO_PAGE,href)
         if url in seen:continue
