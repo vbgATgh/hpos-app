@@ -21,6 +21,7 @@ on:
       - 'config/asset_sources.json'
       - 'tests/test_news_fetch.py'
       - 'tests/test_alpha432_sources.py'
+      - 'tests/test_alpha432_version_patch.py'
       - 'tests/test_alpha433_privacy.py'
       - 'alpha41/news-414.js'
       - 'alpha41/news-42.js'
@@ -58,9 +59,9 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Parser, Quellen und Privacy-Invarianten testen
+      - name: Parser, Version, Quellen und Privacy-Invarianten testen
         run: |
-          python -m unittest tests.test_news_fetch tests.test_alpha432_sources tests.test_alpha433_privacy -v
+          python -m unittest tests.test_news_fetch tests.test_alpha432_sources tests.test_alpha432_version_patch tests.test_alpha433_privacy -v
 
       - name: UI-Integration sicherstellen
         run: |
