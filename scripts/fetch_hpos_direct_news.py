@@ -8,6 +8,7 @@ ROOT=Path(__file__).resolve().parents[1]; FEED=ROOT/'data'/'news'/'news_feed.jso
 UA='HPOS-PersonalResearch/1.0 (+https://github.com/vbgATgh/hpos-app)'; TIMEOUT=10
 JNJ_RSS='https://www.jnj.com/rss-feed/all'
 RIO_PAGE='https://www.riotinto.com/en/invest'
+RIO_DIRECT_LIMIT=5
 
 def znow(): return dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace('+00:00','Z')
 def clean(v): return re.sub(r'\s+',' ',re.sub(r'<[^>]+>',' ',html.unescape(v or ''))).strip()
@@ -39,7 +40,6 @@ class Links(HTMLParser):
             self.href=None;self.buf=[]
 def rio_title(text):
     title=re.sub(r'^\d{1,2}\s+[A-Za-z]+\s+20\d{2}\s+','',text).strip()
-    # Die Investor-Seite hängt bei manchen Links den Meldungstext an den Titel.
     title=re.split(r'\s+[A-Z][A-Z .\'-]{2,},\s+(?:Australia|Canada|United States|USA|UK|Mongolia|Guinea)\s*[-–—]{1,2}\s*',title,maxsplit=1)[0].strip()
     title=re.split(r'\s*--\s*\(BUSINESS WIRE\)\s*--\s*',title,maxsplit=1)[0].strip()
     if len(title)>180:title=title[:177].rstrip()+'…'
@@ -66,7 +66,7 @@ def main():
     except Exception as e:results.append({'source':'Johnson & Johnson RSS','ok':False,'error':str(e)});print(f'[WARN] JNJ RSS: {e}')
     try:
         rows=rio_rows(get(RIO_PAGE));n=0
-        for title,url in rows[:20]:
+        for title,url in rows[:RIO_DIRECT_LIMIT]:
             new.append({'newsId':nid('RIO_TINTO',title,url),'assetKey':'RIO_TINTO','title':title,'source':'Rio Tinto','sourceUrl':RIO_PAGE,'url':url,'publishedAt':None,'sourceTier':'PRIMARY','primarySource':True,'provider':'RIO_TINTO_OFFICIAL'});n+=1
         results.append({'source':'Rio Tinto Invest','ok':True,'items':n});print(f'[OK] Rio Tinto official: {n}')
     except Exception as e:results.append({'source':'Rio Tinto Invest','ok':False,'error':str(e)});print(f'[WARN] Rio Tinto: {e}')
