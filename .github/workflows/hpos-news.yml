@@ -3,7 +3,7 @@ name: HPOS News Fetch
 on:
   workflow_dispatch:
   push:
-    branches: [main, audit-open-items-20260827]
+    branches: [main]
     paths:
       - '.github/workflows/hpos-news.yml'
       - 'scripts/fetch_hpos_news.py'
