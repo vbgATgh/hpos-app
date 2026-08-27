@@ -3,10 +3,12 @@ name: HPOS Alpha 4.3.2 CI
 on:
   workflow_dispatch:
   push:
-    branches: [alpha432-halal-news-hardening-20260827]
+    branches: [alpha432-halal-news-hardening-20260827, hotfix-alpha432-version-refresh-20260827]
     paths:
       - '.github/workflows/hpos-alpha432-ci.yml'
+      - '.github/workflows/hpos-news.yml'
       - 'alpha41/**'
+      - 'scripts/apply_hpos_alpha431.py'
       - 'scripts/apply_hpos_alpha432.py'
       - 'scripts/fetch_hpos_news.py'
       - 'scripts/fetch_hpos_news_portfolio.py'
@@ -49,6 +51,7 @@ jobs:
           python scripts/apply_hpos_alpha431.py
           python scripts/apply_hpos_alpha432.py
           cp alpha41/index.html /tmp/index-first.html
+          python scripts/apply_hpos_alpha431.py
           python scripts/apply_hpos_alpha432.py
           cmp -s alpha41/index.html /tmp/index-first.html
       - name: JavaScript und Invarianten
@@ -66,7 +69,8 @@ jobs:
           import json
           t=Path('alpha41/index.html').read_text(encoding='utf-8')
           assert t.count('alpha432.js') == 1
-          assert '1.3.0-alpha.4.3.2' in t
+          assert "const APP_VERSION='1.3.0-alpha.4.3.2';" in t
+          assert "const APP_VERSION='1.3.0-alpha.4.3.1.2';" not in t
           assert 'ALPHA 4.3.2 · Halal & News Hardening' in t
           js=t.split('<script>',1)[1].split('</script>',1)[0]
           Path('/tmp/hpos-inline.js').write_text(js,encoding='utf-8')
