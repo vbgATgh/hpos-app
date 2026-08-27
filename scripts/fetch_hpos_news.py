@@ -16,6 +16,7 @@ import sys
 import urllib.parse
 import urllib.request
 import xml.etree.ElementTree as ET
+from collections import Counter
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
@@ -24,7 +25,7 @@ ROOT = Path(__file__).resolve().parents[1]
 CONFIG_PATH = ROOT / "config" / "news_sources.json"
 FEED_PATH = ROOT / "data" / "news" / "news_feed.json"
 STATUS_PATH = ROOT / "data" / "news" / "news_status.json"
-USER_AGENT = "HPOS-NewsBot/1.1 (+GitHub Actions; personal portfolio research)"
+USER_AGENT = "HPOS-NewsBot/1.2 (+GitHub Actions; personal portfolio research)"
 TIMEOUT = 20
 
 
@@ -44,9 +45,13 @@ def load_json(path: Path, fallback: Any) -> Any:
         return fallback
 
 
-def write_json(path: Path, obj: Any) -> None:
+def write_json(path: Path, obj: Any, *, compact: bool = False) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(obj, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    if compact:
+        text = json.dumps(obj, ensure_ascii=False, separators=(",", ":")) + "\n"
+    else:
+        text = json.dumps(obj, ensure_ascii=False, indent=2) + "\n"
+    path.write_text(text, encoding="utf-8")
 
 
 def clean_text(value: str | None) -> str:
@@ -117,36 +122,32 @@ def parse_google_rss(xml_bytes: bytes, asset: dict[str, Any], fetched_at: str,
         source_name = clean_text(source_node.text if source_node is not None else "")
         source_url = source_node.attrib.get("url") if source_node is not None else None
         published_at = iso_z(pub_dt) if pub_dt else None
-        primary = is_primary(source_url, asset.get("primaryDomains", []))
         if not title or not link:
             continue
         out.append({
             "newsId": stable_id(asset["assetKey"], title, link, published_at or ""),
             "assetKey": asset["assetKey"],
-            "assetName": asset.get("name"),
-            "ticker": asset.get("ticker"),
-            "isin": asset.get("isin"),
-            "scope": asset.get("scope", "PORTFOLIO"),
             "title": title,
             "source": source_name or "Quelle unbekannt",
             "sourceUrl": source_url,
-            "sourceDomain": domain_of(source_url),
             "url": link,
             "publishedAt": published_at,
-            "fetchedAt": fetched_at,
-            "provider": "GOOGLE_NEWS_RSS",
-            "sourceType": "PRIMARY" if primary else "DISCOVERY",
-            "primarySource": primary,
-            "analysisStatus": "UNREVIEWED",
+            "primarySource": is_primary(source_url, asset.get("primaryDomains", [])),
         })
     return out
+
+
+def compact_item(item: dict[str, Any]) -> dict[str, Any]:
+    return {k: item.get(k) for k in (
+        "newsId", "assetKey", "title", "source", "sourceUrl", "url", "publishedAt", "primarySource"
+    ) if item.get(k) is not None}
 
 
 def dedupe(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
     seen_ids: set[str] = set()
     seen_titles: set[tuple[str, str]] = set()
     out: list[dict[str, Any]] = []
-    items = sorted(items, key=lambda x: (x.get("publishedAt") or "", x.get("fetchedAt") or ""), reverse=True)
+    items = sorted(items, key=lambda x: x.get("publishedAt") or "", reverse=True)
     for item in items:
         nid = item.get("newsId", "")
         title_key = (item.get("assetKey", ""), re.sub(r"\W+", "", item.get("title", "").lower()))
@@ -155,7 +156,7 @@ def dedupe(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
         if nid:
             seen_ids.add(nid)
         seen_titles.add(title_key)
-        out.append(item)
+        out.append(compact_item(item))
     return out
 
 
@@ -163,7 +164,7 @@ def prune(items: list[dict[str, Any]], retention_days: int) -> list[dict[str, An
     cutoff = utc_now() - dt.timedelta(days=retention_days)
     out = []
     for item in items:
-        stamp = item.get("publishedAt") or item.get("fetchedAt")
+        stamp = item.get("publishedAt")
         try:
             parsed = dt.datetime.fromisoformat(stamp.replace("Z", "+00:00")) if stamp else None
         except Exception:
@@ -207,6 +208,7 @@ def main() -> int:
     max_items = int(config.get("maxItemsPerQuery", 20))
     max_stored = int(config.get("maxStoredItems", 250))
     enabled_assets = [a for a in config.get("assets", []) if a.get("enabled")]
+    index = asset_index(config)
 
     for asset in enabled_assets:
         for query in asset.get("queries", []):
@@ -225,6 +227,8 @@ def main() -> int:
     ok_count = sum(1 for q in query_results if q["ok"])
     fail_count = len(query_results) - ok_count
     merged = prune(dedupe(all_new + old_items), retention_days)[:max_stored]
+    by_asset = Counter(x.get("assetKey") or "UNKNOWN" for x in merged)
+    by_scope = Counter((index.get(x.get("assetKey"), {}) or {}).get("scope", "UNKNOWN") for x in merged)
 
     if ok_count > 0:
         write_json(FEED_PATH, {
@@ -234,9 +238,9 @@ def main() -> int:
             "lookbackDays": lookback_days,
             "retentionDays": retention_days,
             "count": len(merged),
-            "assetIndex": asset_index(config),
+            "assetIndex": index,
             "items": merged,
-        })
+        }, compact=True)
 
     if ok_count == 0:
         state, message = "ERROR", "Kein News-Abruf erfolgreich. Letzter vorhandener Feed bleibt unverändert."
@@ -258,6 +262,8 @@ def main() -> int:
         "queriesFailed": fail_count,
         "articlesFetchedThisRun": len(all_new),
         "articlesStored": len(merged) if ok_count else len(old_items),
+        "articlesByAsset": dict(sorted(by_asset.items())),
+        "articlesByScope": dict(sorted(by_scope.items())),
         "queryResults": query_results,
     })
     return 0 if ok_count else 1
