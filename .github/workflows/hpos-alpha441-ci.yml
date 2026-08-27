@@ -8,6 +8,13 @@ on:
       - 'tests/test_alpha441_thesis.py'
       - 'docs/alpha441-thesis-methodology.md'
       - '.github/workflows/hpos-alpha441-ci.yml'
+  pull_request:
+    paths:
+      - 'alpha41/alpha441.js'
+      - 'scripts/apply_hpos_alpha441.py'
+      - 'tests/test_alpha441_thesis.py'
+      - 'docs/alpha441-thesis-methodology.md'
+      - '.github/workflows/hpos-alpha441-ci.yml'
 permissions:
   contents: write
 jobs:
@@ -37,16 +44,20 @@ jobs:
           assert 'ALPHA 4.4.1 · UX + Thesis Intelligence' in t
           assert t.count('alpha441.js') == 1
           assert t.index('alpha44.js') < t.index('alpha441.js')
+          js=Path('alpha41/alpha441.js').read_text(encoding='utf-8')
+          assert 'Investmentthese' in js and 'Konfidenz' in js and 'Invalidierung' in js
           print('Alpha 4.4.1 integration OK')
           PY
-      - name: Browser Smoke Asset UX
+      - name: Browser Smoke
         run: |
           python -m http.server 8000 >/tmp/hpos441.log 2>&1 &
           sleep 2
           google-chrome --headless=new --no-sandbox --disable-gpu --virtual-time-budget=7000 --dump-dom 'http://127.0.0.1:8000/alpha41/?ci=441#portfolio' >/tmp/p441.html
           grep -q 'ALPHA 4.4.1' /tmp/p441.html
+          grep -q 'alpha441.js' /tmp/p441.html
           grep -q 'Portfolio' /tmp/p441.html
       - name: Integration committen
+        if: github.event_name == 'push'
         run: |
           git add alpha41/index.html
           if git diff --cached --quiet; then exit 0; fi
