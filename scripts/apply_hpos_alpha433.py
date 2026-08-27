@@ -27,6 +27,15 @@ if old_title in t:
 elif new_title not in t:
     raise SystemExit('HTML-Titel konnte nicht sicher auf 4.3.3 angehoben werden')
 
+# Legacy Alpha 4.3 erwartet historisch einen öffentlichen Parqet-Snapshot. Ab 4.3.3
+# wird dieser Request VOR alpha43.js lokal aus dem Browser-State beantwortet.
+shim='<script src="./privacy-local43-shim.js"></script>'
+alpha43='<script src="./alpha43.js"></script>'
+if shim not in t:
+    if alpha43 not in t:
+        raise SystemExit('alpha43.js Integration fehlt')
+    t=t.replace(alpha43,shim+'\n'+alpha43,1);changed=True
+
 if 'alpha433.js' not in t:
     marker='<script src="./alpha432.js"></script>'
     if marker not in t:
@@ -37,9 +46,13 @@ if new not in t:
     raise SystemExit('APP_VERSION konnte nicht auf 4.3.3 normalisiert werden')
 if t.count('alpha433.js')!=1:
     raise SystemExit('alpha433.js muss exakt einmal eingebunden sein')
+if t.count('privacy-local43-shim.js')!=1:
+    raise SystemExit('privacy-local43-shim.js muss exakt einmal eingebunden sein')
+if t.index('privacy-local43-shim.js')>t.index('alpha43.js'):
+    raise SystemExit('Privacy-Shim muss vor alpha43.js geladen werden')
 
 if changed:
     p.write_text(t,encoding='utf-8')
-    print('Alpha 4.3.3 Privacy Boundary integriert.')
+    print('Alpha 4.3.3 Privacy Boundary inklusive Local-Projection-Shim integriert.')
 else:
     print('Alpha 4.3.3 bereits korrekt integriert.')
