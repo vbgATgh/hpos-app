@@ -1,0 +1,77 @@
+name: HPOS News Fetch
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/hpos-news.yml'
+      - 'scripts/fetch_hpos_news.py'
+      - 'config/news_sources.json'
+      - 'tests/test_news_fetch.py'
+  schedule:
+    # GitHub cron is UTC. Four triggers + Berlin-time gate below handle CET/CEST.
+    - cron: '15 4 * * *'
+    - cron: '15 5 * * *'
+    - cron: '15 16 * * *'
+    - cron: '15 17 * * *'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: hpos-news-fetch
+  cancel-in-progress: false
+
+jobs:
+  fetch-news:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Repository auschecken
+        uses: actions/checkout@v4
+
+      - name: Python einrichten
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Parser und Datenlogik testen
+        run: python -m unittest tests.test_news_fetch -v
+
+      - name: Berliner Zeitfenster prüfen
+        id: gate
+        shell: bash
+        run: |
+          if [[ "$GITHUB_EVENT_NAME" != "schedule" ]]; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+            echo "Manueller/Push-Lauf: Abruf wird ausgeführt."
+            exit 0
+          fi
+          BERLIN_HOUR="$(TZ=Europe/Berlin date +%H)"
+          if [[ "$BERLIN_HOUR" == "06" || "$BERLIN_HOUR" == "18" ]]; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+            echo "Zeitfenster Europe/Berlin: ${BERLIN_HOUR}:xx"
+          else
+            echo "run=false" >> "$GITHUB_OUTPUT"
+            echo "DST-Ausweichlauf: ${BERLIN_HOUR}:xx Europe/Berlin, kein Abruf nötig."
+          fi
+
+      - name: HPOS-News abrufen
+        if: steps.gate.outputs.run == 'true'
+        run: python scripts/fetch_hpos_news.py
+
+      - name: News-Snapshot committen
+        if: steps.gate.outputs.run == 'true'
+        shell: bash
+        run: |
+          if git diff --quiet -- data/news/news_feed.json data/news/news_status.json; then
+            echo "Keine Änderungen."
+            exit 0
+          fi
+          git config user.name "hpos-news-bot"
+          git config user.email "hpos-news-bot@users.noreply.github.com"
+          git add data/news/news_feed.json data/news/news_status.json
+          git commit -m "chore(news): automatischen HPOS-News-Snapshot aktualisieren"
+          git push
