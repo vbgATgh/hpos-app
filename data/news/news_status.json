@@ -2,14 +2,14 @@
   "schemaVersion": 1,
   "state": "CURRENT",
   "source": "github-actions/google-news-rss-discovery",
-  "asOf": "2026-08-27T12:17:15Z",
-  "lastAttemptAt": "2026-08-27T12:17:15Z",
-  "message": "Discovery-News aktualisiert: 42 konfigurierte Abfragen erfolgreich. Depot: 19 Titel vollständig; Watchlist: 18/60 Titel in diesem Rotationslauf.",
+  "asOf": "2026-08-27T13:34:54Z",
+  "lastAttemptAt": "2026-08-27T13:34:54Z",
+  "message": "Discovery-News aktualisiert: 42 konfigurierte Abfragen erfolgreich. Depot: 19 Titel vollständig; offizielle Primärquellen: 19/19; Watchlist: 18/60 Titel in diesem Rotationslauf.",
   "queriesTotal": 42,
   "queriesOk": 42,
   "queriesFailed": 0,
-  "articlesFetchedThisRun": 222,
-  "articlesStored": 273,
+  "articlesFetchedThisRun": 224,
+  "articlesStored": 280,
   "articlesByAsset": {
     "JNJ": 35,
     "PQ_ATFREQUENT09": 6,
@@ -17,32 +17,32 @@
     "PQ_AU000000SIG5": 5,
     "PQ_CA14150G4007": 2,
     "PQ_CH0012005267": 11,
-    "PQ_DE000A3E5D56": 12,
+    "PQ_DE000A3E5D56": 13,
     "PQ_DK0062498333": 1,
     "PQ_FR0000120073": 9,
     "PQ_FR0006174348": 5,
     "PQ_GB0006640972": 1,
     "PQ_GB00B2B0DG97": 5,
-    "PQ_IE00BTN1Y115": 8,
+    "PQ_IE00BTN1Y115": 9,
     "PQ_US0028241000": 11,
-    "PQ_US46120E6023": 11,
+    "PQ_US46120E6023": 12,
     "PQ_US48581R2058": 3,
     "PQ_US4943681035": 10,
     "PQ_US58933Y1055": 12,
     "PQ_US6742152076": 3,
-    "PQ_US8725401090": 12,
-    "PQ_US8825081040": 12,
+    "PQ_US8725401090": 13,
+    "PQ_US8825081040": 13,
     "PQ_US9037311076": 7,
     "PQ_US9078181081": 8,
     "PQ_US94106L1098": 10,
     "PQ_US98423F1093": 3,
-    "RIO_TINTO": 22,
-    "SPACEX": 32,
+    "RIO_TINTO": 23,
+    "SPACEX": 33,
     "XIAOMI": 15
   },
   "articlesByScope": {
-    "PORTFOLIO": 109,
-    "WATCHLIST": 164
+    "PORTFOLIO": 112,
+    "WATCHLIST": 168
   },
   "queryResults": [
     {
@@ -67,7 +67,7 @@
       "assetKey": "RIO_TINTO",
       "query": "\"Rio Tinto\" earnings OR production OR guidance OR dividend",
       "ok": true,
-      "items": 1
+      "items": 2
     },
     {
       "assetKey": "SUKUK",
@@ -85,7 +85,7 @@
       "assetKey": "SPACEX",
       "query": "\"SpaceX\"",
       "ok": true,
-      "items": 12
+      "items": 11
     },
     {
       "assetKey": "XIAOMI",
@@ -109,7 +109,7 @@
       "assetKey": "JNJ",
       "query": "\"Johnson & Johnson\" earnings OR dividend OR FDA",
       "ok": true,
-      "items": 8
+      "items": 9
     },
     {
       "assetKey": "PQ_DK0062498333",
@@ -175,7 +175,7 @@
       "assetKey": "PQ_IE00BTN1Y115",
       "query": "\"Medtronic\"",
       "ok": true,
-      "items": 8
+      "items": 9
     },
     {
       "assetKey": "PQ_US58933Y1055",
@@ -299,6 +299,7 @@
     }
   ],
   "portfolioAssetsConfigured": 19,
+  "portfolioPrimarySourcesMapped": 19,
   "watchlistAssetsConfigured": 60,
   "watchlistAssetsFetchedThisRun": 18,
   "watchlistRotationHours": 12
