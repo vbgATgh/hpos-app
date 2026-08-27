@@ -1,0 +1,106 @@
+name: HPOS News Fetch
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/hpos-news.yml'
+      - 'scripts/fetch_hpos_news.py'
+      - 'scripts/apply_hpos_news_integration.py'
+      - 'config/news_sources.json'
+      - 'tests/test_news_fetch.py'
+      - 'alpha41/news-414.js'
+  schedule:
+    # GitHub cron is UTC. Four triggers + Berlin-time gate below handle CET/CEST.
+    - cron: '15 4 * * *'
+    - cron: '15 5 * * *'
+    - cron: '15 16 * * *'
+    - cron: '15 17 * * *'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: hpos-news-fetch-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  fetch-news:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Repository auschecken
+        uses: actions/checkout@v4
+
+      - name: Python einrichten
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Parser und Datenlogik testen
+        run: python -m unittest tests.test_news_fetch -v
+
+      - name: Alpha 4.1.4 Integration anwenden
+        run: python scripts/apply_hpos_news_integration.py
+
+      - name: JavaScript-Syntax prüfen
+        shell: bash
+        run: |
+          node --check alpha41/news-414.js
+          python - <<'PY'
+          from pathlib import Path
+          t=Path('alpha41/index.html').read_text(encoding='utf-8')
+          js=t.split('<script>',1)[1].split('</script>',1)[0]
+          Path('/tmp/hpos-inline.js').write_text(js,encoding='utf-8')
+          assert "1.3.0-alpha.4.1.4" in t
+          assert 'news-414.js' in t
+          assert not any(line.lstrip().startswith('import ') for line in js.splitlines())
+          print('Single-file invariants: OK')
+          PY
+          node --check /tmp/hpos-inline.js
+
+      - name: Berliner Zeitfenster prüfen
+        id: gate
+        shell: bash
+        run: |
+          if [[ "$GITHUB_EVENT_NAME" != "schedule" ]]; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+            echo "Manueller/Push-Lauf: Abruf wird ausgeführt."
+            exit 0
+          fi
+          BERLIN_HOUR="$(TZ=Europe/Berlin date +%H)"
+          if [[ "$BERLIN_HOUR" == "06" || "$BERLIN_HOUR" == "18" ]]; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+            echo "Zeitfenster Europe/Berlin: ${BERLIN_HOUR}:xx"
+          else
+            echo "run=false" >> "$GITHUB_OUTPUT"
+            echo "DST-Ausweichlauf: ${BERLIN_HOUR}:xx Europe/Berlin, kein Abruf nötig."
+          fi
+
+      - name: HPOS-News abrufen
+        id: fetch
+        if: steps.gate.outputs.run == 'true'
+        continue-on-error: true
+        run: python scripts/fetch_hpos_news.py
+
+      - name: Integration und News-Snapshot committen
+        if: steps.gate.outputs.run == 'true'
+        shell: bash
+        run: |
+          if git diff --quiet -- alpha41/index.html data/news/news_feed.json data/news/news_status.json; then
+            echo "Keine Änderungen."
+            exit 0
+          fi
+          git config user.name "hpos-news-bot"
+          git config user.email "hpos-news-bot@users.noreply.github.com"
+          git add alpha41/index.html data/news/news_feed.json data/news/news_status.json
+          git commit -m "chore(news): Alpha 4.1.4 und News-Snapshot aktualisieren"
+          git push
+
+      - name: Abruffehler als Workflow-Fehler markieren
+        if: steps.gate.outputs.run == 'true' && steps.fetch.outcome == 'failure'
+        run: |
+          echo "Der externe News-Abruf ist fehlgeschlagen; Status wurde dokumentiert."
+          exit 1
