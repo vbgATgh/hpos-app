@@ -8,32 +8,8 @@
     "note": "Titel-spezifische Extraktoren arbeiten nur auf offiziellen Emittentenseiten. Parserfehler erzeugen Missing Evidence statt geschätzter Werte."
   },
   "assets": [
-    {
-      "assetKey":"FREQUENTIS",
-      "sourceName":"Frequentis Investor & Adhoc News",
-      "reportUrl":"https://www.frequentis.com/en/pr/frequentis-strong-growth-revenues-order-intake-and-earnings-h1-2026",
-      "period":"H1 2026",
-      "publishedAt":"2026-08-11",
-      "currency":"EUR",
-      "scale":1000000
-    },
-    {
-      "assetKey":"IVU_TRAFFIC",
-      "sourceName":"IVU Investor Relations",
-      "reportUrl":"https://www.ivu.com/en/all-news/details/ivu-publishes-consolidated-half-year-report-2026",
-      "period":"H1 2026",
-      "publishedAt":"2026-08-28",
-      "currency":"EUR",
-      "scale":1000
-    },
-    {
-      "assetKey":"LAGERCRANTZ",
-      "sourceName":"Lagercrantz Investors",
-      "reportUrl":"https://www.lagercrantz.com/media/press-archive/2026/lagercrantz-interim-report-q1-202627/",
-      "period":"Q1 2026/27",
-      "publishedAt":"2026-07-17",
-      "currency":"SEK",
-      "scale":1000000
-    }
+    {"assetKey":"FREQUENTIS","sourceName":"Frequentis Investor & Adhoc News","reportUrl":"https://www.frequentis.com/en/pr/frequentis-strong-growth-revenues-order-intake-and-earnings-h1-2026","period":"H1 2026","publishedAt":"2026-08-11","currency":"EUR","scale":1000000},
+    {"assetKey":"IVU_TRAFFIC","sourceName":"IVU Investor Relations","reportUrl":"https://www.ivu.com/en/all-news/details/ivu-publishes-consolidated-half-year-report-2026","period":"H1 2026","publishedAt":null,"currency":"EUR","scale":1000},
+    {"assetKey":"LAGERCRANTZ","sourceName":"Lagercrantz Investors","reportUrl":"https://www.lagercrantz.com/media/press-archive/2026/lagercrantz-interim-report-q1-202627/","period":"Q1 2026/27","publishedAt":"2026-07-17","currency":"SEK","scale":1000000}
   ]
 }
