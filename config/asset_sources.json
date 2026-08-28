@@ -1,12 +1,12 @@
 {
   "schemaVersion": 2,
-  "updatedAt": "2026-08-28",
+  "updatedAt": "2026-08-27",
   "policy": {
     "purpose": "Öffentliche Registry offizieller Primärquellen für das HPOS Asset-Universum. Die Registry enthält ausschließlich generische Asset-/Quellenmetadaten und keine Information über lokale Bestände, Watchlists, Broker, Stückzahlen, Einstandswerte, Strategie oder Halal-Historie.",
     "automation": "DIRECT_WHERE_SUPPORTED",
     "fallback": "OFFICIAL_PAGE_REFERENCE",
     "privacyBoundary": "PUBLIC_GENERIC_ONLY",
-    "note": "Eine Quelle wird nur als PRIMARY bezeichnet, wenn sie dem Emittenten/Fondsanbieter oder einem offiziellen Filing-/Melderegister zugeordnet ist. Bei nicht verifiziertem ISIN wird kein ISIN-Wert erfunden."
+    "note": "Eine Quelle wird nur als PRIMARY bezeichnet, wenn sie dem Emittenten/Fondsanbieter oder einem offiziellen Filing-/Melderegister zugeordnet ist."
   },
   "assets": [
     {"isin":"IE00B27YCN58","name":"iShares MSCI World Islamic UCITS ETF - USD DIS","sourceName":"iShares / BlackRock","url":"https://www.ishares.com/","domain":"ishares.com","registry":"Fondsanbieter","automationMode":"OFFICIAL_PAGE_REFERENCE"},
@@ -27,15 +27,6 @@
     {"isin":"GB00B2B0DG97","name":"RELX PLC","sourceName":"RELX Investors","url":"https://www.relx.com/investors","domain":"relx.com","registry":"Unternehmen + RNS","automationMode":"OFFICIAL_PAGE_REFERENCE"},
     {"isin":"GB0006640972","name":"4imprint Group PLC","sourceName":"4imprint Investors","url":"https://investors.4imprint.com/investors/","domain":"investors.4imprint.com","registry":"Unternehmen + RNS","automationMode":"OFFICIAL_PAGE_REFERENCE"},
     {"isin":"CA14150G4007","name":"Cardinal Energy","sourceName":"Cardinal Energy Investors","url":"https://cardinalenergy.ca/investors/investor-information/","domain":"cardinalenergy.ca","registry":"Unternehmen + SEDAR+","automationMode":"OFFICIAL_PAGE_REFERENCE"},
-    {"isin":"CA8051121090","name":"Savaria Corp.","sourceName":"Savaria Investor Information","url":"https://corp.savaria.com/investor-news","domain":"corp.savaria.com","registry":"Unternehmen + SEDAR+","automationMode":"OFFICIAL_PAGE_REFERENCE"},
-
-    {"name":"GSK","sourceName":"GSK Investors","url":"https://www.gsk.com/en-gb/investors/","domain":"gsk.com","registry":"Unternehmen + RNS + SEC","automationMode":"OFFICIAL_PAGE_REFERENCE"},
-    {"isin":"DE000A40ZW05","name":"Funkwerk","sourceName":"Funkwerk AG","url":"https://funkwerk.com/unternehmensdaten/","domain":"funkwerk.com","registry":"Unternehmen + m:access","automationMode":"OFFICIAL_PAGE_REFERENCE"},
-    {"isin":"ATFREQUENT09","name":"Frequentis","sourceName":"Frequentis Investor Relations","url":"https://www.frequentis.com/en/IR","domain":"frequentis.com","registry":"Unternehmen + Wiener Börse","automationMode":"OFFICIAL_PAGE_REFERENCE"},
-    {"name":"IVU Traffic Technologies","sourceName":"IVU Investor Relations","url":"https://www.ivu.com/en/investors","domain":"ivu.com","registry":"Unternehmen + Ad-hoc","automationMode":"OFFICIAL_PAGE_REFERENCE"},
-    {"name":"Tristel","sourceName":"Tristel Investors","url":"https://investors.tristel.com/","domain":"investors.tristel.com","registry":"Unternehmen + RNS/AIM","automationMode":"OFFICIAL_PAGE_REFERENCE"},
-    {"name":"Filtronic","sourceName":"Filtronic Investor Relations","url":"https://filtronic.com/Investors/","domain":"filtronic.com","registry":"Unternehmen + RNS/AIM","automationMode":"OFFICIAL_PAGE_REFERENCE"},
-    {"name":"Lagercrantz","sourceName":"Lagercrantz Investors","url":"https://www.lagercrantz.com/investors/","domain":"lagercrantz.com","registry":"Unternehmen + Nasdaq Stockholm","automationMode":"OFFICIAL_PAGE_REFERENCE"},
-    {"name":"Judges Scientific","sourceName":"Judges Scientific Investors","url":"https://www.judges.uk.com/financial-performance/financial-overview.html","domain":"judges.uk.com","registry":"Unternehmen + RNS/AIM","automationMode":"OFFICIAL_PAGE_REFERENCE"}
+    {"isin":"CA8051121090","name":"Savaria Corp.","sourceName":"Savaria Investor Information","url":"https://corp.savaria.com/investor-news","domain":"corp.savaria.com","registry":"Unternehmen + SEDAR+","automationMode":"OFFICIAL_PAGE_REFERENCE"}
   ]
 }
