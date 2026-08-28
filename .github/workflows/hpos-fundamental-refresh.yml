@@ -9,13 +9,16 @@ on:
       - 'config/asset_sources.json'
       - 'config/fundamental_asset_sources.json'
       - 'config/structured_fundamental_sources.json'
+      - 'config/thesis_evidence_policy.json'
       - 'data/thesis_registry.json'
       - 'scripts/fetch_sec_fundamentals.py'
       - 'scripts/fetch_ir_fundamentals.py'
       - 'scripts/fetch_structured_ir_metrics.py'
       - 'scripts/build_fundamental_coverage.py'
+      - 'scripts/build_thesis_signals.py'
       - 'tests/test_alpha461_ir_adapter.py'
       - 'tests/test_structured_fundamentals.py'
+      - 'tests/test_thesis_evidence_engine.py'
       - 'tests/test_fundamental_source_coverage_complete.py'
       - '.github/workflows/hpos-fundamental-refresh.yml'
   schedule:
@@ -38,7 +41,7 @@ jobs:
         with:
           python-version: '3.12'
       - name: Contract tests
-        run: python -m unittest tests.test_fundamental_evidence tests.test_alpha46_fundamentals tests.test_alpha461_ir_adapter tests.test_structured_fundamentals tests.test_fundamental_source_coverage_complete -v
+        run: python -m unittest tests.test_fundamental_evidence tests.test_alpha46_fundamentals tests.test_alpha461_ir_adapter tests.test_structured_fundamentals tests.test_thesis_evidence_engine tests.test_fundamental_source_coverage_complete -v
       - name: Build coverage
         run: python scripts/build_fundamental_coverage.py
       - name: SEC primary/regulator evidence
@@ -53,13 +56,17 @@ jobs:
         id: structured
         continue-on-error: true
         run: python scripts/fetch_structured_ir_metrics.py
+      - name: Build thesis evidence signals
+        run: python scripts/build_thesis_signals.py
       - name: Validate generated public evidence
         run: |
           test -f data/fundamental/evidence.json || echo '{"schemaVersion":1,"generatedAt":null,"items":[],"adapterStatus":[]}' > data/fundamental/evidence.json
           python -m json.tool data/fundamental/evidence.json >/dev/null
+          python -m json.tool data/fundamental/thesis_signals.json >/dev/null
           python - <<'PY'
           import json
           x=json.load(open('data/fundamental/evidence.json'))
+          s=json.load(open('data/fundamental/thesis_signals.json'))
           forbidden={'shares','broker','avgEntryPrice','cashEur','purchasePrice','portfolioValue','portfolioValueEur','currentValue','currentPrice','taxProfile','openOrders','savingPlans'}
           found=[]
           def walk(v,path='$'):
@@ -69,11 +76,12 @@ jobs:
                       walk(val,f'{path}.{k}')
               elif isinstance(v,list):
                   for i,val in enumerate(v): walk(val,f'{path}[{i}]')
-          walk(x)
+          walk(x);walk(s,'$.thesisSignals')
           assert not found, 'private portfolio field keys leaked into public evidence: '+', '.join(found[:10])
           assert all(i.get('sourceTier') in {'PRIMARY','REGULATOR','PROFESSIONAL','RESEARCH'} for i in x.get('items',[]))
+          assert all(a.get('autoBuyStatusChange') is False for a in s.get('assets',[]))
           structured=[i for i in x.get('items',[]) if i.get('metric') is not None]
-          print(f"Public evidence privacy/source boundary: OK ({len(x.get('items',[]))} items, {len(structured)} structured metrics)")
+          print(f"Public evidence privacy/source boundary: OK ({len(x.get('items',[]))} items, {len(structured)} structured metrics, {len(s.get('assets',[]))} thesis states)")
           PY
       - name: Commit evidence snapshots
         run: |
