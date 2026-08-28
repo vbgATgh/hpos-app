@@ -6,10 +6,13 @@ on:
   pull_request:
     paths:
       - 'alpha41/alpha442.js'
+      - 'alpha41/alpha464.js'
       - 'scripts/apply_hpos_alpha442.py'
       - 'tests/test_alpha442_architecture_runtime.py'
       - 'config/hpos_constitution.json'
+      - 'config/asset_interchangeability.json'
       - 'data/thesis_registry.json'
+      - 'data/asset_catalog.json'
       - '.github/workflows/hpos-alpha442-ci.yml'
       - '.github/workflows/hpos-news.yml'
 
@@ -17,12 +20,12 @@ jobs:
   runtime:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
         with: {python-version: '3.12'}
       - name: Architecture runtime tests
         run: python -m unittest tests.test_alpha442_architecture_runtime -v
-      - name: Apply patch chain twice
+      - name: Apply legacy patch chain twice
         run: |
           python scripts/apply_hpos_ux42.py
           python scripts/apply_hpos_alpha43.py
@@ -33,15 +36,18 @@ jobs:
           python scripts/apply_hpos_alpha441.py
           python scripts/apply_hpos_alpha442.py
           python scripts/apply_hpos_alpha442.py
-      - name: Syntax and source order
+      - name: Syntax and forward source order
         run: |
           node --check alpha41/alpha442.js
+          node --check alpha41/alpha464.js
           python - <<'PY'
           from pathlib import Path
           t=Path('alpha41/index.html').read_text()
-          assert "1.3.0-alpha.4.4.2" in t
           assert t.count('alpha442.js')==1
           assert t.index('alpha44.js') < t.index('alpha441.js') < t.index('alpha442.js')
-          assert 'ALPHA 4.4.2 · Architecture Runtime' in t
-          print('Alpha 4.4.2 runtime chain OK')
+          assert 'alpha464.js' in t
+          assert t.index('alpha442.js') < t.index('alpha464.js')
+          assert "const APP_VERSION='1.3.0-alpha.4.6.4';" in t
+          assert 'ALPHA 4.6.4 · Interchangeable Assets' in t
+          print('Legacy Architecture Runtime remains valid under Alpha 4.6.4')
           PY
