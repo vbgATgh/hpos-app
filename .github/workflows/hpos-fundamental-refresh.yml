@@ -1,0 +1,63 @@
+name: HPOS Fundamental Evidence Refresh
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'config/fundamental_adapters.json'
+      - 'config/fundamental_source_policy.json'
+      - 'scripts/fetch_sec_fundamentals.py'
+      - 'scripts/build_fundamental_coverage.py'
+      - '.github/workflows/hpos-fundamental-refresh.yml'
+  schedule:
+    - cron: '35 6 * * *'
+      timezone: 'Europe/Berlin'
+    - cron: '35 18 * * *'
+      timezone: 'Europe/Berlin'
+permissions:
+  contents: write
+concurrency:
+  group: hpos-fundamental-refresh-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  refresh:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Contract tests
+        run: python -m unittest tests.test_fundamental_evidence tests.test_alpha46_fundamentals -v
+      - name: Build coverage
+        run: python scripts/build_fundamental_coverage.py
+      - name: SEC primary/regulator evidence
+        id: sec
+        continue-on-error: true
+        run: python scripts/fetch_sec_fundamentals.py
+      - name: Validate generated public evidence
+        run: |
+          test -f data/fundamental/evidence.json || echo '{"schemaVersion":1,"generatedAt":null,"items":[],"adapterStatus":[]}' > data/fundamental/evidence.json
+          python -m json.tool data/fundamental/evidence.json >/dev/null
+          python - <<'PY'
+          import json
+          x=json.load(open('data/fundamental/evidence.json'))
+          forbidden=['shares','broker','avgEntryPrice','cashEur','purchasePrice','portfolioValue']
+          text=json.dumps(x)
+          assert not any(k in text for k in forbidden), 'private portfolio field leaked into public evidence'
+          print('Public evidence privacy boundary: OK')
+          PY
+      - name: Commit evidence snapshots
+        run: |
+          git add data/fundamental
+          if git diff --cached --quiet; then exit 0; fi
+          git config user.name 'hpos-fundamental-bot'
+          git config user.email 'hpos-fundamental-bot@users.noreply.github.com'
+          git commit -m 'chore(data): fundamental evidence aktualisieren'
+          git pull --rebase origin "$GITHUB_REF_NAME"
+          git push origin HEAD:"$GITHUB_REF_NAME"
+      - name: SEC total failure marker
+        if: steps.sec.outcome == 'failure'
+        run: |
+          echo 'SEC adapter failed; existing/non-SEC evidence was preserved where available.'
