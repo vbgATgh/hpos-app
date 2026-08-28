@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "updatedAt": "2026-08-28",
+  "policy": {
+    "publicDataOnly": true,
+    "credentialsRequired": false,
+    "primarySourcesOnly": true,
+    "failClosedOnParseError": true,
+    "note": "Adapter-Konfiguration enthält nur öffentliche Unternehmens-/Regulator-Metadaten. Keine Depot-, Broker- oder Steuerdaten."
+  },
+  "sec": {
+    "enabled": true,
+    "baseUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK{cik}.json",
+    "userAgent": "HPOS-PersonalResearch/1.0 vbgATgh@users.noreply.github.com",
+    "forms": ["10-K", "10-Q", "20-F", "40-F"],
+    "assets": [
+      {"assetKey":"ABBOTT","isin":"US0028241000","ticker":"ABT","name":"Abbott Laboratories","cik":"0000001800"},
+      {"assetKey":"WASTE_MANAGEMENT","isin":"US94106L1098","ticker":"WM","name":"Waste Management","cik":"0000823768"},
+      {"assetKey":"MCCORMICK","isin":"US5797802064","ticker":"MKC","name":"McCormick & Co","cik":"0000063754"},
+      {"assetKey":"MEDTRONIC","isin":"IE00BTN1Y115","ticker":"MDT","name":"Medtronic plc","cik":"0001613103"},
+      {"assetKey":"MERCK","isin":"US58933Y1055","ticker":"MRK","name":"Merck & Co., Inc.","cik":"0000310158"}
+    ],
+    "metrics": [
+      {"category":"REVENUE","metric":"revenue","concepts":["RevenueFromContractWithCustomerExcludingAssessedTax","Revenues","SalesRevenueNet"],"units":["USD"]},
+      {"category":"EARNINGS","metric":"net_income","concepts":["NetIncomeLoss","ProfitLoss"],"units":["USD"]},
+      {"category":"MARGIN","metric":"operating_income","concepts":["OperatingIncomeLoss"],"units":["USD"]},
+      {"category":"FREE_CASH_FLOW","metric":"operating_cash_flow","concepts":["NetCashProvidedByUsedInOperatingActivities"],"units":["USD"]},
+      {"category":"BALANCE_SHEET","metric":"assets","concepts":["Assets"],"units":["USD"]},
+      {"category":"BALANCE_SHEET","metric":"liabilities","concepts":["Liabilities"],"units":["USD"]},
+      {"category":"DIVIDEND","metric":"dividend_per_share","concepts":["CommonStockDividendsPerShareDeclared","CommonStockDividendsPerShareCashPaid"],"units":["USD/shares"]}
+    ]
+  },
+  "regulatory": {
+    "fda": {"enabled": true, "mode": "SOURCE_REGISTRY_AND_THESIS_QUERY", "baseUrl":"https://api.fda.gov/", "note":"Automatisches company-specific Mapping wird nur erzeugt, wenn Produkt/Sponsor eindeutig gemappt ist; sonst Missing Evidence."},
+    "ema": {"enabled": true, "mode": "SOURCE_REGISTRY_AND_THESIS_QUERY", "baseUrl":"https://www.ema.europa.eu/", "note":"EMA-Evidenz wird nicht aus unspezifischen Suchtreffern als Asset-Fakt behauptet."}
+  },
+  "fundProviders": {
+    "ishares": {"enabled": true, "mode":"OFFICIAL_PAGE_REFERENCE", "baseUrl":"https://www.ishares.com/", "note":"ETF/Sukuk-Metriken benötigen produktspezifische, belastbar parsebare Provider-Daten; bis dahin Coverage statt erfundener Kennzahlen."}
+  }
+}
