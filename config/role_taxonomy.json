@@ -1,0 +1,12 @@
+{
+  "schemaVersion":1,
+  "families":{
+    "HEALTHCARE":{"roles":["HEALTHCARE","HEALTHCARE_QUALITY","HEALTHCARE_INCOME","HEALTHCARE_DEFENSIVE","HEALTHCARE_REPLACEMENT_CANDIDATE"],"directSubstitutionPreferred":true},
+    "COMPOUNDER":{"roles":["COMPOUNDER","DEFENSIVE_COMPOUNDER"],"directSubstitutionPreferred":true},
+    "ENGPASS_ALPHA":{"roles":["ENGPASS_ALPHA"],"directSubstitutionPreferred":true},
+    "SPECIAL_SITUATION":{"roles":["SPECIAL_SITUATION"],"directSubstitutionPreferred":true},
+    "DEFENSIVE":{"roles":["DEFENSIVE"],"directSubstitutionPreferred":true}
+  },
+  "globalCompetition":{"enabled":true,"rule":"ANY_ELIGIBLE_EQUITY_MAY_COMPETE_FOR_NEW_CAPITAL"},
+  "crossFamilyRotation":{"allowed":true,"requiresPortfolioRoleImprovement":true,"requiresDiversificationOrRiskBenefit":true}
+}
