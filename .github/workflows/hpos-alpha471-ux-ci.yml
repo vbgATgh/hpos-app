@@ -1,0 +1,32 @@
+name: HPOS Alpha 4.7.1 UX CI
+on:
+  pull_request:
+    paths:
+      - 'alpha41/alpha471.js'
+      - 'alpha41/privacy-local43-shim.js'
+      - 'alpha471/**'
+      - 'tests/test_alpha471_ux.py'
+      - '.github/workflows/hpos-alpha471-ux-ci.yml'
+  push:
+    branches:
+      - alpha471-data-integrity-ux-cleanup-20260828
+    paths:
+      - 'alpha41/alpha471.js'
+      - 'alpha41/privacy-local43-shim.js'
+      - 'alpha471/**'
+      - 'tests/test_alpha471_ux.py'
+      - '.github/workflows/hpos-alpha471-ux-ci.yml'
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install pytest
+      - run: pytest -q tests/test_alpha471_ux.py
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --check alpha41/alpha471.js
