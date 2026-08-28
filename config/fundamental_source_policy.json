@@ -1,0 +1,23 @@
+{
+  "schemaVersion":1,
+  "updatedAt":"2026-08-28",
+  "purpose":"Define how HPOS gathers public fundamental evidence without mixing portfolio-private data into public source pipelines.",
+  "sourcePriority":["COMPANY_IR_OR_FILING","OFFICIAL_REGULATOR","OFFICIAL_FUND_PROVIDER","PROFESSIONAL_MEDIA","RESEARCH_AGGREGATOR"],
+  "domains":{
+    "healthcare":{"requiredEvidence":["EARNINGS","GUIDANCE","FREE_CASH_FLOW","MARGIN","PIPELINE","REGULATORY","DIVIDEND"],"regulators":["FDA","EMA"]},
+    "compounder":{"requiredEvidence":["EARNINGS","REVENUE","MARGIN","FREE_CASH_FLOW","BALANCE_SHEET","ACQUISITION","CAPITAL_ALLOCATION"]},
+    "engpass_alpha":{"requiredEvidence":["EARNINGS","ORDER_INTAKE","BACKLOG","MARGIN","FREE_CASH_FLOW","REGULATORY"]},
+    "industrial_quality":{"requiredEvidence":["EARNINGS","REVENUE","MARGIN","FREE_CASH_FLOW","BACKLOG","CAPITAL_ALLOCATION"]},
+    "commodity_energy":{"requiredEvidence":["EARNINGS","FREE_CASH_FLOW","BALANCE_SHEET","DIVIDEND","CAPITAL_ALLOCATION","REGULATORY"]},
+    "etf_sukuk":{"requiredEvidence":["ETF_INDEX","DIVIDEND","SUKUK_CREDIT","OTHER"]}
+  },
+  "rules":{
+    "priceActionIsNotFundamentalEvidence":true,
+    "singleHeadlineCannotChangeBindingRule":true,
+    "thesisChangeRequiresDriverOrFalsificationEvidence":true,
+    "mixedEvidenceMustRemainMixed":true,
+    "missingEvidenceReducesConfidence":true,
+    "primaryOrRegulatorPreferredForMaterialConclusion":true,
+    "noPortfolioPrivateDataInPublicSnapshots":true
+  }
+}

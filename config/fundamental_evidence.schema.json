@@ -1,0 +1,31 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "title":"HPOS Fundamental Evidence Snapshot",
+  "type":"object",
+  "required":["schemaVersion","generatedAt","items"],
+  "properties":{
+    "schemaVersion":{"const":1},
+    "generatedAt":{"type":"string"},
+    "items":{"type":"array","items":{"type":"object","required":["evidenceId","assetKey","category","sourceTier","sourceUrl","observedAt"],"properties":{
+      "evidenceId":{"type":"string"},
+      "assetKey":{"type":"string"},
+      "isin":{"type":["string","null"]},
+      "category":{"enum":["EARNINGS","GUIDANCE","REVENUE","MARGIN","FREE_CASH_FLOW","BALANCE_SHEET","DIVIDEND","PIPELINE","REGULATORY","ORDER_INTAKE","BACKLOG","ACQUISITION","CAPITAL_ALLOCATION","VALUATION_INPUT","ETF_INDEX","SUKUK_CREDIT","OTHER"]},
+      "metric":{"type":["string","null"]},
+      "value":{"type":["number","string","null"]},
+      "unit":{"type":["string","null"]},
+      "period":{"type":["string","null"]},
+      "direction":{"enum":["POSITIVE","NEGATIVE","MIXED","NEUTRAL","UNKNOWN"]},
+      "materiality":{"enum":["S1","S2","S3"]},
+      "sourceTier":{"enum":["PRIMARY","REGULATOR","PROFESSIONAL","RESEARCH"]},
+      "sourceName":{"type":["string","null"]},
+      "sourceUrl":{"type":"string"},
+      "publishedAt":{"type":["string","null"]},
+      "observedAt":{"type":"string"},
+      "thesisDriver":{"type":["string","null"]},
+      "falsificationCandidate":{"type":"boolean"},
+      "corroboration":{"type":"array","items":{"type":"string"}},
+      "notes":{"type":["string","null"]}
+    },"additionalProperties":true}}
+  },"additionalProperties":true
+}

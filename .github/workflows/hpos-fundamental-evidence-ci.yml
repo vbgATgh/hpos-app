@@ -1,0 +1,43 @@
+name: HPOS Fundamental Evidence CI
+on:
+  push:
+    branches: [hpos-fundamental-evidence-v1-20260828]
+    paths:
+      - 'config/fundamental_evidence.schema.json'
+      - 'config/fundamental_source_policy.json'
+      - 'data/fundamental/**'
+      - 'scripts/build_fundamental_coverage.py'
+      - 'tests/test_fundamental_evidence.py'
+      - '.github/workflows/hpos-fundamental-evidence-ci.yml'
+  pull_request:
+    paths:
+      - 'config/fundamental_evidence.schema.json'
+      - 'config/fundamental_source_policy.json'
+      - 'data/fundamental/**'
+      - 'scripts/build_fundamental_coverage.py'
+      - 'tests/test_fundamental_evidence.py'
+      - '.github/workflows/hpos-fundamental-evidence-ci.yml'
+jobs:
+  evidence:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with: {python-version: '3.12'}
+      - name: Validate JSON
+        run: |
+          python -m json.tool config/fundamental_evidence.schema.json >/dev/null
+          python -m json.tool config/fundamental_source_policy.json >/dev/null
+          python -m json.tool data/fundamental/evidence.json >/dev/null
+      - name: Fundamental evidence tests
+        run: python -m unittest tests.test_fundamental_evidence -v
+      - name: Coverage summary
+        run: |
+          python scripts/build_fundamental_coverage.py
+          python - <<'PY'
+          import json
+          c=json.load(open('data/fundamental/coverage.json'))
+          mapped=sum(x['sourceMapped'] for x in c['assets'])
+          print(f'Primary-source mapping: {mapped}/{len(c["assets"])}')
+          assert mapped >= 8
+          PY
