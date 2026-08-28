@@ -25,6 +25,16 @@ def test_progressive_disclosure_keeps_allocation_out_of_overview():
     assert 'a471-overview-only' in js
 
 
+def test_home_cleanup_reduces_development_cockpit_noise():
+    js=(ROOT/'alpha41'/'alpha471.js').read_text()
+    assert "['Übersicht','Depots','Mover','Daten']" in js
+    assert "'IZF / XIRR'" in js
+    assert "'Watchlist-Marker'" in js
+    assert 'a471-home-strip' in js
+    assert 'Dividenden YTD' in js
+    assert "HPOS · Portfolio" in js
+
+
 def test_isolated_test_entrypoint_injects_layer():
     html=(ROOT/'alpha471'/'index.html').read_text()
     assert '../alpha41/index.html' in html
