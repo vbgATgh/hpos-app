@@ -7,6 +7,7 @@ on:
       - 'config/fundamental_adapters.json'
       - 'config/fundamental_source_policy.json'
       - 'scripts/fetch_sec_fundamentals.py'
+      - 'scripts/fetch_ir_fundamentals.py'
       - 'scripts/build_fundamental_coverage.py'
       - '.github/workflows/hpos-fundamental-refresh.yml'
   schedule:
@@ -22,7 +23,7 @@ concurrency:
 jobs:
   refresh:
     runs-on: ubuntu-24.04
-    timeout-minutes: 12
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-python@v6
@@ -36,6 +37,10 @@ jobs:
         id: sec
         continue-on-error: true
         run: python scripts/fetch_sec_fundamentals.py
+      - name: Official company IR fallback
+        id: ir
+        continue-on-error: true
+        run: python scripts/fetch_ir_fundamentals.py
       - name: Validate generated public evidence
         run: |
           test -f data/fundamental/evidence.json || echo '{"schemaVersion":1,"generatedAt":null,"items":[],"adapterStatus":[]}' > data/fundamental/evidence.json
@@ -46,7 +51,8 @@ jobs:
           forbidden=['shares','broker','avgEntryPrice','cashEur','purchasePrice','portfolioValue']
           text=json.dumps(x)
           assert not any(k in text for k in forbidden), 'private portfolio field leaked into public evidence'
-          print('Public evidence privacy boundary: OK')
+          assert all(i.get('sourceTier') in {'PRIMARY','REGULATOR','PROFESSIONAL','RESEARCH'} for i in x.get('items',[]))
+          print('Public evidence privacy/source boundary: OK')
           PY
       - name: Commit evidence snapshots
         run: |
@@ -57,7 +63,10 @@ jobs:
           git commit -m 'chore(data): fundamental evidence aktualisieren'
           git pull --rebase origin "$GITHUB_REF_NAME"
           git push origin HEAD:"$GITHUB_REF_NAME"
-      - name: SEC total failure marker
-        if: steps.sec.outcome == 'failure'
+      - name: Adapter health summary
         run: |
-          echo 'SEC adapter failed; existing/non-SEC evidence was preserved where available.'
+          echo "SEC outcome: ${{ steps.sec.outcome }}"
+          echo "IR outcome: ${{ steps.ir.outcome }}"
+          if [ "${{ steps.sec.outcome }}" = "failure" ] && [ "${{ steps.ir.outcome }}" = "failure" ]; then
+            echo 'Both direct fundamental adapters failed; do not treat evidence as current.'
+          fi
