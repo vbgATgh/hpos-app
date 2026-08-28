@@ -49,11 +49,19 @@ jobs:
           python - <<'PY'
           import json
           x=json.load(open('data/fundamental/evidence.json'))
-          forbidden=['shares','broker','avgEntryPrice','cashEur','purchasePrice','portfolioValue']
-          text=json.dumps(x)
-          assert not any(k in text for k in forbidden), 'private portfolio field leaked into public evidence'
+          forbidden={'shares','broker','avgEntryPrice','cashEur','purchasePrice','portfolioValue','portfolioValueEur','currentValue','currentPrice','taxProfile','openOrders','savingPlans'}
+          found=[]
+          def walk(v,path='$'):
+              if isinstance(v,dict):
+                  for k,val in v.items():
+                      if k in forbidden: found.append(f'{path}.{k}')
+                      walk(val,f'{path}.{k}')
+              elif isinstance(v,list):
+                  for i,val in enumerate(v): walk(val,f'{path}[{i}]')
+          walk(x)
+          assert not found, 'private portfolio field keys leaked into public evidence: '+', '.join(found[:10])
           assert all(i.get('sourceTier') in {'PRIMARY','REGULATOR','PROFESSIONAL','RESEARCH'} for i in x.get('items',[]))
-          print('Public evidence privacy/source boundary: OK')
+          print(f"Public evidence privacy/source boundary: OK ({len(x.get('items',[]))} items)")
           PY
       - name: Commit evidence snapshots
         run: |
