@@ -3,6 +3,9 @@ from pathlib import Path
 p=Path('alpha41/index.html')
 t=p.read_text(encoding='utf-8')
 changed=False
+if "1.3.0-alpha.4.5" in t or "ALPHA 4.5" in t:
+    print('Neuerer Stand erkannt; Alpha 4.4.2 übersprungen.')
+    raise SystemExit(0)
 pairs=[
 ("const APP_VERSION='1.3.0-alpha.4.4.1';","const APP_VERSION='1.3.0-alpha.4.4.2';"),
 ('ALPHA 4.4.1 · UX + Thesis Intelligence','ALPHA 4.4.2 · Architecture Runtime'),
@@ -11,7 +14,6 @@ for old,new in pairs:
     if old in t:
         t=t.replace(old,new,1);changed=True
     elif new not in t:
-        # forward-idempotent: newer versions are left untouched
         if "1.3.0-alpha.4.4.3" in t or "ALPHA 4.4.3" in t:
             print('Neuerer Stand erkannt; Alpha 4.4.2 übersprungen.')
             raise SystemExit(0)
