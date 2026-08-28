@@ -6,10 +6,14 @@ on:
     paths:
       - 'config/fundamental_adapters.json'
       - 'config/fundamental_source_policy.json'
+      - 'config/asset_sources.json'
+      - 'config/fundamental_asset_sources.json'
+      - 'data/thesis_registry.json'
       - 'scripts/fetch_sec_fundamentals.py'
       - 'scripts/fetch_ir_fundamentals.py'
       - 'scripts/build_fundamental_coverage.py'
       - 'tests/test_alpha461_ir_adapter.py'
+      - 'tests/test_fundamental_source_coverage_complete.py'
       - '.github/workflows/hpos-fundamental-refresh.yml'
   schedule:
     - cron: '35 6 * * *'
@@ -24,14 +28,14 @@ concurrency:
 jobs:
   refresh:
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    timeout-minutes: 18
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
       - name: Contract tests
-        run: python -m unittest tests.test_fundamental_evidence tests.test_alpha46_fundamentals tests.test_alpha461_ir_adapter -v
+        run: python -m unittest tests.test_fundamental_evidence tests.test_alpha46_fundamentals tests.test_alpha461_ir_adapter tests.test_fundamental_source_coverage_complete -v
       - name: Build coverage
         run: python scripts/build_fundamental_coverage.py
       - name: SEC primary/regulator evidence
