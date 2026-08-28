@@ -2,16 +2,16 @@
   "schemaVersion": 1,
   "state": "CURRENT",
   "source": "github-actions/google-news-rss-discovery",
-  "asOf": "2026-08-28T06:28:04Z",
-  "lastAttemptAt": "2026-08-28T06:28:04Z",
+  "asOf": "2026-08-28T09:59:43Z",
+  "lastAttemptAt": "2026-08-28T09:59:43Z",
   "message": "Discovery-News aktualisiert: 27 konfigurierte Abfragen erfolgreich. Öffentliches Asset-Universum: 22 Titel; Primärquellen-Registry: 19/19. Depot-/Watchlist-Scope bleibt lokal.",
   "queriesTotal": 27,
   "queriesOk": 27,
   "queriesFailed": 0,
-  "articlesFetchedThisRun": 142,
-  "articlesStored": 319,
+  "articlesFetchedThisRun": 140,
+  "articlesStored": 331,
   "articlesByAsset": {
-    "JNJ": 36,
+    "JNJ": 37,
     "PQ_ATFREQUENT09": 7,
     "PQ_AU000000LTR4": 2,
     "PQ_AU000000SIG5": 4,
@@ -29,23 +29,23 @@
     "PQ_US9078181081": 7,
     "PQ_US98423F1093": 3,
     "PUB_CA14150G4007": 2,
-    "PUB_CH0012005267": 13,
+    "PUB_CH0012005267": 18,
     "PUB_DE000A3E5D56": 6,
     "PUB_DK0062498333": 1,
     "PUB_FR0000120073": 12,
     "PUB_FR0006174348": 5,
     "PUB_GB0006640972": 1,
     "PUB_GB00B2B0DG97": 6,
-    "PUB_IE00BTN1Y115": 13,
+    "PUB_IE00BTN1Y115": 14,
     "PUB_US0028241000": 15,
-    "PUB_US58933Y1055": 15,
-    "PUB_US94106L1098": 15,
-    "RIO_TINTO": 24,
-    "SPACEX": 39,
+    "PUB_US58933Y1055": 16,
+    "PUB_US94106L1098": 16,
+    "RIO_TINTO": 25,
+    "SPACEX": 41,
     "XIAOMI": 13
   },
   "articlesByScope": {
-    "UNIVERSE": 216,
+    "UNIVERSE": 228,
     "UNKNOWN": 103
   },
   "queryResults": [
@@ -95,13 +95,13 @@
       "assetKey": "XIAOMI",
       "query": "\"Xiaomi Corporation\"",
       "ok": true,
-      "items": 5
+      "items": 7
     },
     {
       "assetKey": "XIAOMI",
       "query": "\"Xiaomi\" earnings OR guidance OR results",
       "ok": true,
-      "items": 3
+      "items": 2
     },
     {
       "assetKey": "JNJ",
@@ -119,7 +119,7 @@
       "assetKey": "PUB_DK0062498333",
       "query": "\"Novo Nordisk B\"",
       "ok": true,
-      "items": 1
+      "items": 0
     },
     {
       "assetKey": "PUB_US0028241000",
@@ -131,7 +131,7 @@
       "assetKey": "PUB_DE000A3E5D56",
       "query": "\"FUCHS SE Vz\"",
       "ok": true,
-      "items": 6
+      "items": 5
     },
     {
       "assetKey": "PUB_CH0012005267",
@@ -173,13 +173,13 @@
       "assetKey": "PUB_FR0000120073",
       "query": "\"Air Liquide\"",
       "ok": true,
-      "items": 11
+      "items": 9
     },
     {
       "assetKey": "PUB_IE00BTN1Y115",
       "query": "\"Medtronic\"",
       "ok": true,
-      "items": 10
+      "items": 11
     },
     {
       "assetKey": "PUB_US58933Y1055",
