@@ -38,16 +38,17 @@ def frequentis(a,t):
     if g:add(out,a,'backlog','BACKLOG',num(g[0])*1_000_000,'EUR','backlog parsed from official H1 release','backlog and order intake')
     return out
 
+def _ivu_metric(out,a,t,metric,category,label,driver):
+    explicit=search(rf'{label}.{{0,120}}?(?:rose|increased|grew)\s+by\s+([+\-]?[\d.,]+)%\s+to\s*€\s*([\d.,]+)\s*thousand',t)
+    if explicit:
+        add(out,a,metric,category,num(explicit[1])*1_000,'EUR',f'{metric} parsed from official half-year report/news',driver,num(explicit[0]));return
+    fallback=search(rf'{label}.{{0,180}}?to\s*€\s*([\d.,]+)\s*thousand',t)
+    if fallback:add(out,a,metric,category,num(fallback[0])*1_000,'EUR',f'{metric} parsed from official half-year report/news',driver)
+
 def ivu(a,t):
     out=[]
-    rules=[
-      ('revenue','REVENUE',r'Revenue(?:\s+(?:rose|increased|grew)\s+by\s+([+\-]?[\d.,]+)%|.{0,80}?)?.{0,120}?to\s*€\s*([\d.,]+)\s*thousand','recurring software revenue'),
-      ('gross_profit','MARGIN',r'Gross profit(?:\s+(?:rose|increased|grew)\s+by\s+([+\-]?[\d.,]+)%|.{0,80}?)?.{0,120}?to\s*€\s*([\d.,]+)\s*thousand','EBIT scalability')]
-    for metric,cat,pat,driver in rules:
-        g=search(pat,t)
-        if g:
-            cp=num(g[0]) if g[0] not in (None,'') else None
-            add(out,a,metric,cat,num(g[1])*1_000,'EUR',f'{metric} parsed from official half-year report/news',driver,cp)
+    _ivu_metric(out,a,t,'revenue','REVENUE','Revenue','recurring software revenue')
+    _ivu_metric(out,a,t,'gross_profit','MARGIN','Gross profit','EBIT scalability')
     g=search(r'operating profit(?:\s+(?:rose|increased|grew)\s+by\s+([+\-]?[\d.,]+)%)?.{0,180}?€\s*([\d.,]+)\s*thousand',t)
     if g:add(out,a,'ebit','EARNINGS',num(g[1])*1_000,'EUR','ebit parsed from official half-year report/news','EBIT scalability',num(g[0]) if g[0] else None)
     else:
