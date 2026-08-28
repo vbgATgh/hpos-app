@@ -7,10 +7,14 @@ class InterchangeabilityTests(unittest.TestCase):
         cls.roles=json.loads((ROOT/'config/role_taxonomy.json').read_text())
         cls.catalog=json.loads((ROOT/'data/asset_catalog.json').read_text())
         cls.thesis=json.loads((ROOT/'data/thesis_registry.json').read_text())
+        cls.constitution=json.loads((ROOT/'config/hpos_constitution.json').read_text())
     def test_global_competition_is_binding(self):
         self.assertTrue(self.policy['capitalCompetition']['allEligibleEquitiesCompeteGlobally'])
         self.assertTrue(self.policy['capitalCompetition']['ownedAssetsHaveNoIncumbencyBonus'])
         self.assertTrue(self.policy['capitalCompetition']['watchlistAssetsMayBeatOwnedAssets'])
+        self.assertIn('ASSETS_ARE_REPLACEABLE_CAPITAL_CANDIDATES',self.constitution['principles'])
+        self.assertIn('OWNERSHIP_CREATES_NO_INCUMBENCY_BONUS',self.constitution['principles'])
+        self.assertTrue(self.constitution['rotation']['allEligibleEquitiesCompeteForCapital'])
     def test_all_thesis_assets_are_catalog_records(self):
         self.assertEqual(set(self.thesis['assets']),set(self.catalog['assets']))
     def test_roles_are_data_not_asset_specific_rules(self):
