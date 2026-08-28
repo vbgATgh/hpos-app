@@ -9,6 +9,7 @@ on:
       - 'scripts/fetch_sec_fundamentals.py'
       - 'scripts/fetch_ir_fundamentals.py'
       - 'scripts/build_fundamental_coverage.py'
+      - 'tests/test_alpha461_ir_adapter.py'
       - '.github/workflows/hpos-fundamental-refresh.yml'
   schedule:
     - cron: '35 6 * * *'
@@ -30,7 +31,7 @@ jobs:
         with:
           python-version: '3.12'
       - name: Contract tests
-        run: python -m unittest tests.test_fundamental_evidence tests.test_alpha46_fundamentals -v
+        run: python -m unittest tests.test_fundamental_evidence tests.test_alpha46_fundamentals tests.test_alpha461_ir_adapter -v
       - name: Build coverage
         run: python scripts/build_fundamental_coverage.py
       - name: SEC primary/regulator evidence
