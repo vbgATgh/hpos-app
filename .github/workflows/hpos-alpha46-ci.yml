@@ -1,0 +1,39 @@
+name: HPOS Alpha 4.6 Fundamental Adapters CI
+on:
+  pull_request:
+    paths:
+      - 'config/fundamental_adapters.json'
+      - 'scripts/fetch_sec_fundamentals.py'
+      - 'scripts/apply_hpos_alpha46.py'
+      - 'alpha41/alpha46.js'
+      - 'tests/test_alpha46_fundamentals.py'
+      - '.github/workflows/hpos-alpha46-ci.yml'
+  push:
+    branches: [hpos-fundamental-adapters-v1-20260828]
+permissions:
+  contents: read
+jobs:
+  fundamentals:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Validate adapter config
+        run: python -m json.tool config/fundamental_adapters.json >/dev/null
+      - name: Fundamental adapter tests
+        run: python -m unittest tests.test_alpha46_fundamentals -v
+      - name: Apply patcher twice
+        run: |
+          python scripts/apply_hpos_alpha451.py
+          python scripts/apply_hpos_alpha46.py
+          cp alpha41/index.html /tmp/a46.html
+          python scripts/apply_hpos_alpha46.py
+          cmp -s alpha41/index.html /tmp/a46.html
+      - name: Syntax and integration
+        run: |
+          node --check alpha41/alpha46.js
+          python -m py_compile scripts/fetch_sec_fundamentals.py scripts/apply_hpos_alpha46.py
+          grep -q 'alpha46.js' alpha41/index.html
