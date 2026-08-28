@@ -1,0 +1,61 @@
+name: HPOS Alpha 4.6.4 Interchangeable Assets CI
+on:
+  pull_request:
+    paths:
+      - 'config/asset_interchangeability.json'
+      - 'config/role_taxonomy.json'
+      - 'data/asset_catalog.json'
+      - 'data/thesis_registry.json'
+      - 'scripts/build_replacement_universe.py'
+      - 'scripts/apply_hpos_alpha464.py'
+      - 'alpha41/alpha442.js'
+      - 'alpha41/alpha464.js'
+      - 'tests/test_alpha464_interchangeability.py'
+      - '.github/workflows/hpos-alpha464-ci.yml'
+      - 'alpha41/index.html'
+  push:
+    branches: [alpha464-asset-interchangeability-20260828]
+permissions:
+  contents: write
+jobs:
+  interchangeable:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Validate registries
+        run: |
+          python -m json.tool config/asset_interchangeability.json >/dev/null
+          python -m json.tool config/role_taxonomy.json >/dev/null
+          python -m json.tool data/asset_catalog.json >/dev/null
+      - name: Architecture contracts
+        run: python -m unittest tests.test_alpha464_interchangeability -v
+      - name: Build replacement universe
+        run: |
+          python scripts/build_replacement_universe.py
+          python -m json.tool data/architecture/replacement_universe.json >/dev/null
+      - name: Apply patcher twice
+        run: |
+          python scripts/apply_hpos_alpha464.py
+          cp alpha41/index.html /tmp/a464.html
+          python scripts/apply_hpos_alpha464.py
+          cmp -s alpha41/index.html /tmp/a464.html
+      - name: Syntax and generic runtime
+        run: |
+          node --check alpha41/alpha442.js
+          node --check alpha41/alpha464.js
+          python -m py_compile scripts/build_replacement_universe.py scripts/apply_hpos_alpha464.py
+          grep -q 'alpha464.js' alpha41/index.html
+      - name: Integrated app commit
+        if: github.event_name == 'push'
+        run: |
+          git add alpha41/index.html data/architecture/replacement_universe.json
+          if git diff --cached --quiet; then exit 0; fi
+          git config user.name 'hpos-alpha464-bot'
+          git config user.email 'hpos-alpha464-bot@users.noreply.github.com'
+          git commit -m 'chore(alpha464): integrate interchangeable asset runtime'
+          git pull --rebase origin "$GITHUB_REF_NAME"
+          git push origin HEAD:"$GITHUB_REF_NAME"
