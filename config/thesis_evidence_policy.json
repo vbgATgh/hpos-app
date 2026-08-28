@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "updatedAt": "2026-08-28",
+  "principles": {
+    "rawEvidenceDoesNotChangeBuyStatus": true,
+    "missingComparisonMeansInsufficient": true,
+    "brokenRequiresExplicitFalsificationEvidence": true,
+    "positiveEvidenceCannotAutoUpgradeToBuy": true
+  },
+  "signalStates": ["STRENGTHENING", "WEAKENING", "NEUTRAL", "INSUFFICIENT", "BROKEN"],
+  "metricRules": {
+    "revenue": {"positivePct": 5.0, "negativePct": -5.0},
+    "order_intake": {"positivePct": 5.0, "negativePct": -5.0},
+    "backlog": {"positivePct": 5.0, "negativePct": -5.0},
+    "ebit": {"positivePct": 5.0, "negativePct": -5.0},
+    "ebita": {"positivePct": 5.0, "negativePct": -5.0},
+    "gross_profit": {"positivePct": 5.0, "negativePct": -5.0},
+    "operating_cash_flow": {"positivePct": 5.0, "negativePct": -5.0},
+    "ebita_margin": {"positiveAbs": 0.5, "negativeAbs": -0.5},
+    "revenue_guidance": {"mode": "REFERENCE_ONLY"},
+    "ebit_guidance": {"mode": "REFERENCE_ONLY"}
+  },
+  "aggregation": {
+    "minimumComparableSignals": 1,
+    "weakeningDominatesOnExplicitFalsification": true,
+    "brokenRequires": ["falsificationCandidate=true", "direction=NEGATIVE", "materiality=S3"]
+  }
+}
