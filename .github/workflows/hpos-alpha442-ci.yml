@@ -1,5 +1,4 @@
 name: HPOS Alpha 4.4.2 Architecture Runtime CI
-
 on:
   push:
     branches: [hpos-runtime-architecture-v1-20260828]
@@ -7,15 +6,16 @@ on:
     paths:
       - 'alpha41/alpha442.js'
       - 'alpha41/alpha464.js'
+      - 'alpha41/alpha47.js'
       - 'scripts/apply_hpos_alpha442.py'
       - 'tests/test_alpha442_architecture_runtime.py'
       - 'config/hpos_constitution.json'
       - 'config/asset_interchangeability.json'
+      - 'config/capital_competition_policy.json'
       - 'data/thesis_registry.json'
       - 'data/asset_catalog.json'
       - '.github/workflows/hpos-alpha442-ci.yml'
       - '.github/workflows/hpos-news.yml'
-
 jobs:
   runtime:
     runs-on: ubuntu-24.04
@@ -40,14 +40,16 @@ jobs:
         run: |
           node --check alpha41/alpha442.js
           node --check alpha41/alpha464.js
+          test ! -f alpha41/alpha47.js || node --check alpha41/alpha47.js
           python - <<'PY'
           from pathlib import Path
+          import re
           t=Path('alpha41/index.html').read_text()
           assert t.count('alpha442.js')==1
           assert t.index('alpha44.js') < t.index('alpha441.js') < t.index('alpha442.js')
-          assert 'alpha464.js' in t
-          assert t.index('alpha442.js') < t.index('alpha464.js')
-          assert "const APP_VERSION='1.3.0-alpha.4.6.4';" in t
-          assert 'ALPHA 4.6.4 · Interchangeable Assets' in t
-          print('Legacy Architecture Runtime remains valid under Alpha 4.6.4')
+          assert 'alpha464.js' in t and t.index('alpha442.js') < t.index('alpha464.js')
+          m=re.search(r"const APP_VERSION='1\.3\.0-alpha\.(\d+)\.(\d+)(?:\.(\d+))?';",t)
+          assert m and tuple(int(x or 0) for x in m.groups()) >= (4,6,4)
+          if 'alpha47.js' in t: assert t.index('alpha464.js') < t.index('alpha47.js')
+          print('Architecture Runtime forward-safe: OK')
           PY
