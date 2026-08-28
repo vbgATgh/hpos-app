@@ -4,7 +4,7 @@ import datetime as dt, hashlib, html, json, re, urllib.parse, urllib.request
 from html.parser import HTMLParser
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
-ASSETS=ROOT/'config'/'asset_sources.json'; OUT=ROOT/'data'/'fundamental'/'evidence.json'
+ASSETS=ROOT/'config'/'asset_sources.json'; FUND_ASSETS=ROOT/'config'/'fundamental_asset_sources.json'; OUT=ROOT/'data'/'fundamental'/'evidence.json'
 UA='HPOS-PersonalResearch/1.0 (+https://github.com/vbgATgh/hpos-app)'; TIMEOUT=15
 KEYWORDS=('results','earnings','quarter','annual report','interim','trading update','guidance','dividend','financial results','full year','half year','q1','q2','q3','q4')
 
@@ -31,8 +31,18 @@ class P(HTMLParser):
 def get(url):
     req=urllib.request.Request(url,headers={'User-Agent':UA,'Accept':'text/html,application/xhtml+xml','Accept-Language':'en-US,en;q=0.8'})
     with urllib.request.urlopen(req,timeout=TIMEOUT) as r:return r.read().decode('utf-8','ignore')
+def sources():
+    rows=list(json.loads(ASSETS.read_text(encoding='utf-8'))['assets'])
+    if FUND_ASSETS.exists():rows.extend(json.loads(FUND_ASSETS.read_text(encoding='utf-8'))['assets'])
+    # source URLs are the identity; do not crawl duplicates twice
+    out=[];seen=set()
+    for a in rows:
+        u=a.get('url')
+        if not u or u in seen:continue
+        seen.add(u);out.append(a)
+    return out
 def main():
-    assets=json.loads(ASSETS.read_text(encoding='utf-8'))['assets']; old={}
+    assets=sources(); old={}
     if OUT.exists():
         try:old=json.loads(OUT.read_text(encoding='utf-8'))
         except:old={}
@@ -40,7 +50,6 @@ def main():
     for a in assets:
         key=re.sub(r'[^A-Z0-9]','_',str(a.get('name') or a.get('isin')).upper()).strip('_')[:60]
         url=a.get('url'); n=0
-        if not url:continue
         try:
             p=P();p.feed(get(url))
             for text,href in p.rows:
@@ -56,7 +65,7 @@ def main():
             status.append({'asset':a.get('name'),'source':'IR','ok':True,'items':n})
         except Exception as ex:status.append({'asset':a.get('name'),'source':'IR','ok':False,'error':str(ex)})
     preserved=[x for x in old.get('items',[]) if x.get('sourceTier')!='PRIMARY' or x.get('sourceName')=='SEC EDGAR Companyfacts']
-    payload={'schemaVersion':1,'generatedAt':now(),'items':new+preserved,'adapterStatus':(old.get('adapterStatus') or [])+status}
+    payload={'schemaVersion':1,'generatedAt':now(),'items':new+preserved,'adapterStatus':status+[x for x in (old.get('adapterStatus') or []) if x.get('source')!='IR']}
     OUT.parent.mkdir(parents=True,exist_ok=True);OUT.write_text(json.dumps(payload,ensure_ascii=False,separators=(',',':'))+'\n',encoding='utf-8')
     print(f'Official IR evidence: {len(new)} items across {sum(1 for x in status if x.get("ok"))} reachable sources')
     return 0 if any(x.get('ok') for x in status) else 1
