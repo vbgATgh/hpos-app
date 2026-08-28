@@ -5,8 +5,10 @@ on:
   pull_request:
     paths:
       - 'config/asset_sources.json'
+      - 'config/fundamental_asset_sources.json'
       - 'data/thesis_registry.json'
       - 'scripts/build_fundamental_coverage.py'
+      - 'scripts/fetch_ir_fundamentals.py'
       - 'tests/test_fundamental_source_coverage_complete.py'
       - '.github/workflows/hpos-fundamental-source-coverage-ci.yml'
 permissions:
@@ -20,7 +22,9 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
-      - name: Validate source registry
-        run: python -m json.tool config/asset_sources.json >/dev/null
+      - name: Validate source registries
+        run: |
+          python -m json.tool config/asset_sources.json >/dev/null
+          python -m json.tool config/fundamental_asset_sources.json >/dev/null
       - name: Full thesis source coverage
-        run: python -m unittest tests.test_fundamental_source_coverage_complete -v
+        run: python -m unittest tests.test_fundamental_source_coverage_complete tests.test_alpha461_ir_adapter -v
