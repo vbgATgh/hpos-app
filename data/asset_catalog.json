@@ -1,0 +1,23 @@
+{
+  "schemaVersion":1,
+  "asOf":"2026-08-28",
+  "note":"Public identity/role metadata only. Assets are replaceable records; no private holdings or broker state.",
+  "assets":{
+    "NOVO_NORDISK":{"name":"Novo Nordisk","isin":"DK0062498333","aliases":["Novo Nordisk B","Novo Nordisk"],"role":"HEALTHCARE","family":"HEALTHCARE"},
+    "NOVARTIS":{"name":"Novartis","isin":"CH0012005267","aliases":["Novartis"],"role":"DEFENSIVE","family":"DEFENSIVE"},
+    "ABBOTT":{"name":"Abbott Laboratories","isin":"US0028241000","aliases":["Abbott Laboratories","Abbott"],"role":"HEALTHCARE_QUALITY","family":"HEALTHCARE"},
+    "MEDTRONIC":{"name":"Medtronic","isin":"IE00BTN1Y115","aliases":["Medtronic"],"role":"HEALTHCARE_INCOME","family":"HEALTHCARE"},
+    "MERCK":{"name":"Merck & Co., Inc.","isin":"US58933Y1055","aliases":["Merck & Co","Merck & Co., Inc.","Merck"],"role":"HEALTHCARE_DEFENSIVE","family":"HEALTHCARE"},
+    "GSK":{"name":"GSK","isin":null,"aliases":["GSK","GlaxoSmithKline"],"role":"HEALTHCARE_REPLACEMENT_CANDIDATE","family":"HEALTHCARE"},
+    "FUNKWERK":{"name":"Funkwerk","isin":"DE000A40ZW05","aliases":["Funkwerk","Funkwerk AG"],"role":"ENGPASS_ALPHA","family":"ENGPASS_ALPHA"},
+    "FREQUENTIS":{"name":"Frequentis","isin":"ATFREQUENT09","aliases":["Frequentis","Frequentis AG"],"role":"ENGPASS_ALPHA","family":"ENGPASS_ALPHA"},
+    "IVU_TRAFFIC":{"name":"IVU Traffic Technologies","isin":null,"aliases":["IVU Traffic","IVU Traffic Technologies","IVU"],"role":"ENGPASS_ALPHA","family":"ENGPASS_ALPHA"},
+    "RELX":{"name":"RELX","isin":"GB00B2B0DG97","aliases":["RELX","RELX PLC"],"role":"COMPOUNDER","family":"COMPOUNDER"},
+    "CRANEWARE":{"name":"Craneware","isin":"GB00B2425G68","aliases":["Craneware","Craneware PLC","The Craneware Group"],"role":"COMPOUNDER","family":"COMPOUNDER"},
+    "TRISTEL":{"name":"Tristel","isin":null,"aliases":["Tristel","Tristel PLC"],"role":"SPECIAL_SITUATION","family":"SPECIAL_SITUATION"},
+    "FILTRONIC":{"name":"Filtronic","isin":null,"aliases":["Filtronic","Filtronic PLC"],"role":"SPECIAL_SITUATION","family":"SPECIAL_SITUATION"},
+    "LAGERCRANTZ":{"name":"Lagercrantz","isin":null,"aliases":["Lagercrantz","Lagercrantz Group"],"role":"COMPOUNDER","family":"COMPOUNDER"},
+    "JUDGES_SCIENTIFIC":{"name":"Judges Scientific","isin":null,"aliases":["Judges Scientific","Judges Scientific PLC"],"role":"COMPOUNDER","family":"COMPOUNDER"},
+    "BUREAU_VERITAS":{"name":"Bureau Veritas","isin":"FR0006174348","aliases":["Bureau Veritas"],"role":"DEFENSIVE_COMPOUNDER","family":"COMPOUNDER"}
+  }
+}
