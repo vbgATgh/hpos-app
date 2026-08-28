@@ -8,7 +8,6 @@ def test_alpha471_layer_exists_and_is_fail_closed():
     assert "purchasePrice" in js
     assert "avgEntryPrice" in js
     assert "avgCost" in js
-    assert "HALAL" not in js or True
 
 
 def test_asset_primary_tabs_are_reduced():
@@ -30,11 +29,12 @@ def test_isolated_test_entrypoint_injects_layer():
     html=(ROOT/'alpha471'/'index.html').read_text()
     assert '../alpha41/index.html' in html
     assert 'alpha471.js?v=471' in html
-    assert 'cache:\'no-store\'' in html
+    assert "cache:'no-store'" in html
 
 
 def test_privacy_projection_exposes_canonical_entry_aliases():
     shim=(ROOT/'alpha41'/'privacy-local43-shim.js').read_text()
-    assert 'avgEntryPrice:entry' in shim
-    assert 'avgCost:entry' in shim
-    assert 'purchasePrice:entry' in shim
+    assert 'const averageEntryPrice=' in shim
+    assert 'avgEntryPrice:averageEntryPrice' in shim
+    assert 'avgCost:averageEntryPrice' in shim
+    assert 'purchasePrice:averageEntryPrice' in shim
