@@ -1,0 +1,34 @@
+name: HPOS Alpha 4.6.1 Primary IR Adapter CI
+on:
+  push:
+    branches: [hpos-primary-ir-adapter-v1-20260828]
+  pull_request:
+    paths:
+      - 'scripts/fetch_ir_fundamentals.py'
+      - 'tests/test_alpha461_ir_adapter.py'
+      - '.github/workflows/hpos-fundamental-refresh.yml'
+      - '.github/workflows/hpos-alpha461-ci.yml'
+permissions:
+  contents: read
+jobs:
+  ir:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: IR parser tests
+        run: python -m unittest tests.test_alpha461_ir_adapter -v
+      - name: Syntax
+        run: python -m py_compile scripts/fetch_ir_fundamentals.py
+      - name: Privacy invariant
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          t=Path('scripts/fetch_ir_fundamentals.py').read_text()
+          for x in ['currentValue','avgEntryPrice','cashEur','portfolioValueEur','broker']:
+              assert x not in t, x
+          print('IR adapter is public-source only')
+          PY
