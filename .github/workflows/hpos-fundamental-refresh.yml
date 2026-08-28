@@ -8,11 +8,14 @@ on:
       - 'config/fundamental_source_policy.json'
       - 'config/asset_sources.json'
       - 'config/fundamental_asset_sources.json'
+      - 'config/structured_fundamental_sources.json'
       - 'data/thesis_registry.json'
       - 'scripts/fetch_sec_fundamentals.py'
       - 'scripts/fetch_ir_fundamentals.py'
+      - 'scripts/fetch_structured_ir_metrics.py'
       - 'scripts/build_fundamental_coverage.py'
       - 'tests/test_alpha461_ir_adapter.py'
+      - 'tests/test_structured_fundamentals.py'
       - 'tests/test_fundamental_source_coverage_complete.py'
       - '.github/workflows/hpos-fundamental-refresh.yml'
   schedule:
@@ -28,14 +31,14 @@ concurrency:
 jobs:
   refresh:
     runs-on: ubuntu-24.04
-    timeout-minutes: 18
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
       - name: Contract tests
-        run: python -m unittest tests.test_fundamental_evidence tests.test_alpha46_fundamentals tests.test_alpha461_ir_adapter tests.test_fundamental_source_coverage_complete -v
+        run: python -m unittest tests.test_fundamental_evidence tests.test_alpha46_fundamentals tests.test_alpha461_ir_adapter tests.test_structured_fundamentals tests.test_fundamental_source_coverage_complete -v
       - name: Build coverage
         run: python scripts/build_fundamental_coverage.py
       - name: SEC primary/regulator evidence
@@ -46,6 +49,10 @@ jobs:
         id: ir
         continue-on-error: true
         run: python scripts/fetch_ir_fundamentals.py
+      - name: Structured official IR metrics
+        id: structured
+        continue-on-error: true
+        run: python scripts/fetch_structured_ir_metrics.py
       - name: Validate generated public evidence
         run: |
           test -f data/fundamental/evidence.json || echo '{"schemaVersion":1,"generatedAt":null,"items":[],"adapterStatus":[]}' > data/fundamental/evidence.json
@@ -65,7 +72,8 @@ jobs:
           walk(x)
           assert not found, 'private portfolio field keys leaked into public evidence: '+', '.join(found[:10])
           assert all(i.get('sourceTier') in {'PRIMARY','REGULATOR','PROFESSIONAL','RESEARCH'} for i in x.get('items',[]))
-          print(f"Public evidence privacy/source boundary: OK ({len(x.get('items',[]))} items)")
+          structured=[i for i in x.get('items',[]) if i.get('metric') is not None]
+          print(f"Public evidence privacy/source boundary: OK ({len(x.get('items',[]))} items, {len(structured)} structured metrics)")
           PY
       - name: Commit evidence snapshots
         run: |
@@ -80,6 +88,7 @@ jobs:
         run: |
           echo "SEC outcome: ${{ steps.sec.outcome }}"
           echo "IR outcome: ${{ steps.ir.outcome }}"
+          echo "Structured IR outcome: ${{ steps.structured.outcome }}"
           if [ "${{ steps.sec.outcome }}" = "failure" ] && [ "${{ steps.ir.outcome }}" = "failure" ]; then
-            echo 'Both direct fundamental adapters failed; do not treat evidence as current.'
+            echo 'Both direct fundamental source adapters failed; do not treat evidence as current.'
           fi
