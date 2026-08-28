@@ -1,0 +1,32 @@
+{
+  "schemaVersion":1,
+  "version":"1.0",
+  "principle":"THE_NEXT_EURO_HAS_NO_LOYALTY",
+  "eligibilityOrder":["HALAL","DATA_SUFFICIENCY","PORTFOLIO_CAPS","CASH","TRADEABILITY","THESIS_EVIDENCE","VALUATION_WHEN_AVAILABLE","EXECUTION"],
+  "hardBlocks":{
+    "halalAllowed":["H1"],
+    "unknownHalalBlocksNewCapital":true,
+    "h2BlocksNewCapital":true,
+    "h0BlocksNewCapital":true,
+    "portfolioCapViolationBlocksAffectedAdds":true,
+    "cashHardFloorBlocksPurchase":true,
+    "unknownTradeabilityBlocksExecution":true
+  },
+  "evidenceStates":{
+    "BROKEN":"BLOCK",
+    "WEAKENING":"DO_NOT_ADD_UNLESS_REVIEW_RESOLVES",
+    "NEUTRAL":"ELIGIBLE_IF_OTHER_GATES_PASS",
+    "STRENGTHENING":"ELIGIBLE_IF_OTHER_GATES_PASS",
+    "INSUFFICIENT":"WAIT_FOR_EVIDENCE"
+  },
+  "comparisonDimensions":["THESIS_EVIDENCE","PORTFOLIO_FIT","VALUATION","INCOME_QUALITY","DIVERSIFICATION","NET_ECONOMIC_EFFECT"],
+  "dominance":{
+    "requireNoKnownHardDisadvantage":true,
+    "requireAtLeastOneKnownMaterialAdvantage":true,
+    "unknownDimensionNeverCountsAsAdvantage":true,
+    "priceMomentumNeverCountsAsStandaloneAdvantage":true,
+    "ownershipNeverCountsAsAdvantage":true
+  },
+  "outcomes":["BEST_NEW_MONEY_DESTINATION","BEST_ROTATION","NO_CLEAR_ADVANTAGE","WAIT","BLOCKED"],
+  "guardrails":["NO_AUTONOMOUS_TRADES","NO_WEIGHTED_PSEUDO_PRECISION","NO_FORCED_INVESTMENT","NO_ASSET_FAVORITES","USER_FINAL_AUTHORITY"]
+}
