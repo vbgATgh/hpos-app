@@ -9,7 +9,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>HPOS Alpha 4.4.1 · UX + Thesis Intelligence</title>
+<title>HPOS Alpha 4.4.2 · Architecture Runtime</title>
 <style>
 :root{
   color-scheme:dark;
@@ -95,7 +95,7 @@ details{border-top:1px solid var(--line);padding:10px 0}summary{cursor:pointer;f
       </div>
     </header>
 
-    <div class="alpha-banner">ALPHA 4.4.1 · UX + Thesis Intelligence</div>
+    <div class="alpha-banner">ALPHA 4.4.2 · Architecture Runtime</div>
     <main id="main" class="main" tabindex="-1"></main>
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
     <div id="modalRoot"></div>
@@ -749,7 +749,7 @@ function buildHalalPortfolioSummary(state,snapshot){
 }
 
 /* === app.mjs === */
-const APP_VERSION='1.3.0-alpha.4.4.1';
+const APP_VERSION='1.3.0-alpha.4.4.2';
 const $=(s,r=document)=>r.querySelector(s); const $$=(s,r=document)=>[...r.querySelectorAll(s)];
 const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 const eur=v=>v===null||v===undefined||Number.isNaN(Number(v))?'unbekannt':new Intl.NumberFormat('de-DE',{style:'currency',currency:'EUR'}).format(Number(v));
@@ -1055,5 +1055,6 @@ init();
 <script src="./alpha433.js"></script>
 <script src="./alpha44.js"></script>
 <script src="./alpha441.js"></script>
+<script src="./alpha442.js"></script>
 </body>
 </html>
