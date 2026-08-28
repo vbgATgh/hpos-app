@@ -1,0 +1,39 @@
+name: HPOS Thesis Evidence Engine CI
+on:
+  push:
+    branches: [hpos-thesis-evidence-engine-v1-20260828]
+  pull_request:
+    paths:
+      - 'config/thesis_evidence_policy.json'
+      - 'data/thesis_registry.json'
+      - 'data/fundamental/evidence.json'
+      - 'scripts/build_thesis_signals.py'
+      - 'tests/test_thesis_evidence_engine.py'
+      - '.github/workflows/hpos-thesis-evidence-engine-ci.yml'
+permissions:
+  contents: read
+jobs:
+  thesis-evidence:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Validate policy
+        run: python -m json.tool config/thesis_evidence_policy.json >/dev/null
+      - name: Thesis evidence tests
+        run: python -m unittest tests.test_thesis_evidence_engine -v
+      - name: Build signals
+        run: python scripts/build_thesis_signals.py
+      - name: Invariants
+        run: |
+          python - <<'PY'
+          import json
+          x=json.load(open('data/fundamental/thesis_signals.json'))
+          assert all(a['decisionImpact']=='EVIDENCE_ONLY' for a in x['assets'])
+          assert all(a['autoBuyStatusChange'] is False for a in x['assets'])
+          assert all((a['state']!='BROKEN') or a['broken'] is True for a in x['assets'])
+          print('Thesis evidence invariants: OK')
+          PY
