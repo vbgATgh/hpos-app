@@ -48,9 +48,12 @@ jobs:
           node --check alpha41/alpha441.js
           python - <<'PY'
           from pathlib import Path
+          import re
           t=Path('alpha41/index.html').read_text(encoding='utf-8')
-          assert "const APP_VERSION='1.3.0-alpha.4.4.1';" in t
-          assert 'ALPHA 4.4.1 · UX + Thesis Intelligence' in t
+          m=re.search(r"1\.3\.0-alpha\.(\d+)\.(\d+)(?:\.(\d+))?",t)
+          assert m
+          version=tuple(int(x or 0) for x in m.groups())
+          assert version >= (4,4,1), version
           assert t.count('alpha441.js') == 1
           assert t.index('alpha44.js') < t.index('alpha441.js')
           js=Path('alpha41/alpha441.js').read_text(encoding='utf-8')
@@ -59,15 +62,13 @@ jobs:
           prod=Path('.github/workflows/hpos-news.yml').read_text(encoding='utf-8')
           assert 'apply_hpos_alpha441.py' in prod
           assert 'test_alpha441_thesis' in prod
-          assert "1.3.0-alpha.4.4.1" in prod
-          print('Alpha 4.4.1 + production refresh contract OK')
+          print('Alpha 4.4.1 layer remains present in newer release')
           PY
       - name: Browser Smoke
         run: |
           python -m http.server 8000 >/tmp/hpos441.log 2>&1 &
           sleep 2
           google-chrome --headless=new --no-sandbox --disable-gpu --virtual-time-budget=7000 --dump-dom 'http://127.0.0.1:8000/alpha41/?ci=441#portfolio' >/tmp/p441.html
-          grep -q 'ALPHA 4.4.1' /tmp/p441.html
           grep -q 'alpha441.js' /tmp/p441.html
           grep -q 'Portfolio' /tmp/p441.html
       - name: Integration committen
