@@ -32,17 +32,18 @@ def frequentis(a,t):
 
 def ivu(a,t):
     out=[]
-    rules=[
+    for metric,cat,pat,driver in [
       ('revenue','REVENUE',r'Revenue.{0,180}?to\s*€\s*([\d.,]+)\s*thousand','recurring software revenue'),
-      ('gross_profit','MARGIN',r'Gross profit.{0,180}?to\s*€\s*([\d.,]+)\s*thousand','EBIT scalability'),
-      ('ebit','EARNINGS',r'(?:At\s*)?€\s*([\d.,]+)\s*thousand.{0,180}?operating profit','EBIT scalability'),
-      ('revenue_guidance','GUIDANCE',r'expect.{0,160}?revenue\s+of\s+(?:more than|around)\s*€\s*([\d.,]+)\s*million','international scaling'),
-      ('ebit_guidance','GUIDANCE',r'(?:earnings before interest and taxes|EBIT).{0,220}?to\s+around\s*€\s*([\d.,]+)\s*million','EBIT scalability')]
-    for metric,cat,pat,driver in rules:
+      ('gross_profit','MARGIN',r'Gross profit.{0,180}?to\s*€\s*([\d.,]+)\s*thousand','EBIT scalability')]:
         g=search(pat,t)
-        if g:
-            scale=1_000_000 if 'guidance' in metric else 1_000
-            add(out,a,metric,cat,num(g[0])*scale,'EUR',f'{metric} parsed from official half-year report/news',driver)
+        if g:add(out,a,metric,cat,num(g[0])*1_000,'EUR',f'{metric} parsed from official half-year report/news',driver)
+    g=search(r'operating profit.{0,180}?€\s*([\d.,]+)\s*thousand',t)
+    if not g:g=search(r'At\s*€\s*([\d.,]+)\s*thousand.{0,180}?operating profit',t)
+    if g:add(out,a,'ebit','EARNINGS',num(g[0])*1_000,'EUR','ebit parsed from official half-year report/news','EBIT scalability')
+    g=search(r'expect.{0,180}?revenue\s+of\s+(?:more than|around)\s*€\s*([\d.,]+)\s*million',t)
+    if g:add(out,a,'revenue_guidance','GUIDANCE',num(g[0])*1_000_000,'EUR','revenue guidance parsed from official half-year report/news','international scaling')
+    g=search(r'(?:earnings before interest and taxes|EBIT).{0,260}?to\s+around\s*€\s*([\d.,]+)\s*million',t)
+    if g:add(out,a,'ebit_guidance','GUIDANCE',num(g[0])*1_000_000,'EUR','EBIT guidance parsed from official half-year report/news','EBIT scalability')
     return out
 
 def lagercrantz(a,t):
