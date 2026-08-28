@@ -2,16 +2,16 @@
   "schemaVersion": 1,
   "state": "CURRENT",
   "source": "github-actions/google-news-rss-discovery",
-  "asOf": "2026-08-28T09:59:43Z",
-  "lastAttemptAt": "2026-08-28T09:59:43Z",
+  "asOf": "2026-08-28T15:03:04Z",
+  "lastAttemptAt": "2026-08-28T15:03:04Z",
   "message": "Discovery-News aktualisiert: 27 konfigurierte Abfragen erfolgreich. Öffentliches Asset-Universum: 22 Titel; Primärquellen-Registry: 19/19. Depot-/Watchlist-Scope bleibt lokal.",
   "queriesTotal": 27,
   "queriesOk": 27,
   "queriesFailed": 0,
   "articlesFetchedThisRun": 140,
-  "articlesStored": 331,
+  "articlesStored": 350,
   "articlesByAsset": {
-    "JNJ": 37,
+    "JNJ": 39,
     "PQ_ATFREQUENT09": 7,
     "PQ_AU000000LTR4": 2,
     "PQ_AU000000SIG5": 4,
@@ -29,23 +29,23 @@
     "PQ_US9078181081": 7,
     "PQ_US98423F1093": 3,
     "PUB_CA14150G4007": 2,
-    "PUB_CH0012005267": 18,
+    "PUB_CH0012005267": 20,
     "PUB_DE000A3E5D56": 6,
     "PUB_DK0062498333": 1,
-    "PUB_FR0000120073": 12,
+    "PUB_FR0000120073": 15,
     "PUB_FR0006174348": 5,
     "PUB_GB0006640972": 1,
-    "PUB_GB00B2B0DG97": 6,
-    "PUB_IE00BTN1Y115": 14,
-    "PUB_US0028241000": 15,
-    "PUB_US58933Y1055": 16,
-    "PUB_US94106L1098": 16,
-    "RIO_TINTO": 25,
-    "SPACEX": 41,
+    "PUB_GB00B2B0DG97": 7,
+    "PUB_IE00BTN1Y115": 17,
+    "PUB_US0028241000": 17,
+    "PUB_US58933Y1055": 18,
+    "PUB_US94106L1098": 17,
+    "RIO_TINTO": 23,
+    "SPACEX": 46,
     "XIAOMI": 13
   },
   "articlesByScope": {
-    "UNIVERSE": 228,
+    "UNIVERSE": 247,
     "UNKNOWN": 103
   },
   "queryResults": [
@@ -65,7 +65,7 @@
       "assetKey": "RIO_TINTO",
       "query": "\"Rio Tinto\"",
       "ok": true,
-      "items": 10
+      "items": 11
     },
     {
       "assetKey": "RIO_TINTO",
@@ -173,13 +173,13 @@
       "assetKey": "PUB_FR0000120073",
       "query": "\"Air Liquide\"",
       "ok": true,
-      "items": 9
+      "items": 8
     },
     {
       "assetKey": "PUB_IE00BTN1Y115",
       "query": "\"Medtronic\"",
       "ok": true,
-      "items": 11
+      "items": 12
     },
     {
       "assetKey": "PUB_US58933Y1055",
@@ -203,7 +203,7 @@
       "assetKey": "PUB_CA14150G4007",
       "query": "\"Cardinal Energy\"",
       "ok": true,
-      "items": 3
+      "items": 2
     },
     {
       "assetKey": "PUB_CA8051121090",
