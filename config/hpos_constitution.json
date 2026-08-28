@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "version": "4.2-consolidated",
+  "role": "HPOS Constitution",
+  "principles": [
+    "HALAL_BEATS_RETURN",
+    "PORTFOLIO_BEATS_SINGLE_STOCK",
+    "QUALITY_BEATS_YIELD",
+    "VALUATION_BEATS_FOMO",
+    "CASH_IS_OPTIONALITY",
+    "WAIT_IS_VALID_ALLOCATION",
+    "USER_IS_FINAL_CAPITAL_AUTHORITY"
+  ],
+  "halal": {
+    "H1": "INVESTABLE",
+    "H2": "FREEZE_REVIEW",
+    "H0": "VETO_EXIT_REVIEW",
+    "UNKNOWN": "NO_NEW_BUY_OR_ADD",
+    "conflictPolicy": "CONSERVATIVE_H2_UNTIL_NEWER_VERIFIED_RESOLUTION",
+    "sourcePriority": ["MUSAFFA_AAOIFI", "ZOYA", "SHARLIFE_OR_OTHER_RELIABLE_SCREENING"]
+  },
+  "portfolioRules": {
+    "cash": {"targetPct": 3, "relativeHardMinimumPct": 2, "absoluteHardFloorEur": 150},
+    "healthcare": {"hardCapPct": 30},
+    "singleStock": {"hardCapPct": 25, "normalCoreRangePct": [3,8]},
+    "commodity": {"hardCapPct": 15},
+    "satellites": {"hardCapPct": 20},
+    "sukuk": {"targetPct": 15, "isin": "IE000929U2U9"},
+    "minimumEconomicPositionEur": 300,
+    "t90Days": 90,
+    "watchlistMax": 15
+  },
+  "watchlistDummy": {
+    "markers": ["NOTE_W", "TINY_FRACTION", "ECONOMIC_CENT_VALUE"],
+    "excludeFrom": ["SECTOR_CAPS", "T90", "PORTFOLIO_DIVERSIFICATION", "ECONOMIC_EXPOSURE"]
+  },
+  "rotation": {
+    "mandatoryEligibility": ["HALAL_H1", "CAPS_OK", "TRADEABLE", "PORTFOLIO_ROLE_CLEAR", "NET_EFFECT_ECONOMICALLY_SENSIBLE"],
+    "requiresMeaningfulAdvantage": true,
+    "fullRotationRequiresStrongerEvidence": true,
+    "neverBecauseOfRecentPricePerformanceAlone": true
+  },
+  "decisionOrder": ["HALAL_GATE", "PORTFOLIO_FIT", "THESIS", "FUNDAMENTALS", "VALUATION", "MARKET_TIMING", "NEWS_EVIDENCE", "EXECUTION"],
+  "governance": {
+    "priority": ["LATEST_EXPLICIT_USER_DECISION", "LATEST_BINDING_HPOS_RULE", "CURRENT_EFFECTIVE_PROFILE", "OLDER_MASTERFILES", "HISTORICAL_SNAPSHOTS"],
+    "classifyStatementsAs": ["BINDING_RULE", "OPERATING_PRINCIPLE", "TACTICAL_RECOMMENDATION", "TEMPORARY_PORTFOLIO_STATE"],
+    "featureFreeze": "NO_NEW_BINDING_RULE_FROM_SINGLE_CASE"
+  },
+  "data": {
+    "portfolioSourcePriority": ["CURRENT_BROKER_CONFIRMED_DATA", "PARQET_LIVE", "CURRENT_HPOS_LOCAL_STATE", "USER_CONFIRMED_OVERRIDE", "HISTORICAL_MASTERFILE"],
+    "currentStateMustNotBeHardcodedIntoConstitution": true,
+    "unknownMustRemainUnknown": true
+  }
+}
