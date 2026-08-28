@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "HPOS Private Current State",
+  "description": "Schema only. Real portfolio state stays local/private and must not be committed to the public repository.",
+  "type": "object",
+  "required": ["asOf", "portfolio", "positions", "overrides", "openOrders", "savingPlans"],
+  "properties": {
+    "asOf": {"type": "string"},
+    "portfolio": {
+      "type": "object",
+      "properties": {
+        "portfolioValueEur": {"type": ["number", "null"]},
+        "cashEur": {"type": ["number", "null"]},
+        "ttwrorPct": {"type": ["number", "null"]},
+        "xirrPct": {"type": ["number", "null"]},
+        "netDividendsEur": {"type": ["number", "null"]}
+      },
+      "additionalProperties": true
+    },
+    "positions": {"type": "array", "items": {"type": "object"}},
+    "overrides": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["assetKey", "confirmedAt", "source", "field", "value"],
+        "properties": {
+          "assetKey": {"type": "string"},
+          "confirmedAt": {"type": "string"},
+          "source": {"enum": ["BROKER_CONFIRMED", "USER_CONFIRMED"]},
+          "field": {"type": "string"},
+          "value": {},
+          "expiresWhen": {"type": ["string", "null"]}
+        }
+      }
+    },
+    "openOrders": {"type": "array", "items": {"type": "object"}},
+    "savingPlans": {"type": "array", "items": {"type": "object"}},
+    "lastController": {"type": ["object", "null"]}
+  },
+  "additionalProperties": true
+}
