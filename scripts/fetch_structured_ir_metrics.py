@@ -12,34 +12,47 @@ def text(url):
     with urllib.request.urlopen(req,timeout=TIMEOUT) as r: raw=r.read().decode('utf-8','ignore')
     raw=re.sub(r'<script\b[^>]*>.*?</script>',' ',raw,flags=re.I|re.S); raw=re.sub(r'<style\b[^>]*>.*?</style>',' ',raw,flags=re.I|re.S)
     return re.sub(r'\s+',' ',html.unescape(re.sub(r'<[^>]+>',' ',raw))).strip()
-def num(s): return float(str(s).replace(',','').replace('−','-').replace('–','-'))
+def num(s): return float(str(s).replace(',','').replace('−','-').replace('–','-').replace('+',''))
 def ev_id(asset,metric,period): return 'ev_'+hashlib.sha256(f'STRUCTURED_IR|{asset}|{metric}|{period}'.encode()).hexdigest()[:24]
-def add(out,a,metric,category,value,unit,notes,thesis_driver=None):
-    out.append({'evidenceId':ev_id(a['assetKey'],metric,a['period']),'assetKey':a['assetKey'],'isin':a.get('isin'),'category':category,'metric':metric,'value':value,'unit':unit,'period':a['period'],'direction':'NEUTRAL','materiality':'S2','sourceTier':'PRIMARY','sourceName':a['sourceName'],'sourceUrl':a['reportUrl'],'publishedAt':a.get('publishedAt'),'observedAt':now(),'thesisDriver':thesis_driver,'falsificationCandidate':False,'corroboration':[],'notes':notes})
+def add(out,a,metric,category,value,unit,notes,thesis_driver=None,change_pct=None):
+    row={'evidenceId':ev_id(a['assetKey'],metric,a['period']),'assetKey':a['assetKey'],'isin':a.get('isin'),'category':category,'metric':metric,'value':value,'unit':unit,'period':a['period'],'direction':'NEUTRAL','materiality':'S2','sourceTier':'PRIMARY','sourceName':a['sourceName'],'sourceUrl':a['reportUrl'],'publishedAt':a.get('publishedAt'),'observedAt':now(),'thesisDriver':thesis_driver,'falsificationCandidate':False,'corroboration':[],'notes':notes}
+    if change_pct is not None: row['changePct']=change_pct
+    out.append(row)
 def search(pattern,t,flags=re.I):
     m=re.search(pattern,t,flags); return m.groups() if m else None
 
 def frequentis(a,t):
     out=[]
-    for metric,cat,pat,driver in [
-      ('revenue','REVENUE',r'Revenues?\s*\+?[\d.,]+%?\s*to\s*EUR\s*([\d.,]+)\s*million','structural growth'),
-      ('order_intake','ORDER_INTAKE',r'Order intake\s*\+?[\d.,]+%?\s*to\s*EUR\s*([\d.,]+)\s*million','backlog and order intake'),
-      ('ebit','EARNINGS',r'EBIT\s+(?:rose\s+to|at)\s*EUR\s*\+?(-?[\d.,]+)\s*million','margin and execution'),
-      ('backlog','BACKLOG',r'(?:orders on hand|order backlog|backlog)\s+of\s+EUR\s*([\d.,]+)\s*million','backlog and order intake')]:
+    rules=[
+      ('revenue','REVENUE',r'Revenues?\s*([+\-]?[\d.,]+)%?\s*to\s*EUR\s*([\d.,]+)\s*million','structural growth'),
+      ('order_intake','ORDER_INTAKE',r'Order intake\s*([+\-]?[\d.,]+)%?\s*to\s*EUR\s*([\d.,]+)\s*million','backlog and order intake')]
+    for metric,cat,pat,driver in rules:
         g=search(pat,t)
-        if g:add(out,a,metric,cat,num(g[0])*1_000_000,'EUR',f'{metric} parsed from official H1 release',driver)
+        if g:add(out,a,metric,cat,num(g[1])*1_000_000,'EUR',f'{metric} parsed from official H1 release',driver,num(g[0]))
+    g=search(r'EBIT\s*([+\-]?[\d.,]+)%?\s*(?:to|at)\s*EUR\s*([+\-]?[\d.,]+)\s*million',t)
+    if g:add(out,a,'ebit','EARNINGS',num(g[1])*1_000_000,'EUR','ebit parsed from official H1 release','margin and execution',num(g[0]))
+    else:
+        g=search(r'EBIT\s+(?:rose\s+to|at)\s*EUR\s*\+?(-?[\d.,]+)\s*million',t)
+        if g:add(out,a,'ebit','EARNINGS',num(g[0])*1_000_000,'EUR','ebit parsed from official H1 release','margin and execution')
+    g=search(r'(?:orders on hand|order backlog|backlog)\s+of\s+EUR\s*([\d.,]+)\s*million',t)
+    if g:add(out,a,'backlog','BACKLOG',num(g[0])*1_000_000,'EUR','backlog parsed from official H1 release','backlog and order intake')
     return out
 
 def ivu(a,t):
     out=[]
-    for metric,cat,pat,driver in [
-      ('revenue','REVENUE',r'Revenue.{0,180}?to\s*€\s*([\d.,]+)\s*thousand','recurring software revenue'),
-      ('gross_profit','MARGIN',r'Gross profit.{0,180}?to\s*€\s*([\d.,]+)\s*thousand','EBIT scalability')]:
+    rules=[
+      ('revenue','REVENUE',r'Revenue(?:\s+(?:rose|increased|grew)\s+by\s+([+\-]?[\d.,]+)%|.{0,80}?)?.{0,120}?to\s*€\s*([\d.,]+)\s*thousand','recurring software revenue'),
+      ('gross_profit','MARGIN',r'Gross profit(?:\s+(?:rose|increased|grew)\s+by\s+([+\-]?[\d.,]+)%|.{0,80}?)?.{0,120}?to\s*€\s*([\d.,]+)\s*thousand','EBIT scalability')]
+    for metric,cat,pat,driver in rules:
         g=search(pat,t)
-        if g:add(out,a,metric,cat,num(g[0])*1_000,'EUR',f'{metric} parsed from official half-year report/news',driver)
-    g=search(r'operating profit.{0,180}?€\s*([\d.,]+)\s*thousand',t)
-    if not g:g=search(r'At\s*€\s*([\d.,]+)\s*thousand.{0,180}?operating profit',t)
-    if g:add(out,a,'ebit','EARNINGS',num(g[0])*1_000,'EUR','ebit parsed from official half-year report/news','EBIT scalability')
+        if g:
+            cp=num(g[0]) if g[0] not in (None,'') else None
+            add(out,a,metric,cat,num(g[1])*1_000,'EUR',f'{metric} parsed from official half-year report/news',driver,cp)
+    g=search(r'operating profit(?:\s+(?:rose|increased|grew)\s+by\s+([+\-]?[\d.,]+)%)?.{0,180}?€\s*([\d.,]+)\s*thousand',t)
+    if g:add(out,a,'ebit','EARNINGS',num(g[1])*1_000,'EUR','ebit parsed from official half-year report/news','EBIT scalability',num(g[0]) if g[0] else None)
+    else:
+        g=search(r'At\s*€\s*([\d.,]+)\s*thousand.{0,180}?operating profit',t)
+        if g:add(out,a,'ebit','EARNINGS',num(g[0])*1_000,'EUR','ebit parsed from official half-year report/news','EBIT scalability')
     g=search(r'expect.{0,180}?revenue\s+of\s+(?:more than|around)\s*€\s*([\d.,]+)\s*million',t)
     if g:add(out,a,'revenue_guidance','GUIDANCE',num(g[0])*1_000_000,'EUR','revenue guidance parsed from official half-year report/news','international scaling')
     g=search(r'(?:earnings before interest and taxes|EBIT).{0,260}?to\s+around\s*€\s*([\d.,]+)\s*million',t)
@@ -49,16 +62,15 @@ def ivu(a,t):
 def lagercrantz(a,t):
     out=[]
     rules=[
-      ('revenue','REVENUE',r'Net revenue increased by\s*[\d.,]+%\s*to MSEK\s*([\d.,]+)','acquisition discipline'),
-      ('ebita','EARNINGS',r'Operating profit \(EBITA\) increased by\s*[\d.,]+%\s*to MSEK\s*([\d.,]+)','EBITA margin'),
-      ('ebita_margin','MARGIN',r'EBITA margin was\s*([\d.,]+)%','EBITA margin'),
-      ('operating_cash_flow','FREE_CASH_FLOW',r'Cash flow from operating activities amounted to MSEK\s*([\d.,]+)','cash conversion')]
+      ('revenue','REVENUE',r'Net revenue increased by\s*([\d.,]+)%\s*to MSEK\s*([\d.,]+)','acquisition discipline'),
+      ('ebita','EARNINGS',r'Operating profit \(EBITA\) increased by\s*([\d.,]+)%\s*to MSEK\s*([\d.,]+)','EBITA margin')]
     for metric,cat,pat,driver in rules:
         g=search(pat,t)
-        if g:
-            value=num(g[0]) if metric=='ebita_margin' else num(g[0])*1_000_000
-            unit='PCT' if metric=='ebita_margin' else 'SEK'
-            add(out,a,metric,cat,value,unit,f'{metric} parsed from official Q1 report',driver)
+        if g:add(out,a,metric,cat,num(g[1])*1_000_000,'SEK',f'{metric} parsed from official Q1 report',driver,num(g[0]))
+    g=search(r'EBITA margin was\s*([\d.,]+)%',t)
+    if g:add(out,a,'ebita_margin','MARGIN',num(g[0]),'PCT','ebita_margin parsed from official Q1 report','EBITA margin')
+    g=search(r'Cash flow from operating activities amounted to MSEK\s*([\d.,]+)',t)
+    if g:add(out,a,'operating_cash_flow','FREE_CASH_FLOW',num(g[0])*1_000_000,'SEK','operating_cash_flow parsed from official Q1 report','cash conversion')
     return out
 PARSERS={'FREQUENTIS':frequentis,'IVU_TRAFFIC':ivu,'LAGERCRANTZ':lagercrantz}
 
