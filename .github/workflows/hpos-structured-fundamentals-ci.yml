@@ -1,0 +1,40 @@
+name: HPOS Structured Fundamentals CI
+on:
+  push:
+    branches: [hpos-structured-fundamentals-v1-20260828]
+  pull_request:
+    paths:
+      - 'config/fundamental_asset_sources.json'
+      - 'config/structured_fundamental_sources.json'
+      - 'scripts/fetch_ir_fundamentals.py'
+      - 'scripts/fetch_structured_ir_metrics.py'
+      - 'tests/test_structured_fundamentals.py'
+      - '.github/workflows/hpos-structured-fundamentals-ci.yml'
+permissions:
+  contents: read
+jobs:
+  structured:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Validate configs
+        run: |
+          python -m json.tool config/fundamental_asset_sources.json >/dev/null
+          python -m json.tool config/structured_fundamental_sources.json >/dev/null
+      - name: Parser contracts
+        run: python -m unittest tests.test_structured_fundamentals tests.test_alpha461_ir_adapter -v
+      - name: Syntax
+        run: python -m py_compile scripts/fetch_ir_fundamentals.py scripts/fetch_structured_ir_metrics.py
+      - name: Privacy
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          t=Path('scripts/fetch_structured_ir_metrics.py').read_text()+Path('config/structured_fundamental_sources.json').read_text()
+          for x in ['avgEntryPrice','portfolioValueEur','cashEur','openOrders','taxProfile']:
+              assert x not in t, x
+          print('Structured fundamentals are public-source only')
+          PY

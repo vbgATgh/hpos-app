@@ -34,7 +34,6 @@ def get(url):
 def sources():
     rows=list(json.loads(ASSETS.read_text(encoding='utf-8'))['assets'])
     if FUND_ASSETS.exists():rows.extend(json.loads(FUND_ASSETS.read_text(encoding='utf-8'))['assets'])
-    # source URLs are the identity; do not crawl duplicates twice
     out=[];seen=set()
     for a in rows:
         u=a.get('url')
@@ -48,23 +47,23 @@ def main():
         except:old={}
     existing={x.get('evidenceId'):x for x in old.get('items',[])}; new=[];status=[];seen=set()
     for a in assets:
-        key=re.sub(r'[^A-Z0-9]','_',str(a.get('name') or a.get('isin')).upper()).strip('_')[:60]
+        key=a.get('assetKey') or re.sub(r'[^A-Z0-9]','_',str(a.get('name') or a.get('isin')).upper()).strip('_')[:60]
         url=a.get('url'); n=0
         try:
             p=P();p.feed(get(url))
-            for text,href in p.rows:
-                low=text.lower()
+            for label,href in p.rows:
+                low=label.lower()
                 if not any(k in low for k in KEYWORDS):continue
                 full=urllib.parse.urljoin(url,href)
                 if urllib.parse.urlparse(full).netloc and urllib.parse.urlparse(full).netloc.lower()!=urllib.parse.urlparse(url).netloc.lower():continue
-                ident=eid(key,text,full)
+                ident=eid(key,label,full)
                 if ident in seen:continue
                 seen.add(ident);prev=existing.get(ident,{})
-                new.append({'evidenceId':ident,'assetKey':key,'isin':a.get('isin'),'category':category(text),'metric':None,'value':None,'unit':None,'period':None,'direction':'NEUTRAL','materiality':'S2','sourceTier':'PRIMARY','sourceName':a.get('sourceName'),'sourceUrl':full,'publishedAt':None,'observedAt':now(),'firstSeenAt':prev.get('firstSeenAt') or now(),'thesisDriver':None,'falsificationCandidate':False,'corroboration':[],'notes':text[:240]});n+=1
+                new.append({'evidenceId':ident,'assetKey':key,'isin':a.get('isin'),'category':category(label),'metric':None,'value':None,'unit':None,'period':None,'direction':'NEUTRAL','materiality':'S2','sourceTier':'PRIMARY','sourceName':a.get('sourceName'),'sourceUrl':full,'publishedAt':None,'observedAt':now(),'firstSeenAt':prev.get('firstSeenAt') or now(),'thesisDriver':None,'falsificationCandidate':False,'corroboration':[],'notes':label[:240]});n+=1
                 if n>=6:break
-            status.append({'asset':a.get('name'),'source':'IR','ok':True,'items':n})
-        except Exception as ex:status.append({'asset':a.get('name'),'source':'IR','ok':False,'error':str(ex)})
-    preserved=[x for x in old.get('items',[]) if x.get('sourceTier')!='PRIMARY' or x.get('sourceName')=='SEC EDGAR Companyfacts']
+            status.append({'assetKey':key,'asset':a.get('name'),'source':'IR','ok':True,'items':n})
+        except Exception as ex:status.append({'assetKey':key,'asset':a.get('name'),'source':'IR','ok':False,'error':str(ex)})
+    preserved=[x for x in old.get('items',[]) if x.get('sourceTier')!='PRIMARY' or x.get('sourceName')=='SEC EDGAR Companyfacts' or x.get('metric') is not None]
     payload={'schemaVersion':1,'generatedAt':now(),'items':new+preserved,'adapterStatus':status+[x for x in (old.get('adapterStatus') or []) if x.get('source')!='IR']}
     OUT.parent.mkdir(parents=True,exist_ok=True);OUT.write_text(json.dumps(payload,ensure_ascii=False,separators=(',',':'))+'\n',encoding='utf-8')
     print(f'Official IR evidence: {len(new)} items across {sum(1 for x in status if x.get("ok"))} reachable sources')
