@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "HPOS Private Transaction Ledger",
+  "description": "Schema only. Real transaction rows remain local/private.",
+  "type": "object",
+  "required": ["schemaVersion", "asOf", "entries"],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "asOf": {"type": "string"},
+    "source": {"enum": ["PARQET", "BROKER_DIRECT", "MIXED", "LOCAL_IMPORT"]},
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "type", "datetime", "currency", "source"],
+        "properties": {
+          "id": {"type": "string"},
+          "type": {"enum": ["BUY", "SELL", "DIVIDEND", "INTEREST", "DEPOSIT", "WITHDRAWAL", "FEE_TAX", "TRANSFER_IN", "TRANSFER_OUT", "OPENING_POSITION"]},
+          "datetime": {"type": "string"},
+          "assetKey": {"type": ["string", "null"]},
+          "isin": {"type": ["string", "null"]},
+          "broker": {"type": ["string", "null"]},
+          "shares": {"type": ["number", "null"]},
+          "price": {"type": ["number", "null"]},
+          "amountGross": {"type": ["number", "null"]},
+          "amountNet": {"type": ["number", "null"]},
+          "tax": {"type": ["number", "null"]},
+          "fee": {"type": ["number", "null"]},
+          "currency": {"type": "string"},
+          "source": {"enum": ["PARQET", "SCALABLE_CAPITAL", "TRADE_REPUBLIC", "USER_CONFIRMED", "OPENING_BALANCE"]},
+          "sourceId": {"type": ["string", "null"]},
+          "confidence": {"enum": ["HIGH", "MEDIUM", "LOW"]},
+          "notes": {"type": ["string", "null"]}
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": true
+}
