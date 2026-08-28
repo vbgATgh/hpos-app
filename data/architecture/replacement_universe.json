@@ -1,0 +1,561 @@
+{
+  "schemaVersion": 1,
+  "principle": "EQUITIES_ARE_REPLACEABLE_DATA_NOT_SYSTEM_COMPONENTS",
+  "allEligibleEquitiesCompeteGlobally": true,
+  "assetCount": 16,
+  "assets": [
+    {
+      "assetKey": "NOVO_NORDISK",
+      "name": "Novo Nordisk",
+      "isin": "DK0062498333",
+      "role": "HEALTHCARE",
+      "family": "HEALTHCARE",
+      "thesisDefined": true,
+      "falsificationDefined": true
+    },
+    {
+      "assetKey": "NOVARTIS",
+      "name": "Novartis",
+      "isin": "CH0012005267",
+      "role": "DEFENSIVE",
+      "family": "DEFENSIVE",
+      "thesisDefined": true,
+      "falsificationDefined": true
+    },
+    {
+      "assetKey": "ABBOTT",
+      "name": "Abbott Laboratories",
+      "isin": "US0028241000",
+      "role": "HEALTHCARE_QUALITY",
+      "family": "HEALTHCARE",
+      "thesisDefined": true,
+      "falsificationDefined": true
+    },
+    {
+      "assetKey": "MEDTRONIC",
+      "name": "Medtronic",
+      "isin": "IE00BTN1Y115",
+      "role": "HEALTHCARE_INCOME",
+      "family": "HEALTHCARE",
+      "thesisDefined": true,
+      "falsificationDefined": true
+    },
+    {
+      "assetKey": "MERCK",
+      "name": "Merck & Co., Inc.",
+      "isin": "US58933Y1055",
+      "role": "HEALTHCARE_DEFENSIVE",
+      "family": "HEALTHCARE",
+      "thesisDefined": true,
+      "falsificationDefined": true
+    },
+    {
+      "assetKey": "GSK",
+      "name": "GSK",
+      "isin": null,
+      "role": "HEALTHCARE_REPLACEMENT_CANDIDATE",
+      "family": "HEALTHCARE",
+      "thesisDefined": true,
+      "falsificationDefined": true
+    },
+    {
+      "assetKey": "FUNKWERK",
+      "name": "Funkwerk",
+      "isin": "DE000A40ZW05",
+      "role": "ENGPASS_ALPHA",
+      "family": "ENGPASS_ALPHA",
+      "thesisDefined": true,
+      "falsificationDefined": true
+    },
+    {
+      "assetKey": "FREQUENTIS",
+      "name": "Frequentis",
+      "isin": "ATFREQUENT09",
+      "role": "ENGPASS_ALPHA",
+      "family": "ENGPASS_ALPHA",
+      "thesisDefined": true,
+      "falsificationDefined": true
+    },
+    {
+      "assetKey": "IVU_TRAFFIC",
+      "name": "IVU Traffic Technologies",
+      "isin": null,
+      "role": "ENGPASS_ALPHA",
+      "family": "ENGPASS_ALPHA",
+      "thesisDefined": true,
+      "falsificationDefined": true
+    },
+    {
+      "assetKey": "RELX",
+      "name": "RELX",
+      "isin": "GB00B2B0DG97",
+      "role": "COMPOUNDER",
+      "family": "COMPOUNDER",
+      "thesisDefined": true,
+      "falsificationDefined": true
+    },
+    {
+      "assetKey": "CRANEWARE",
+      "name": "Craneware",
+      "isin": "GB00B2425G68",
+      "role": "COMPOUNDER",
+      "family": "COMPOUNDER",
+      "thesisDefined": true,
+      "falsificationDefined": true
+    },
+    {
+      "assetKey": "TRISTEL",
+      "name": "Tristel",
+      "isin": null,
+      "role": "SPECIAL_SITUATION",
+      "family": "SPECIAL_SITUATION",
+      "thesisDefined": true,
+      "falsificationDefined": true
+    },
+    {
+      "assetKey": "FILTRONIC",
+      "name": "Filtronic",
+      "isin": null,
+      "role": "SPECIAL_SITUATION",
+      "family": "SPECIAL_SITUATION",
+      "thesisDefined": true,
+      "falsificationDefined": true
+    },
+    {
+      "assetKey": "LAGERCRANTZ",
+      "name": "Lagercrantz",
+      "isin": null,
+      "role": "COMPOUNDER",
+      "family": "COMPOUNDER",
+      "thesisDefined": true,
+      "falsificationDefined": true
+    },
+    {
+      "assetKey": "JUDGES_SCIENTIFIC",
+      "name": "Judges Scientific",
+      "isin": null,
+      "role": "COMPOUNDER",
+      "family": "COMPOUNDER",
+      "thesisDefined": true,
+      "falsificationDefined": true
+    },
+    {
+      "assetKey": "BUREAU_VERITAS",
+      "name": "Bureau Veritas",
+      "isin": "FR0006174348",
+      "role": "DEFENSIVE_COMPOUNDER",
+      "family": "COMPOUNDER",
+      "thesisDefined": true,
+      "falsificationDefined": true
+    }
+  ],
+  "replacementMap": [
+    {
+      "source": "NOVO_NORDISK",
+      "directRoleCandidates": [
+        "ABBOTT",
+        "GSK",
+        "MEDTRONIC",
+        "MERCK"
+      ],
+      "globalCapitalCompetitors": [
+        "ABBOTT",
+        "BUREAU_VERITAS",
+        "CRANEWARE",
+        "FILTRONIC",
+        "FREQUENTIS",
+        "FUNKWERK",
+        "GSK",
+        "IVU_TRAFFIC",
+        "JUDGES_SCIENTIFIC",
+        "LAGERCRANTZ",
+        "MEDTRONIC",
+        "MERCK",
+        "NOVARTIS",
+        "RELX",
+        "TRISTEL"
+      ]
+    },
+    {
+      "source": "NOVARTIS",
+      "directRoleCandidates": [],
+      "globalCapitalCompetitors": [
+        "ABBOTT",
+        "BUREAU_VERITAS",
+        "CRANEWARE",
+        "FILTRONIC",
+        "FREQUENTIS",
+        "FUNKWERK",
+        "GSK",
+        "IVU_TRAFFIC",
+        "JUDGES_SCIENTIFIC",
+        "LAGERCRANTZ",
+        "MEDTRONIC",
+        "MERCK",
+        "NOVO_NORDISK",
+        "RELX",
+        "TRISTEL"
+      ]
+    },
+    {
+      "source": "ABBOTT",
+      "directRoleCandidates": [
+        "GSK",
+        "MEDTRONIC",
+        "MERCK",
+        "NOVO_NORDISK"
+      ],
+      "globalCapitalCompetitors": [
+        "BUREAU_VERITAS",
+        "CRANEWARE",
+        "FILTRONIC",
+        "FREQUENTIS",
+        "FUNKWERK",
+        "GSK",
+        "IVU_TRAFFIC",
+        "JUDGES_SCIENTIFIC",
+        "LAGERCRANTZ",
+        "MEDTRONIC",
+        "MERCK",
+        "NOVARTIS",
+        "NOVO_NORDISK",
+        "RELX",
+        "TRISTEL"
+      ]
+    },
+    {
+      "source": "MEDTRONIC",
+      "directRoleCandidates": [
+        "ABBOTT",
+        "GSK",
+        "MERCK",
+        "NOVO_NORDISK"
+      ],
+      "globalCapitalCompetitors": [
+        "ABBOTT",
+        "BUREAU_VERITAS",
+        "CRANEWARE",
+        "FILTRONIC",
+        "FREQUENTIS",
+        "FUNKWERK",
+        "GSK",
+        "IVU_TRAFFIC",
+        "JUDGES_SCIENTIFIC",
+        "LAGERCRANTZ",
+        "MERCK",
+        "NOVARTIS",
+        "NOVO_NORDISK",
+        "RELX",
+        "TRISTEL"
+      ]
+    },
+    {
+      "source": "MERCK",
+      "directRoleCandidates": [
+        "ABBOTT",
+        "GSK",
+        "MEDTRONIC",
+        "NOVO_NORDISK"
+      ],
+      "globalCapitalCompetitors": [
+        "ABBOTT",
+        "BUREAU_VERITAS",
+        "CRANEWARE",
+        "FILTRONIC",
+        "FREQUENTIS",
+        "FUNKWERK",
+        "GSK",
+        "IVU_TRAFFIC",
+        "JUDGES_SCIENTIFIC",
+        "LAGERCRANTZ",
+        "MEDTRONIC",
+        "NOVARTIS",
+        "NOVO_NORDISK",
+        "RELX",
+        "TRISTEL"
+      ]
+    },
+    {
+      "source": "GSK",
+      "directRoleCandidates": [
+        "ABBOTT",
+        "MEDTRONIC",
+        "MERCK",
+        "NOVO_NORDISK"
+      ],
+      "globalCapitalCompetitors": [
+        "ABBOTT",
+        "BUREAU_VERITAS",
+        "CRANEWARE",
+        "FILTRONIC",
+        "FREQUENTIS",
+        "FUNKWERK",
+        "IVU_TRAFFIC",
+        "JUDGES_SCIENTIFIC",
+        "LAGERCRANTZ",
+        "MEDTRONIC",
+        "MERCK",
+        "NOVARTIS",
+        "NOVO_NORDISK",
+        "RELX",
+        "TRISTEL"
+      ]
+    },
+    {
+      "source": "FUNKWERK",
+      "directRoleCandidates": [
+        "FREQUENTIS",
+        "IVU_TRAFFIC"
+      ],
+      "globalCapitalCompetitors": [
+        "ABBOTT",
+        "BUREAU_VERITAS",
+        "CRANEWARE",
+        "FILTRONIC",
+        "FREQUENTIS",
+        "GSK",
+        "IVU_TRAFFIC",
+        "JUDGES_SCIENTIFIC",
+        "LAGERCRANTZ",
+        "MEDTRONIC",
+        "MERCK",
+        "NOVARTIS",
+        "NOVO_NORDISK",
+        "RELX",
+        "TRISTEL"
+      ]
+    },
+    {
+      "source": "FREQUENTIS",
+      "directRoleCandidates": [
+        "FUNKWERK",
+        "IVU_TRAFFIC"
+      ],
+      "globalCapitalCompetitors": [
+        "ABBOTT",
+        "BUREAU_VERITAS",
+        "CRANEWARE",
+        "FILTRONIC",
+        "FUNKWERK",
+        "GSK",
+        "IVU_TRAFFIC",
+        "JUDGES_SCIENTIFIC",
+        "LAGERCRANTZ",
+        "MEDTRONIC",
+        "MERCK",
+        "NOVARTIS",
+        "NOVO_NORDISK",
+        "RELX",
+        "TRISTEL"
+      ]
+    },
+    {
+      "source": "IVU_TRAFFIC",
+      "directRoleCandidates": [
+        "FREQUENTIS",
+        "FUNKWERK"
+      ],
+      "globalCapitalCompetitors": [
+        "ABBOTT",
+        "BUREAU_VERITAS",
+        "CRANEWARE",
+        "FILTRONIC",
+        "FREQUENTIS",
+        "FUNKWERK",
+        "GSK",
+        "JUDGES_SCIENTIFIC",
+        "LAGERCRANTZ",
+        "MEDTRONIC",
+        "MERCK",
+        "NOVARTIS",
+        "NOVO_NORDISK",
+        "RELX",
+        "TRISTEL"
+      ]
+    },
+    {
+      "source": "RELX",
+      "directRoleCandidates": [
+        "BUREAU_VERITAS",
+        "CRANEWARE",
+        "JUDGES_SCIENTIFIC",
+        "LAGERCRANTZ"
+      ],
+      "globalCapitalCompetitors": [
+        "ABBOTT",
+        "BUREAU_VERITAS",
+        "CRANEWARE",
+        "FILTRONIC",
+        "FREQUENTIS",
+        "FUNKWERK",
+        "GSK",
+        "IVU_TRAFFIC",
+        "JUDGES_SCIENTIFIC",
+        "LAGERCRANTZ",
+        "MEDTRONIC",
+        "MERCK",
+        "NOVARTIS",
+        "NOVO_NORDISK",
+        "TRISTEL"
+      ]
+    },
+    {
+      "source": "CRANEWARE",
+      "directRoleCandidates": [
+        "BUREAU_VERITAS",
+        "JUDGES_SCIENTIFIC",
+        "LAGERCRANTZ",
+        "RELX"
+      ],
+      "globalCapitalCompetitors": [
+        "ABBOTT",
+        "BUREAU_VERITAS",
+        "FILTRONIC",
+        "FREQUENTIS",
+        "FUNKWERK",
+        "GSK",
+        "IVU_TRAFFIC",
+        "JUDGES_SCIENTIFIC",
+        "LAGERCRANTZ",
+        "MEDTRONIC",
+        "MERCK",
+        "NOVARTIS",
+        "NOVO_NORDISK",
+        "RELX",
+        "TRISTEL"
+      ]
+    },
+    {
+      "source": "TRISTEL",
+      "directRoleCandidates": [
+        "FILTRONIC"
+      ],
+      "globalCapitalCompetitors": [
+        "ABBOTT",
+        "BUREAU_VERITAS",
+        "CRANEWARE",
+        "FILTRONIC",
+        "FREQUENTIS",
+        "FUNKWERK",
+        "GSK",
+        "IVU_TRAFFIC",
+        "JUDGES_SCIENTIFIC",
+        "LAGERCRANTZ",
+        "MEDTRONIC",
+        "MERCK",
+        "NOVARTIS",
+        "NOVO_NORDISK",
+        "RELX"
+      ]
+    },
+    {
+      "source": "FILTRONIC",
+      "directRoleCandidates": [
+        "TRISTEL"
+      ],
+      "globalCapitalCompetitors": [
+        "ABBOTT",
+        "BUREAU_VERITAS",
+        "CRANEWARE",
+        "FREQUENTIS",
+        "FUNKWERK",
+        "GSK",
+        "IVU_TRAFFIC",
+        "JUDGES_SCIENTIFIC",
+        "LAGERCRANTZ",
+        "MEDTRONIC",
+        "MERCK",
+        "NOVARTIS",
+        "NOVO_NORDISK",
+        "RELX",
+        "TRISTEL"
+      ]
+    },
+    {
+      "source": "LAGERCRANTZ",
+      "directRoleCandidates": [
+        "BUREAU_VERITAS",
+        "CRANEWARE",
+        "JUDGES_SCIENTIFIC",
+        "RELX"
+      ],
+      "globalCapitalCompetitors": [
+        "ABBOTT",
+        "BUREAU_VERITAS",
+        "CRANEWARE",
+        "FILTRONIC",
+        "FREQUENTIS",
+        "FUNKWERK",
+        "GSK",
+        "IVU_TRAFFIC",
+        "JUDGES_SCIENTIFIC",
+        "MEDTRONIC",
+        "MERCK",
+        "NOVARTIS",
+        "NOVO_NORDISK",
+        "RELX",
+        "TRISTEL"
+      ]
+    },
+    {
+      "source": "JUDGES_SCIENTIFIC",
+      "directRoleCandidates": [
+        "BUREAU_VERITAS",
+        "CRANEWARE",
+        "LAGERCRANTZ",
+        "RELX"
+      ],
+      "globalCapitalCompetitors": [
+        "ABBOTT",
+        "BUREAU_VERITAS",
+        "CRANEWARE",
+        "FILTRONIC",
+        "FREQUENTIS",
+        "FUNKWERK",
+        "GSK",
+        "IVU_TRAFFIC",
+        "LAGERCRANTZ",
+        "MEDTRONIC",
+        "MERCK",
+        "NOVARTIS",
+        "NOVO_NORDISK",
+        "RELX",
+        "TRISTEL"
+      ]
+    },
+    {
+      "source": "BUREAU_VERITAS",
+      "directRoleCandidates": [
+        "CRANEWARE",
+        "JUDGES_SCIENTIFIC",
+        "LAGERCRANTZ",
+        "RELX"
+      ],
+      "globalCapitalCompetitors": [
+        "ABBOTT",
+        "CRANEWARE",
+        "FILTRONIC",
+        "FREQUENTIS",
+        "FUNKWERK",
+        "GSK",
+        "IVU_TRAFFIC",
+        "JUDGES_SCIENTIFIC",
+        "LAGERCRANTZ",
+        "MEDTRONIC",
+        "MERCK",
+        "NOVARTIS",
+        "NOVO_NORDISK",
+        "RELX",
+        "TRISTEL"
+      ]
+    }
+  ],
+  "guardrails": {
+    "noPermanentFavorite": true,
+    "noAssetSpecificHardcodedBuyRule": true,
+    "noAssetSpecificHardcodedCap": true,
+    "noAssetSpecificHardcodedScoreBoost": true,
+    "assetSpecificFalsificationBelongsInThesisRegistry": true,
+    "assetSpecificParsingMayExistOnlyInSourceAdapterLayer": true
+  }
+}

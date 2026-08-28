@@ -16,15 +16,17 @@ class StateLedgerTests(unittest.TestCase):
             self.assertIn(token,t)
         self.assertNotIn('parqet_snapshot.json',t)
 
-    def test_patcher_twice(self):
+    def test_patcher_twice_is_forward_safe(self):
         with tempfile.TemporaryDirectory() as td:
             td=Path(td); (td/'alpha41').mkdir(); (td/'scripts').mkdir()
             shutil.copy(ROOT/'alpha41/index.html',td/'alpha41/index.html')
             shutil.copy(ROOT/'scripts/apply_hpos_alpha45.py',td/'scripts/apply_hpos_alpha45.py')
+            before=(td/'alpha41/index.html').read_text()
             for _ in range(2): subprocess.run(['python','scripts/apply_hpos_alpha45.py'],cwd=td,check=True)
             t=(td/'alpha41/index.html').read_text()
+            self.assertEqual(before,t)
             self.assertEqual(t.count('alpha45.js'),1)
-            self.assertIn("1.3.0-alpha.4.5",t)
-            self.assertIn('ALPHA 4.5 · State & Ledger Foundation',t)
+            self.assertIn('alpha464.js',t)
+            self.assertIn("1.3.0-alpha.4.6.4",t)
 
 if __name__=='__main__': unittest.main()

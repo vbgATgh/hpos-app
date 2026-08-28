@@ -24,13 +24,15 @@ class Alpha46FundamentalTests(unittest.TestCase):
         for token in ['Fundamentale Evidenz','missing','PRIMARY/REGULATOR','HPOSFundamental46','coveragePct']:
             self.assertIn(token,t)
 
-    def test_patcher_twice(self):
+    def test_patcher_twice_is_forward_safe(self):
         with tempfile.TemporaryDirectory() as td:
             td=Path(td); (td/'alpha41').mkdir(); (td/'scripts').mkdir()
             shutil.copy(ROOT/'alpha41/index.html',td/'alpha41/index.html')
             shutil.copy(ROOT/'scripts/apply_hpos_alpha46.py',td/'scripts/apply_hpos_alpha46.py')
+            before=(td/'alpha41/index.html').read_text()
             for _ in range(2): subprocess.run(['python','scripts/apply_hpos_alpha46.py'],cwd=td,check=True)
             t=(td/'alpha41/index.html').read_text()
+            self.assertEqual(before,t)
             self.assertEqual(t.count('alpha46.js'),1)
-            self.assertIn("const APP_VERSION='1.3.0-alpha.4.6';",t)
+            self.assertIn('alpha464.js',t)
             self.assertLess(t.index('alpha45.js'),t.index('alpha46.js'))

@@ -7,6 +7,8 @@
     "PORTFOLIO_BEATS_SINGLE_STOCK",
     "QUALITY_BEATS_YIELD",
     "VALUATION_BEATS_FOMO",
+    "ASSETS_ARE_REPLACEABLE_CAPITAL_CANDIDATES",
+    "OWNERSHIP_CREATES_NO_INCUMBENCY_BONUS",
     "CASH_IS_OPTIONALITY",
     "WAIT_IS_VALID_ALLOCATION",
     "USER_IS_FINAL_CAPITAL_AUTHORITY"
@@ -38,7 +40,11 @@
     "mandatoryEligibility": ["HALAL_H1", "CAPS_OK", "TRADEABLE", "PORTFOLIO_ROLE_CLEAR", "NET_EFFECT_ECONOMICALLY_SENSIBLE"],
     "requiresMeaningfulAdvantage": true,
     "fullRotationRequiresStrongerEvidence": true,
-    "neverBecauseOfRecentPricePerformanceAlone": true
+    "neverBecauseOfRecentPricePerformanceAlone": true,
+    "allEligibleEquitiesCompeteForCapital": true,
+    "ownedPositionReceivesNoIncumbencyBonus": true,
+    "sameRoleReplacementPreferredButNotRequired": true,
+    "crossRoleReplacementRequiresPortfolioImprovement": true
   },
   "decisionOrder": ["HALAL_GATE", "PORTFOLIO_FIT", "THESIS", "FUNDAMENTALS", "VALUATION", "MARKET_TIMING", "NEWS_EVIDENCE", "EXECUTION"],
   "governance": {
