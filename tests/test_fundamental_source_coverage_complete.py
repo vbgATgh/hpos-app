@@ -1,4 +1,4 @@
-import json, subprocess, tempfile, shutil, unittest
+import json, subprocess, unittest
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 class SourceCoverageTests(unittest.TestCase):
@@ -8,8 +8,11 @@ class SourceCoverageTests(unittest.TestCase):
         missing=[a['assetKey'] for a in x['assets'] if not a['sourceMapped']]
         self.assertEqual(missing,[],f'Missing primary sources: {missing}')
         self.assertEqual(len(x['assets']),16)
-    def test_source_registry_stays_public_generic(self):
-        x=json.loads((ROOT/'config/asset_sources.json').read_text())
-        text=json.dumps(x)
-        for k in ['currentValue','avgEntryPrice','cashEur','openOrders','taxProfile']:
+    def test_source_registries_stay_public_generic(self):
+        rows=[]
+        for p in ['config/asset_sources.json','config/fundamental_asset_sources.json']:
+            rows.append(json.loads((ROOT/p).read_text()))
+        text=json.dumps(rows)
+        for k in ['currentValue','avgEntryPrice','cashEur','openOrders','taxProfile','portfolioValueEur']:
             self.assertNotIn(k,text)
+        self.assertEqual(len(rows[1]['assets']),8)
