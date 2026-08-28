@@ -1,0 +1,33 @@
+{
+  "schemaVersion":1,
+  "updatedAt":"2026-08-28",
+  "policy":{
+    "primaryMethodology":"AAOIFI",
+    "statusRule":"Conflicts are conservative: H2/REVIEW until newer evidence resolves them.",
+    "purificationSeparateFromZakat":true,
+    "privacyBoundary":"PUBLIC_GENERIC_ONLY"
+  },
+  "sources":[
+    {"key":"MUSAFFA","name":"Musaffa","tier":1,"methodologies":["AAOIFI"],"capabilities":["SCREENING","PURIFICATION"],"url":"https://musaffa.com/screening-methodology/"},
+    {"key":"ZOYA","name":"Zoya","tier":2,"methodologies":["AAOIFI","S&P Shariah","MSCI Islamic","Dow Jones Islamic","FTSE Russell Shariah"],"capabilities":["SCREENING","PURIFICATION","ZAKAT_GUIDANCE"],"url":"https://help.zoya.finance/"},
+    {"key":"ISLAMICLY","name":"Islamicly","tier":2,"methodologies":["AAOIFI-aligned"],"capabilities":["SCREENING","PURIFICATION"],"url":"https://islamicly.com/"},
+    {"key":"AAOIFI","name":"AAOIFI","tier":0,"methodologies":["AAOIFI Shariah Standards"],"capabilities":["METHODOLOGY_AUTHORITY"],"url":"https://aaoifi.com/"},
+    {"key":"MSCI_ISLAMIC","name":"MSCI Islamic Index Methodology","tier":3,"methodologies":["MSCI Islamic"],"capabilities":["INDEX_METHODOLOGY"],"url":"https://www.msci.com/"},
+    {"key":"SP_SHARIAH","name":"S&P Shariah Indices","tier":3,"methodologies":["S&P Shariah"],"capabilities":["INDEX_METHODOLOGY"],"url":"https://www.spglobal.com/spdji/"},
+    {"key":"FTSE_SHARIAH","name":"FTSE Russell Shariah","tier":3,"methodologies":["FTSE Russell Shariah"],"capabilities":["INDEX_METHODOLOGY"],"url":"https://www.lseg.com/en/ftse-russell"}
+  ],
+  "purification":{
+    "rule":"Do not invent a purification amount. Use the latest sourced non-permissible-income ratio or per-share purification figure and record source/date/method.",
+    "methods":["DIVIDEND_RATIO","CAPITAL_GAIN_RATIO","AAOIFI_PER_SHARE"],
+    "destination":"CHARITY"
+  },
+  "zakat":{
+    "defaultRatePct":2.5,
+    "methods":[
+      {"key":"ACTIVE_MARKET_VALUE","description":"Short-term/active holdings: 2.5% of market value when applicable under the selected scholarly method."},
+      {"key":"LONG_TERM_ZAKATABLE_ASSETS","description":"Long-term holdings: investor share of zakatable/current assets; requires company/fund data."},
+      {"key":"LONG_TERM_30PCT_PROXY","description":"Optional scholarly approximation: 30% of current market value as zakatable base when underlying current-asset data is unavailable."}
+    ],
+    "guardrail":"Zakat method is user/scholar policy, not inferred from price or news. HPOS must show selected method and assumptions."
+  }
+}

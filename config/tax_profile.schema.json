@@ -1,0 +1,15 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "title":"HPOS Private German Tax Profile",
+  "description":"Private/local-only tax inputs. Never commit real user values.",
+  "type":"object",
+  "required":["taxYear","assessment","allowanceEur","brokers"],
+  "properties":{
+    "taxYear":{"type":"integer"},
+    "assessment":{"enum":["SINGLE","JOINT"]},
+    "allowanceEur":{"type":"number","minimum":0},
+    "brokers":{"type":"array","items":{"type":"object","required":["broker","freistellungsauftragEur","usedAllowanceEur"],"properties":{"broker":{"type":"string"},"freistellungsauftragEur":{"type":"number","minimum":0},"usedAllowanceEur":{"type":"number","minimum":0},"stockLossPotEur":{"type":["number","null"]},"otherLossPotEur":{"type":["number","null"]},"foreignTaxCreditEur":{"type":["number","null"]},"asOf":{"type":["string","null"]},"source":{"enum":["BROKER_CONFIRMED","USER_CONFIRMED","UNKNOWN"]}}}},
+    "notes":{"type":["string","null"]}
+  },
+  "additionalProperties":true
+}
