@@ -1,0 +1,30 @@
+name: HPOS Fundamental Source Coverage CI
+on:
+  push:
+    branches: [hpos-thesis-source-coverage-v1-20260828]
+  pull_request:
+    paths:
+      - 'config/asset_sources.json'
+      - 'config/fundamental_asset_sources.json'
+      - 'data/thesis_registry.json'
+      - 'scripts/build_fundamental_coverage.py'
+      - 'scripts/fetch_ir_fundamentals.py'
+      - 'tests/test_fundamental_source_coverage_complete.py'
+      - '.github/workflows/hpos-fundamental-source-coverage-ci.yml'
+permissions:
+  contents: read
+jobs:
+  coverage:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Validate source registries
+        run: |
+          python -m json.tool config/asset_sources.json >/dev/null
+          python -m json.tool config/fundamental_asset_sources.json >/dev/null
+      - name: Full thesis source coverage
+        run: python -m unittest tests.test_fundamental_source_coverage_complete tests.test_alpha461_ir_adapter -v

@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "updatedAt": "2026-08-28",
+  "policy": {
+    "purpose": "Öffentliche Primärquellen für Thesis-/Fundamental-Coverage, getrennt von der Legacy-News-Asset-Registry.",
+    "privacyBoundary": "PUBLIC_GENERIC_ONLY",
+    "isinPolicy": "Nur verifizierte ISINs speichern; fehlende ISIN ist zulässig und wird nicht geraten."
+  },
+  "assets": [
+    {"name":"GSK","sourceName":"GSK Investors","url":"https://www.gsk.com/en-gb/investors/","domain":"gsk.com","registry":"Unternehmen + RNS + SEC","automationMode":"OFFICIAL_PAGE_REFERENCE"},
+    {"isin":"DE000A40ZW05","name":"Funkwerk","sourceName":"Funkwerk AG","url":"https://funkwerk.com/unternehmensdaten/","domain":"funkwerk.com","registry":"Unternehmen + m:access","automationMode":"OFFICIAL_PAGE_REFERENCE"},
+    {"isin":"ATFREQUENT09","name":"Frequentis","sourceName":"Frequentis Investor Relations","url":"https://www.frequentis.com/en/IR","domain":"frequentis.com","registry":"Unternehmen + Wiener Börse","automationMode":"OFFICIAL_PAGE_REFERENCE"},
+    {"name":"IVU Traffic Technologies","sourceName":"IVU Investor Relations","url":"https://www.ivu.com/en/investors","domain":"ivu.com","registry":"Unternehmen + Ad-hoc","automationMode":"OFFICIAL_PAGE_REFERENCE"},
+    {"name":"Tristel","sourceName":"Tristel Investors","url":"https://investors.tristel.com/","domain":"investors.tristel.com","registry":"Unternehmen + RNS/AIM","automationMode":"OFFICIAL_PAGE_REFERENCE"},
+    {"name":"Filtronic","sourceName":"Filtronic Investor Relations","url":"https://filtronic.com/Investors/","domain":"filtronic.com","registry":"Unternehmen + RNS/AIM","automationMode":"OFFICIAL_PAGE_REFERENCE"},
+    {"name":"Lagercrantz","sourceName":"Lagercrantz Investors","url":"https://www.lagercrantz.com/investors/","domain":"lagercrantz.com","registry":"Unternehmen + Nasdaq Stockholm","automationMode":"OFFICIAL_PAGE_REFERENCE"},
+    {"name":"Judges Scientific","sourceName":"Judges Scientific Investors","url":"https://www.judges.uk.com/financial-performance/financial-overview.html","domain":"judges.uk.com","registry":"Unternehmen + RNS/AIM","automationMode":"OFFICIAL_PAGE_REFERENCE"}
+  ]
+}
