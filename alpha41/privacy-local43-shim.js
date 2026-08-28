@@ -28,8 +28,9 @@ function localProjection433(){
     const a=byId.get(p.assetId)||{},basis=txCost433(p.assetId),qty=Number(p.qty??basis.qty??0);
     const currentPrice=Number(p.valuationPrice??a.priceQuote?.price??basis.avg??0),currentValue=Number(p.marketValue??(qty*currentPrice));
     const purchaseValue=basis.cost>0?basis.cost:Math.max(0,qty*Number(p.purchasePrice??basis.avg??currentPrice));
+    const averageEntryPrice=qty>0?purchaseValue/qty:0;
     const gain=currentValue-purchaseValue;
-    return{name:p.name||a.name||a.isin,isin:p.isin||a.isin,shares:qty,currentPrice,currentValue,purchaseValue,purchasePrice:qty>0?purchaseValue/qty:0,unrealizedGainNet:gain,unrealizedReturnNet:purchaseValue>0?gain/purchaseValue*100:0,earliestActivityDate:basis.first||a.createdAt?.slice(0,10)||null,broker:a.broker||'LOCAL',holdingId:a.sourceHoldingId||a.assetId};
+    return{name:p.name||a.name||a.isin,isin:p.isin||a.isin,shares:qty,currentPrice,currentValue,purchaseValue,purchasePrice:averageEntryPrice,avgEntryPrice:averageEntryPrice,avgCost:averageEntryPrice,unrealizedGainNet:gain,unrealizedReturnNet:purchaseValue>0?gain/purchaseValue*100:0,earliestActivityDate:basis.first||a.createdAt?.slice(0,10)||null,broker:a.broker||'LOCAL',holdingId:a.sourceHoldingId||a.assetId};
   }).filter(h=>h.isin&&h.shares>0);
   const activeWatchIds=new Set((state.watchlistEntries||[]).filter(w=>w.status!=='ARCHIVED').map(w=>w.assetId));
   const watchlist=assets.filter(a=>a.portfolioRole==='WATCHLIST'||activeWatchIds.has(a.assetId)).filter(a=>a.isin&&!holdings.some(h=>String(h.isin).toUpperCase()===String(a.isin).toUpperCase())).map(a=>({name:a.name,isin:a.isin,source:'LOCAL_STATE',excludeFromPortfolioTotals:true}));
