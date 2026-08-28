@@ -3,38 +3,17 @@
   "title": "HPOS Private Current State",
   "description": "Schema only. Real portfolio state stays local/private and must not be committed to the public repository.",
   "type": "object",
-  "required": ["asOf", "portfolio", "positions", "overrides", "openOrders", "savingPlans"],
+  "required": ["asOf", "portfolio", "positions", "overrides", "openOrders", "savingPlans", "provenance"],
   "properties": {
     "asOf": {"type": "string"},
-    "portfolio": {
-      "type": "object",
-      "properties": {
-        "portfolioValueEur": {"type": ["number", "null"]},
-        "cashEur": {"type": ["number", "null"]},
-        "ttwrorPct": {"type": ["number", "null"]},
-        "xirrPct": {"type": ["number", "null"]},
-        "netDividendsEur": {"type": ["number", "null"]}
-      },
-      "additionalProperties": true
-    },
-    "positions": {"type": "array", "items": {"type": "object"}},
-    "overrides": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "required": ["assetKey", "confirmedAt", "source", "field", "value"],
-        "properties": {
-          "assetKey": {"type": "string"},
-          "confirmedAt": {"type": "string"},
-          "source": {"enum": ["BROKER_CONFIRMED", "USER_CONFIRMED"]},
-          "field": {"type": "string"},
-          "value": {},
-          "expiresWhen": {"type": ["string", "null"]}
-        }
-      }
-    },
+    "provenance": {"type": "object", "required": ["portfolioSource", "lastPortfolioSyncAt"], "properties": {"portfolioSource": {"enum": ["PARQET", "BROKER_DIRECT", "LOCAL_IMPORT", "MIXED"]}, "lastPortfolioSyncAt": {"type": ["string", "null"]}, "parqetPortfolioId": {"type": ["string", "null"]}, "brokerCoverage": {"type": "array", "items": {"enum": ["SCALABLE_CAPITAL", "TRADE_REPUBLIC", "OTHER"]}}, "notes": {"type": ["string", "null"]}}, "additionalProperties": true},
+    "portfolio": {"type": "object", "properties": {"portfolioValueEur": {"type": ["number", "null"]}, "cashEur": {"type": ["number", "null"]}, "cashCommittedEur": {"type": ["number", "null"]}, "availableCashEur": {"type": ["number", "null"]}, "ttwrorPct": {"type": ["number", "null"]}, "xirrPct": {"type": ["number", "null"]}, "netDividendsEur": {"type": ["number", "null"]}}, "additionalProperties": true},
+    "positions": {"type": "array", "items": {"type": "object", "properties": {"assetKey": {"type": ["string", "null"]}, "isin": {"type": ["string", "null"]}, "broker": {"type": ["string", "null"]}, "shares": {"type": ["number", "null"]}, "currentPrice": {"type": ["number", "null"]}, "currentValue": {"type": ["number", "null"]}, "avgEntryPrice": {"type": ["number", "null"]}, "quoteAsOf": {"type": ["string", "null"]}, "quoteSource": {"type": ["string", "null"]}, "quoteState": {"enum": ["CURRENT", "STALE", "OVERRIDDEN", "UNKNOWN"]}}, "additionalProperties": true}},
+    "overrides": {"type": "array", "items": {"type": "object", "required": ["assetKey", "confirmedAt", "source", "field", "value"], "properties": {"assetKey": {"type": "string"}, "confirmedAt": {"type": "string"}, "source": {"enum": ["BROKER_CONFIRMED", "USER_CONFIRMED"]}, "broker": {"type": ["string", "null"]}, "field": {"type": "string"}, "value": {}, "expiresWhen": {"type": ["string", "null"]}, "reason": {"type": ["string", "null"]}}}},
     "openOrders": {"type": "array", "items": {"type": "object"}},
     "savingPlans": {"type": "array", "items": {"type": "object"}},
+    "ledger": {"type": "object", "properties": {"schemaVersion": {"type": ["integer", "null"]}, "entryCount": {"type": ["integer", "null"]}, "lastEntryAt": {"type": ["string", "null"]}, "source": {"type": ["string", "null"]}}, "additionalProperties": true},
+    "reconciliation": {"type": "object", "properties": {"status": {"enum": ["OK", "WARN", "STALE", "UNKNOWN"]}, "issues": {"type": "array", "items": {"type": "object"}}}, "additionalProperties": true},
     "lastController": {"type": ["object", "null"]}
   },
   "additionalProperties": true
