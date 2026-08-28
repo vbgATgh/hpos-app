@@ -8,10 +8,11 @@ on:
       - 'alpha41/alpha46.js'
       - 'tests/test_alpha46_fundamentals.py'
       - '.github/workflows/hpos-alpha46-ci.yml'
+      - 'alpha41/index.html'
   push:
     branches: [hpos-fundamental-adapters-v1-20260828]
 permissions:
-  contents: read
+  contents: write
 jobs:
   fundamentals:
     runs-on: ubuntu-24.04
@@ -37,3 +38,13 @@ jobs:
           node --check alpha41/alpha46.js
           python -m py_compile scripts/fetch_sec_fundamentals.py scripts/apply_hpos_alpha46.py
           grep -q 'alpha46.js' alpha41/index.html
+      - name: Integrated app commit
+        if: github.event_name == 'push'
+        run: |
+          git add alpha41/index.html
+          if git diff --cached --quiet; then exit 0; fi
+          git config user.name 'hpos-alpha46-bot'
+          git config user.email 'hpos-alpha46-bot@users.noreply.github.com'
+          git commit -m 'chore(alpha46): integrate fundamental adapters runtime'
+          git pull --rebase origin "$GITHUB_REF_NAME"
+          git push origin HEAD:"$GITHUB_REF_NAME"
