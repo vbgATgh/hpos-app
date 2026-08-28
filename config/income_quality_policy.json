@@ -1,0 +1,18 @@
+{
+  "schemaVersion":1,
+  "version":"1.0",
+  "principle":"DIVIDEND_IS_QUALITY_TIEBREAKER_NOT_PRIMARY_BUY_REASON",
+  "requiredEvidence":{"minimumForKnownQuality":2,"primaryOrRegulatorRequired":true},
+  "dimensions":["DIVIDEND_CONTINUITY","DIVIDEND_GROWTH","FCF_COVERAGE","PAYOUT_SAFETY","NET_INCOME_EFFECT","WITHHOLDING_TAX_DRAG"],
+  "qualityStates":["EXCELLENT","STRONG","GOOD","WEAK","UNSAFE","UNKNOWN"],
+  "hardRules":[
+    "HALAL_AND_PORTFOLIO_GATES_ALWAYS_PRECEDE_INCOME",
+    "HIGH_YIELD_ALONE_NEVER_CREATES_BUY",
+    "DIVIDEND_CUT_OR_UNCOVERED_PAYOUT_IS_NEGATIVE_EVIDENCE",
+    "UNKNOWN_TAX_OR_FCF_DATA_MUST_REMAIN_UNKNOWN",
+    "CALENDAR_GAPS_ARE_TIEBREAKERS_ONLY"
+  ],
+  "classification":{"EXCELLENT":{"minKnownDimensions":4,"requires":["DIVIDEND_CONTINUITY","FCF_COVERAGE"],"noNegative":true},"STRONG":{"minKnownDimensions":3,"requires":["DIVIDEND_CONTINUITY"],"noUnsafe":true},"GOOD":{"minKnownDimensions":2,"noUnsafe":true},"WEAK":{"negativeSignalsMin":1},"UNSAFE":{"cutOrCoverageFailure":true}},
+  "goal":{"metric":"NET_DIVIDEND_EUR_MONTH","targetFromConstitution":true,"forecastRequiresEvidence":true},
+  "guardrails":["NO_YIELD_CHASING","NO_FORECAST_FROM_SINGLE_PAYMENT","NO_GROSS_TO_NET_ASSUMPTION_WITHOUT_TAX_METADATA","NO_ASSET_SPECIFIC_FAVORITES"]
+}
