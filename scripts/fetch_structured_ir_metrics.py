@@ -33,11 +33,11 @@ def frequentis(a,t):
 def ivu(a,t):
     out=[]
     rules=[
-      ('revenue','REVENUE',r'Revenue[^.]{0,120}?to\s*€\s*([\d.,]+)\s*thousand','recurring software revenue'),
-      ('gross_profit','MARGIN',r'Gross profit[^.]{0,120}?to\s*€\s*([\d.,]+)\s*thousand','EBIT scalability'),
-      ('ebit','EARNINGS',r'(?:operating profit|EBIT)[^€]{0,80}?€\s*([\d.,]+)\s*thousand','EBIT scalability'),
-      ('revenue_guidance','GUIDANCE',r'(?:expect|expected|expecting)[^.]{0,100}?revenue\s+of\s+(?:more than|around)\s*€\s*([\d.,]+)\s*million','international scaling'),
-      ('ebit_guidance','GUIDANCE',r'(?:EBIT|earnings before interest and taxes)[^.]{0,100}?(?:around|to)\s*€\s*([\d.,]+)\s*million','EBIT scalability')]
+      ('revenue','REVENUE',r'Revenue.{0,180}?to\s*€\s*([\d.,]+)\s*thousand','recurring software revenue'),
+      ('gross_profit','MARGIN',r'Gross profit.{0,180}?to\s*€\s*([\d.,]+)\s*thousand','EBIT scalability'),
+      ('ebit','EARNINGS',r'(?:At\s*)?€\s*([\d.,]+)\s*thousand.{0,180}?operating profit','EBIT scalability'),
+      ('revenue_guidance','GUIDANCE',r'expect.{0,160}?revenue\s+of\s+(?:more than|around)\s*€\s*([\d.,]+)\s*million','international scaling'),
+      ('ebit_guidance','GUIDANCE',r'(?:earnings before interest and taxes|EBIT).{0,220}?to\s+around\s*€\s*([\d.,]+)\s*million','EBIT scalability')]
     for metric,cat,pat,driver in rules:
         g=search(pat,t)
         if g:
@@ -69,10 +69,8 @@ def main():
             t=text(a['reportUrl']); got=PARSERS[a['assetKey']](a,t); rows.extend(got)
             status.append({'assetKey':a['assetKey'],'source':'STRUCTURED_IR','ok':True,'items':len(got),'url':a['reportUrl']})
         except Exception as ex:status.append({'assetKey':a['assetKey'],'source':'STRUCTURED_IR','ok':False,'error':str(ex),'url':a['reportUrl']})
-    preserved=[x for x in old.get('items',[]) if not str(x.get('evidenceId','')).startswith('ev_') or x.get('sourceName') not in {a['sourceName'] for a in cfg['assets']} or x.get('metric') is None]
-    # replace prior structured facts for these exact source/metric combinations; keep generic primary links
     structured_keys={(x['assetKey'],x['metric']) for x in rows}
-    preserved=[x for x in preserved if (x.get('assetKey'),x.get('metric')) not in structured_keys]
+    preserved=[x for x in old.get('items',[]) if (x.get('assetKey'),x.get('metric')) not in structured_keys]
     old_status=[x for x in old.get('adapterStatus',[]) if x.get('source')!='STRUCTURED_IR']
     payload={'schemaVersion':1,'generatedAt':now(),'items':rows+preserved,'adapterStatus':old_status+status}
     OUT.parent.mkdir(parents=True,exist_ok=True);OUT.write_text(json.dumps(payload,ensure_ascii=False,separators=(',',':'))+'\n',encoding='utf-8')
