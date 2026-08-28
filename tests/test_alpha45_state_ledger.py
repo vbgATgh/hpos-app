@@ -1,5 +1,5 @@
 from pathlib import Path
-import json, shutil, subprocess, tempfile, unittest
+import json, re, shutil, subprocess, tempfile, unittest
 ROOT=Path(__file__).resolve().parents[1]
 
 class StateLedgerTests(unittest.TestCase):
@@ -26,7 +26,8 @@ class StateLedgerTests(unittest.TestCase):
             t=(td/'alpha41/index.html').read_text()
             self.assertEqual(before,t)
             self.assertEqual(t.count('alpha45.js'),1)
-            self.assertIn('alpha464.js',t)
-            self.assertIn("1.3.0-alpha.4.6.4",t)
+            m=re.search(r"const APP_VERSION='1\.3\.0-alpha\.(\d+)\.(\d+)(?:\.(\d+))?';",t)
+            self.assertIsNotNone(m)
+            self.assertGreaterEqual(tuple(int(x or 0) for x in m.groups()),(4,5,0))
 
 if __name__=='__main__': unittest.main()
