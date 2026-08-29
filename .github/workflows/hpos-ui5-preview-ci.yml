@@ -1,0 +1,42 @@
+name: HPOS UI v5 Preview CI
+
+on:
+  pull_request:
+    paths:
+      - 'ui5/**'
+      - 'tests/test_ui5_preview.py'
+      - '.github/workflows/hpos-ui5-preview-ci.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'ui5/**'
+      - 'tests/test_ui5_preview.py'
+      - '.github/workflows/hpos-ui5-preview-ci.yml'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install pytest
+      - run: pytest -q tests/test_ui5_preview.py
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Extract and syntax-check inline JS
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          h=Path('ui5/index.html').read_text()
+          scripts=re.findall(r'<script>(.*?)</script>',h,re.S)
+          assert scripts, 'no inline script found'
+          Path('/tmp/ui5.js').write_text('\n'.join(scripts))
+          PY
+          node --check /tmp/ui5.js
+      - name: Guard against hardcoded portfolio truth
+        run: |
+          ! grep -E "9\.938,88|Novo Nordisk|Scalable 97" ui5/index.html
