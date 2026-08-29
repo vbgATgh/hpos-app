@@ -2,48 +2,47 @@
   "schemaVersion": 1,
   "state": "CURRENT",
   "source": "github-actions/google-news-rss-discovery",
-  "asOf": "2026-08-29T11:01:24Z",
-  "lastAttemptAt": "2026-08-29T11:01:24Z",
+  "asOf": "2026-08-29T19:24:12Z",
+  "lastAttemptAt": "2026-08-29T19:24:12Z",
   "message": "Discovery-News aktualisiert: 27 konfigurierte Abfragen erfolgreich. Öffentliches Asset-Universum: 22 Titel; Primärquellen-Registry: 19/19. Depot-/Watchlist-Scope bleibt lokal.",
   "queriesTotal": 27,
   "queriesOk": 27,
   "queriesFailed": 0,
-  "articlesFetchedThisRun": 142,
+  "articlesFetchedThisRun": 143,
   "articlesStored": 350,
   "articlesByAsset": {
     "ISWD": 1,
-    "JNJ": 40,
-    "PQ_ATFREQUENT09": 7,
-    "PQ_AU000000SIG5": 4,
+    "JNJ": 39,
+    "PQ_ATFREQUENT09": 6,
+    "PQ_AU000000SIG5": 3,
     "PQ_DE000A3E5D56": 16,
-    "PQ_US0028241000": 1,
-    "PQ_US46120E6023": 11,
+    "PQ_US46120E6023": 10,
     "PQ_US48581R2058": 1,
-    "PQ_US4943681035": 10,
-    "PQ_US58933Y1055": 2,
-    "PQ_US6742152076": 3,
-    "PQ_US8725401090": 13,
+    "PQ_US4943681035": 9,
+    "PQ_US58933Y1055": 1,
+    "PQ_US6742152076": 2,
+    "PQ_US8725401090": 11,
     "PQ_US8825081040": 12,
     "PQ_US9037311076": 6,
-    "PQ_US9078181081": 6,
+    "PQ_US9078181081": 5,
     "PQ_US98423F1093": 2,
     "PUB_CA14150G4007": 1,
-    "PUB_CH0012005267": 24,
-    "PUB_DE000A3E5D56": 6,
-    "PUB_FR0000120073": 16,
-    "PUB_FR0006174348": 6,
-    "PUB_GB00B2B0DG97": 9,
-    "PUB_IE00BTN1Y115": 17,
-    "PUB_US0028241000": 22,
-    "PUB_US58933Y1055": 19,
-    "PUB_US94106L1098": 17,
-    "RIO_TINTO": 22,
-    "SPACEX": 52,
-    "XIAOMI": 4
+    "PUB_CH0012005267": 25,
+    "PUB_DE000A3E5D56": 5,
+    "PUB_FR0000120073": 22,
+    "PUB_FR0006174348": 9,
+    "PUB_GB00B2B0DG97": 11,
+    "PUB_IE00BTN1Y115": 18,
+    "PUB_US0028241000": 21,
+    "PUB_US58933Y1055": 16,
+    "PUB_US94106L1098": 19,
+    "RIO_TINTO": 23,
+    "SPACEX": 54,
+    "XIAOMI": 2
   },
   "articlesByScope": {
-    "UNIVERSE": 256,
-    "UNKNOWN": 94
+    "UNIVERSE": 266,
+    "UNKNOWN": 84
   },
   "queryResults": [
     {
@@ -92,13 +91,13 @@
       "assetKey": "XIAOMI",
       "query": "\"Xiaomi Corporation\"",
       "ok": true,
-      "items": 6
+      "items": 5
     },
     {
       "assetKey": "XIAOMI",
       "query": "\"Xiaomi\" earnings OR guidance OR results",
       "ok": true,
-      "items": 3
+      "items": 1
     },
     {
       "assetKey": "JNJ",
@@ -128,7 +127,7 @@
       "assetKey": "PUB_DE000A3E5D56",
       "query": "\"FUCHS SE Vz\"",
       "ok": true,
-      "items": 6
+      "items": 7
     },
     {
       "assetKey": "PUB_CH0012005267",
@@ -170,7 +169,7 @@
       "assetKey": "PUB_FR0000120073",
       "query": "\"Air Liquide\"",
       "ok": true,
-      "items": 8
+      "items": 11
     },
     {
       "assetKey": "PUB_IE00BTN1Y115",
