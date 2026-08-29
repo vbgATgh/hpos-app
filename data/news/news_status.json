@@ -2,57 +2,55 @@
   "schemaVersion": 1,
   "state": "CURRENT",
   "source": "github-actions/google-news-rss-discovery",
-  "asOf": "2026-08-29T00:33:22Z",
-  "lastAttemptAt": "2026-08-29T00:33:22Z",
+  "asOf": "2026-08-29T11:01:24Z",
+  "lastAttemptAt": "2026-08-29T11:01:24Z",
   "message": "Discovery-News aktualisiert: 27 konfigurierte Abfragen erfolgreich. Öffentliches Asset-Universum: 22 Titel; Primärquellen-Registry: 19/19. Depot-/Watchlist-Scope bleibt lokal.",
   "queriesTotal": 27,
   "queriesOk": 27,
   "queriesFailed": 0,
-  "articlesFetchedThisRun": 139,
+  "articlesFetchedThisRun": 142,
   "articlesStored": 350,
   "articlesByAsset": {
     "ISWD": 1,
-    "JNJ": 38,
+    "JNJ": 40,
     "PQ_ATFREQUENT09": 7,
-    "PQ_AU000000LTR4": 2,
     "PQ_AU000000SIG5": 4,
     "PQ_DE000A3E5D56": 16,
-    "PQ_FR0006174348": 1,
     "PQ_US0028241000": 1,
     "PQ_US46120E6023": 11,
-    "PQ_US48581R2058": 2,
+    "PQ_US48581R2058": 1,
     "PQ_US4943681035": 10,
-    "PQ_US58933Y1055": 3,
+    "PQ_US58933Y1055": 2,
     "PQ_US6742152076": 3,
     "PQ_US8725401090": 13,
-    "PQ_US8825081040": 13,
-    "PQ_US9037311076": 7,
-    "PQ_US9078181081": 7,
-    "PQ_US98423F1093": 3,
+    "PQ_US8825081040": 12,
+    "PQ_US9037311076": 6,
+    "PQ_US9078181081": 6,
+    "PQ_US98423F1093": 2,
     "PUB_CA14150G4007": 1,
-    "PUB_CH0012005267": 23,
-    "PUB_DE000A3E5D56": 5,
-    "PUB_FR0000120073": 14,
-    "PUB_FR0006174348": 5,
-    "PUB_GB00B2B0DG97": 8,
+    "PUB_CH0012005267": 24,
+    "PUB_DE000A3E5D56": 6,
+    "PUB_FR0000120073": 16,
+    "PUB_FR0006174348": 6,
+    "PUB_GB00B2B0DG97": 9,
     "PUB_IE00BTN1Y115": 17,
-    "PUB_US0028241000": 20,
+    "PUB_US0028241000": 22,
     "PUB_US58933Y1055": 19,
     "PUB_US94106L1098": 17,
-    "RIO_TINTO": 24,
-    "SPACEX": 49,
-    "XIAOMI": 6
+    "RIO_TINTO": 22,
+    "SPACEX": 52,
+    "XIAOMI": 4
   },
   "articlesByScope": {
-    "UNIVERSE": 247,
-    "UNKNOWN": 103
+    "UNIVERSE": 256,
+    "UNKNOWN": 94
   },
   "queryResults": [
     {
       "assetKey": "ISWD",
       "query": "\"iShares MSCI World Islamic UCITS ETF\"",
       "ok": true,
-      "items": 1
+      "items": 0
     },
     {
       "assetKey": "ISWD",
@@ -94,7 +92,7 @@
       "assetKey": "XIAOMI",
       "query": "\"Xiaomi Corporation\"",
       "ok": true,
-      "items": 7
+      "items": 6
     },
     {
       "assetKey": "XIAOMI",
@@ -130,7 +128,7 @@
       "assetKey": "PUB_DE000A3E5D56",
       "query": "\"FUCHS SE Vz\"",
       "ok": true,
-      "items": 4
+      "items": 6
     },
     {
       "assetKey": "PUB_CH0012005267",
@@ -148,7 +146,7 @@
       "assetKey": "PUB_US94106L1098",
       "query": "\"Waste Management\"",
       "ok": true,
-      "items": 11
+      "items": 12
     },
     {
       "assetKey": "PUB_US5797802064",
@@ -160,7 +158,7 @@
       "assetKey": "PUB_FR0006174348",
       "query": "\"Bureau Veritas\"",
       "ok": true,
-      "items": 5
+      "items": 6
     },
     {
       "assetKey": "PUB_IE00B27YCP72",
@@ -202,7 +200,7 @@
       "assetKey": "PUB_CA14150G4007",
       "query": "\"Cardinal Energy\"",
       "ok": true,
-      "items": 2
+      "items": 3
     },
     {
       "assetKey": "PUB_CA8051121090",
