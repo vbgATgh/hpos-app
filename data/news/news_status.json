@@ -2,15 +2,16 @@
   "schemaVersion": 1,
   "state": "CURRENT",
   "source": "github-actions/google-news-rss-discovery",
-  "asOf": "2026-08-28T22:23:24Z",
-  "lastAttemptAt": "2026-08-28T22:23:24Z",
+  "asOf": "2026-08-29T00:33:22Z",
+  "lastAttemptAt": "2026-08-29T00:33:22Z",
   "message": "Discovery-News aktualisiert: 27 konfigurierte Abfragen erfolgreich. Öffentliches Asset-Universum: 22 Titel; Primärquellen-Registry: 19/19. Depot-/Watchlist-Scope bleibt lokal.",
   "queriesTotal": 27,
   "queriesOk": 27,
   "queriesFailed": 0,
-  "articlesFetchedThisRun": 140,
+  "articlesFetchedThisRun": 139,
   "articlesStored": 350,
   "articlesByAsset": {
+    "ISWD": 1,
     "JNJ": 38,
     "PQ_ATFREQUENT09": 7,
     "PQ_AU000000LTR4": 2,
@@ -38,9 +39,9 @@
     "PUB_US0028241000": 20,
     "PUB_US58933Y1055": 19,
     "PUB_US94106L1098": 17,
-    "RIO_TINTO": 23,
+    "RIO_TINTO": 24,
     "SPACEX": 49,
-    "XIAOMI": 8
+    "XIAOMI": 6
   },
   "articlesByScope": {
     "UNIVERSE": 247,
@@ -51,7 +52,7 @@
       "assetKey": "ISWD",
       "query": "\"iShares MSCI World Islamic UCITS ETF\"",
       "ok": true,
-      "items": 0
+      "items": 1
     },
     {
       "assetKey": "ISWD",
@@ -171,7 +172,7 @@
       "assetKey": "PUB_FR0000120073",
       "query": "\"Air Liquide\"",
       "ok": true,
-      "items": 10
+      "items": 8
     },
     {
       "assetKey": "PUB_IE00BTN1Y115",
