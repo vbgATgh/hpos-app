@@ -1,0 +1,17 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "hpos-api",
+  "main": "worker.js",
+  "compatibility_date": "2026-08-31",
+  "vars": {
+    "APP_ORIGIN": "https://vbgatgh.github.io",
+    "PARQET_CLIENT_ID": "SET_IN_CLOUDFLARE_DASHBOARD_OR_HERE_IF_PUBLIC",
+    "PARQET_REDIRECT_URI": "https://hpos-api.YOUR_SUBDOMAIN.workers.dev/auth/parqet/callback"
+  },
+  "kv_namespaces": [
+    {
+      "binding": "HPOS_KV",
+      "id": "SET_AFTER_CREATING_KV_NAMESPACE"
+    }
+  ]
+}

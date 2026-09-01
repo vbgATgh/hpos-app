@@ -2,20 +2,27 @@
 
 Halal Portfolio Optimization System / Portfolio Intelligence.
 
-## Aktueller UI-Stand
+## Aktueller Produktpfad
 
-Der derzeitige aktive Entwicklungsstand liegt unter `ui83/index.html` und trägt intern bereits die Bezeichnung **HPOS UI v8.4**. Der Ordnername `ui83` ist historisch gewachsen und wird vorerst nicht umbenannt, damit bestehende Links und Tests nicht brechen.
+Die aktive HPOS-Anwendung liegt ab v8.5 unter:
+
+- `app/index.html`
+- `app/app.js`
+- `app/styles.css`
+
+Der bisherige Pfad `ui83/` bleibt als Weiterleitung bestehen, damit vorhandene Testlinks nicht brechen. Neue Produktivarbeit erfolgt ausschließlich unter `app/`.
 
 ## Datenprinzip
 
-- **Parqet** ist die kanonische Quelle für Depotbestand, Stückzahlen und Cash-Snapshot.
-- **Marktdaten** dürfen den Bestand nicht verändern; sie ergänzen nur Kurse bzw. Marktinformationen.
+- **Parqet** ist die kanonische Quelle für Depotbestand, Stückzahlen, Einstand und Cash-Snapshot.
+- **Marktdaten** dürfen den Bestand nicht verändern; sie ergänzen ausschließlich Kurse und Marktinformationen.
 - **Scalable Capital** und **Trade Republic** bleiben die Orte der tatsächlichen Orderausführung.
 - **HPOS** liest, normalisiert, analysiert und visualisiert. Es führt keine Broker-Orders aus.
-- **Watchlist** ist von realen Depotbeständen getrennt zu behandeln.
+- **Watchlist** ist ein eigenes lokales HPOS-Datenmodell und wird nicht in Depotwert oder Allokation gerechnet.
+- Der historische Parqet-Fallback liegt als Datendatei unter `data/bootstrap/` und nicht mehr im UI-Code.
 
-## Repository-Regel ab jetzt
+## Aktueller Funktionsstand
 
-Neue Produktivarbeit erfolgt nur noch auf dem jeweils dokumentierten aktiven UI-Pfad. Alte Alpha-/UI-Stände werden nicht mehr als Ausgangsbasis verwendet.
+v8.5 enthält den Hybrid-Parqet-Sync, getrennte Marktpreis-Aktualisierung, dynamische Watchlist, Wertpapiersuche mit Adapter/Fallback, Investment-Akte und einen Broker-Workflow mit anschließendem Parqet-Abgleich.
 
 Siehe `docs/REPOSITORY_STRUCTURE.md` für die Aufräum- und Archivierungslogik.

@@ -8,28 +8,26 @@ Das Repository wird schrittweise bereinigt, ohne funktionierende HPOS-Stände, G
 
 ## Aktiver Produktpfad
 
-### UI
+Ab **HPOS v8.5** ist `app/` der einzige aktive UI-Pfad:
 
-- `ui83/index.html`
-- interne Version im Dokument: **HPOS UI v8.4**
-- Status: **aktive Entwicklungsbasis**
+- `app/index.html`
+- `app/app.js`
+- `app/styles.css`
 
-Der Ordner bleibt vorerst `ui83`, obwohl der Inhalt bereits v8.4 ist. Eine Umbenennung erfolgt erst, wenn alle Links, Pages-Pfade und Tests kontrolliert migriert werden können.
+`ui83/index.html` ist nur noch eine Weiterleitung auf `app/`, damit bestehende Testlinks erhalten bleiben.
 
 ## Aktive Systembereiche
 
-Diese Bereiche bleiben erhalten und werden nicht pauschal archiviert:
-
+- `app/` – aktive HPOS-Anwendung
 - `.github/workflows/` – Daten-, News-, Fundamental- und CI-Workflows
-- `data/` – strukturierte HPOS-Daten
-- `config/` – Konfiguration
+- `data/` – strukturierte HPOS-Daten; `data/bootstrap/` nur als gekennzeichneter Fallback
+- `config/` – Instrument-, Markt- und Systemkonfiguration
 - `docs/` – Architektur, Prüfungen und technische Dokumentation
-- Root-PWA-Dateien (`index.html`, `app.js`, `styles.css`, Manifest/Icons), solange nicht geklärt ist, ob einzelne Deployments oder Workflows davon abhängen
-- `ui83/` – aktuelle UI-Basis
+- Root-PWA-Dateien vorerst nur solange Abhängigkeiten nicht vollständig geprüft sind
 
 ## Historische UI-Stände
 
-Als Legacy einzustufen, aber vorerst **nicht löschen**:
+Legacy, vorerst nicht löschen:
 
 - `ui5/`
 - `ui6/`
@@ -37,29 +35,28 @@ Als Legacy einzustufen, aber vorerst **nicht löschen**:
 - `ui8/`
 - `ui81/`
 - `ui82/`
+- `ui83/` als Redirect-Kompatibilität
 - ältere Alpha-Verzeichnisse und Alpha-Testdateien
-
-Grund: Diese Stände sind historisch, können aber noch von Workflows, Vergleichstests, GitHub-Pages-URLs oder Audit-Dokumenten referenziert werden.
 
 ## Aufräumstrategie
 
-### Phase 1 – sofort und risikoarm
+### Phase 1 – abgeschlossen
 
-1. Aktiven UI-Pfad dokumentieren.
-2. README eindeutig machen.
-3. Keine neue Entwicklung mehr in alten UI-/Alpha-Verzeichnissen.
-4. Neue Features nur noch in der aktiven Linie entwickeln.
-5. Vor jeder strukturellen Löschung Abhängigkeiten prüfen.
+1. Aktiven UI-Pfad dokumentiert.
+2. `app/` als kanonischen Produktpfad eingeführt.
+3. UI in HTML, CSS und JavaScript getrennt.
+4. Parqet-Fallback aus dem UI-Code nach `data/bootstrap/` ausgelagert.
+5. `ui83` auf den aktiven Produktpfad weitergeleitet.
 
-### Phase 2 – nach stabilem v8.4/v8.5-Test
+### Phase 2 – nach v8.5-Test
 
-1. Referenzen aus Workflows und Dokumentation auf Legacy-Pfade suchen.
+1. Referenzen aus Workflows und Dokumentation auf Legacy-Pfade prüfen.
 2. Nicht mehr verwendete UI-Versionen nach `archive/ui/` verschieben.
 3. Alte Alpha-Artefakte nach `archive/alpha/` verschieben.
 4. Veraltete Audit-/Hotfix-Einzeldateien in `docs/archive/` konsolidieren.
 5. Doppelte oder obsolete Workflows deaktivieren oder archivieren.
 
-### Phase 3 – Zielstruktur
+### Zielstruktur
 
 ```text
 hpos-app/
@@ -69,42 +66,40 @@ hpos-app/
 │   ├── styles.css
 │   └── assets/
 ├── data/                 # Portfolio-, Markt-, Fundamental-, News-Daten
+│   └── bootstrap/        # nur gekennzeichnete Fallback-Snapshots
 ├── config/               # Konfiguration
 ├── docs/                 # aktive Dokumentation
 │   └── archive/          # historische Doku
 ├── archive/
-│   ├── ui/               # alte UI-Versionen
-│   └── alpha/            # alte Alpha-Stände
-├── .github/workflows/    # nur aktive CI-/Datenjobs
+│   ├── ui/
+│   └── alpha/
+├── .github/workflows/
 ├── README.md
 └── manifest.webmanifest
 ```
 
-Diese Zielstruktur wird **nicht in einem großen Umbau** erzwungen. Die Migration erfolgt inkrementell, damit HPOS stabil bleibt.
-
 ## Verbindliche Architekturregeln
 
-1. **Parqet = kanonischer Depot-Snapshot** für Bestand, Stückzahlen und Cash.
-2. Marktquellen dürfen nur Kurse/Marktdaten ergänzen und niemals Stückzahlen oder Depotbestand überschreiben.
-3. Kauf/Verkauf wird ausschließlich bei Scalable Capital bzw. Trade Republic ausgeführt.
-4. HPOS führt keine Brokerorder aus.
+1. **Parqet = kanonischer Depot-Snapshot** für Bestand, Stückzahlen, Einstand und Cash.
+2. Marktquellen ergänzen nur Preise/Marktdaten und verändern niemals Stückzahlen oder Depotbestand.
+3. Kauf/Verkauf erfolgt ausschließlich bei Scalable Capital bzw. Trade Republic.
+4. HPOS führt keine Brokerorder aus; nach einer echten Brokerorder wird der Bestand über Parqet reconciled.
 5. Watchlist und Depotbestand sind getrennte Datenmodelle.
-6. Die UI erzeugt keine erfundenen Halal-, Fundamental-, Steuer- oder BUY/SELL-Daten.
-7. Neue Module greifen auf gemeinsame normalisierte Datenobjekte zu; keine parallelen Schatten-Stores pro Ansicht.
-8. Alte UI-Versionen werden nicht mehr funktional erweitert.
+6. Wertpapiere werden nicht als feste UI-Liste programmiert. Suche/Watchlist arbeiten dynamisch; Instrumentmetadaten liegen in Konfiguration oder externen Datenadaptern.
+7. Die UI erzeugt keine erfundenen Halal-, Fundamental-, Steuer- oder BUY/SELL-Daten.
+8. Neue Module greifen auf gemeinsame normalisierte Datenobjekte zu; keine parallelen Schatten-Stores pro Ansicht.
+9. Alte UI-Versionen werden funktional nicht weiterentwickelt.
 
-## Aktueller Befund
+## Aktueller v8.5-Schritt
 
-- `ui81/index.html` ist noch die historische v8.1-Test-Shell.
-- `ui82/index.html` ist der historische v8.2-Stand.
-- `ui83/index.html` enthält bereits HPOS UI v8.4 und ist deshalb die aktuelle Entwicklungsbasis.
-- Das Repository enthält zahlreiche Alpha- und Audit-Artefakte. Sie sind gute Archivkandidaten, sollen aber erst nach Abhängigkeitsprüfung verschoben werden.
+- dynamische Watchlist mit Hinzufügen/Entfernen
+- Wertpapiersuche über Bestand, Watchlist und `config/market_sources.json`
+- externer Suchadapter mit sicherem Fallback, falls der Proxy keine Suche liefert
+- Broker-Workflow für Kauf/Verkauf ohne autonome Orderausführung
+- anschließender manueller Parqet-Abgleich
+- automatischer Parqet-Hintergrundcheck ab 15 Minuten
+- Marktpreise getrennt vom Depotbestand
 
 ## Nächster technischer Schritt
 
-Bevor Dateien physisch verschoben oder gelöscht werden:
-
-1. aktuelle UI stabilisieren,
-2. Watchlist/Search/Portfolio-Sync sauber vervollständigen,
-3. Abhängigkeiten der GitHub Actions auf alte Pfade prüfen,
-4. anschließend Legacy-Migration in einem getrennten Cleanup-Commit durchführen.
+Nach dem v8.5-Test werden zuerst Boot, Navigation, Watchlist-Persistenz, Broker-Workflow und Parqet-Reconciliation verifiziert. Erst danach folgen Halal-/Fundamental-/News-Verknüpfung und der physische Legacy-Cleanup.

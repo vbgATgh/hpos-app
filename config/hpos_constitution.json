@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "version": "4.2-consolidated",
+  "version": "4.3-consolidated",
   "role": "HPOS Constitution",
   "principles": [
     "HALAL_BEATS_RETURN",
@@ -53,7 +53,9 @@
     "featureFreeze": "NO_NEW_BINDING_RULE_FROM_SINGLE_CASE"
   },
   "data": {
-    "portfolioSourcePriority": ["CURRENT_BROKER_CONFIRMED_DATA", "PARQET_LIVE", "CURRENT_HPOS_LOCAL_STATE", "USER_CONFIRMED_OVERRIDE", "HISTORICAL_MASTERFILE"],
+    "portfolioSourcePriority": ["PARQET_LIVE", "CURRENT_HPOS_LOCAL_STATE", "USER_CONFIRMED_OVERRIDE", "HISTORICAL_MASTERFILE"],
+    "executionSources": ["SCALABLE_CAPITAL", "TRADE_REPUBLIC"],
+    "reconciliationRule": "BROKER_ORDERS_ARE_EXECUTED_EXTERNALLY_AND_BECOME_HPOS_PORTFOLIO_STATE_AFTER_PARQET_RECONCILIATION",
     "currentStateMustNotBeHardcodedIntoConstitution": true,
     "unknownMustRemainUnknown": true
   }
