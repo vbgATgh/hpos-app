@@ -23,6 +23,7 @@ ACTIONS = {
     "BUY", "ADD", "HOLD", "DO_NOT_ADD", "REDUCE", "SELL", "ROTATE",
     "WAIT_FOR_TRIGGER", "NONE",
 }
+ACTION_BASIS = {"NEW_DELTA", "PRIOR_VALIDATED_STATE", "NONE"}
 THESIS_DELTAS = {"STRENGTHENING", "WEAKENING", "NEUTRAL", "INSUFFICIENT", "BROKEN"}
 RISK_DELTAS = {"LOWER", "UNCHANGED", "HIGHER", "UNKNOWN"}
 COVERAGE = {"DELTA_FOUND", "NO_RELEVANT_DELTA", "NOT_COVERED"}
@@ -86,8 +87,12 @@ def validate(payload: dict[str, Any]) -> list[str]:
             if value is not None and (not isinstance(value, (int, float)) or isinstance(value, bool) or not 0 <= value <= 10):
                 errors.append(f"{prefix}.{field} must be null or a number from 0 to 10")
 
-        if candidate.get("actionCandidate") not in ACTIONS:
+        action = candidate.get("actionCandidate")
+        action_basis = candidate.get("actionBasis")
+        if action not in ACTIONS:
             errors.append(f"{prefix}.actionCandidate is invalid")
+        if action_basis is not None and action_basis not in ACTION_BASIS:
+            errors.append(f"{prefix}.actionBasis is invalid")
         if candidate.get("thesisDelta") not in THESIS_DELTAS:
             errors.append(f"{prefix}.thesisDelta is invalid")
         if candidate.get("riskDelta") not in RISK_DELTAS:
@@ -123,7 +128,6 @@ def validate(payload: dict[str, Any]) -> list[str]:
         verification_status = candidate.get("verificationStatus")
 
         # Hard boundary: an external agent may only submit UNVERIFIED candidates.
-        # Promotion to PARTIALLY_VERIFIED / VERIFIED / REJECTED belongs to an HPOS review step.
         if source_kind == "EXTERNAL_AGENT" and verification_status != "UNVERIFIED":
             errors.append(f"{prefix}.verificationStatus must be UNVERIFIED for EXTERNAL_AGENT input")
 
@@ -131,9 +135,18 @@ def validate(payload: dict[str, Any]) -> list[str]:
         if source_kind == "MANUAL_REVIEW" and verification_status in {"PARTIALLY_VERIFIED", "VERIFIED"} and not (evidence_urls or evidence_ids):
             errors.append(f"{prefix} cannot be {verification_status} without evidence references")
 
-        # Coverage without a thesis-relevant delta cannot trigger a directional trade proposal.
-        if candidate.get("coverageStatus") == "NO_RELEVANT_DELTA" and candidate.get("actionCandidate") not in {"HOLD", "NONE", "WAIT_FOR_TRIGGER"}:
-            errors.append(f"{prefix} proposes an action despite NO_RELEVANT_DELTA")
+        # A no-delta briefing may carry forward an already validated directional stance,
+        # but it must say so explicitly. It must never pretend the action was caused by new evidence.
+        if candidate.get("coverageStatus") == "NO_RELEVANT_DELTA" and action not in {"HOLD", "NONE", "WAIT_FOR_TRIGGER"}:
+            if action_basis != "PRIOR_VALIDATED_STATE":
+                errors.append(f"{prefix} proposes a directional action despite NO_RELEVANT_DELTA without actionBasis PRIOR_VALIDATED_STATE")
+
+        # NEW_DELTA cannot be claimed if coverage says no relevant delta or not covered.
+        if action_basis == "NEW_DELTA" and candidate.get("coverageStatus") != "DELTA_FOUND":
+            errors.append(f"{prefix}.actionBasis NEW_DELTA requires coverageStatus DELTA_FOUND")
+
+        if action == "NONE" and action_basis not in {None, "NONE"}:
+            errors.append(f"{prefix}.actionBasis must be NONE when actionCandidate is NONE")
 
     return errors
 
