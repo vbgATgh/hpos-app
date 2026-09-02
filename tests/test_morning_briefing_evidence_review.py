@@ -62,7 +62,11 @@ def test_nonprimary_evidence_is_blocked():
 
 
 def test_no_semantic_anchor_requires_manual_review():
-    result = reviewer.review_payload(payload(), match(), evidence(driver="unrelated topic"), registry())
+    ev = evidence(driver="unrelated topic")
+    ev["items"][0]["notes"] = "unrelated disclosure"
+    ev["items"][0]["category"] = "OTHER"
+    ev["items"][0]["metric"] = "other_metric"
+    result = reviewer.review_payload(payload(), match(), ev, registry())
     c = result["candidates"][0]
     assert c["reviewStatus"] == "MANUAL_SEMANTIC_REVIEW_REQUIRED"
 
