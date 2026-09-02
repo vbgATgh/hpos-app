@@ -2,8 +2,9 @@
 """Validate explicit HPOS promotion decisions for morning-briefing candidates.
 
 This contract deliberately separates evidence review from canonical state mutation.
-It validates whether a proposed verification-state change is admissible, auditable
-and temporally sane. It never changes THS, actions, portfolio state or broker state.
+It validates whether a proposed verification-state change is admissible, auditable,
+temporally sane and bound to the actual upstream review result. It never changes THS,
+actions, portfolio state or broker state.
 """
 from __future__ import annotations
 
@@ -41,7 +42,16 @@ def _dt(value: Any) -> datetime | None:
         return None
 
 
-def validate(decision: dict[str, Any], registry: dict[str, Any] | None = None) -> list[str]:
+def _review_for_asset(review_result: dict[str, Any] | None, asset_key: Any) -> dict[str, Any] | None:
+    if review_result is None:
+        return None
+    for item in review_result.get("candidates", []):
+        if isinstance(item, dict) and item.get("assetKey") == asset_key:
+            return item
+    return None
+
+
+def validate(decision: dict[str, Any], registry: dict[str, Any] | None = None, review_result: dict[str, Any] | None = None) -> list[str]:
     registry = registry or _load(THESIS_REGISTRY)
     registry_keys = set(registry.get("assets", {}).keys())
     errors: list[str] = []
@@ -90,8 +100,24 @@ def validate(decision: dict[str, Any], registry: dict[str, Any] | None = None) -
         errors.append("unresolvedIssues must be an array of non-empty strings")
         unresolved = []
 
-    # A fully verified state requires the strongest review outcome, primary evidence references,
-    # and no unresolved gaps. Date gaps or semantic gaps cannot be silently promoted away.
+    # Do not trust a self-reported reviewStatus/evidence list. If an upstream review result is
+    # supplied, the promotion decision must bind exactly to that asset and its reviewed evidence.
+    upstream = _review_for_asset(review_result, asset_key)
+    if review_result is not None:
+        if upstream is None:
+            errors.append("promotion decision has no matching upstream review result")
+        else:
+            upstream_status = upstream.get("reviewStatus")
+            upstream_ids = sorted(x for x in upstream.get("matchedEvidenceIds", []) if isinstance(x, str))
+            if review_status != upstream_status:
+                errors.append("reviewStatus does not match upstream review result")
+            if sorted(evidence_ids) != upstream_ids:
+                errors.append("evidenceIds do not match upstream reviewed evidence")
+            upstream_as_of = _dt(review_result.get("sourceAsOf"))
+            if source_as_of is not None and upstream_as_of is not None and source_as_of != upstream_as_of:
+                errors.append("sourceAsOf does not match upstream review result")
+
+    # A fully verified state requires the strongest review outcome and no unresolved gaps.
     if target == "VERIFIED":
         if review_status != "REVIEW_READY":
             errors.append("VERIFIED requires reviewStatus REVIEW_READY")
@@ -130,15 +156,16 @@ def validate(decision: dict[str, Any], registry: dict[str, Any] | None = None) -
 
 
 def main() -> int:
-    if len(sys.argv) != 2:
-        print("usage: validate_morning_briefing_promotion.py <decision.json>", file=sys.stderr)
+    if len(sys.argv) not in {2, 3}:
+        print("usage: validate_morning_briefing_promotion.py <decision.json> [review-result.json]", file=sys.stderr)
         return 2
     try:
         decision = _load(Path(sys.argv[1]))
+        review_result = _load(Path(sys.argv[2])) if len(sys.argv) == 3 else None
     except (OSError, json.JSONDecodeError, ValueError) as exc:
         print(f"INVALID: {exc}", file=sys.stderr)
         return 1
-    errors = validate(decision)
+    errors = validate(decision, review_result=review_result)
     if errors:
         for error in errors:
             print(f"INVALID: {error}", file=sys.stderr)
