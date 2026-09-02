@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "decisionId": "prom_20260902_medtronic_verified_001",
+  "assetKey": "MEDTRONIC",
+  "sourceAsOf": "2026-09-02T07:00:00+02:00",
+  "decidedAt": "2026-09-02T21:34:00+02:00",
+  "decisionKind": "HPOS_REVIEW",
+  "reviewStatus": "REVIEW_READY",
+  "targetVerificationStatus": "VERIFIED",
+  "evidenceIds": [
+    "ev_curated_medtronic_q1fy27_eps",
+    "ev_curated_medtronic_fy27_guidance",
+    "ev_curated_medtronic_q1fy27_margin"
+  ],
+  "unresolvedIssues": [],
+  "rationale": "Dated Medtronic primary-source evidence directly supports the briefing claim that Q1 FY27 combined strong organic growth with higher adjusted EPS, improved operating margin and raised FY27 guidance. This verifies the evidence claim only; it does not change canonical THS or create a portfolio action.",
+  "supersedesDecisionId": null
+}
