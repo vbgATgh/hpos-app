@@ -8,11 +8,13 @@ on:
       - 'scripts/match_morning_briefing_evidence.py'
       - 'scripts/review_morning_briefing_evidence.py'
       - 'scripts/validate_morning_briefing_promotion.py'
+      - 'scripts/validate_promotion_sequence.py'
       - 'tests/test_morning_briefing_ingestion.py'
       - 'tests/test_morning_briefing_evidence_matcher.py'
       - 'tests/test_morning_briefing_evidence_review.py'
       - 'tests/test_morning_briefing_promotion.py'
       - 'tests/test_morning_briefing_case_2026_09_02.py'
+      - 'tests/test_promotion_sequence.py'
       - 'data/thesis_registry.json'
       - 'data/asset_identity_aliases.json'
       - 'data/fundamental/evidence.json'
@@ -27,11 +29,13 @@ on:
       - 'scripts/match_morning_briefing_evidence.py'
       - 'scripts/review_morning_briefing_evidence.py'
       - 'scripts/validate_morning_briefing_promotion.py'
+      - 'scripts/validate_promotion_sequence.py'
       - 'tests/test_morning_briefing_ingestion.py'
       - 'tests/test_morning_briefing_evidence_matcher.py'
       - 'tests/test_morning_briefing_evidence_review.py'
       - 'tests/test_morning_briefing_promotion.py'
       - 'tests/test_morning_briefing_case_2026_09_02.py'
+      - 'tests/test_promotion_sequence.py'
       - 'data/thesis_registry.json'
       - 'data/asset_identity_aliases.json'
       - 'data/fundamental/evidence.json'
@@ -60,5 +64,8 @@ jobs:
           python -m py_compile scripts/match_morning_briefing_evidence.py
           python -m py_compile scripts/review_morning_briefing_evidence.py
           python -m py_compile scripts/validate_morning_briefing_promotion.py
+          python -m py_compile scripts/validate_promotion_sequence.py
       - name: Run briefing pipeline tests
-        run: python -m pytest -q tests/test_morning_briefing_ingestion.py tests/test_morning_briefing_evidence_matcher.py tests/test_morning_briefing_evidence_review.py tests/test_morning_briefing_promotion.py tests/test_morning_briefing_case_2026_09_02.py
+        run: python -m pytest -q tests/test_morning_briefing_ingestion.py tests/test_morning_briefing_evidence_matcher.py tests/test_morning_briefing_evidence_review.py tests/test_morning_briefing_promotion.py tests/test_morning_briefing_case_2026_09_02.py tests/test_promotion_sequence.py
+      - name: Validate promotion decision ordering
+        run: python scripts/validate_promotion_sequence.py data/promotion_decisions
