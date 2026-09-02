@@ -62,8 +62,6 @@ def project(decisions: list[dict[str, Any]], registry: dict[str, Any]) -> dict[s
 
     registry_keys = set(registry.get("assets", {}).keys())
     latest: dict[str, dict[str, Any]] = {}
-
-    # Sequence validity guarantees that decidedAt order cannot regress sourceAsOf.
     ordered = sorted(decisions, key=lambda d: _dt(d.get("decidedAt")))
     for decision in ordered:
         asset = decision.get("assetKey")
@@ -75,11 +73,9 @@ def project(decisions: list[dict[str, Any]], registry: dict[str, Any]) -> dict[s
         forbidden = sorted(FORBIDDEN_FIELDS & set(decision.keys()))
         if forbidden:
             raise ValueError(f"promotion decision contains forbidden state/action fields for {asset}: {', '.join(forbidden)}")
-
         evidence_ids = decision.get("evidenceIds", [])
         if not isinstance(evidence_ids, list) or any(not isinstance(x, str) or not x for x in evidence_ids):
             raise ValueError(f"invalid evidenceIds for {asset}")
-
         latest[asset] = {
             "assetKey": asset,
             "verificationStatus": status,
@@ -91,7 +87,6 @@ def project(decisions: list[dict[str, Any]], registry: dict[str, Any]) -> dict[s
             "unresolvedIssues": list(decision.get("unresolvedIssues", [])),
             "supersedesDecisionId": decision.get("supersedesDecisionId"),
         }
-
     return {
         "schemaVersion": 1,
         "projectionType": "READ_ONLY_EVIDENCE_VERIFICATION",
@@ -104,14 +99,30 @@ def project(decisions: list[dict[str, Any]], registry: dict[str, Any]) -> dict[s
 
 
 def main() -> int:
-    directory = Path(sys.argv[1]) if len(sys.argv) == 2 else DEFAULT_DECISIONS
-    if len(sys.argv) > 2:
-        print("usage: project_verification_state.py [promotion-decisions-directory]", file=sys.stderr)
+    args = sys.argv[1:]
+    check_path = None
+    directory = DEFAULT_DECISIONS
+    if args[:1] == ["--check"]:
+        if len(args) != 2:
+            print("usage: project_verification_state.py --check <projection.json>", file=sys.stderr)
+            return 2
+        check_path = Path(args[1])
+    elif len(args) == 1:
+        directory = Path(args[0])
+    elif len(args) > 1:
+        print("usage: project_verification_state.py [promotion-decisions-directory] | --check <projection.json>", file=sys.stderr)
         return 2
     try:
         decisions = load_decisions(directory)
         registry = _load(THESIS_REGISTRY)
         result = project(decisions, registry)
+        if check_path is not None:
+            committed = _load(check_path)
+            if committed != result:
+                print("INVALID: committed verification projection is stale", file=sys.stderr)
+                return 1
+            print("VALID: committed verification projection matches promotion decisions")
+            return 0
     except (OSError, json.JSONDecodeError, ValueError) as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 1
