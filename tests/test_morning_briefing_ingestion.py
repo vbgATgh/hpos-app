@@ -19,6 +19,7 @@ def valid_payload():
                 "externalThsBefore": 7.8,
                 "externalThsAfter": 8.2,
                 "actionCandidate": "HOLD",
+                "actionBasis": "NEW_DELTA",
                 "thesisDelta": "STRENGTHENING",
                 "riskDelta": "UNCHANGED",
                 "evidenceUrls": ["https://example.com/primary-source"],
@@ -69,13 +70,34 @@ def test_manual_verified_with_evidence_is_accepted():
     assert validator.validate(payload) == []
 
 
-def test_no_relevant_delta_cannot_propose_buy():
+def test_no_relevant_delta_directional_action_requires_prior_validated_basis():
     payload = valid_payload()
     candidate = payload["candidates"][0]
     candidate["coverageStatus"] = "NO_RELEVANT_DELTA"
     candidate["actionCandidate"] = "BUY"
+    candidate.pop("actionBasis", None)
     errors = validator.validate(payload)
-    assert any("proposes an action despite NO_RELEVANT_DELTA" in error for error in errors)
+    assert any("without actionBasis PRIOR_VALIDATED_STATE" in error for error in errors)
+
+
+def test_no_relevant_delta_may_carry_forward_prior_validated_buy():
+    payload = valid_payload()
+    candidate = payload["candidates"][0]
+    candidate["coverageStatus"] = "NO_RELEVANT_DELTA"
+    candidate["actionCandidate"] = "BUY"
+    candidate["actionBasis"] = "PRIOR_VALIDATED_STATE"
+    candidate["thesisDelta"] = "NEUTRAL"
+    assert validator.validate(payload) == []
+
+
+def test_new_delta_basis_requires_actual_delta_coverage():
+    payload = valid_payload()
+    candidate = payload["candidates"][0]
+    candidate["coverageStatus"] = "NO_RELEVANT_DELTA"
+    candidate["actionCandidate"] = "HOLD"
+    candidate["actionBasis"] = "NEW_DELTA"
+    errors = validator.validate(payload)
+    assert any("NEW_DELTA requires coverageStatus DELTA_FOUND" in error for error in errors)
 
 
 def test_external_ths_may_use_decimal_metadata_without_changing_canonical_policy():
