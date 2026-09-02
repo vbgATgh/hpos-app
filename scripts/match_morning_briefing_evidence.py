@@ -16,6 +16,7 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 EVIDENCE_PATH = ROOT / "data" / "fundamental" / "evidence.json"
+CURATED_EVIDENCE_PATH = ROOT / "data" / "fundamental" / "evidence_curated.json"
 THESIS_REGISTRY = ROOT / "data" / "thesis_registry.json"
 ASSET_ALIASES_PATH = ROOT / "data" / "asset_identity_aliases.json"
 
@@ -25,6 +26,14 @@ def _load_json(path: Path) -> dict[str, Any]:
     if not isinstance(data, dict):
         raise ValueError(f"{path} root must be an object")
     return data
+
+
+def _load_evidence() -> dict[str, Any]:
+    base = _load_json(EVIDENCE_PATH)
+    curated = _load_json(CURATED_EVIDENCE_PATH) if CURATED_EVIDENCE_PATH.exists() else {"items": []}
+    merged = dict(base)
+    merged["items"] = [*base.get("items", []), *curated.get("items", [])]
+    return merged
 
 
 def _load_aliases() -> dict[str, str]:
@@ -59,7 +68,6 @@ def _indexes(evidence: dict[str, Any]) -> tuple[dict[str, dict[str, Any]], dict[
 
 
 def match_candidate(candidate: dict[str, Any], evidence: dict[str, Any], aliases: dict[str, str] | None = None) -> dict[str, Any]:
-    """Return a non-mutating evidence-match assessment for one candidate."""
     aliases = aliases or _load_aliases()
     asset_key = candidate.get("assetKey")
     requested_ids = [x for x in candidate.get("evidenceIds", []) if isinstance(x, str) and x]
@@ -136,7 +144,7 @@ def match_candidate(candidate: dict[str, Any], evidence: dict[str, Any], aliases
 
 
 def assess_payload(payload: dict[str, Any], evidence: dict[str, Any] | None = None) -> dict[str, Any]:
-    evidence = evidence or _load_json(EVIDENCE_PATH)
+    evidence = evidence or _load_evidence()
     registry = _load_json(THESIS_REGISTRY)
     registry_keys = set(registry.get("assets", {}).keys())
     aliases = _load_aliases()
@@ -167,12 +175,7 @@ def assess_payload(payload: dict[str, Any], evidence: dict[str, Any] | None = No
             continue
         results.append(match_candidate(candidate, evidence, aliases))
 
-    return {
-        "schemaVersion": 1,
-        "sourceAsOf": payload.get("asOf"),
-        "automaticPromotionPerformed": False,
-        "candidates": results,
-    }
+    return {"schemaVersion": 1, "sourceAsOf": payload.get("asOf"), "automaticPromotionPerformed": False, "candidates": results}
 
 
 def main() -> int:
