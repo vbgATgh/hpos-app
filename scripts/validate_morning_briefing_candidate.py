@@ -61,7 +61,8 @@ def validate(payload: dict[str, Any]) -> list[str]:
         errors.append("asOf must be an ISO-8601 date-time string")
 
     source = payload.get("source")
-    if not isinstance(source, dict) or source.get("kind") not in SOURCE_KINDS:
+    source_kind = source.get("kind") if isinstance(source, dict) else None
+    if source_kind not in SOURCE_KINDS:
         errors.append("source.kind must be EXTERNAL_AGENT or MANUAL_REVIEW")
 
     candidates = payload.get("candidates")
@@ -119,18 +120,20 @@ def validate(payload: dict[str, Any]) -> list[str]:
                 if rotation.get("scope", "UNSPECIFIED") not in {"PARTIAL", "FULL", "UNSPECIFIED"}:
                     errors.append(f"{prefix}.rotationCandidate.scope is invalid")
 
-        # Guardrail: an external candidate cannot arrive pre-verified without evidence refs.
-        if candidate.get("verificationStatus") in {"PARTIALLY_VERIFIED", "VERIFIED"} and not (evidence_urls or evidence_ids):
-            errors.append(f"{prefix} cannot be {candidate.get('verificationStatus')} without evidence references")
+        verification_status = candidate.get("verificationStatus")
 
-        # Guardrail: coverage without a relevant delta must not propose a trade.
+        # Hard boundary: an external agent may only submit UNVERIFIED candidates.
+        # Promotion to PARTIALLY_VERIFIED / VERIFIED / REJECTED belongs to an HPOS review step.
+        if source_kind == "EXTERNAL_AGENT" and verification_status != "UNVERIFIED":
+            errors.append(f"{prefix}.verificationStatus must be UNVERIFIED for EXTERNAL_AGENT input")
+
+        # A manual HPOS review may promote a candidate, but only with evidence references.
+        if source_kind == "MANUAL_REVIEW" and verification_status in {"PARTIALLY_VERIFIED", "VERIFIED"} and not (evidence_urls or evidence_ids):
+            errors.append(f"{prefix} cannot be {verification_status} without evidence references")
+
+        # Coverage without a thesis-relevant delta cannot trigger a directional trade proposal.
         if candidate.get("coverageStatus") == "NO_RELEVANT_DELTA" and candidate.get("actionCandidate") not in {"HOLD", "NONE", "WAIT_FOR_TRIGGER"}:
             errors.append(f"{prefix} proposes an action despite NO_RELEVANT_DELTA")
-
-        # Guardrail: this layer never turns a briefing action into canonical execution.
-        if candidate.get("verificationStatus") == "UNVERIFIED" and candidate.get("actionCandidate") in {"BUY", "ADD", "REDUCE", "SELL", "ROTATE"}:
-            # Candidate is allowed, but must remain visibly unverified. No error is raised.
-            pass
 
     return errors
 
