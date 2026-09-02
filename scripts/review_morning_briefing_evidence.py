@@ -86,16 +86,28 @@ def review_candidate(candidate: dict[str, Any], matched_ids: list[str], evidence
     candidate_terms: set[str] = set()
     for proofpoint in candidate.get("proofpoints", []):
         candidate_terms |= _tokens(proofpoint)
-    evidence_terms: set[str] = set()
-    for item in items:
-        evidence_terms |= _tokens(item.get("thesisDriver"))
-        evidence_terms |= _tokens(item.get("notes"))
-        evidence_terms |= _tokens(item.get("category"))
-        evidence_terms |= _tokens(item.get("metric"))
 
-    registry_overlap = sorted(vocabulary & evidence_terms)
-    proofpoint_overlap = sorted(candidate_terms & evidence_terms)
-    semantic_anchor = bool(registry_overlap or proofpoint_overlap)
+    driver_terms: set[str] = set()
+    supporting_terms: set[str] = set()
+    for item in items:
+        driver_terms |= _tokens(item.get("thesisDriver"))
+        supporting_terms |= _tokens(item.get("notes"))
+        supporting_terms |= _tokens(item.get("category"))
+        supporting_terms |= _tokens(item.get("metric"))
+
+    # Prefer explicit thesisDriver linkage. Generic words in notes such as growth or margin
+    # must not by themselves make unrelated evidence REVIEW_READY. If a source has no
+    # thesisDriver at all, require at least two supporting vocabulary overlaps as a cautious
+    # fallback and still expose the matched tokens for audit.
+    registry_driver_overlap = sorted(vocabulary & driver_terms)
+    proofpoint_driver_overlap = sorted(candidate_terms & driver_terms)
+    supporting_registry_overlap = sorted(vocabulary & supporting_terms)
+    supporting_proofpoint_overlap = sorted(candidate_terms & supporting_terms)
+    has_explicit_driver = bool(driver_terms)
+    strong_driver_anchor = bool(registry_driver_overlap or proofpoint_driver_overlap)
+    fallback_anchor_count = len(set(supporting_registry_overlap) | set(supporting_proofpoint_overlap))
+    semantic_anchor = strong_driver_anchor if has_explicit_driver else fallback_anchor_count >= 2
+
     if items and not semantic_anchor:
         issues.append("NO_THESIS_OR_PROOFPOINT_ANCHOR")
 
@@ -115,8 +127,11 @@ def review_candidate(candidate: dict[str, Any], matched_ids: list[str], evidence
         "primaryEvidenceCount": len(primary),
         "futureEvidenceIds": future_items,
         "undatedEvidenceIds": undated_items,
-        "registryAnchorTokens": registry_overlap,
-        "proofpointAnchorTokens": proofpoint_overlap,
+        "registryAnchorTokens": registry_driver_overlap,
+        "proofpointAnchorTokens": proofpoint_driver_overlap,
+        "supportingRegistryTokens": supporting_registry_overlap,
+        "supportingProofpointTokens": supporting_proofpoint_overlap,
+        "explicitThesisDriverPresent": has_explicit_driver,
         "issues": issues,
         "automaticVerificationPerformed": False,
         "automaticThsChangePerformed": False,
