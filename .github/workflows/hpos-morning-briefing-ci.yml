@@ -13,6 +13,7 @@ on:
       - 'tests/test_morning_briefing_evidence_review.py'
       - 'tests/test_morning_briefing_promotion.py'
       - 'data/thesis_registry.json'
+      - 'data/asset_identity_aliases.json'
       - 'data/fundamental/evidence.json'
       - '.github/workflows/hpos-morning-briefing-ci.yml'
   pull_request:
@@ -27,6 +28,7 @@ on:
       - 'tests/test_morning_briefing_evidence_review.py'
       - 'tests/test_morning_briefing_promotion.py'
       - 'data/thesis_registry.json'
+      - 'data/asset_identity_aliases.json'
       - 'data/fundamental/evidence.json'
       - '.github/workflows/hpos-morning-briefing-ci.yml'
 
