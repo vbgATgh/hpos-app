@@ -9,12 +9,14 @@ on:
       - 'scripts/review_morning_briefing_evidence.py'
       - 'scripts/validate_morning_briefing_promotion.py'
       - 'scripts/validate_promotion_sequence.py'
+      - 'scripts/project_verification_state.py'
       - 'tests/test_morning_briefing_ingestion.py'
       - 'tests/test_morning_briefing_evidence_matcher.py'
       - 'tests/test_morning_briefing_evidence_review.py'
       - 'tests/test_morning_briefing_promotion.py'
       - 'tests/test_morning_briefing_case_2026_09_02.py'
       - 'tests/test_promotion_sequence.py'
+      - 'tests/test_verification_projection.py'
       - 'data/thesis_registry.json'
       - 'data/asset_identity_aliases.json'
       - 'data/fundamental/evidence.json'
@@ -30,12 +32,14 @@ on:
       - 'scripts/review_morning_briefing_evidence.py'
       - 'scripts/validate_morning_briefing_promotion.py'
       - 'scripts/validate_promotion_sequence.py'
+      - 'scripts/project_verification_state.py'
       - 'tests/test_morning_briefing_ingestion.py'
       - 'tests/test_morning_briefing_evidence_matcher.py'
       - 'tests/test_morning_briefing_evidence_review.py'
       - 'tests/test_morning_briefing_promotion.py'
       - 'tests/test_morning_briefing_case_2026_09_02.py'
       - 'tests/test_promotion_sequence.py'
+      - 'tests/test_verification_projection.py'
       - 'data/thesis_registry.json'
       - 'data/asset_identity_aliases.json'
       - 'data/fundamental/evidence.json'
@@ -65,7 +69,10 @@ jobs:
           python -m py_compile scripts/review_morning_briefing_evidence.py
           python -m py_compile scripts/validate_morning_briefing_promotion.py
           python -m py_compile scripts/validate_promotion_sequence.py
+          python -m py_compile scripts/project_verification_state.py
       - name: Run briefing pipeline tests
-        run: python -m pytest -q tests/test_morning_briefing_ingestion.py tests/test_morning_briefing_evidence_matcher.py tests/test_morning_briefing_evidence_review.py tests/test_morning_briefing_promotion.py tests/test_morning_briefing_case_2026_09_02.py tests/test_promotion_sequence.py
+        run: python -m pytest -q tests/test_morning_briefing_ingestion.py tests/test_morning_briefing_evidence_matcher.py tests/test_morning_briefing_evidence_review.py tests/test_morning_briefing_promotion.py tests/test_morning_briefing_case_2026_09_02.py tests/test_promotion_sequence.py tests/test_verification_projection.py
       - name: Validate promotion decision ordering
         run: python scripts/validate_promotion_sequence.py data/promotion_decisions
+      - name: Project committed verification state
+        run: python scripts/project_verification_state.py data/promotion_decisions
