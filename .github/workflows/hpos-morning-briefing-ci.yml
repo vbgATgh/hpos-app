@@ -5,15 +5,21 @@ on:
     paths:
       - 'config/morning_briefing_candidate.schema.json'
       - 'scripts/validate_morning_briefing_candidate.py'
+      - 'scripts/match_morning_briefing_evidence.py'
       - 'tests/test_morning_briefing_ingestion.py'
+      - 'tests/test_morning_briefing_evidence_matcher.py'
       - 'data/thesis_registry.json'
+      - 'data/fundamental/evidence.json'
       - '.github/workflows/hpos-morning-briefing-ci.yml'
   pull_request:
     paths:
       - 'config/morning_briefing_candidate.schema.json'
       - 'scripts/validate_morning_briefing_candidate.py'
+      - 'scripts/match_morning_briefing_evidence.py'
       - 'tests/test_morning_briefing_ingestion.py'
+      - 'tests/test_morning_briefing_evidence_matcher.py'
       - 'data/thesis_registry.json'
+      - 'data/fundamental/evidence.json'
       - '.github/workflows/hpos-morning-briefing-ci.yml'
 
 permissions:
@@ -30,7 +36,9 @@ jobs:
           python-version: '3.12'
       - name: Install test dependency
         run: python -m pip install --disable-pip-version-check pytest
-      - name: Compile validator
-        run: python -m py_compile scripts/validate_morning_briefing_candidate.py
-      - name: Run briefing ingestion tests
-        run: python -m pytest -q tests/test_morning_briefing_ingestion.py
+      - name: Compile briefing tools
+        run: |
+          python -m py_compile scripts/validate_morning_briefing_candidate.py
+          python -m py_compile scripts/match_morning_briefing_evidence.py
+      - name: Run briefing ingestion and evidence matcher tests
+        run: python -m pytest -q tests/test_morning_briefing_ingestion.py tests/test_morning_briefing_evidence_matcher.py
