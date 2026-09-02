@@ -12,9 +12,11 @@ on:
       - 'tests/test_morning_briefing_evidence_matcher.py'
       - 'tests/test_morning_briefing_evidence_review.py'
       - 'tests/test_morning_briefing_promotion.py'
+      - 'tests/test_morning_briefing_case_2026_09_02.py'
       - 'data/thesis_registry.json'
       - 'data/asset_identity_aliases.json'
       - 'data/fundamental/evidence.json'
+      - 'data/briefing_cases/**'
       - '.github/workflows/hpos-morning-briefing-ci.yml'
   pull_request:
     paths:
@@ -27,9 +29,11 @@ on:
       - 'tests/test_morning_briefing_evidence_matcher.py'
       - 'tests/test_morning_briefing_evidence_review.py'
       - 'tests/test_morning_briefing_promotion.py'
+      - 'tests/test_morning_briefing_case_2026_09_02.py'
       - 'data/thesis_registry.json'
       - 'data/asset_identity_aliases.json'
       - 'data/fundamental/evidence.json'
+      - 'data/briefing_cases/**'
       - '.github/workflows/hpos-morning-briefing-ci.yml'
 
 permissions:
@@ -53,4 +57,4 @@ jobs:
           python -m py_compile scripts/review_morning_briefing_evidence.py
           python -m py_compile scripts/validate_morning_briefing_promotion.py
       - name: Run briefing pipeline tests
-        run: python -m pytest -q tests/test_morning_briefing_ingestion.py tests/test_morning_briefing_evidence_matcher.py tests/test_morning_briefing_evidence_review.py tests/test_morning_briefing_promotion.py
+        run: python -m pytest -q tests/test_morning_briefing_ingestion.py tests/test_morning_briefing_evidence_matcher.py tests/test_morning_briefing_evidence_review.py tests/test_morning_briefing_promotion.py tests/test_morning_briefing_case_2026_09_02.py
