@@ -1,6 +1,6 @@
 # HPOS – QA Execution Evidence 2026-09-01
 
-Status: PARTIAL PASS / CANONICAL7 MVP BROWSER EVIDENCE EXPANDED / SECURITY SUPPORT OPEN
+Status: PARTIAL PASS / CANONICAL7 MVP BROWSER EVIDENCE EXPANDED / SECURITY CLEANUP VERIFIED
 
 ## Scope
 
@@ -101,9 +101,9 @@ Implementation commits retained as provenance:
 ## Security follow-up 2026-09-02
 
 ### T-020 – final secret/privacy smoke
-Result: BLOCKED / EXTERNAL CLEANUP OPEN.
+Result: PASS.
 
-The current `main` branch no longer contains the real portfolio snapshot in its reachable branch history. A previously exposed orphaned commit remains directly retrievable by its old SHA, so final privacy PASS is not claimed. GitHub Support ticket `#4720320` was opened on 2026-09-02 requesting server-side dereferencing / garbage collection and cached-view removal. T-020 can move to PASS only after GitHub confirms cleanup and the old SHA is independently rechecked.
+The active branch history had already been rewritten so the real portfolio snapshot was no longer present in reachable `main` history. GitHub Support ticket `#4720320` was then processed on 2026-09-02. GitHub Support confirmed that repository garbage collection was run and the repository cache was cleared because no remaining references pointed to the supplied old commit SHA. After that support action, an independent GitHub API lookup for `5a5edb603fdfaedb34a38b7cc74f4d6d4c2106af` returned `No commit found for SHA` with HTTP 422. The previously exposed orphaned commit is therefore no longer retrievable as a commit through GitHub.
 
 ### T-003 – controlled provider-failure protocol
 Result: PENDING EXECUTION.
@@ -119,7 +119,6 @@ The following are NOT claimed as passed yet:
 - T-017 remaining More/data/system/diagnostic navigation
 - T-018 core visualizations beyond currently observed cards/gates/income states
 - T-019 iPhone Safari/PWA primary flow
-- T-020 final secret/privacy smoke (blocked on GitHub Support #4720320)
 - final legacy cleanup regression
 
 ## QA rule
