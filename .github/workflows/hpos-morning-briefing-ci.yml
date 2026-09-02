@@ -18,11 +18,14 @@ on:
       - 'tests/test_promotion_sequence.py'
       - 'tests/test_verification_projection.py'
       - 'data/thesis_registry.json'
+      - 'data/asset_catalog.json'
       - 'data/asset_identity_aliases.json'
       - 'data/fundamental/evidence.json'
       - 'data/fundamental/evidence_curated.json'
       - 'data/briefing_cases/**'
       - 'data/promotion_decisions/**'
+      - 'data/verification_projection.json'
+      - 'app/verification-status.js'
       - '.github/workflows/hpos-morning-briefing-ci.yml'
   pull_request:
     paths:
@@ -41,11 +44,14 @@ on:
       - 'tests/test_promotion_sequence.py'
       - 'tests/test_verification_projection.py'
       - 'data/thesis_registry.json'
+      - 'data/asset_catalog.json'
       - 'data/asset_identity_aliases.json'
       - 'data/fundamental/evidence.json'
       - 'data/fundamental/evidence_curated.json'
       - 'data/briefing_cases/**'
       - 'data/promotion_decisions/**'
+      - 'data/verification_projection.json'
+      - 'app/verification-status.js'
       - '.github/workflows/hpos-morning-briefing-ci.yml'
 
 permissions:
@@ -70,9 +76,12 @@ jobs:
           python -m py_compile scripts/validate_morning_briefing_promotion.py
           python -m py_compile scripts/validate_promotion_sequence.py
           python -m py_compile scripts/project_verification_state.py
+          node --check app/verification-status.js
       - name: Run briefing pipeline tests
         run: python -m pytest -q tests/test_morning_briefing_ingestion.py tests/test_morning_briefing_evidence_matcher.py tests/test_morning_briefing_evidence_review.py tests/test_morning_briefing_promotion.py tests/test_morning_briefing_case_2026_09_02.py tests/test_promotion_sequence.py tests/test_verification_projection.py
       - name: Validate promotion decision ordering
         run: python scripts/validate_promotion_sequence.py data/promotion_decisions
       - name: Project committed verification state
         run: python scripts/project_verification_state.py data/promotion_decisions
+      - name: Check committed UI verification projection
+        run: python scripts/project_verification_state.py --check data/verification_projection.json
