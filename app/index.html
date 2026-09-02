@@ -7,14 +7,14 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="HPOS">
-<link rel="manifest" href="manifest.webmanifest?v=20260901-canonical7">
+<link rel="manifest" href="manifest.webmanifest?v=20260902-evidenceux1">
 <link rel="apple-touch-icon" href="../icon-192.png">
 <title>HPOS</title>
-<link rel="stylesheet" href="styles.css?v=20260901-canonical7">
+<link rel="stylesheet" href="styles.css?v=20260902-evidenceux1">
 </head>
 <body>
 <div class="app">
-<header class="top"><div class="brand"><button class="h" id="homeBtn" aria-label="Home">H</button><div><strong>HPOS</strong><small>Portfolio Intelligence · v8.7.5</small></div></div><div class="topActions"><button id="searchBtn" class="iconBtn" aria-label="Wertpapier suchen">⌕</button><button id="refresh" class="iconBtn refresh" aria-label="Portfolio aktualisieren">↻</button></div></header>
+<header class="top"><div class="brand"><button class="h" id="homeBtn" aria-label="Home">H</button><div><strong>HPOS</strong><small>Portfolio Intelligence · v8.7.6</small></div></div><div class="topActions"><button id="searchBtn" class="iconBtn" aria-label="Wertpapier suchen">⌕</button><button id="refresh" class="iconBtn refresh" aria-label="Portfolio aktualisieren">↻</button></div></header>
 <main class="main">
 <section id="home" class="view on"><div class="eye">Validiertes Gesamtvermögen</div><div id="homeValue" class="hero">—</div><div id="homeSub" class="sub">Portfolio wird geladen.</div><div id="quoteStatus" class="source"><span class="dot"></span><span>Daten werden initialisiert</span></div><div id="homeCards" class="cards spaced"></div><div class="section"><div class="sectionHead"><h2>HPOS Status</h2><button class="link" data-go="analyse">Analyse</button></div><div id="status" class="panel"></div></div><div class="section"><div class="sectionHead"><h2>Allokation</h2><button class="link" data-go="portfolio">Portfolio</button></div><div id="allocation"></div></div><div class="section"><div class="sectionHead"><h2>Heute relevant</h2><button class="link" data-go="analyse">Alle Signale</button></div><div id="focus" class="list"></div></div></section>
 <section id="portfolio" class="view"><div class="eye">Portfolio</div><div class="titleRow"><h1>Bestände</h1><button class="primary small" id="portfolioSearch">+ Wertpapier</button></div><div id="portfolioMeta" class="sub"></div><div class="filters"><button class="chip on" data-filter="ALL">Alle</button><button class="chip" data-filter="SCALABLE">Scalable</button><button class="chip" data-filter="TRADE_REPUBLIC">TR</button><button class="chip" data-filter="WATCHLIST">Watchlist <span id="watchCountChip"></span></button></div><div id="portfolioList" class="list"></div></section>
@@ -29,13 +29,14 @@
 <dialog id="searchDialog" class="sheet"><div class="sheetHead"><div><div class="eye">Wertpapier</div><h2>Suchen & beobachten</h2></div><button class="close" data-close="searchDialog">×</button></div><input id="securityQuery" class="searchInput" placeholder="Name, Ticker oder ISIN" autocomplete="off" autocapitalize="off" spellcheck="false"><div class="sub searchHint">Ein Feld genügt. HPOS erkennt automatisch Name, Ticker oder eine 12-stellige ISIN. Bei einer ISIN erfolgt eine exakte Identitätsprüfung.</div><div class="verifiedOnly">Nur ISIN-verifizierte Instrumente dürfen in die Watchlist. Name und Ticker dienen der Suche; die verifizierte ISIN ist der kanonische Instrumentenschlüssel.</div><div id="searchResults" class="list searchResults"></div></dialog>
 <dialog id="orderDialog" class="sheet"><div class="sheetHead"><div><div class="eye">Broker-Workflow</div><h2 id="orderTitle">Order ausführen</h2></div><button class="close" data-close="orderDialog">×</button></div><div class="panel"><div class="status"><span>Wertpapier</span><strong id="orderAsset">—</strong></div><div class="status"><span>Aktion</span><select id="orderSide"><option value="BUY">Kaufen</option><option value="SELL">Verkaufen</option></select></div><div class="status"><span>Broker</span><select id="orderBroker"><option value="SCALABLE">Scalable Capital</option><option value="TRADE_REPUBLIC">Trade Republic</option></select></div></div><div class="notice">Die Order wird ausschließlich in der Broker-App ausgeführt. HPOS sendet keine Order und verändert den Depotbestand nicht manuell.</div><button id="orderDone" class="primary full">Order im Broker erledigt · Bestand aktualisieren</button><button id="orderCancel" class="secondary full">Nur schließen</button></dialog>
 <div id="toast" class="toast"></div>
-<script src="runtime-config.js?v=20260901-canonical7"></script>
-<script src="quote-policy.js?v=20260901-canonical7"></script>
+<script src="runtime-config.js?v=20260902-evidenceux1"></script>
+<script src="quote-policy.js?v=20260902-evidenceux1"></script>
 <script src="parqet-supabase-adapter.js?v=20260902-syncfix1"></script>
-<script src="app.js?v=20260901-canonical7"></script>
-<script src="search-guard.js?v=20260901-canonical7"></script>
-<script src="watchlist-policy.js?v=20260901-canonical7"></script>
-<script src="asset-intelligence.js?v=20260901-canonical7"></script>
-<script src="mvp-hardening.js?v=20260901-canonical7"></script>
+<script src="app.js?v=20260902-evidenceux1"></script>
+<script src="search-guard.js?v=20260902-evidenceux1"></script>
+<script src="watchlist-policy.js?v=20260902-evidenceux1"></script>
+<script src="asset-intelligence.js?v=20260902-evidenceux1"></script>
+<script src="verification-status.js?v=20260902-evidenceux1"></script>
+<script src="mvp-hardening.js?v=20260902-evidenceux1"></script>
 </body>
 </html>
