@@ -1,6 +1,6 @@
 # HPOS – QA Execution Evidence 2026-09-01
 
-Status: PARTIAL PASS / CANONICAL7 MVP BROWSER EVIDENCE EXPANDED
+Status: PARTIAL PASS / CANONICAL7 MVP BROWSER EVIDENCE EXPANDED / SECURITY SUPPORT OPEN
 
 ## Scope
 
@@ -98,16 +98,28 @@ Implementation commits retained as provenance:
 - `c5c777d8b9dc2a973886a5cc5478f096d313d8c5` – canonical6 promotion
 - `48d5ff827870649af95744547121521802e963aa` – canonical7 app cache-bust / manifest
 
+## Security follow-up 2026-09-02
+
+### T-020 – final secret/privacy smoke
+Result: BLOCKED / EXTERNAL CLEANUP OPEN.
+
+The current `main` branch no longer contains the real portfolio snapshot in its reachable branch history. A previously exposed orphaned commit remains directly retrievable by its old SHA, so final privacy PASS is not claimed. GitHub Support ticket `#4720320` was opened on 2026-09-02 requesting server-side dereferencing / garbage collection and cached-view removal. T-020 can move to PASS only after GitHub confirms cleanup and the old SHA is independently rechecked.
+
+### T-003 – controlled provider-failure protocol
+Result: PENDING EXECUTION.
+
+The next deterministic browser test will use the already validated local portfolio state and then temporarily disable network connectivity without reloading the page. A manual HPOS refresh must fail provider access while leaving position count, cash, validated-state timestamp and previously validated holdings unchanged. Network is then restored and a second manual refresh must recover normal Parqet/market connectivity. No PASS is claimed until this exact sequence is observed.
+
 ## Still required
 
 The following are NOT claimed as passed yet:
-- T-003 deliberate provider failure / preserved validated state on current canonical build
+- T-003 controlled offline provider failure / preserved validated state on current canonical build (protocol prepared, execution pending)
 - T-004 representative portfolio-row navigation beyond already observed Abbott/JNJ paths if broader coverage is required
 - T-011 real broker -> Parqet -> HPOS reconciliation after an actual broker-side change
 - T-017 remaining More/data/system/diagnostic navigation
 - T-018 core visualizations beyond currently observed cards/gates/income states
 - T-019 iPhone Safari/PWA primary flow
-- T-020 final secret/privacy smoke
+- T-020 final secret/privacy smoke (blocked on GitHub Support #4720320)
 - final legacy cleanup regression
 
 ## QA rule
