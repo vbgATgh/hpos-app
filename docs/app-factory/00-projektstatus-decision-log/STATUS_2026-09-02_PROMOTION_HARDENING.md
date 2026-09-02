@@ -42,7 +42,10 @@ Neue Promotion-Tests decken mindestens ab:
 - ausgetauschte Evidence-IDs,
 - abweichender sourceAsOf.
 
-Der bestehende Evidence-Review-Testblock bleibt aktiv und prüft u. a. Future Evidence, Secondary-only Evidence, fehlenden semantischen Anker, und undatierte Primärevidenz.
+Der bestehende Evidence-Review-Testblock bleibt aktiv und prüft u. a. Future Evidence, Secondary-only Evidence, fehlenden semantischen Anker und undatierte Primärevidenz.
+
+## CI-Nachweis
+GitHub Actions Lauf `33670919273` für Commit `f8e36a221d78b76f012b46fdbdb5ef2bf3afefcb` wurde erfolgreich abgeschlossen. Dieser Lauf enthält Candidate Validation, Evidence Matcher, Evidence Review und Promotion-Contract-Tests inklusive der verschärften semantischen Ankerlogik.
 
 ## Verbindliche Systemgrenze
 Auch nach diesem Hardening führt kein Morning-Briefing-Signal automatisch zu einer Investmentaktion. Der Pfad bleibt:
@@ -52,8 +55,7 @@ Auch nach diesem Hardening führt kein Morning-Briefing-Signal automatisch zu ei
 Promotion betrifft ausschließlich den Evidenz-/Verifikationsstatus. THS und Portfolioaktion sind weiterhin getrennte nachgelagerte Entscheidungen.
 
 ## Noch offen
-- Aktuellen CI-Lauf nach den Promotion-/Semantic-Hardening-Änderungen erfolgreich abschließen und als Nachweis referenzieren.
-- Danach das konkrete Morgenbriefing vom 02.09.2026 als kontrollierten Pipeline-Fall modellieren; Fakten werden nur übernommen, soweit Primärevidenz im HPOS-Evidence-Store vorhanden und ausreichend passend ist.
+- Das konkrete Morgenbriefing vom 02.09.2026 als kontrollierten Pipeline-Fall modellieren; Fakten werden nur übernommen, soweit Primärevidenz im HPOS-Evidence-Store vorhanden und ausreichend passend ist.
 - THS-Granularität bleibt ein separater Produktentscheid; externe Dezimalwerte überschreiben den kanonischen HPOS-THS weiterhin nicht.
 - Stale-/Out-of-order-Promotions müssen beim späteren Persistenzlayer zusätzlich gegen den jeweils aktuelleren kanonischen Asset-State geschützt werden. `sourceAsOf`, `decisionId` und `supersedesDecisionId` sind dafür bereits vorbereitet, aber noch kein persistenter Canonical-State-Writer wurde freigegeben.
 
