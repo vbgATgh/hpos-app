@@ -1,4 +1,3 @@
-import copy
 import importlib.util
 from pathlib import Path
 
@@ -45,14 +44,29 @@ def test_unknown_asset_is_rejected():
     assert any("not present in thesis_registry" in error for error in errors)
 
 
-def test_verified_requires_evidence_reference():
+def test_external_agent_cannot_arrive_preverified_even_with_evidence():
     payload = valid_payload()
+    payload["candidates"][0]["verificationStatus"] = "VERIFIED"
+    errors = validator.validate(payload)
+    assert any("must be UNVERIFIED for EXTERNAL_AGENT input" in error for error in errors)
+
+
+def test_manual_verified_requires_evidence_reference():
+    payload = valid_payload()
+    payload["source"]["kind"] = "MANUAL_REVIEW"
     candidate = payload["candidates"][0]
     candidate["verificationStatus"] = "VERIFIED"
     candidate["evidenceUrls"] = []
     candidate["evidenceIds"] = []
     errors = validator.validate(payload)
     assert any("cannot be VERIFIED without evidence references" in error for error in errors)
+
+
+def test_manual_verified_with_evidence_is_accepted():
+    payload = valid_payload()
+    payload["source"]["kind"] = "MANUAL_REVIEW"
+    payload["candidates"][0]["verificationStatus"] = "VERIFIED"
+    assert validator.validate(payload) == []
 
 
 def test_no_relevant_delta_cannot_propose_buy():
