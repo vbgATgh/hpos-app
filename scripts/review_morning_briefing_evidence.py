@@ -121,7 +121,7 @@ def review_candidate(candidate: dict[str, Any], matched_ids: list[str], evidence
         "automaticVerificationPerformed": False,
         "automaticThsChangePerformed": False,
         "automaticActionPromotionPerformed": False,
-        "requiredNextStep": "HUMAN_OR_SEPARATE_HP0S_REVIEW_DECISION" if status != "BLOCKED" else "RESOLVE_EVIDENCE_BLOCKERS",
+        "requiredNextStep": "HUMAN_OR_SEPARATE_HPOS_REVIEW_DECISION" if status != "BLOCKED" else "RESOLVE_EVIDENCE_BLOCKERS",
     }
 
 
