@@ -16,6 +16,7 @@ on:
       - 'data/thesis_registry.json'
       - 'data/asset_identity_aliases.json'
       - 'data/fundamental/evidence.json'
+      - 'data/fundamental/evidence_curated.json'
       - 'data/briefing_cases/**'
       - '.github/workflows/hpos-morning-briefing-ci.yml'
   pull_request:
@@ -33,6 +34,7 @@ on:
       - 'data/thesis_registry.json'
       - 'data/asset_identity_aliases.json'
       - 'data/fundamental/evidence.json'
+      - 'data/fundamental/evidence_curated.json'
       - 'data/briefing_cases/**'
       - '.github/workflows/hpos-morning-briefing-ci.yml'
 
