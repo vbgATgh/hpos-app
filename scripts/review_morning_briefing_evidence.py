@@ -17,6 +17,7 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 EVIDENCE_PATH = ROOT / "data" / "fundamental" / "evidence.json"
+CURATED_EVIDENCE_PATH = ROOT / "data" / "fundamental" / "evidence_curated.json"
 THESIS_REGISTRY = ROOT / "data" / "thesis_registry.json"
 
 
@@ -25,6 +26,14 @@ def _load(path: Path) -> dict[str, Any]:
     if not isinstance(data, dict):
         raise ValueError(f"{path} root must be an object")
     return data
+
+
+def _load_evidence() -> dict[str, Any]:
+    base = _load(EVIDENCE_PATH)
+    curated = _load(CURATED_EVIDENCE_PATH) if CURATED_EVIDENCE_PATH.exists() else {"items": []}
+    merged = dict(base)
+    merged["items"] = [*base.get("items", []), *curated.get("items", [])]
+    return merged
 
 
 def _dt(value: Any) -> datetime | None:
@@ -95,10 +104,6 @@ def review_candidate(candidate: dict[str, Any], matched_ids: list[str], evidence
         supporting_terms |= _tokens(item.get("category"))
         supporting_terms |= _tokens(item.get("metric"))
 
-    # Prefer explicit thesisDriver linkage. Generic words in notes such as growth or margin
-    # must not by themselves make unrelated evidence REVIEW_READY. If a source has no
-    # thesisDriver at all, require at least two supporting vocabulary overlaps as a cautious
-    # fallback and still expose the matched tokens for audit.
     registry_driver_overlap = sorted(vocabulary & driver_terms)
     proofpoint_driver_overlap = sorted(candidate_terms & driver_terms)
     supporting_registry_overlap = sorted(vocabulary & supporting_terms)
@@ -141,7 +146,7 @@ def review_candidate(candidate: dict[str, Any], matched_ids: list[str], evidence
 
 
 def review_payload(payload: dict[str, Any], match_result: dict[str, Any], evidence: dict[str, Any] | None = None, registry: dict[str, Any] | None = None) -> dict[str, Any]:
-    evidence = evidence or _load(EVIDENCE_PATH)
+    evidence = evidence or _load_evidence()
     registry = registry or _load(THESIS_REGISTRY)
     match_by_asset = {x.get("assetKey"): x for x in match_result.get("candidates", []) if isinstance(x, dict)}
     results: list[dict[str, Any]] = []
