@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hpos.local/schema/morning_briefing_candidate.schema.json",
+  "title": "HPOS Morning Briefing Candidate",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "asOf", "source", "candidates"],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "asOf": {"type": "string", "format": "date-time"},
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind"],
+      "properties": {
+        "kind": {"enum": ["EXTERNAL_AGENT", "MANUAL_REVIEW"]},
+        "label": {"type": "string", "maxLength": 120}
+      }
+    },
+    "candidates": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/candidate"}
+    }
+  },
+  "$defs": {
+    "candidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "assetKey",
+        "actionCandidate",
+        "thesisDelta",
+        "riskDelta",
+        "coverageStatus",
+        "verificationStatus"
+      ],
+      "properties": {
+        "assetKey": {"type": "string", "pattern": "^[A-Z0-9_]+$"},
+        "externalThsBefore": {"type": ["number", "null"], "minimum": 0, "maximum": 10},
+        "externalThsAfter": {"type": ["number", "null"], "minimum": 0, "maximum": 10},
+        "actionCandidate": {
+          "enum": ["BUY", "ADD", "HOLD", "DO_NOT_ADD", "REDUCE", "SELL", "ROTATE", "WAIT_FOR_TRIGGER", "NONE"]
+        },
+        "thesisDelta": {"enum": ["STRENGTHENING", "WEAKENING", "NEUTRAL", "INSUFFICIENT", "BROKEN"]},
+        "riskDelta": {"enum": ["LOWER", "UNCHANGED", "HIGHER", "UNKNOWN"]},
+        "evidenceUrls": {
+          "type": "array",
+          "items": {"type": "string", "format": "uri"},
+          "uniqueItems": true
+        },
+        "evidenceIds": {
+          "type": "array",
+          "items": {"type": "string", "minLength": 1},
+          "uniqueItems": true
+        },
+        "coverageStatus": {"enum": ["DELTA_FOUND", "NO_RELEVANT_DELTA", "NOT_COVERED"]},
+        "proofpoints": {
+          "type": "array",
+          "items": {"type": "string", "minLength": 1, "maxLength": 500}
+        },
+        "rotationCandidate": {
+          "type": ["object", "null"],
+          "additionalProperties": false,
+          "required": ["targetAssetKey"],
+          "properties": {
+            "targetAssetKey": {"type": "string", "pattern": "^[A-Z0-9_]+$"},
+            "scope": {"enum": ["PARTIAL", "FULL", "UNSPECIFIED"]},
+            "reason": {"type": "string", "maxLength": 1000}
+          }
+        },
+        "verificationStatus": {"enum": ["UNVERIFIED", "PARTIALLY_VERIFIED", "VERIFIED", "REJECTED"]},
+        "notes": {"type": "string", "maxLength": 2000}
+      }
+    }
+  }
+}
