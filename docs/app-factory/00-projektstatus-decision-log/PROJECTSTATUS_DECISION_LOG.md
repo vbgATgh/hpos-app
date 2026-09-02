@@ -1,6 +1,6 @@
 # HPOS App – Projektstatus & Decision Log
 
-Stand: 2026-09-01
+Stand: 2026-09-02
 
 > Zentrale Steuerungsakte für HPOS nach der App Factory. Nur tatsächlich belegte Zustände werden als abgeschlossen dokumentiert. Nicht durchgeführte Tests oder Gates gelten nicht als bestanden.
 
@@ -39,7 +39,7 @@ Stand: 2026-09-01
 
 **Status:** IN DEVELOPMENT
 
-**Phase:** Parqet-E2E, produktiver Parqet-Live-Sync sowie Search/Quotes über Supabase real nachgewiesen. Der erprobte `live9`-Stand wurde in den kanonischen Produktpfad `app/index.html` übernommen. Canonical-Smoke-/Regressionstest und anschließende RC-Härtung sind offen.
+**Phase:** Kanonischer Produktpfad `app/` ist im realen Browser nachgewiesen. Parqet-Live-Sync, Search/ISIN, Quotes, Watchlist-Persistenz, Investment-Akte, Decision Layer, Income-Grundlogik, Halal-UNKNOWN-Verhalten, Broker-Guard und Hauptnavigation wurden real geprüft. Offen sind gezielter Providerfehler/Fallback-Nachweis, verbleibende System-/Diagnosepfade, Safari/PWA-Primärfluss, finaler Privacy-Smoke sowie anschließendes Legacy-Cleanup und v9-RC-Regression.
 
 **Letztes formal abgeschlossenes App-Factory-Gate:** keines nachgewiesen
 
@@ -104,7 +104,7 @@ Ergebnis des bislang verifizierten Bestands:
 - Trade Republic: Savaria, ISIN `CA8051121090`
 - alle übrigen aktiven Wertpapierpositionen: Scalable Capital
 
-Wichtig: Die Produktion darf nicht dauerhaft auf exakt 19 Positionen oder exakt 246,73 EUR Cash fest verdrahtet sein. Mit Edge Function Version 17 und dem aktualisierten Adapter wurden diese Testassertionen durch strukturelle Plausibilitätsprüfungen ersetzt, damit reale Käufe/Verkäufe und Cash-Änderungen künftig nicht fälschlich als Providerfehler blockiert werden. Dieser neue flexible Pfad ist implementiert, aber im kanonischen Browserpfad noch zu regressionsprüfen.
+Wichtig: Die Produktion darf nicht dauerhaft auf exakt 19 Positionen oder exakt 246,73 EUR Cash fest verdrahtet sein. Mit Edge Function Version 17 und dem aktualisierten Adapter wurden diese Testassertionen durch strukturelle Plausibilitätsprüfungen ersetzt, damit reale Käufe/Verkäufe und Cash-Änderungen künftig nicht fälschlich als Providerfehler blockiert werden. Dieser neue flexible Pfad ist implementiert und im kanonischen Browserpfad für den unveränderten Bestandsfall regressionsgeprüft.
 
 Die Brokerzuordnung ist Workflow-/Darstellungsmetadatum und verändert den von Parqet gelieferten Bestand nicht.
 
@@ -136,26 +136,33 @@ Die Normalisierung ist über Positionswert, Cash/Sold-Status und die bestätigte
 ### OPEN-003 – Frontend-Umschaltung Parqet
 **Status:** ERLEDIGT / PASS 2026-09-01
 
-Produktiver Browserlauf nachgewiesen: `PARQET LIVE SYNC`, 19 aktive Positionen, 246,73 EUR Cash, aktueller Bestandszeitpunkt.
+Produktiver Browserlauf nachgewiesen: `PARQET LIVE SYNC`, 19 aktive Positionen, plausibler aktueller Cashwert und aktueller Bestandszeitpunkt.
 
 ### OPEN-004 – Search/ISIN und Quotes migrieren
 **Status:** ERLEDIGT / PASS 2026-09-01
 
-Browser- und Serverlog-Nachweis liegen vor. Search und Yahoo-Quotes liefen über Supabase `hpos-api` Version 16 mit HTTP 200; Abbott wurde auf `US0028241000` / `ABT` ISIN-verifiziert. `runtime-config.js` enthält keinen aktiven Cloudflare-Zielhost mehr.
+Browser- und Serverlog-Nachweis liegen vor. Search und Yahoo-Quotes liefen über Supabase `hpos-api` mit HTTP 200; Abbott wurde auf `US0028241000` / `ABT` ISIN-verifiziert. `runtime-config.js` enthält keinen aktiven Cloudflare-Zielhost mehr.
 
 ### OPEN-005 – QA / Regression / Security / Rollback
 **Kritikalität:** HOCH
 
-Parqet-Livepfad sowie Search/Quotes sind einzeln nachgewiesen. Vollständige Regression des kanonischen `app/`-Pfads, Security-/Fehlerfallprüfung und finaler Rollback-/Cleanup-Nachweis bleiben offen.
+Kanonischer Pfad und wesentliche MVP-Funktionen sind browserseitig nachgewiesen. Gezielt provozierter Providerfehler, verbleibende Diagnosepfade, Safari/PWA, finaler Privacy-Smoke und Final-Cleanup-Regressionsnachweis bleiben offen.
 
 **Status:** TEILWEISE OFFEN
 
 ### OPEN-006 – Kanonischen Produktpfad nach Promotion prüfen
 **Kritikalität:** HOCH
 
-Der erprobte Live-Stand wurde am 2026-09-01 als `v8.7.5` nach `app/index.html` übernommen. Edge Function Version 17 redirectet OAuth nun direkt auf `app/`. Dieser kanonische Pfad muss real im Browser mit Refresh, OAuth, Parqet-Sync, Search, Watchlist-Persistenz und Quotes geprüft werden.
+Der kanonische Einstieg und die Kernflüsse wurden im Browser geprüft, einschließlich Root-Redirect auf `/app/`, Parqet-Sync, Search/ISIN und Watchlist-Persistenz.
 
-**Status:** IMPLEMENTIERT / BROWSERTEST OFFEN
+**Status:** ERLEDIGT / PASS 2026-09-01
+
+### OPEN-007 – GitHub serverseitiger Cleanup sensibler Alt-Historie
+**Kritikalität:** KRITISCH VOR RC-FREIGABE
+
+Die aktive Branch-Historie wurde bereinigt. Ein verwaister früherer Commit mit einem realen Portfolio-Snapshot ist weiterhin direkt über seine alte SHA erreichbar. GitHub Support-Ticket `#4720320` wurde am 2026-09-02 eröffnet und ist OPEN. Bis zur bestätigten serverseitigen Dereferenzierung/Garbage Collection bleibt T-020 BLOCKED.
+
+**Status:** EXTERN BLOCKED / GITHUB SUPPORT OPEN
 
 ## 8. Decision Log
 
@@ -255,9 +262,9 @@ Search und Yahoo-Quotes hängen funktional nicht mehr vom Cloudflare-Legacy-Work
 
 ### DEC-015 – Kanonischer OAuth-Rücksprung auf `app/`
 **Datum:** 2026-09-01
-**Status:** AKTIV / TEST OFFEN
+**Status:** AKTIV / PASS NACHGEWIESEN
 
-Temporäre `liveN`-Redirects dürfen nicht Teil des finalen Produkts bleiben. Edge Function Version 17 verwendet deshalb `https://vbgatgh.github.io/hpos-app/app/` als Frontend-Rücksprung nach erfolgreichem Parqet-OAuth. Der zugehörige kanonische Browser-Smoke-Test ist noch offen.
+Temporäre `liveN`-Redirects dürfen nicht Teil des finalen Produkts bleiben. Edge Function Version 17 verwendet `https://vbgatgh.github.io/hpos-app/app/` als Frontend-Rücksprung nach erfolgreichem Parqet-OAuth. Der kanonische Produktpfad und Root-Redirect wurden im Browser erfolgreich nachgewiesen.
 
 ## 9. ADR-Status
 
@@ -287,7 +294,9 @@ Aktuelle Zielentscheidung für die private Integrationsschicht.
 
 ### RISK-004 – Privacy/Secrets bei öffentlichem Frontend/Repo
 **Auswirkung:** KRITISCH
-**Status:** REDUZIERT; Parqet OAuth-Tokens bleiben serverseitig. Die opake HPOS-Session-ID ist der einzige Browser-Bearer. Vollständiger Security-PASS vor RC weiterhin offen.
+**Status:** TEILWEISE BLOCKIERT / EXTERNER CLEANUP OFFEN
+
+Parqet OAuth-Tokens bleiben serverseitig. Die opake HPOS-Session-ID ist der einzige Browser-Bearer. Der aktuelle `main`-Stand enthält keinen realen Portfolio-Snapshot. Die erreichbare Branch-Historie wurde am 2026-09-01 auf eine bereinigte Historie umgeschrieben. Ein früherer sensibler Commit ist jedoch weiterhin direkt über seine alte SHA abrufbar und erfordert GitHub-seitige Dereferenzierung/Garbage Collection. GitHub Support-Ticket `#4720320` wurde am 2026-09-02 eröffnet und ist OPEN. T-020 bleibt bis zur bestätigten serverseitigen Entfernung BLOCKED.
 
 ### RISK-005 – Browser-lokaler Zustand
 **Auswirkung:** MITTEL
@@ -319,16 +328,14 @@ Historische UI-/Alpha-Pfade werden vor Go-live nach `FINAL_LEGACY_CLEANUP_GATE.m
 
 ## 12. Nächste Ausführungsreihenfolge
 
-1. kanonischen Pfad `https://vbgatgh.github.io/hpos-app/app/` im primären Browser öffnen.
-2. Version `v8.7.5` und bestehenden validierten State prüfen.
-3. manuellen Refresh ausführen und bei Bedarf Parqet einmal autorisieren; Rücksprung muss auf `app/` erfolgen.
-4. `PARQET LIVE SYNC`, plausible Positions-/Cashwerte und aktuellen Bestandszeitpunkt prüfen.
-5. Search mit Name und exakter ISIN sowie Watchlist-Hinzufügen prüfen; Browser-Neuladen und Watchlist-Persistenz im selben Browser prüfen.
-6. Quotes prüfen und Supabase-Logs gegen Market-Requests verifizieren.
-7. Fehler-/Fallback-Verhalten und Security-/Origin-Fälle testen.
-8. vollständigen Regressionstest dokumentieren.
-9. danach verbindliches Final-Cleanup-Gate durchführen: `docs/app-factory/09-deployment-betrieb/FINAL_LEGACY_CLEANUP_GATE.md`.
-10. erst danach `v9 RC = MVP` freigeben.
+1. gezielten, reversiblen Providerfehler-Test gegen den aktuellen kanonischen Build durchführen und belegen, dass der letzte validierte Portfolio-State unverändert erhalten bleibt (T-003).
+2. verbleibende `Mehr`-/Datenquellen-/Diagnosepfade prüfen und T-017 abschließen.
+3. repräsentative Kernvisualisierungen und Portfolio-Navigation ergänzend regressionsprüfen (T-004/T-018).
+4. iPhone Safari/PWA-Primärfluss prüfen und den kanonischen Browser-/PWA-Nutzungskontext dokumentieren (T-019).
+5. GitHub Support-Ticket `#4720320` verfolgen; nach bestätigter serverseitiger Entfernung alten SHA erneut prüfen und T-020 erst dann auf PASS setzen.
+6. danach verbindliches Final-Cleanup-Gate durchführen: historische `live.html`-/Alpha-/Cloudflare-Artefakte und nicht mehr benötigte Compatibility-Shims entfernen oder technisch neutralisieren.
+7. vollständigen v9-RC-Regressionstest auf dem bereinigten Stand durchführen.
+8. erst danach `v9 RC = MVP` freigeben.
 
 ## 13. Maßgebliche Projektquellen
 
@@ -354,6 +361,27 @@ Historische UI-/Alpha-Pfade werden vor Go-live nach `FINAL_LEGACY_CLEANUP_GATE.m
 - `config/current_state.schema.json`
 - `data/thesis_registry.json`
 
-## 14. Aktualisierungsregel
+## 14. Aktuelle QA-/Security-Evidenz 2026-09-02
+
+Nach realen Browserprüfungen dokumentiert:
+- T-001 App Boot / validierter State: PASS
+- T-002 Parqet Refresh/Reconciliation für unveränderten Bestand: PASS
+- T-005 Search Name/Ticker: PASS
+- T-006 exakte gültige ISIN: PASS
+- T-007 ungültige ISIN: PASS
+- T-008 Watchlist Add/Remove/Persistenz: PASS
+- T-009 Datenrollentrennung HOLDING/WATCHLIST: PASS
+- T-010 Broker-Workflow ohne HPOS-Orderausführung: PASS
+- T-012 Decision Layer bei fehlender Halal-Evidenz: PASS
+- T-013 Halal UNKNOWN/fehlende Evidenz: PASS
+- T-014 Monats-Ist vs. Monatsziel: PASS
+- T-015 keine erfundenen Dividendenschätzungen: PASS
+- T-016 Hauptnavigation/H→Home: PASS
+- T-017 `Mehr -> Halal Register`: PARTIAL PASS
+- T-020 Privacy-Smoke: BLOCKED bis GitHub Support `#4720320` den orphaned sensiblen Commit serverseitig entfernt hat.
+
+Die vollständigen Ausführungsdetails stehen in `docs/app-factory/08-qa-tests/QA_EXECUTION_2026-09-01.md`.
+
+## 15. Aktualisierungsregel
 
 Dieses Dokument wird bei Änderungen an Status, Gate, Architektur, Entscheidung, Blocker, Risiko, Scope, Release oder wesentlicher Implementierung aktualisiert. Wesentliche Projektinformationen dürfen nicht ausschließlich im Chat verbleiben.
