@@ -29,6 +29,12 @@ def evidence_fixture():
                 "assetKey": "MEDTRONIC",
                 "sourceTier": "SECONDARY",
                 "sourceUrl": "https://example.com/medtronic-secondary"
+            },
+            {
+                "evidenceId": "ev_novo_provider_key",
+                "assetKey": "NOVO_NORDISK_B",
+                "sourceTier": "PRIMARY",
+                "sourceUrl": "https://example.com/novo-primary"
             }
         ]
     }
@@ -84,6 +90,26 @@ def test_url_match_is_asset_scoped():
     result = matcher.match_candidate(candidate(evidenceIds=[], evidenceUrls=["https://example.com/medtronic-primary"]), evidence_fixture())
     assert result["matchStatus"] == "MATCHED_READY_FOR_REVIEW"
     assert result["matchedEvidenceIds"] == ["ev_med_primary"]
+
+
+def test_provider_alias_matches_canonical_registry_asset():
+    result = matcher.match_candidate(
+        candidate(assetKey="NOVO_NORDISK", evidenceIds=["ev_novo_provider_key"]),
+        evidence_fixture(),
+        aliases={"NOVO_NORDISK_B": "NOVO_NORDISK"},
+    )
+    assert result["matchStatus"] == "MATCHED_READY_FOR_REVIEW"
+    assert result["matchedEvidenceIds"] == ["ev_novo_provider_key"]
+    assert result["appliedAssetAliases"] == {"NOVO_NORDISK_B": "NOVO_NORDISK"}
+
+
+def test_alias_does_not_hide_real_cross_asset_mismatch():
+    result = matcher.match_candidate(
+        candidate(assetKey="MEDTRONIC", evidenceIds=["ev_novo_provider_key"]),
+        evidence_fixture(),
+        aliases={"NOVO_NORDISK_B": "NOVO_NORDISK"},
+    )
+    assert result["matchStatus"] == "BLOCKED_ASSET_MISMATCH"
 
 
 def test_payload_assessment_never_auto_promotes():
