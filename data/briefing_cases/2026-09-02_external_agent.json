@@ -1,10 +1,7 @@
 {
   "schemaVersion": 1,
   "asOf": "2026-09-02T07:00:00+02:00",
-  "source": {
-    "kind": "EXTERNAL_AGENT",
-    "label": "HPOS Morning Briefing 2026-09-02"
-  },
+  "source": {"kind": "EXTERNAL_AGENT", "label": "HPOS Morning Briefing 2026-09-02"},
   "candidates": [
     {
       "assetKey": "MEDTRONIC",
@@ -15,12 +12,12 @@
       "thesisDelta": "STRENGTHENING",
       "riskDelta": "UNCHANGED",
       "evidenceUrls": [],
-      "evidenceIds": ["ev_06f0ed397d1e93b4a1f4a765"],
+      "evidenceIds": ["ev_curated_medtronic_q1fy27_margin", "ev_curated_medtronic_q1fy27_eps", "ev_curated_medtronic_fy27_guidance"],
       "coverageStatus": "DELTA_FOUND",
       "proofpoints": ["growth translates into profit and margin recovery"],
       "rotationCandidate": null,
       "verificationStatus": "UNVERIFIED",
-      "notes": "External briefing claims Q1 FY27 strengthened the profitability thesis. Canonical evidence currently only references a generic Q1 earnings page, so the claim remains unverified until structured primary evidence is ingested."
+      "notes": "Q1 FY27 claim is now linked to curated primary-source evidence. External THS remains metadata only until a separate HPOS promotion/decision step."
     },
     {
       "assetKey": "GSK",
@@ -31,12 +28,12 @@
       "thesisDelta": "STRENGTHENING",
       "riskDelta": "UNCHANGED",
       "evidenceUrls": [],
-      "evidenceIds": ["ev_fe173343cad45277a034ff2b"],
+      "evidenceIds": ["ev_curated_gsk_mrna_flu_phase2"],
       "coverageStatus": "DELTA_FOUND",
       "proofpoints": ["pipeline broadening from positive phase II vaccine data"],
       "rotationCandidate": null,
       "verificationStatus": "UNVERIFIED",
-      "notes": "External briefing cites positive Phase II mRNA influenza-vaccine data. The current canonical evidence store only has generic GSK results pages and does not yet prove this claim."
+      "notes": "Positive Phase II mRNA influenza-vaccine claim is linked to the dated GSK primary release; no automatic Novartis-to-GSK rotation follows."
     },
     {
       "assetKey": "NOVARTIS",
@@ -68,7 +65,7 @@
       "proofpoints": ["oral GLP-1 rollout and competitive position versus Lilly"],
       "rotationCandidate": null,
       "verificationStatus": "UNVERIFIED",
-      "notes": "Carry-forward DO_NOT_ADD. Evidence uses provider key NOVO_NORDISK_B and must canonicalize to NOVO_NORDISK."
+      "notes": "Carry-forward DO_NOT_ADD. Evidence provider key canonicalizes from NOVO_NORDISK_B to NOVO_NORDISK."
     },
     {
       "assetKey": "CRANEWARE",
@@ -84,7 +81,23 @@
       "proofpoints": ["new ARR growth proofpoint remains outstanding"],
       "rotationCandidate": null,
       "verificationStatus": "UNVERIFIED",
-      "notes": "Carry-forward DO_NOT_ADD. Evidence uses provider key CRANEWARE_PLC and must canonicalize to CRANEWARE."
+      "notes": "Carry-forward DO_NOT_ADD. Evidence provider key canonicalizes from CRANEWARE_PLC to CRANEWARE."
+    },
+    {
+      "assetKey": "4IMPRINT_GROUP",
+      "externalThsBefore": 7.3,
+      "externalThsAfter": 7.3,
+      "actionCandidate": "ROTATE",
+      "actionBasis": "PRIOR_VALIDATED_STATE",
+      "thesisDelta": "NEUTRAL",
+      "riskDelta": "UNCHANGED",
+      "evidenceUrls": [],
+      "evidenceIds": ["ev_curated_4imprint_h1_2026_margin", "ev_curated_4imprint_h1_2026_customers"],
+      "coverageStatus": "NO_RELEVANT_DELTA",
+      "proofpoints": ["customer acquisition recovery and margin resilience remain weaker than the preferred capital-allocation alternative"],
+      "rotationCandidate": {"targetAssetKey": "IVU_TRAFFIC", "scope": "FULL", "reason": "Carry-forward rotation candidate from prior validated state; not created by a new 02.09 thesis delta."},
+      "verificationStatus": "UNVERIFIED",
+      "notes": "4imprint is now explicitly registered as the source side of the carry-forward rotation. Execution remains gated and external."
     },
     {
       "assetKey": "IVU_TRAFFIC",
