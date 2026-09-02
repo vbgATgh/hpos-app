@@ -1,0 +1,32 @@
+{
+  "assets": {
+    "GSK": {
+      "decidedAt": "2026-09-02T21:34:00+02:00",
+      "decisionId": "prom_20260902_gsk_verified_001",
+      "evidenceIds": [
+        "ev_curated_gsk_mrna_flu_phase2"
+      ],
+      "rationale": "Dated GSK primary-source evidence directly supports the briefing claim that positive Phase II mRNA seasonal-influenza vaccine data broaden the pipeline and that Phase III is planned to begin in September 2026. This verifies the evidence claim only; it does not authorize a Novartis-to-GSK rotation or alter canonical THS.",
+      "sourceAsOf": "2026-09-02T07:00:00+02:00",
+      "unresolvedIssues": [],
+      "verificationStatus": "VERIFIED"
+    },
+    "MEDTRONIC": {
+      "decidedAt": "2026-09-02T21:34:00+02:00",
+      "decisionId": "prom_20260902_medtronic_verified_001",
+      "evidenceIds": [
+        "ev_curated_medtronic_q1fy27_eps",
+        "ev_curated_medtronic_fy27_guidance",
+        "ev_curated_medtronic_q1fy27_margin"
+      ],
+      "rationale": "Dated Medtronic primary-source evidence directly supports the briefing claim that Q1 FY27 combined strong organic growth with higher adjusted EPS, improved operating margin and raised FY27 guidance. This verifies the evidence claim only; it does not change canonical THS or create a portfolio action.",
+      "sourceAsOf": "2026-09-02T07:00:00+02:00",
+      "unresolvedIssues": [],
+      "verificationStatus": "VERIFIED"
+    }
+  },
+  "derived": true,
+  "mutatesCanonicalState": false,
+  "schemaVersion": 1,
+  "sourceOfTruth": "data/promotion_decisions/*.json"
+}
