@@ -18,6 +18,7 @@ on:
       - 'data/fundamental/evidence.json'
       - 'data/fundamental/evidence_curated.json'
       - 'data/briefing_cases/**'
+      - 'data/promotion_decisions/**'
       - '.github/workflows/hpos-morning-briefing-ci.yml'
   pull_request:
     paths:
@@ -36,6 +37,7 @@ on:
       - 'data/fundamental/evidence.json'
       - 'data/fundamental/evidence_curated.json'
       - 'data/briefing_cases/**'
+      - 'data/promotion_decisions/**'
       - '.github/workflows/hpos-morning-briefing-ci.yml'
 
 permissions:
