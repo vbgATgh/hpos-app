@@ -39,7 +39,7 @@ Stand: 2026-09-02
 
 **Status:** IN DEVELOPMENT
 
-**Phase:** Kanonischer Produktpfad `app/` ist im realen Browser nachgewiesen. Parqet-Live-Sync, Search/ISIN, Quotes, Watchlist-Persistenz, Investment-Akte, Decision Layer, Income-Grundlogik, Halal-UNKNOWN-Verhalten, Broker-Guard und Hauptnavigation wurden real geprüft. Offen sind gezielter Providerfehler/Fallback-Nachweis, verbleibende System-/Diagnosepfade, Safari/PWA-Primärfluss, finaler Privacy-Smoke sowie anschließendes Legacy-Cleanup und v9-RC-Regression.
+**Phase:** Kanonischer Produktpfad `app/` ist im realen Browser nachgewiesen. Parqet-Live-Sync, Search/ISIN, Quotes, Watchlist-Persistenz, Investment-Akte, Decision Layer, Income-Grundlogik, Halal-UNKNOWN-Verhalten, Broker-Guard und Hauptnavigation wurden real geprüft. Der serverseitige GitHub-Cleanup des früheren sensiblen Snapshot-Commits wurde von GitHub Support durchgeführt und die alte SHA liefert anschließend keinen Commit mehr. Offen sind gezielter Providerfehler/Fallback-Nachweis, verbleibende System-/Diagnosepfade, Safari/PWA-Primärfluss sowie anschließendes Legacy-Cleanup und v9-RC-Regression.
 
 **Letztes formal abgeschlossenes App-Factory-Gate:** keines nachgewiesen
 
@@ -146,7 +146,7 @@ Browser- und Serverlog-Nachweis liegen vor. Search und Yahoo-Quotes liefen über
 ### OPEN-005 – QA / Regression / Security / Rollback
 **Kritikalität:** HOCH
 
-Kanonischer Pfad und wesentliche MVP-Funktionen sind browserseitig nachgewiesen. Gezielt provozierter Providerfehler, verbleibende Diagnosepfade, Safari/PWA, finaler Privacy-Smoke und Final-Cleanup-Regressionsnachweis bleiben offen.
+Kanonischer Pfad und wesentliche MVP-Funktionen sind browserseitig nachgewiesen. Gezielt provozierter Providerfehler, verbleibende Diagnosepfade, Safari/PWA und Final-Cleanup-Regressionsnachweis bleiben offen.
 
 **Status:** TEILWEISE OFFEN
 
@@ -160,9 +160,9 @@ Der kanonische Einstieg und die Kernflüsse wurden im Browser geprüft, einschli
 ### OPEN-007 – GitHub serverseitiger Cleanup sensibler Alt-Historie
 **Kritikalität:** KRITISCH VOR RC-FREIGABE
 
-Die aktive Branch-Historie wurde bereinigt. Ein verwaister früherer Commit mit einem realen Portfolio-Snapshot ist weiterhin direkt über seine alte SHA erreichbar. GitHub Support-Ticket `#4720320` wurde am 2026-09-02 eröffnet und ist OPEN. Bis zur bestätigten serverseitigen Dereferenzierung/Garbage Collection bleibt T-020 BLOCKED.
+GitHub Support-Ticket `#4720320` wurde am 2026-09-02 bearbeitet. GitHub Support bestätigte, dass Garbage Collection durchgeführt und der Repository-Cache geleert wurde, da keine Referenzen auf die angegebene alte Commit-SHA mehr bestanden. Unmittelbare Nachprüfung über die GitHub-API ergab für `5a5edb603fdfaedb34a38b7cc74f4d6d4c2106af`: `No commit found for SHA` (HTTP 422).
 
-**Status:** EXTERN BLOCKED / GITHUB SUPPORT OPEN
+**Status:** ERLEDIGT / PASS 2026-09-02
 
 ## 8. Decision Log
 
@@ -294,9 +294,9 @@ Aktuelle Zielentscheidung für die private Integrationsschicht.
 
 ### RISK-004 – Privacy/Secrets bei öffentlichem Frontend/Repo
 **Auswirkung:** KRITISCH
-**Status:** TEILWEISE BLOCKIERT / EXTERNER CLEANUP OFFEN
+**Status:** RESOLVED / PASS 2026-09-02
 
-Parqet OAuth-Tokens bleiben serverseitig. Die opake HPOS-Session-ID ist der einzige Browser-Bearer. Der aktuelle `main`-Stand enthält keinen realen Portfolio-Snapshot. Die erreichbare Branch-Historie wurde am 2026-09-01 auf eine bereinigte Historie umgeschrieben. Ein früherer sensibler Commit ist jedoch weiterhin direkt über seine alte SHA abrufbar und erfordert GitHub-seitige Dereferenzierung/Garbage Collection. GitHub Support-Ticket `#4720320` wurde am 2026-09-02 eröffnet und ist OPEN. T-020 bleibt bis zur bestätigten serverseitigen Entfernung BLOCKED.
+Parqet OAuth-Tokens bleiben serverseitig. Die opake HPOS-Session-ID ist der einzige Browser-Bearer. Der aktuelle `main`-Stand enthält keinen realen Portfolio-Snapshot. Die erreichbare Branch-Historie wurde bereinigt. GitHub Support bestätigte am 2026-09-02 für Ticket `#4720320`, dass Garbage Collection durchgeführt und der Repository-Cache geleert wurde. Die alte sensible Commit-SHA `5a5edb603fdfaedb34a38b7cc74f4d6d4c2106af` wurde anschließend unabhängig über GitHub geprüft und ist nicht mehr als Commit abrufbar (`No commit found for SHA`, HTTP 422).
 
 ### RISK-005 – Browser-lokaler Zustand
 **Auswirkung:** MITTEL
@@ -332,10 +332,9 @@ Historische UI-/Alpha-Pfade werden vor Go-live nach `FINAL_LEGACY_CLEANUP_GATE.m
 2. verbleibende `Mehr`-/Datenquellen-/Diagnosepfade prüfen und T-017 abschließen.
 3. repräsentative Kernvisualisierungen und Portfolio-Navigation ergänzend regressionsprüfen (T-004/T-018).
 4. iPhone Safari/PWA-Primärfluss prüfen und den kanonischen Browser-/PWA-Nutzungskontext dokumentieren (T-019).
-5. GitHub Support-Ticket `#4720320` verfolgen; nach bestätigter serverseitiger Entfernung alten SHA erneut prüfen und T-020 erst dann auf PASS setzen.
-6. danach verbindliches Final-Cleanup-Gate durchführen: historische `live.html`-/Alpha-/Cloudflare-Artefakte und nicht mehr benötigte Compatibility-Shims entfernen oder technisch neutralisieren.
-7. vollständigen v9-RC-Regressionstest auf dem bereinigten Stand durchführen.
-8. erst danach `v9 RC = MVP` freigeben.
+5. verbindliches Final-Cleanup-Gate durchführen: historische `live.html`-/Alpha-/Cloudflare-Artefakte und nicht mehr benötigte Compatibility-Shims entfernen oder technisch neutralisieren.
+6. vollständigen v9-RC-Regressionstest auf dem bereinigten Stand durchführen.
+7. erst danach `v9 RC = MVP` freigeben.
 
 ## 13. Maßgebliche Projektquellen
 
@@ -363,7 +362,7 @@ Historische UI-/Alpha-Pfade werden vor Go-live nach `FINAL_LEGACY_CLEANUP_GATE.m
 
 ## 14. Aktuelle QA-/Security-Evidenz 2026-09-02
 
-Nach realen Browserprüfungen dokumentiert:
+Nach realen Browserprüfungen und serverseitiger Security-Nachprüfung dokumentiert:
 - T-001 App Boot / validierter State: PASS
 - T-002 Parqet Refresh/Reconciliation für unveränderten Bestand: PASS
 - T-005 Search Name/Ticker: PASS
@@ -378,7 +377,7 @@ Nach realen Browserprüfungen dokumentiert:
 - T-015 keine erfundenen Dividendenschätzungen: PASS
 - T-016 Hauptnavigation/H→Home: PASS
 - T-017 `Mehr -> Halal Register`: PARTIAL PASS
-- T-020 Privacy-Smoke: BLOCKED bis GitHub Support `#4720320` den orphaned sensiblen Commit serverseitig entfernt hat.
+- T-020 Privacy-Smoke: PASS. GitHub Support `#4720320` führte Garbage Collection/Cache-Cleanup durch; die alte sensible Commit-SHA ist anschließend nicht mehr abrufbar.
 
 Die vollständigen Ausführungsdetails stehen in `docs/app-factory/08-qa-tests/QA_EXECUTION_2026-09-01.md`.
 
