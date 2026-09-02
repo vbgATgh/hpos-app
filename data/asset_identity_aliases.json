@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "note": "Canonicalize upstream/provider asset keys to thesis_registry asset keys. Only aliases whose canonical target already exists in thesis_registry.json are allowed.",
+  "aliases": {
+    "ABBOTT_LABORATORIES": "ABBOTT",
+    "NOVO_NORDISK_B": "NOVO_NORDISK",
+    "CRANEWARE_PLC": "CRANEWARE",
+    "MERCK___CO___INC": "MERCK",
+    "RELX_PLC": "RELX"
+  }
+}
