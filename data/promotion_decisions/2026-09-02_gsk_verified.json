@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "decisionId": "prom_20260902_gsk_verified_001",
+  "assetKey": "GSK",
+  "sourceAsOf": "2026-09-02T07:00:00+02:00",
+  "decidedAt": "2026-09-02T21:34:00+02:00",
+  "decisionKind": "HPOS_REVIEW",
+  "reviewStatus": "REVIEW_READY",
+  "targetVerificationStatus": "VERIFIED",
+  "evidenceIds": [
+    "ev_curated_gsk_mrna_flu_phase2"
+  ],
+  "unresolvedIssues": [],
+  "rationale": "Dated GSK primary-source evidence directly supports the briefing claim that positive Phase II mRNA seasonal-influenza vaccine data broaden the pipeline and that Phase III is planned to begin in September 2026. This verifies the evidence claim only; it does not authorize a Novartis-to-GSK rotation or alter canonical THS.",
+  "supersedesDecisionId": null
+}
