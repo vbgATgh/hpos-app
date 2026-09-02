@@ -38,7 +38,7 @@ Regeln:
 - Promotion Decisions sind gegen das tatsächlich erzeugte Upstream-Review gebunden.
 - Regression prüft, dass weder THS noch Action in den Promotion-Dateien enthalten sind.
 - GitHub CI Run 33674374423 war erfolgreich für die expliziten Medtronic/GSK-Promotion-Fixtures.
-- Der nachgelagerte CI Run für den neuen Sequenzschutz ist zum Zeitpunkt dieses Statusdokuments noch abzuschließen und darf erst nach tatsächlichem Success als PASS referenziert werden.
+- GitHub CI Run 33674497828 ist ebenfalls erfolgreich und bestätigt den neuen stale-/out-of-order-Sequenzschutz.
 
 ## Verbindliche Grenze
 `Evidence VERIFIED` bedeutet nicht `BUY`, `ADD`, `ROTATE` oder eine THS-Änderung. Die Architektur bleibt:
@@ -46,4 +46,4 @@ Regeln:
 External Briefing → Candidate Validation → Evidence Match → Evidence Review → Promotion Decision → HPOS Decision Gates → ggf. externer Broker.
 
 ## Nächster sinnvoller Schritt
-Nach erfolgreichem Sequenz-CI: einen read-only Canonical Verification Projection Layer bauen, der aus gültigen Promotion Decisions den aktuellen Evidence-Verifikationszustand je Asset berechnet, ohne Portfolio-/THS-State zu mutieren. Erst danach sollte ein persistenter Canonical-State-Writer erwogen werden.
+Einen read-only Canonical Verification Projection Layer bauen, der aus gültigen Promotion Decisions den aktuellen Evidence-Verifikationszustand je Asset berechnet, ohne Portfolio-/THS-State zu mutieren. Erst danach sollte ein persistenter Canonical-State-Writer erwogen werden.
