@@ -41,6 +41,9 @@
         "actionCandidate": {
           "enum": ["BUY", "ADD", "HOLD", "DO_NOT_ADD", "REDUCE", "SELL", "ROTATE", "WAIT_FOR_TRIGGER", "NONE"]
         },
+        "actionBasis": {
+          "enum": ["NEW_DELTA", "PRIOR_VALIDATED_STATE", "NONE"]
+        },
         "thesisDelta": {"enum": ["STRENGTHENING", "WEAKENING", "NEUTRAL", "INSUFFICIENT", "BROKEN"]},
         "riskDelta": {"enum": ["LOWER", "UNCHANGED", "HIGHER", "UNKNOWN"]},
         "evidenceUrls": {
