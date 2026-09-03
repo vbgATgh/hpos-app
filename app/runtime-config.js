@@ -6,7 +6,7 @@
  * Parqet, Quotes and Search route through Supabase hpos-api.
  */
 window.HPOS_RUNTIME=Object.freeze({
-  version:'8.7.5',
+  version:'8.7.7',
   integration:Object.freeze({
     enabled:true,
     mode:'SUPABASE_PARQET_QUOTES_SEARCH',
