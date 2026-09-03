@@ -26,16 +26,16 @@
 </main>
 <nav class="bottom"><button class="nav on" data-view="home"><b>⌂</b><span>Home</span></button><button class="nav" data-view="portfolio"><b>▣</b><span>Portfolio</span></button><button class="nav" data-view="analyse"><b>◎</b><span>Analyse</span></button><button class="nav" data-view="income"><b>€</b><span>Income</span></button><button class="nav" data-view="more"><b>•••</b><span>Mehr</span></button></nav>
 </div>
-<dialog id="searchDialog" class="sheet"><div class="sheetHead"><div><div class="eye">Wertpapier</div><h2>Suchen & beobachten</h2></div><button class="close" data-close="searchDialog">×</button></div><input id="securityQuery" class="searchInput" placeholder="Name, Ticker oder ISIN" autocomplete="off" autocapitalize="off" spellcheck="false"><div class="sub searchHint">Ein Feld genügt. HPOS sucht global nach Name oder Ticker. Eine 12-stellige ISIN wird zusätzlich exakt geprüft.</div><div class="verifiedOnly">Globale Treffer dürfen zunächst als Beobachtung in die Watchlist. Für Halal-Evidenz, Thesis, Decision Gates und Broker-Entscheidungen bleibt eine verifizierte ISIN der kanonische Instrumentenschlüssel.</div><div id="searchResults" class="list searchResults"></div></dialog>
+<dialog id="searchDialog" class="sheet"><div class="sheetHead"><div><div class="eye">Wertpapier</div><h2>Suchen & beobachten</h2></div><button class="close" data-close="searchDialog">×</button></div><input id="securityQuery" class="searchInput" placeholder="Name, Ticker oder ISIN" autocomplete="off" autocapitalize="off" spellcheck="false"><div class="sub searchHint">Ein Feld genügt. HPOS sucht global nach Name oder Ticker. Eine 12-stellige ISIN wird zusätzlich exakt geprüft.</div><div class="verifiedOnly">Globale Treffer dürfen zunächst als Vorschau angesehen oder als Beobachtung in die Watchlist übernommen werden. Für Halal-Evidenz, Thesis, Decision Gates und Broker-Entscheidungen bleibt eine verifizierte ISIN der kanonische Instrumentenschlüssel.</div><div id="searchResults" class="list searchResults"></div></dialog>
 <dialog id="orderDialog" class="sheet"><div class="sheetHead"><div><div class="eye">Broker-Workflow</div><h2 id="orderTitle">Order ausführen</h2></div><button class="close" data-close="orderDialog">×</button></div><div class="panel"><div class="status"><span>Wertpapier</span><strong id="orderAsset">—</strong></div><div class="status"><span>Aktion</span><select id="orderSide"><option value="BUY">Kaufen</option><option value="SELL">Verkaufen</option></select></div><div class="status"><span>Broker</span><select id="orderBroker"><option value="SCALABLE">Scalable Capital</option><option value="TRADE_REPUBLIC">Trade Republic</option></select></div></div><div class="notice">Die Order wird ausschließlich in der Broker-App ausgeführt. HPOS sendet keine Order und verändert den Depotbestand nicht manuell.</div><button id="orderDone" class="primary full">Order im Broker erledigt · Bestand aktualisieren</button><button id="orderCancel" class="secondary full">Nur schließen</button></dialog>
 <div id="toast" class="toast"></div>
 <script src="runtime-config.js?v=20260903-runtime1"></script>
 <script src="quote-policy.js?v=20260902-evidenceux1"></script>
 <script src="parqet-supabase-adapter.js?v=20260903-authlight1"></script>
 <script src="app.js?v=20260902-evidenceux1"></script>
-<script src="search-guard.js?v=20260903-preview1"></script>
+<script src="search-guard.js?v=20260903-identity2"></script>
 <script src="watchlist-policy.js?v=20260902-evidenceux1"></script>
-<script src="asset-intelligence.js?v=20260903-profile1"></script>
+<script src="asset-intelligence.js?v=20260903-profile2"></script>
 <script src="verification-status.js?v=20260902-evidenceux1"></script>
 <script src="mvp-hardening.js?v=20260902-lightux1"></script>
 </body>
