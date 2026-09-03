@@ -35,7 +35,10 @@ Risiko: OAuth-Callback benötigt weiterhin genau einen Refresh nach erfolgreiche
 
 - Code-Commit: `32ec04e5c96b488c5f53d30ecf9b78705eff2644`
 - Cache-Bust-Commit: `d11db005c6913c4c4f0effcfacc78049cfe9f3ed`
-- Pages Deployment für den letzten Commit war beim letzten Check noch queued und ist daher noch nicht als PASS gewertet.
+- Dokumentations-Commit: `c1974177a8b18594cee7676ce8b5caf1c00ba52b`
+- GitHub Pages Run `33721889777` ist abgeschlossen mit `success`; der Auth-Light-Stand ist damit deployt.
+
+Wichtig: Deployment-Erfolg ist kein Ersatz für den realen Browser-/PWA-Smoke. Der Lauf bestätigt nur Build und Veröffentlichung.
 
 ## Nächste reale Smoke-Fälle
 
@@ -44,3 +47,7 @@ Risiko: OAuth-Callback benötigt weiterhin genau einen Refresh nach erfolgreiche
 3. Ablauf/401: Reauth startet weiterhin korrekt.
 4. OAuth-Rückkehr: Session wird übernommen und einmalig aktualisiert.
 5. Search/Watchlist: reales Verhalten prüfen, bevor der verbleibende Add-Reload verändert wird.
+
+## Review-Erkenntnis
+
+Der aktuelle Frontendpfad wird nicht weiter vorauseilend optimiert. Die nächsten Änderungen erfolgen nur noch auf Basis real beobachteter Interaktionsprobleme oder eines klaren Pre-RC-Risikos. Damit vermeiden wir zusätzliche Event-Bridges, parallele Zustände und unnötige Runtime-Komplexität.
