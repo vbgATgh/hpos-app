@@ -3,6 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <meta name="theme-color" content="#0a0712">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -14,7 +17,7 @@
 </head>
 <body>
 <div class="app">
-<header class="top"><div class="brand"><button class="h" id="homeBtn" aria-label="Home">H</button><div><strong>HPOS</strong><small>Portfolio Intelligence · v8.7.7</small></div></div><div class="topActions"><button id="searchBtn" class="iconBtn" aria-label="Wertpapier suchen">⌕</button><button id="refresh" class="iconBtn refresh" aria-label="Portfolio aktualisieren">↻</button></div></header>
+<header class="top"><div class="brand"><button class="h" id="homeBtn" aria-label="Home">H</button><div><strong>HPOS</strong><small>Portfolio Intelligence · v8.7.8</small></div></div><div class="topActions"><button id="searchBtn" class="iconBtn" aria-label="Wertpapier suchen">⌕</button><button id="refresh" class="iconBtn refresh" aria-label="Portfolio aktualisieren">↻</button></div></header>
 <main class="main">
 <section id="home" class="view on"><div class="eye">Validiertes Gesamtvermögen</div><div id="homeValue" class="hero">—</div><div id="homeSub" class="sub">Portfolio wird geladen.</div><div id="quoteStatus" class="source"><span class="dot"></span><span>Daten werden initialisiert</span></div><div id="homeCards" class="cards spaced"></div><div class="section"><div class="sectionHead"><h2>HPOS Status</h2><button class="link" data-go="analyse">Analyse</button></div><div id="status" class="panel"></div></div><div class="section"><div class="sectionHead"><h2>Allokation</h2><button class="link" data-go="portfolio">Portfolio</button></div><div id="allocation"></div></div><div class="section"><div class="sectionHead"><h2>Heute relevant</h2><button class="link" data-go="analyse">Alle Signale</button></div><div id="focus" class="list"></div></div></section>
 <section id="portfolio" class="view"><div class="eye">Portfolio</div><div class="titleRow"><h1>Bestände</h1><button class="primary small" id="portfolioSearch">+ Wertpapier</button></div><div id="portfolioMeta" class="sub"></div><div class="filters"><button class="chip on" data-filter="ALL">Alle</button><button class="chip" data-filter="SCALABLE">Scalable</button><button class="chip" data-filter="TRADE_REPUBLIC">TR</button><button class="chip" data-filter="WATCHLIST">Watchlist <span id="watchCountChip"></span></button></div><div id="portfolioList" class="list"></div></section>
@@ -33,7 +36,7 @@
 <script src="quote-policy.js?v=20260902-evidenceux1"></script>
 <script src="parqet-supabase-adapter.js?v=20260903-authlight1"></script>
 <script src="app.js?v=20260902-evidenceux1"></script>
-<script src="search-guard.js?v=20260903-identity3"></script>
+<script src="search-guard.js?v=20260903-searchfix1"></script>
 <script src="watchlist-policy.js?v=20260902-evidenceux1"></script>
 <script src="asset-intelligence.js?v=20260903-profile2"></script>
 <script src="verification-status.js?v=20260902-evidenceux1"></script>
