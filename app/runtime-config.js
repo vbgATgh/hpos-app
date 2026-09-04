@@ -6,14 +6,14 @@
  * Parqet, Quotes and Search route through Supabase hpos-api.
  */
 try{
-  const profileSchema='3';
+  const profileSchema='4';
   if(localStorage.getItem('hpos_profile_schema')!==profileSchema){
     localStorage.removeItem('hpos_asset_profiles_v2');
     localStorage.setItem('hpos_profile_schema',profileSchema);
   }
 }catch{}
 window.HPOS_RUNTIME=Object.freeze({
-  version:'8.7.17',
+  version:'8.7.18',
   integration:Object.freeze({
     enabled:true,
     mode:'SUPABASE_PARQET_QUOTES_SEARCH',
