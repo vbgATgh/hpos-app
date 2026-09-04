@@ -34,12 +34,10 @@ function gateLock(state){
 async function render(){
  if(!$('#asset')?.classList.contains('on'))return;await load();const id=identity(),sig=id.name+'|'+id.rawIsin;if(sig===lastSig&&$('#halalEvidenceBox'))return;lastSig=sig;
  const sec=mount();if(!sec)return;const e=evaluate(id),box=$('#halalEvidenceBox');if(!box)return;
- let html='<div class="drow"><span>Gate 1</span><strong class="'+cls(e.state)+'">'+esc(label(e.state))+'</strong></div>';
+ const providerHtml=e.evidence?.length?'<ul class="infoList">'+e.evidence.map(x=>'<li><strong>'+esc(x.provider)+'</strong>: '+esc(x.status)+(x.note?' · '+esc(x.note):'')+'</li>').join('')+'</ul>':'<div>Keine Provider-Evidenz hinterlegt.</div>';
+ let html='<div class="drow"><span class="labelWithInfo">Gate 1<details class="infoDisclosure"><summary aria-label="Gate-1-Regel anzeigen">i</summary><div class="infoCard">Nur <strong>PASS</strong> öffnet Gate 2. <strong>OPEN REVIEW</strong> bleibt neutral und gesperrt; <strong>FAIL</strong> beendet die Investment-Pipeline für dieses Instrument.</div></details></span><strong class="'+cls(e.state)+'">'+esc(label(e.state))+'</strong></div>';
  html+='<div class="drow"><span>Kanonische Identität</span><strong>'+esc(id.isin||'nicht verifiziert')+'</strong></div>';
- html+='<div class="profileText"><span>Begründung</span><p>'+esc(e.reason)+'</p></div>';
- if(e.source)html+='<div class="drow"><span>Quelle</span><strong>'+esc(e.source)+'</strong></div>';
- if(e.reviewedAt)html+='<div class="drow"><span>Geprüft am</span><strong>'+esc(new Date(e.reviewedAt).toLocaleString('de-DE'))+'</strong></div>'; if(e.evidence?.length){html+='<div class="profileText"><span>Provider-Evidenz</span><p>'+e.evidence.map(x=>esc(x.provider)+': '+esc(x.status)).join('<br>')+'</p></div>';}
- html+='<div class="notice">Nur PASS öffnet Gate 2. OPEN REVIEW bleibt neutral und gesperrt; FAIL beendet die Investment-Pipeline für dieses Instrument.</div>';
+ html+='<div class="drow"><span class="labelWithInfo">Evidenz<details class="infoDisclosure"><summary aria-label="Evidenzdetails anzeigen">i</summary><div class="infoCard"><strong>Begründung</strong><br>'+esc(e.reason)+(e.reviewedAt?'<br><br><strong>Geprüft am</strong><br>'+esc(new Date(e.reviewedAt).toLocaleString('de-DE')):'')+(e.source?'<br><br><strong>Quelle</strong><br>'+esc(e.source):'')+'<br><br><strong>Provider</strong>'+providerHtml+'</div></details></span><strong>'+esc(e.evidence?.length?e.evidence.length+' Quellen':'offen')+'</strong></div>';
  box.innerHTML=html;gateLock(e.state);
 }
 function schedule(){lastSig='';setTimeout(render,60)}
