@@ -6,7 +6,7 @@ const VALID_ISIN=/^[A-Z]{2}[A-Z0-9]{9}\d$/;
 const esc=v=>String(v??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 async function load(){if(loadPromise)return loadPromise;loadPromise=fetch(REGISTRY_URL,{cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null).then(x=>registry=x);return loadPromise}
 function detail(label){const row=[...document.querySelectorAll('#assetDetails .drow')].find(r=>r.firstElementChild?.textContent?.trim()===label);return row?.lastElementChild?.textContent?.trim()||''}
-function identity(){const raw=detail('ISIN').toUpperCase();return{isin:VALID_ISIN.test(raw)?raw:'',rawIsin:raw,name:$('#assetName')?.textContent?.trim()||''}}
+function identity(){const raw=detail('ISIN').toUpperCase(),ticker=detail('Ticker').toUpperCase();return{isin:VALID_ISIN.test(raw)?raw:'',rawIsin:raw,ticker:ticker&&ticker!=='—'?ticker:'',name:$('#assetName')?.textContent?.trim()||''}}
 function evaluate(id){
  if(!id.isin)return{state:'OPEN_REVIEW',reason:'Identität noch nicht über eine verifizierte ISIN kanonisiert.',source:null};
  const e=registry?.assets?.[id.isin];
@@ -24,6 +24,7 @@ function mount(){
  decision.insertAdjacentElement('afterend',sec);return sec;
 }
 function syncPositionHalal(state){const row=[...document.querySelectorAll('#assetDetails .drow')].find(r=>r.firstElementChild?.textContent?.trim()==='Halal');const v=row?.lastElementChild;if(!v)return;v.textContent=state==='PASS'?'HALALKONFORM':state==='FAIL'?'NICHT HALALKONFORM':'PRÜFUNG OFFEN';v.className=cls(state)}
+function syncDecisionHalal(state){const p=$('#assetDecision p');if(!p)return;const who=p.textContent.includes('Depotposition')?'Depotposition':'Beobachtung';p.innerHTML=who+' · Halal: <b class="'+cls(state)+'">'+(state==='PASS'?'HALALKONFORM':state==='FAIL'?'NICHT HALALKONFORM':'PRÜFUNG OFFEN')+'</b>'}
 function gateLock(state){
  const rows=[...document.querySelectorAll('#assetGateRows .drow')];
  rows.forEach((r,i)=>{const v=r.lastElementChild;if(!v)return;
@@ -34,12 +35,12 @@ function gateLock(state){
 }
 async function render(){
  if(!$('#asset')?.classList.contains('on'))return;await load();const id=identity(),sig=id.name+'|'+id.rawIsin;if(sig===lastSig&&$('#halalEvidenceBox'))return;lastSig=sig;
- const sec=mount();if(!sec)return;const e=evaluate(id),box=$('#halalEvidenceBox');if(!box)return;
+ const sec=mount();if(!sec)return;let e=evaluate(id),box=$('#halalEvidenceBox');if(!box)return;let pre=null;if(e.state==='OPEN_REVIEW'&&!registry?.assets?.[id.isin]&&window.HPOS_HALAL_AUTOSCREEN){pre=await window.HPOS_HALAL_AUTOSCREEN.screen(id);if(pre?.state==='FAIL')e={state:'FAIL',reason:pre.reason,source:'HPOS kostenlose Vorprüfung',reviewedAt:pre.checkedAt,evidence:[{provider:'HPOS Free Prescreen',status:'BUSINESS_SCREEN_FAIL',note:pre.reason}]};}
  const providerHtml=e.evidence?.length?'<ul class="infoList">'+e.evidence.map(x=>'<li><strong>'+esc(x.provider)+'</strong>: '+esc(x.status)+(x.note?' · '+esc(x.note):'')+'</li>').join('')+'</ul>':'<div>Keine Provider-Evidenz hinterlegt.</div>';
  let html='<div class="drow"><span class="labelWithInfo">Gate 1<button type="button" class="infoBtn" data-info-eye="Gate 1" data-info-title="Halal-Regel" data-info-html="Nur <strong>PASS</strong> öffnet Gate 2. <strong>OPEN REVIEW</strong> bleibt neutral und gesperrt; <strong>FAIL</strong> beendet die Investment-Pipeline für dieses Instrument." aria-label="Gate-1-Regel anzeigen">i</button></span><strong class="'+cls(e.state)+'">'+esc(label(e.state))+'</strong></div>';
  html+='<div class="drow"><span>Kanonische Identität</span><strong>'+esc(id.isin||'nicht verifiziert')+'</strong></div>';
- const evidenceInfo='<strong>Begründung</strong><br>'+esc(e.reason)+(e.reviewedAt?'<br><br><strong>Geprüft am</strong><br>'+esc(new Date(e.reviewedAt).toLocaleString('de-DE')):'')+(e.source?'<br><br><strong>Quelle</strong><br>'+esc(e.source):'')+'<br><br><strong>Provider</strong>'+providerHtml; html+='<div class="drow"><span class="labelWithInfo">Evidenz<button type="button" class="infoBtn" data-info-eye="Gate 1" data-info-title="Halal-Evidenz" data-info-html="'+esc(evidenceInfo)+'" aria-label="Evidenzdetails anzeigen">i</button></span><strong>'+esc(e.evidence?.length?e.evidence.length+' Quellen':'offen')+'</strong></div>';
- box.innerHTML=html;gateLock(e.state);syncPositionHalal(e.state);
+ const evidenceInfo='<strong>Begründung</strong><br>'+esc(e.reason)+(pre&&pre.state!=='FAIL'?'<br><br><strong>Automatische Vorprüfung</strong><br>'+esc(pre.reason):'')+(e.reviewedAt?'<br><br><strong>Geprüft am</strong><br>'+esc(new Date(e.reviewedAt).toLocaleString('de-DE')):'')+(e.source?'<br><br><strong>Quelle</strong><br>'+esc(e.source):'')+'<br><br><strong>Provider</strong>'+providerHtml; html+='<div class="drow"><span class="labelWithInfo">Evidenz<button type="button" class="infoBtn" data-info-eye="Gate 1" data-info-title="Halal-Evidenz" data-info-html="'+esc(evidenceInfo)+'" aria-label="Evidenzdetails anzeigen">i</button></span><strong>'+esc(e.evidence?.length?e.evidence.length+' Quellen':'offen')+'</strong></div>';
+ box.innerHTML=html;gateLock(e.state);syncPositionHalal(e.state);syncDecisionHalal(e.state);
 }
 function schedule(){lastSig='';setTimeout(render,60)}
 document.addEventListener('click',schedule,true);
