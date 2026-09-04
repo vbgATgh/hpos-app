@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "asOf": "2026-09-04",
+  "engine": "HPOS_PORTFOLIO_FIT_V1",
+  "policy": {
+    "requiresGate1": "PASS",
+    "states": ["PASS", "FAIL", "OPEN_REVIEW", "LOCKED"],
+    "defaultState": "OPEN_REVIEW",
+    "failClosed": true,
+    "allocationTargets": {
+      "Core": 0.70,
+      "Turbo": 0.30
+    },
+    "cashReserveTarget": 0.03,
+    "sukukTarget": 0.15,
+    "notes": [
+      "70/30 Core/Turbo is the approved strategic frame.",
+      "Cash reserve target is 3%.",
+      "Sukuk target is 15%.",
+      "No tolerance bands, maximum single-position concentration, or automatic buy/sell thresholds are approved yet. Missing thresholds must not be invented."
+    ]
+  },
+  "assetClassifications": {
+    "IE00B27YCN58": {
+      "bucket": "Core",
+      "basis": "Existing HPOS portfolio classification: iShares MSCI World Islamic UCITS ETF."
+    }
+  }
+}
