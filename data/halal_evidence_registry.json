@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "asOf": "2026-09-04",
+  "engine": "HPOS_HALAL_EVIDENCE_V1",
+  "policy": {
+    "canonicalKey": "VERIFIED_ISIN",
+    "states": ["PASS", "FAIL", "OPEN_REVIEW"],
+    "defaultState": "OPEN_REVIEW",
+    "failClosed": true,
+    "downstreamRule": "Only PASS may unlock Portfolio Fit and later decision gates. FAIL blocks the pipeline. OPEN_REVIEW keeps all downstream investment gates locked.",
+    "evidenceRule": "A status requires explicit source evidence tied to the canonical instrument identity. Discovery ticker/name, portfolio presence, sector metadata and general company evidence never imply Halal compliance."
+  },
+  "assets": {}
+}
