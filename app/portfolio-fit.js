@@ -27,12 +27,11 @@ async function evaluate(id){
 async function render(){
  if(!$('#asset')?.classList.contains('on'))return;await load();const id=identity(),sig=id.name+'|'+id.isin;if(sig===lastSig&&$('#portfolioFitBox'))return;lastSig=sig;const sec=mount();if(!sec)return;
  const e=await evaluate(id),box=$('#portfolioFitBox');if(!box)return;
- let html='<div class="drow"><span>Gate 2</span><strong class="'+cls(e.state)+'">'+esc(stateLabel(e.state))+'</strong></div>';
+ let html='<div class="drow"><span class="labelWithInfo">Gate 2<details class="infoDisclosure"><summary aria-label="Gate-2-Regel anzeigen">i</summary><div class="infoCard">Freigegebener Rahmen: <strong>Core/Turbo 70/30</strong>, <strong>Sukuk 15 %</strong>, <strong>Cash-Reserve 3 %</strong>. HPOS erfindet keine Toleranzbänder oder Konzentrationsgrenzen. Ohne ausdrücklich freigegebene Grenzwerte bleibt eine automatische PASS/FAIL-Entscheidung gesperrt.</div></details></span><strong class="'+cls(e.state)+'">'+esc(stateLabel(e.state))+'</strong></div>';
  html+='<div class="drow"><span>Strategischer Bucket</span><strong>'+esc(e.bucket||'—')+'</strong></div>';
  if(e.bucket&&e.target!=null)html+='<div class="drow"><span>Zielrahmen</span><strong>'+esc(e.bucket)+' '+(e.target*100).toFixed(0)+' %</strong></div>';
  if(e.bucket&&e.allocation?.[e.bucket]!=null)html+='<div class="drow"><span>Aktueller Anteil</span><strong>'+Number(e.allocation[e.bucket]).toFixed(1)+' %</strong></div>';
- html+='<div class="profileText"><span>Begründung</span><p>'+esc(e.reason)+'</p></div>';
- html+='<div class="notice">Freigegebener Rahmen: Core/Turbo 70/30, Sukuk 15 %, Cash-Reserve 3 %. HPOS erfindet keine Toleranzbänder oder Konzentrationsgrenzen. Bis diese Regeln beschlossen sind, kann Gate 2 nach Gate-1-PASS höchstens OPEN REVIEW erreichen.</div>';
+ html+='<div class="drow"><span class="labelWithInfo">Begründung<details class="infoDisclosure"><summary aria-label="Portfolio-Fit-Begründung anzeigen">i</summary><div class="infoCard">'+esc(e.reason)+'</div></details></span><strong>'+esc(e.state==='LOCKED'?'gesperrt':e.state==='OPEN_REVIEW'?'offen':e.state)+'</strong></div>';
  box.innerHTML=html;gateRow(e.state);
 }
 function schedule(){lastSig='';setTimeout(render,120)}
