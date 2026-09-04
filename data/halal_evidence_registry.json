@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "asOf": "2026-09-04",
   "engine": "HPOS_HALAL_EVIDENCE_V1",
   "policy": {
@@ -20,40 +20,44 @@
     ],
     "conflictRule": "No provider conflict may be auto-resolved. Conflicting explicit verdicts produce OPEN_REVIEW until manually adjudicated.",
     "coverageRule": "Absence of an instrument-specific verdict is not evidence. Methodology pages, search snippets for other instruments, names, tickers, index labels and marketing descriptions cannot produce PASS or FAIL.",
-    "freshnessRule": "Store provider review/check date when available. Re-screen periodically; stale evidence must not silently remain decisive."
+    "freshnessRule": "Store provider review/check date when available. Re-screen periodically; stale evidence must not silently remain decisive.",
+    "fundRule": "For funds/ETFs, an exact-ISIN issuer source that explicitly states Shariah-compliant investment principles may produce PASS when identity is unambiguous and no current conflicting approved evidence is known. External screeners remain corroborative and periodic re-check is required."
   },
   "assets": {
     "IE00B27YCN58": {
-      "state": "OPEN_REVIEW",
-      "reason": "No instrument-specific current verdict for canonical ISIN IE00B27YCN58 has been verified from the approved providers. Musaffa publicly identifies ISWD as the iShares MSCI World Islamic UCITS ETF in educational material and documents AAOIFI-based ETF screening, but that is not an instrument-specific current compliance verdict. Zoya states that ETF screening is currently limited to the US market. No usable Sharlife verdict was verified.",
-      "reviewedAt": "2026-09-04T17:18:00+02:00",
+      "state": "PASS",
+      "reason": "Die exakte Anteilsklasse IE00B27YCN58 wird von iShares/BlackRock als iShares MSCI World Islamic UCITS ETF geführt. Der Emittent beschreibt das Anlageziel ausdrücklich als Nachbildung eines Index aus Unternehmen, die Scharia-Anlageprinzipien erfüllen, und bezeichnet den Fonds als Shari'ah-Fonds. Musaffa nennt ISWD zusätzlich als islamische MSCI-World-Alternative. Es wurde in dieser Prüfung kein aktueller gegenteiliger Befund verifiziert.",
+      "source": "iShares / BlackRock",
+      "reviewedAt": "2026-09-04T23:35:00+02:00",
+      "recheckPolicy": "QUARTERLY_OR_ON_CONFLICT",
       "evidence": [
         {
-          "provider": "Musaffa",
-          "role": "PRIMARY",
-          "status": "COVERAGE_CONTEXT_ONLY",
-          "url": "https://academy.musaffa.com/list-of-halal-stocks-in-the-msci-world-index/",
-          "note": "Names ISWD as iShares MSCI World Islamic UCITS ETF; not treated as a current instrument verdict."
+          "provider": "iShares / BlackRock",
+          "role": "ISSUER_PRIMARY",
+          "status": "EXACT_ISIN_SHARIAH_MANDATE_VERIFIED",
+          "url": "https://www.ishares.com/de/privatanleger/de/produkte/251394/ishares-msci-world-islamic-ucits-etf?siteEntryPassthrough=true&switchLocale=y",
+          "note": "Exact ISIN IE00B27YCN58; benchmark MSCI Developed World Islamic Index; issuer describes Shariah-fund restrictions."
+        },
+        {
+          "provider": "iShares / BlackRock Factsheet",
+          "role": "ISSUER_PRIMARY",
+          "status": "SHARIAH_OBJECTIVE_VERIFIED",
+          "url": "https://www.ishares.com/de/privatanleger/de/literature/fact-sheet/iswd-ishares-msci-world-islamic-ucits-etf-fund-fact-sheet-en-de.pdf",
+          "note": "Fund objective: track an index of developed-market companies complying with Shariah investment principles."
         },
         {
           "provider": "Musaffa",
-          "role": "PRIMARY",
-          "status": "METHODOLOGY_VERIFIED",
-          "url": "https://musaffa.com/screening-methodology/",
-          "note": "AAOIFI-based screening methodology verified; methodology alone cannot set asset status."
+          "role": "SCREENER_CORROBORATION",
+          "status": "CORROBORATED",
+          "url": "https://academy.musaffa.com/list-of-halal-stocks-in-the-msci-world-index/",
+          "note": "Names ISWD as an Islamic MSCI World alternative and describes the MSCI World Islamic Index as Shariah-screened."
         },
         {
           "provider": "Zoya",
           "role": "SECONDARY",
-          "status": "NO_APPLICABLE_COVERAGE_VERIFIED",
+          "status": "NO_APPLICABLE_ETF_COVERAGE",
           "url": "https://help.zoya.finance/en/articles/4189861-does-zoya-screen-etfs-and-mutual-funds",
-          "note": "Zoya says ETF/mutual-fund screening is currently for the US market."
-        },
-        {
-          "provider": "Sharlife",
-          "role": "SUPPLEMENTARY",
-          "status": "NO_VERDICT_VERIFIED",
-          "note": "No instrument-specific verdict verified in this review."
+          "note": "No conflicting verdict used; ETF screening coverage is limited."
         }
       ]
     }
