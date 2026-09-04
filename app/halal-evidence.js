@@ -14,7 +14,7 @@ function evaluate(id){
  const state=['PASS','FAIL','OPEN_REVIEW'].includes(String(e.state||'').toUpperCase())?String(e.state).toUpperCase():'OPEN_REVIEW';
  return{state,reason:e.reason||'',source:e.source||null,reviewedAt:e.reviewedAt||null,evidence:Array.isArray(e.evidence)?e.evidence:[]};
 }
-function label(s){return s==='PASS'?'PASS · Halal belegt':s==='FAIL'?'FAIL · Nicht halal':'OPEN REVIEW · Prüfung offen'}
+function label(s){return s==='PASS'?'HALALKONFORM':s==='FAIL'?'NICHT HALALKONFORM':'PRÜFUNG OFFEN'}
 function cls(s){return s==='PASS'?'pos':s==='FAIL'?'neg':'warn'}
 function mount(){
  let sec=$('#halalEvidenceSection');if(sec)return sec;
@@ -23,10 +23,11 @@ function mount(){
  sec.innerHTML='<h2>Halal-Evidenz</h2><div id="halalEvidenceBox" class="detail"></div>';
  decision.insertAdjacentElement('afterend',sec);return sec;
 }
+function syncPositionHalal(state){const row=[...document.querySelectorAll('#assetDetails .drow')].find(r=>r.firstElementChild?.textContent?.trim()==='Halal');const v=row?.lastElementChild;if(!v)return;v.textContent=state==='PASS'?'HALALKONFORM':state==='FAIL'?'NICHT HALALKONFORM':'PRÜFUNG OFFEN';v.className=cls(state)}
 function gateLock(state){
  const rows=[...document.querySelectorAll('#assetGateRows .drow')];
  rows.forEach((r,i)=>{const v=r.lastElementChild;if(!v)return;
-   if(i===0){v.textContent=state==='PASS'?'Halal belegt':state==='FAIL'?'Nicht halal':'Prüfung offen';v.className=cls(state);return}
+   if(i===0){v.textContent=state==='PASS'?'Halalkonform':state==='FAIL'?'Nicht halalkonform':'Prüfung offen';v.className=cls(state);return}
    if(state==='PASS')return;
    v.textContent=state==='FAIL'?'Gesperrt · Halal FAIL':'Wartet auf Halal-Prüfung';v.className=state==='FAIL'?'neg':'warn';
  });
@@ -38,7 +39,7 @@ async function render(){
  let html='<div class="drow"><span class="labelWithInfo">Gate 1<button type="button" class="infoBtn" data-info-eye="Gate 1" data-info-title="Halal-Regel" data-info-html="Nur <strong>PASS</strong> öffnet Gate 2. <strong>OPEN REVIEW</strong> bleibt neutral und gesperrt; <strong>FAIL</strong> beendet die Investment-Pipeline für dieses Instrument." aria-label="Gate-1-Regel anzeigen">i</button></span><strong class="'+cls(e.state)+'">'+esc(label(e.state))+'</strong></div>';
  html+='<div class="drow"><span>Kanonische Identität</span><strong>'+esc(id.isin||'nicht verifiziert')+'</strong></div>';
  const evidenceInfo='<strong>Begründung</strong><br>'+esc(e.reason)+(e.reviewedAt?'<br><br><strong>Geprüft am</strong><br>'+esc(new Date(e.reviewedAt).toLocaleString('de-DE')):'')+(e.source?'<br><br><strong>Quelle</strong><br>'+esc(e.source):'')+'<br><br><strong>Provider</strong>'+providerHtml; html+='<div class="drow"><span class="labelWithInfo">Evidenz<button type="button" class="infoBtn" data-info-eye="Gate 1" data-info-title="Halal-Evidenz" data-info-html="'+esc(evidenceInfo)+'" aria-label="Evidenzdetails anzeigen">i</button></span><strong>'+esc(e.evidence?.length?e.evidence.length+' Quellen':'offen')+'</strong></div>';
- box.innerHTML=html;gateLock(e.state);
+ box.innerHTML=html;gateLock(e.state);syncPositionHalal(e.state);
 }
 function schedule(){lastSig='';setTimeout(render,60)}
 document.addEventListener('click',schedule,true);
