@@ -12,7 +12,7 @@ function evaluate(id){
  const e=registry?.assets?.[id.isin];
  if(!e)return{state:'OPEN_REVIEW',reason:'Für diese ISIN liegt noch keine freigegebene Halal-Evidenz vor.',source:null};
  const state=['PASS','FAIL','OPEN_REVIEW'].includes(String(e.state||'').toUpperCase())?String(e.state).toUpperCase():'OPEN_REVIEW';
- return{state,reason:e.reason||'',source:e.source||null,reviewedAt:e.reviewedAt||null};
+ return{state,reason:e.reason||'',source:e.source||null,reviewedAt:e.reviewedAt||null,evidence:Array.isArray(e.evidence)?e.evidence:[]};
 }
 function label(s){return s==='PASS'?'PASS · Halal belegt':s==='FAIL'?'FAIL · Nicht halal':'OPEN REVIEW · Prüfung offen'}
 function cls(s){return s==='PASS'?'pos':s==='FAIL'?'neg':'warn'}
@@ -38,7 +38,7 @@ async function render(){
  html+='<div class="drow"><span>Kanonische Identität</span><strong>'+esc(id.isin||'nicht verifiziert')+'</strong></div>';
  html+='<div class="profileText"><span>Begründung</span><p>'+esc(e.reason)+'</p></div>';
  if(e.source)html+='<div class="drow"><span>Quelle</span><strong>'+esc(e.source)+'</strong></div>';
- if(e.reviewedAt)html+='<div class="drow"><span>Geprüft am</span><strong>'+esc(new Date(e.reviewedAt).toLocaleString('de-DE'))+'</strong></div>';
+ if(e.reviewedAt)html+='<div class="drow"><span>Geprüft am</span><strong>'+esc(new Date(e.reviewedAt).toLocaleString('de-DE'))+'</strong></div>'; if(e.evidence?.length){html+='<div class="profileText"><span>Provider-Evidenz</span><p>'+e.evidence.map(x=>esc(x.provider)+': '+esc(x.status)).join('<br>')+'</p></div>';}
  html+='<div class="notice">Nur PASS öffnet Gate 2. OPEN REVIEW bleibt neutral und gesperrt; FAIL beendet die Investment-Pipeline für dieses Instrument.</div>';
  box.innerHTML=html;gateLock(e.state);
 }
