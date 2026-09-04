@@ -1,7 +1,7 @@
 # HPOS MVP Closeout Review — 2026-09-04
 
 ## Current build
-- Working build: v8.7.9
+- Working build: v8.7.17
 - Target freeze: v8.8.0
 - v8.8.0 is not released yet.
 
@@ -16,6 +16,10 @@
 
 ## Still OPEN before MVP freeze
 ### Block 3 — Intelligence consolidation
+- Gate 1 Halal evidence engine implemented fail-closed; exact verified evidence can set PASS/FAIL/OPEN-REVIEW.
+- Gate 2 Portfolio Fit engine implemented and correctly gated by Gate 1.
+- Halal Register now covers portfolio + Watchlist automatically.
+- Zero-cost-only technical services is a binding architecture decision.
 - Canonical identity verification must be the gate into the decision pipeline.
 - Halal Evidence Engine must implement explicit PASS / FAIL / OPEN-REVIEW states.
 - Portfolio Fit, Thesis, Fundamentals, Valuation, Timing, News Evidence and Execution must consume the same instrument identity and evidence state.
@@ -42,6 +46,9 @@ v8.8.0 may be tagged only after:
 2. Block 4 end-to-end and security checks are complete.
 3. No known release-blocking regressions remain.
 4. The production build is manually validated on mobile.
+
+## Next action
+Implement the zero-cost AAOIFI pre-screen using free fundamentals/business-profile data. It may automate triage, but incomplete evidence must remain OPEN REVIEW. Then continue Gate 2 rules and Gate 3.
 
 ## Current assessment
 The UI/data foundation is largely built. The remaining work is concentrated in decision integrity and release hardening rather than feature expansion.
