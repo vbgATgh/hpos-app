@@ -4,7 +4,8 @@ let registry=null,loading=null;
 const uiState=s=>s==='PASS'?'HALALKONFORM':s==='FAIL'?'NICHT HALALKONFORM':s==='OPEN_REVIEW'?'PRÜFUNG OFFEN':'UNGEPRÜFT';
 const cls=s=>s==='PASS'?'pos':s==='FAIL'?'neg':'warn';
 async function load(){if(registry)return registry;if(loading)return loading;loading=fetch(REG,{cache:'no-store'}).then(r=>r.ok?r.json():{assets:{}}).catch(()=>({assets:{}})).then(x=>registry=x);return loading}
-function evidenceFor(a){const isin=String(a?.isin||'').toUpperCase();return registry?.assets?.[isin]||null}
+function manualFor(a){try{const all=JSON.parse(localStorage.getItem('hpos_halal_manual_evidence_v1')||'{}')||{};const e=all[String(a?.isin||'').toUpperCase()];return e?.identityConfirmed?e:null}catch{return null}}
+function evidenceFor(a){const isin=String(a?.isin||'').toUpperCase();return registry?.assets?.[isin]||manualFor(a)||null}
 async function syncRows(){
  await load();
  document.querySelectorAll('.row[data-asset]').forEach(row=>{
@@ -29,7 +30,7 @@ async function renderRegister(){
  box.querySelectorAll('.halalRegisterRow').forEach(b=>b.onclick=()=>{const id=decodeURIComponent(b.dataset.halalAsset||'');const match=[...s.holdings,...s.watchlist].find(a=>String(a.isin||a.ticker||a.name).toUpperCase()===id.toUpperCase());if(match){window.HPOS_OPEN_ASSET?.(match);}});const refresh=box.querySelector('#halalRefreshAll');if(refresh)refresh.onclick=async()=>{refresh.disabled=true;refresh.textContent='Prüfung läuft …';for(const a of all){if(window.HPOS_HALAL_PROVIDER)await window.HPOS_HALAL_PROVIDER.screen(a,{force:true});if(window.HPOS_HALAL_AUTOSCREEN)await window.HPOS_HALAL_AUTOSCREEN.screen(a,true)}refresh.disabled=false;refresh.textContent='Halal-Prüfung aktualisieren';document.dispatchEvent(new CustomEvent('hpos:halal-prescreen'));await renderRegister()};
 }
 function escapeHtml(v){return String(v??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
-document.addEventListener('click',e=>{if(e.target.closest('.module[data-module="halal"]'))setTimeout(async()=>{await renderRegister();const s=window.HPOS_STATE_SNAPSHOT?.()||{holdings:[],watchlist:[]};window.HPOS_HALAL_AUTOSCREEN?.batch([...(s.holdings||[]),...(s.watchlist||[])],{onItem:()=>renderRegister()})},20);setTimeout(syncRows,80)},true);document.addEventListener('hpos:halal-prescreen',()=>{renderRegister();syncRows()});
+document.addEventListener('click',e=>{if(e.target.closest('.module[data-module="halal"]'))setTimeout(async()=>{await renderRegister();const s=window.HPOS_STATE_SNAPSHOT?.()||{holdings:[],watchlist:[]};window.HPOS_HALAL_AUTOSCREEN?.batch([...(s.holdings||[]),...(s.watchlist||[])],{onItem:()=>renderRegister()})},20);setTimeout(syncRows,80)},true);document.addEventListener('hpos:halal-prescreen',()=>{renderRegister();syncRows()});document.addEventListener('hpos:halal-manual-evidence',()=>{renderRegister();syncRows()});
 new MutationObserver(()=>{clearTimeout(syncRows.t);syncRows.t=setTimeout(syncRows,60)}).observe(document.body,{subtree:true,childList:true});
 setTimeout(syncRows,700);
 window.HPOS_HALAL_REGISTER=Object.freeze({refresh:async()=>{registry=null;loading=null;await load();await syncRows();await renderRegister()}});
