@@ -1,6 +1,6 @@
 (()=>{'use strict';
 const PROFILE_API='https://moxyhjfbrmsnphikxqje.supabase.co/functions/v1/hpos-profile';
-const KEY='hpos_halal_prescreen_v2',TTL=7*24*60*60*1000;
+const KEY='hpos_halal_prescreen_v3',TTL=7*24*60*60*1000;
 const RULES=Object.freeze({impureIncomeMax:0.05,interestAssetsMax:0.30,interestDebtMax:0.30,autoPassSafetyMax:0.27,standard:'AAOIFI SS21',marketValueBasis:'TRAILING_36M_AVG_MARKET_VALUE'});
 const HARD=[
  {cat:'Zinsbasierte Finanzgeschäfte',re:/\b(banks?\s*-|banks?\b|credit services|mortgage finance|consumer finance|financial conglomerates?)\b/i},
