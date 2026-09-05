@@ -41,10 +41,12 @@ async function render(){
    pre=await window.HPOS_HALAL_AUTOSCREEN.screen(id);
    if(pre?.state==='FAIL')e={state:'FAIL',reason:pre.reason,source:'HPOS AAOIFI Rule Engine v1',reviewedAt:pre.checkedAt,evidence:[{provider:'HPOS AAOIFI Rule Engine',status:'BUSINESS_SCREEN_FAIL',note:pre.reason}]};
  }
- if(e.state==='OPEN_REVIEW'&&!registry?.assets?.[id.isin]&&id.isin&&window.HPOS_HALAL_PROVIDER){
+ const autoComplete=pre&&pre.state!=='OPEN_REVIEW';
+ // External providers are fallback only. They are not called while the internal AAOIFI chain is merely waiting for required source data.
+ if(e.state==='OPEN_REVIEW'&&!registry?.assets?.[id.isin]&&id.isin&&window.HPOS_HALAL_PROVIDER&&autoComplete){
    provider=await window.HPOS_HALAL_PROVIDER.screen(id);
-   if(provider?.verdict==='COMPLIANT')e={state:'PASS',reason:'Kostenlose externe Gegenprüfung meldet dieses Instrument als Shariah-compliant. HPOS ordnet das Ergebnis der verifizierten ISIN '+id.isin+' und dem Marktsymbol '+id.ticker+' zu.',source:'Halal Terminal Free',reviewedAt:provider.checkedAt,evidence:[{provider:'Halal Terminal',status:'COMPLIANT',note:'Free-Tier Gegenprüfung · '+(provider.rawStatus||provider.verdict)}]};
-   else if(provider?.verdict==='NON_COMPLIANT')e={state:'FAIL',reason:'Kostenlose externe Gegenprüfung meldet dieses Instrument als nicht Shariah-compliant. HPOS blockiert die nachfolgenden Gates.',source:'Halal Terminal Free',reviewedAt:provider.checkedAt,evidence:[{provider:'Halal Terminal',status:'NON_COMPLIANT',note:'Free-Tier Gegenprüfung · '+(provider.rawStatus||provider.verdict)}]};
+   if(provider?.verdict==='COMPLIANT')e={state:'PASS',reason:'Kostenlose externe Gegenprüfung bestätigt das bereits automatisch entscheidbare Ergebnis für '+id.isin+'.',source:'Halal Terminal Free',reviewedAt:provider.checkedAt,evidence:[{provider:'Halal Terminal',status:'COMPLIANT',note:'Fallback-Gegenprüfung'}]};
+   else if(provider?.verdict==='NON_COMPLIANT')e={state:'FAIL',reason:'Kostenlose externe Gegenprüfung widerspricht bzw. meldet nicht Shariah-compliant. Gate 1 bleibt fail-closed.',source:'Halal Terminal Free',reviewedAt:provider.checkedAt,evidence:[{provider:'Halal Terminal',status:'NON_COMPLIANT',note:'Fallback-Gegenprüfung'}]};
  }
  if(e.state==='OPEN_REVIEW'&&!registry?.assets?.[id.isin]&&window.HPOS_HALAL_MANUAL){
    manual=window.HPOS_HALAL_MANUAL.record();
@@ -58,7 +60,7 @@ async function render(){
  html+='<div class="drow"><span>Kanonische Identität</span><strong>'+esc(id.isin||'nicht verifiziert')+'</strong></div>';
  html+='<div class="drow"><span>AAOIFI-Methode</span><strong>SS21</strong></div>';
  const evidenceInfo='<strong>Begründung</strong><br>'+esc(e.reason)+(provider&&provider.verdict==='UNRATED'?'<br><br><strong>Halal Terminal</strong><br>'+esc(provider.reason||'Kein verwertbares Free-Tier-Ergebnis.'):'')+(pre?'<br><br><strong>HPOS AAOIFI Rule Engine</strong><br>'+esc(pre.reason)+criteriaHtml:'')+(e.reviewedAt?'<br><br><strong>Geprüft am</strong><br>'+esc(new Date(e.reviewedAt).toLocaleString('de-DE')):'')+(e.source?'<br><br><strong>Quelle</strong><br>'+esc(e.source):'')+'<br><br><strong>Provider</strong>'+providerHtml; html+='<div class="drow"><span class="labelWithInfo">Evidenz<button type="button" class="infoBtn" data-info-eye="Gate 1" data-info-title="Halal-Evidenz" data-info-html="'+esc(evidenceInfo)+'" aria-label="Evidenzdetails anzeigen">i</button></span><strong>'+esc(e.evidence?.length?e.evidence.length+' Quellen':'offen')+'</strong></div>';
- html+='<button id="addManualHalalEvidence" class="secondary full">Externe Evidenz hinzufügen</button>';box.innerHTML=html;gateLock(e.state);syncPositionHalal(e.state);syncDecisionHalal(e.state);
+ if(e.state==='OPEN_REVIEW'&&pre?.state==='OPEN_REVIEW')html+='<div class="notice">Automatische AAOIFI-Prüfung läuft bzw. wartet auf belastbare Quelldaten. Externe Evidenz ist nur der Fallback für danach verbleibende unklare Fälle.</div>';if(e.state==='OPEN_REVIEW')html+='<button id="addManualHalalEvidence" class="secondary full">Unklaren Fall extern klären</button>';box.innerHTML=html;gateLock(e.state);syncPositionHalal(e.state);syncDecisionHalal(e.state);
 }
 function schedule(){lastSig='';setTimeout(render,60)}
 document.addEventListener('click',schedule,true);
