@@ -5,7 +5,8 @@ function read(){try{return JSON.parse(localStorage.getItem(KEY)||'{}')||{}}catch
 function write(x){try{localStorage.setItem(KEY,JSON.stringify(x))}catch{}}
 function k(a){return String(a?.isin||a?.ticker||a?.symbol||a?.name||'').toUpperCase()}
 function symbol(a){return String(a?.ticker||a?.symbol||'').trim().toUpperCase()}
-function auth(){const s=String(localStorage.getItem('hpos_parqet_session')||'');return s?{Authorization:'Bearer '+s}:{}}\nasync function status(){try{const r=await fetch(API+'/api/halal/provider/status',{cache:'no-store'});if(!r.ok)return{configured:false,reason:'http_'+r.status};return await r.json()}catch{return{configured:false,reason:'unreachable'}}}
+function auth(){const s=String(localStorage.getItem('hpos_parqet_session')||'');return s?{Authorization:'Bearer '+s}:{}}
+async function status(){try{const r=await fetch(API+'/api/halal/provider/status',{cache:'no-store'});if(!r.ok)return{configured:false,reason:'http_'+r.status};return await r.json()}catch{return{configured:false,reason:'unreachable'}}}
 async function screen(a,{force=false}={}){
  const id=k(a),sym=symbol(a),all=read(),cached=all[id],age=cached?.checkedAt?Date.now()-Date.parse(cached.checkedAt):Infinity;
  if(!force&&cached&&age<TTL)return cached;
