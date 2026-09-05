@@ -43,5 +43,7 @@ Missing, stale, ambiguous, or conflicting evidence remains `OPEN_REVIEW`. No mis
 - unauthenticated evidence read rejected with HTTP 401
 - schema, RLS, grants, and empty initial table verified
 - all modified browser modules pass JavaScript syntax parsing
+- authenticated POST/GET roundtrip returned HTTP 200 and preserved OPEN_REVIEW
+- temporary integration-test evidence and session were deleted and verified absent
 
 Halal Terminal Free is still not connected. No external screening run has been claimed.
