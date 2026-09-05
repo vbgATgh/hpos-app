@@ -8,7 +8,7 @@ let holdings=[],dividends=[],watchlist=[],cash=0,dataSource='',lastPortfolioSync
 let FX={USD:1.17,CHF:.93,CAD:1.60,GBP:.86,DKK:7.46};
 let halalRegistry={assets:{}};
 function manualHalalEvidence(isin){try{const all=JSON.parse(localStorage.getItem('hpos_halal_manual_evidence_v1')||'{}')||{};const e=all[String(isin||'').toUpperCase()];return e?.identityConfirmed?e:null}catch{return null}}
-function canonicalHalal(h){const isin=String(h?.isin||'').toUpperCase(),e=halalRegistry?.assets?.[isin],m=manualHalalEvidence(isin);return e?.state||m?.state||h?.halal||'UNKNOWN'}
+function canonicalHalal(h){const isin=String(h?.isin||'').toUpperCase(),e=halalRegistry?.assets?.[isin],m=manualHalalEvidence(isin),a=window.HPOS_HALAL_AUTOSCREEN?.cached?.(h);return e?.state||m?.state||a?.state||h?.halal||'UNKNOWN'}
 function halalOpenCount(){return holdings.filter(h=>!['PASS','FAIL'].includes(String(canonicalHalal(h)).toUpperCase())).length}
 function halalCoveredCount(){return holdings.filter(h=>['PASS','FAIL'].includes(String(canonicalHalal(h)).toUpperCase())).length}
 async function loadHalalRegistry(){try{const r=await fetch('../data/halal_evidence_registry.json',{cache:'no-store'});if(r.ok)halalRegistry=await r.json()}catch{}return halalRegistry}
