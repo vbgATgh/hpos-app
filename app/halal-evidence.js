@@ -39,9 +39,9 @@ async function render(){
  // Priority: curated exact-ISIN evidence > HPOS AAOIFI Rule Engine > free external provider > manual external evidence.
  if(e.state==='OPEN_REVIEW'&&!registry?.assets?.[id.isin]&&window.HPOS_HALAL_AUTOSCREEN){
    pre=await window.HPOS_HALAL_AUTOSCREEN.screen(id);
-   if(pre?.state==='FAIL')e={state:'FAIL',reason:pre.reason,source:'HPOS AAOIFI Rule Engine v1',reviewedAt:pre.checkedAt,evidence:[{provider:'HPOS AAOIFI Rule Engine',status:'BUSINESS_SCREEN_FAIL',note:pre.reason}]};
+   if(pre?.state==='PASS')e={state:'PASS',reason:pre.reason,source:'HPOS AAOIFI Rule Engine v2',reviewedAt:pre.checkedAt,evidence:[{provider:'HPOS AAOIFI Rule Engine',status:'AUTO_PASS',note:pre.reason}]};else if(pre?.state==='FAIL')e={state:'FAIL',reason:pre.reason,source:'HPOS AAOIFI Rule Engine v2',reviewedAt:pre.checkedAt,evidence:[{provider:'HPOS AAOIFI Rule Engine',status:'AUTO_FAIL',note:pre.reason}]};
  }
- const autoComplete=pre&&pre.state!=='OPEN_REVIEW';
+ const autoComplete=pre&&pre.state==='OPEN_REVIEW'&&false;
  // External providers are fallback only. They are not called while the internal AAOIFI chain is merely waiting for required source data.
  if(e.state==='OPEN_REVIEW'&&!registry?.assets?.[id.isin]&&id.isin&&window.HPOS_HALAL_PROVIDER&&autoComplete){
    provider=await window.HPOS_HALAL_PROVIDER.screen(id);
