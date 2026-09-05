@@ -1,29 +1,44 @@
 {
-  "schemaVersion": 1,
-  "asOf": "2026-09-04",
-  "engine": "HPOS_PORTFOLIO_FIT_V1",
-  "policy": {
-    "requiresGate1": "PASS",
-    "states": ["PASS", "FAIL", "OPEN_REVIEW", "LOCKED"],
-    "defaultState": "OPEN_REVIEW",
-    "failClosed": true,
-    "allocationTargets": {
-      "Core": 0.70,
-      "Turbo": 0.30
-    },
-    "cashReserveTarget": 0.03,
-    "sukukTarget": 0.15,
-    "notes": [
-      "70/30 Core/Turbo is the approved strategic frame.",
-      "Cash reserve target is 3%.",
-      "Sukuk target is 15%.",
-      "No tolerance bands, maximum single-position concentration, or automatic buy/sell thresholds are approved yet. Missing thresholds must not be invented."
+  "schemaVersion": 2,
+  "asOf": "2026-09-05",
+  "engine": "HPOS_PORTFOLIO_FIT_V2",
+  "strategyPolicy": {
+    "activeStrategyId": "HPOS_STRATEGY_2026_09",
+    "selectionRule": "LATEST_VALID_FROM_NOT_AFTER_TODAY",
+    "versions": [
+      {
+        "id": "HPOS_STRATEGY_2026_09",
+        "name": "HPOS Core/Turbo Strategie",
+        "validFrom": "2026-09-01",
+        "validTo": null,
+        "status": "ACTIVE",
+        "requiresGate1": "PASS",
+        "failClosed": true,
+        "allocationTargets": {
+          "Core": 0.7,
+          "Turbo": 0.3,
+          "Sukuk": 0.15,
+          "Cash": 0.03
+        },
+        "toleranceBands": null,
+        "maxSinglePosition": null,
+        "automaticBuySellThresholds": null,
+        "notes": [
+          "Core/Turbo 70/30 is the currently approved strategic frame.",
+          "Sukuk target is 15%.",
+          "Cash reserve target is 3%.",
+          "Tolerance bands and concentration limits are deliberately not approved yet.",
+          "Future strategy changes must be added as a new version and must not overwrite this version."
+        ]
+      }
     ]
   },
   "assetClassifications": {
     "IE00B27YCN58": {
       "bucket": "Core",
-      "basis": "Existing HPOS portfolio classification: iShares MSCI World Islamic UCITS ETF."
+      "basis": "Existing HPOS portfolio classification: iShares MSCI World Islamic UCITS ETF.",
+      "validFrom": "2026-09-01",
+      "validTo": null
     }
   }
 }
