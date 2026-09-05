@@ -9,6 +9,7 @@ function detail(label){const row=[...document.querySelectorAll('#assetDetails .d
 function identity(){const raw=detail('ISIN').toUpperCase();return{isin:VALID_ISIN.test(raw)?raw:'',name:$('#assetName')?.textContent?.trim()||''}}
 function parsePct(txt){const m=String(txt||'').replace(',','.').match(/([0-9]+(?:\.[0-9]+)?)\s*%/);return m?Number(m[1]):null}
 function currentAllocation(){const out={};[...document.querySelectorAll('#allocation .barrow')].forEach(r=>{const k=r.firstElementChild?.textContent?.trim(),v=parsePct(r.lastElementChild?.textContent);if(k&&v!=null)out[k]=v});return out}
+function activeStrategy(){const sp=policy?.strategyPolicy;if(!sp)return null;const today=new Date().toISOString().slice(0,10);const versions=(sp.versions||[]).filter(v=>v?.status!=='RETIRED'&&String(v?.validFrom||'0000-00-00')<=today&&(!v?.validTo||String(v.validTo)>=today)).sort((a,b)=>String(b.validFrom||'').localeCompare(String(a.validFrom||'')));return versions.find(v=>v.id===sp.activeStrategyId)||versions[0]||null}
 async function gate1(isin){
  if(window.HPOS_HALAL_MANUAL){
    try{
@@ -30,11 +31,12 @@ async function evaluate(id){
  const g1=await gate1(id.isin);
  if(g1.state!=='PASS')return{state:'LOCKED',bucket:null,reason:'Gate 1 ist nicht PASS. Portfolio Fit wird deshalb nicht bewertet.'};
  if(!policy)return{state:'OPEN_REVIEW',bucket:null,reason:'Portfolio-Fit-Regelwerk ist nicht verfügbar.'};
+ const strategy=activeStrategy();if(!strategy)return{state:'OPEN_REVIEW',bucket:null,reason:'Keine aktuell gültige Strategieversion vorhanden.'};
  const c=policy.assetClassifications?.[id.isin];
  if(!c)return{state:'OPEN_REVIEW',bucket:null,reason:'Für diese ISIN ist noch keine freigegebene Core/Turbo/Sukuk-Klassifikation hinterlegt.'};
- const a=currentAllocation(),target=policy.policy?.allocationTargets?.[c.bucket];
- if(target==null&&c.bucket!=='Sukuk')return{state:'OPEN_REVIEW',bucket:c.bucket,reason:'Für den Portfolio-Bucket fehlt ein freigegebenes Ziel.'};
- return{state:'OPEN_REVIEW',bucket:c.bucket,reason:'Strategischer Bucket ist klassifiziert. Eine automatische PASS/FAIL-Entscheidung bleibt gesperrt, bis Toleranzband und Konzentrationsgrenze ausdrücklich freigegeben sind.',allocation:a,target:target==null?policy.policy?.sukukTarget:target};
+ const a=currentAllocation(),target=strategy.allocationTargets?.[c.bucket];
+ if(target==null)return{state:'OPEN_REVIEW',bucket:c.bucket,strategy,reason:'Für den Portfolio-Bucket fehlt in der aktiven Strategieversion ein freigegebenes Ziel.'};
+ return{state:'OPEN_REVIEW',bucket:c.bucket,strategy,reason:'Strategischer Bucket ist klassifiziert. Die aktive Strategieversion ist geladen. Eine automatische PASS/FAIL-Entscheidung bleibt gesperrt, bis Toleranzband und Konzentrationsgrenze ausdrücklich freigegeben sind.',allocation:a,target};
 }
 async function render(){
  if(!$('#asset')?.classList.contains('on'))return;await load();const id=identity(),sig=id.name+'|'+id.isin;if(sig===lastSig&&$('#portfolioFitBox'))return;lastSig=sig;const sec=mount();if(!sec)return;
