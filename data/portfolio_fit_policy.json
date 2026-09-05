@@ -15,8 +15,8 @@
         "requiresGate1": "PASS",
         "failClosed": true,
         "allocationTargets": {
-          "Core": 0.7,
-          "Turbo": 0.3,
+          "Core": 0.70,
+          "Turbo": 0.30,
           "Sukuk": 0.15,
           "Cash": 0.03
         },
