@@ -1,6 +1,7 @@
 (()=>{'use strict';
 const PROFILE_API='https://moxyhjfbrmsnphikxqje.supabase.co/functions/v1/hpos-profile';
-const KEY='hpos_halal_prescreen_v1',TTL=7*24*60*60*1000;
+const KEY='hpos_halal_prescreen_v2',TTL=7*24*60*60*1000;
+const RULES=Object.freeze({impureIncomeMax:0.05,interestAssetsMax:0.30,interestDebtMax:0.30,standard:'AAOIFI SS21',marketValueBasis:'TRAILING_36M_AVG_REQUIRED'});
 const HARD=[
  {cat:'Zinsbasierte Finanzgeschäfte',re:/\b(banks?\s*-|banks?\b|credit services|mortgage finance|consumer finance|financial conglomerates?)\b/i},
  {cat:'Glücksspiel',re:/\b(gambling|casinos?|betting|lotter(y|ies)|gaming activities)\b/i},
@@ -22,22 +23,28 @@ function classifyBusiness(p){
  return{state:'PASS_PARTIAL',category:null,detail:hay?'Kein eindeutiger Treffer in den automatisch prüfbaren ausgeschlossenen Kerngeschäften.':'Geschäftsprofil fehlt.'}
 }
 function financial(p){
- const cap=Number(p?.marketCap)||0,debt=Number(p?.totalDebt)||0;
- const ratio=cap>0&&debt>=0?debt/cap:null;
+ const cap=Number(p?.marketCap)||0,debt=Number(p?.totalDebt)||0,cash=Number(p?.totalCash)||0;
+ const debtRatio=cap>0&&debt>=0?debt/cap:null,cashRatio=cap>0&&cash>=0?cash/cap:null;
  return{
-   debtRatio:ratio,
-   debtCheck:ratio==null?'UNAVAILABLE':ratio<=0.30?'PROXY_BELOW_30':'PROXY_ABOVE_30',
+   debtRatio,cashRatio,
+   debtCheck:debtRatio==null?'UNAVAILABLE':debtRatio<=RULES.interestDebtMax?'PROXY_PASS':'PROXY_FAIL',
+   interestAssetsCheck:'UNAVAILABLE',
    incomeCheck:'UNAVAILABLE',
-   interestAssetsCheck:'UNAVAILABLE'
+   marketCapSnapshot:cap||null,totalDebt:debt||null,totalCash:cash||null,
+   caveat:'Kostenlose Quelle liefert Snapshot-Marktkapitalisierung und Gesamtschulden; AAOIFI verlangt für die maßgebliche Berechnung den durchschnittlichen Marktwert der letzten 36 Monate und nur zinstragende Positionen.'
  };
 }
 function derive(p){
  const b=classifyBusiness(p),f=financial(p);
- if(b.state==='FAIL')return{state:'FAIL',screen:'HPOS_FREE_PRESCREEN',business:b,financial:f,reason:'Automatischer Geschäftsmodell-Check: '+b.category+' erkannt.'};
- const missing=['Nicht-zulässige Einnahmen','verzinsliche Vermögenswerte'];
- if(f.debtCheck==='UNAVAILABLE')missing.push('Schuldenquote');
- const debtNote=f.debtCheck==='PROXY_BELOW_30'?'Gesamtschulden/Marktkapitalisierung liegt im verfügbaren Snapshot ≤30 %. Dies ist nur ein Proxy, nicht die vollständige AAOIFI-Berechnung.':f.debtCheck==='PROXY_ABOVE_30'?'Gesamtschulden/Marktkapitalisierung liegt im verfügbaren Snapshot >30 %. Wegen Proxy-Daten und fehlendem 36-Monats-Marktwert bleibt das Ergebnis offen.':'Schuldendaten fehlen.';
- return{state:'OPEN_REVIEW',screen:'HPOS_FREE_PRESCREEN',business:b,financial:f,reason:'Vorprüfung unauffällig, aber vollständige Halal-Freigabe nicht möglich. Fehlend: '+missing.join(', ')+'. '+debtNote};
+ const criteria={
+   business:{rule:'Zulässiges Kerngeschäft',limit:null,state:b.state==='FAIL'?'FAIL':b.state==='PASS_PARTIAL'?'PASS':'OPEN',value:b.category||null,source:p?.profileSource||p?.source||'FREE_PROFILE'},
+   impureIncome:{rule:'Nicht-zulässige Einnahmen / Gesamtumsatz',limit:RULES.impureIncomeMax,state:'OPEN',value:null,source:'FEHLT'},
+   interestAssets:{rule:'Zinstragende Vermögenswerte / 36M Ø Marktwert',limit:RULES.interestAssetsMax,state:'OPEN',value:null,source:'FEHLT'},
+   interestDebt:{rule:'Zinstragende Schulden / 36M Ø Marktwert',limit:RULES.interestDebtMax,state:f.debtCheck==='PROXY_FAIL'?'OPEN':f.debtCheck==='PROXY_PASS'?'OPEN':'OPEN',value:f.debtRatio,source:f.debtRatio==null?'FEHLT':'PROXY_SNAPSHOT'}
+ };
+ if(b.state==='FAIL')return{state:'FAIL',screen:'HPOS_AAOIFI_RULE_ENGINE_V1',standard:RULES.standard,criteria,business:b,financial:f,reason:'Geschäftsmodell verletzt den automatischen AAOIFI-Ausschlussfilter: '+b.category+'.'};
+ const missing=Object.entries(criteria).filter(([k,x])=>x.state==='OPEN').map(([k,x])=>x.rule);
+ return{state:'OPEN_REVIEW',screen:'HPOS_AAOIFI_RULE_ENGINE_V1',standard:RULES.standard,criteria,business:b,financial:f,reason:'AAOIFI-Prüfung noch nicht vollständig. Offene Kriterien: '+missing.join('; ')+'. Ein Snapshot-Proxy darf Gate 1 nicht freigeben.'};
 }
 async function screen(a,force=false){
  const k=keyOf(a),all=read(),cached=all[k],age=cached?.checkedAt?Date.now()-Date.parse(cached.checkedAt):Infinity;
@@ -54,6 +61,6 @@ async function batch(list,{force=false,onItem}={}){
 }
 function cached(a){return read()[keyOf(a)]||null}
 function label(r){if(!r)return'UNGEPRÜFT';if(r.state==='FAIL')return'NICHT HALALKONFORM';return'PRÜFUNG OFFEN'}
-window.HPOS_HALAL_AUTOSCREEN=Object.freeze({screen,batch,cached,label,methodology:'AAOIFI-inspired free pre-screen; not scholarly certification'});
+window.HPOS_HALAL_AUTOSCREEN=Object.freeze({screen,batch,cached,label,rules:RULES,methodology:'HPOS AAOIFI Rule Engine v1 · SS21 · fail-closed'});
 setTimeout(()=>{const s=window.HPOS_STATE_SNAPSHOT?.();if(s)batch([...(s.holdings||[]),...(s.watchlist||[])],{onItem:()=>document.dispatchEvent(new CustomEvent('hpos:halal-prescreen'))})},3500);
 })();
