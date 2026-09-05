@@ -35,7 +35,7 @@ function gateLock(state){
 }
 async function render(){
  if(!$('#asset')?.classList.contains('on'))return;await load();const id=identity(),sig=id.name+'|'+id.rawIsin;if(sig===lastSig&&$('#halalEvidenceBox'))return;lastSig=sig;
- const sec=mount();if(!sec)return;let e=evaluate(id),box=$('#halalEvidenceBox');if(!box)return;let pre=null,provider=null,manual=null;
+ const sec=mount();if(!sec)return;let e=evaluate(id),box=$('#halalEvidenceBox');if(!box)return;let pre=null,provider=null,manual=null,remote=null;if(e.state==='OPEN_REVIEW'&&!registry?.assets?.[id.isin]&&id.isin&&window.HPOS_HALAL_STORE){remote=await window.HPOS_HALAL_STORE.get(id);if(['PASS','FAIL'].includes(remote?.state))e={state:remote.state,reason:remote.reason,source:remote.source_name||remote.source_type,reviewedAt:remote.checked_at,evidence:Array.isArray(remote.evidence)?remote.evidence:[]};}
  // Priority: curated exact-ISIN evidence > HPOS AAOIFI Rule Engine > free external provider > manual external evidence.
  if(e.state==='OPEN_REVIEW'&&!registry?.assets?.[id.isin]&&window.HPOS_HALAL_AUTOSCREEN){
    pre=await window.HPOS_HALAL_AUTOSCREEN.screen(id);
@@ -64,7 +64,7 @@ async function render(){
 }
 function schedule(){lastSig='';setTimeout(render,60)}
 document.addEventListener('click',schedule,true);
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')schedule()});document.addEventListener('hpos:halal-manual-evidence',schedule);
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')schedule()});document.addEventListener('hpos:halal-manual-evidence',schedule);document.addEventListener('hpos:halal-canonical',schedule);
 setTimeout(schedule,500);
 window.HPOS_HALAL_EVIDENCE=Object.freeze({evaluateIsin:async isin=>{await load();return evaluate({isin:VALID_ISIN.test(String(isin||'').toUpperCase())?String(isin).toUpperCase():'',rawIsin:String(isin||'').toUpperCase()})}});
 })();

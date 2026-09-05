@@ -5,13 +5,14 @@ function read(){try{return JSON.parse(localStorage.getItem(KEY)||'{}')||{}}catch
 function write(x){try{localStorage.setItem(KEY,JSON.stringify(x))}catch{}}
 function k(a){return String(a?.isin||a?.ticker||a?.symbol||a?.name||'').toUpperCase()}
 function symbol(a){return String(a?.ticker||a?.symbol||'').trim().toUpperCase()}
+function auth(){const s=String(localStorage.getItem('hpos_parqet_session')||'');return s?{Authorization:'Bearer '+s}:{}}
 async function status(){try{const r=await fetch(API+'/api/halal/provider/status',{cache:'no-store'});if(!r.ok)return{configured:false,reason:'http_'+r.status};return await r.json()}catch{return{configured:false,reason:'unreachable'}}}
 async function screen(a,{force=false}={}){
  const id=k(a),sym=symbol(a),all=read(),cached=all[id],age=cached?.checkedAt?Date.now()-Date.parse(cached.checkedAt):Infinity;
  if(!force&&cached&&age<TTL)return cached;
  if(!sym)return{provider:'HALAL_TERMINAL',verdict:'UNRATED',reason:'symbol_missing',checkedAt:new Date().toISOString()};
  try{
-   const r=await fetch(API+'/api/halal/screen?symbol='+encodeURIComponent(sym),{cache:'no-store'});
+   const r=await fetch(API+'/api/halal/screen?symbol='+encodeURIComponent(sym)+'&isin='+encodeURIComponent(String(a?.isin||'').toUpperCase()),{cache:'no-store',headers:auth()});
    const d=await r.json().catch(()=>({}));
    if(!r.ok){
      const x={provider:'HALAL_TERMINAL',symbol:sym,verdict:'UNRATED',reason:String(d?.error||'provider_http_'+r.status),checkedAt:new Date().toISOString(),freeOnly:true};

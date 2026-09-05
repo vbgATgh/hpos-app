@@ -5,6 +5,7 @@ const P="https://connect.parqet.com";
 const AUTH=`${P}/oauth2/authorize`;
 const TOKEN=`${P}/oauth2/token`;
 const YAHOO="https://query1.finance.yahoo.com";
+const HALAL_TERMINAL="https://api.halalterminal.com";
 const APP_ORIGIN="https://vbgatgh.github.io";
 const APP_REDIRECT="https://vbgatgh.github.io/hpos-app/app/";
 const BASE="https://moxyhjfbrmsnphikxqje.supabase.co/functions/v1/hpos-api";
@@ -16,7 +17,7 @@ Deno.serve(async(req:Request)=>{
   const u=new URL(req.url),r=route(u.pathname),o=req.headers.get("Origin")||"";
   if(req.method==="OPTIONS")return new Response(null,{status:204,headers:cors(o)});
   try{
-    if(r==="/health")return j({ok:true,service:"hpos-api",version:"0.4.1",parqetConfigured:!!Deno.env.get("PARQET_CLIENT_ID"),marketProxy:true},200,o);
+    if(r==="/health")return j({ok:true,service:"hpos-api",version:"0.5.0",parqetConfigured:!!Deno.env.get("PARQET_CLIENT_ID"),marketProxy:true},200,o);
 
     if(r==="/"&&u.searchParams.get("s")==="yahoo"){
       origin(o);
@@ -30,6 +31,10 @@ Deno.serve(async(req:Request)=>{
     if(r==="/auth/parqet/start")return start();
     if(r==="/auth/parqet/callback")return callback(u);
     if(r==="/api/parqet/status"){origin(o);await access(session(req));return j({connected:true},200,o)}
+    if(r==="/api/halal/provider/status"){origin(o);return j(await halalProviderStatus(),200,o)}
+    if(r==="/api/halal/evidence"&&req.method==="GET"){origin(o);await access(session(req));const isin=halalIsin(u.searchParams.get("isin")||"");return j(await halalEvidence(isin),200,o)}
+    if(r==="/api/halal/evidence"&&req.method==="POST"){origin(o);await access(session(req));const body=await req.json().catch(()=>null);return j(await saveHalalEvidence(body),200,o)}
+    if(r==="/api/halal/screen"){origin(o);await access(session(req));const symbol=String(u.searchParams.get("symbol")||"").trim().toUpperCase(),isin=halalIsin(u.searchParams.get("isin")||"");const result=await halalScreen(symbol);if(result.verdict==="COMPLIANT"||result.verdict==="NON_COMPLIANT")await persistProviderEvidence(isin,result);return j(result,200,o)}
     if(r==="/api/parqet/portfolios"){origin(o);return j(await pf("/portfolios",await access(session(req))),200,o)}
     if(r==="/api/parqet/holdings"){origin(o);const id=u.searchParams.get("portfolioId");if(!id)throw err(400,"portfolioId_required");return j(await pf(`/portfolios/${encodeURIComponent(id)}/holdings`,await access(session(req))),200,o)}
     if(r==="/api/parqet/normalized"){origin(o);return j(await normalized(await access(session(req))),200,o)}
@@ -44,6 +49,72 @@ Deno.serve(async(req:Request)=>{
 });
 
 function db(){const u=Deno.env.get("SUPABASE_URL"),k=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");if(!u||!k)throw err(500,"supabase_service_config_missing");return createClient(u,k,{auth:{persistSession:false,autoRefreshToken:false}})}
+
+async function halalProviderStatus(){
+  const key=Deno.env.get("HALAL_TERMINAL_API_KEY");
+  if(!key)return {configured:false,provider:"HALAL_TERMINAL",mode:"FREE_ONLY",reason:"api_key_missing"};
+  try{
+    const r=await fetch(`${HALAL_TERMINAL}/api/auth/me`,{headers:{"X-API-Key":key,Accept:"application/json"}});
+    if(!r.ok)return {configured:false,provider:"HALAL_TERMINAL",mode:"FREE_ONLY",reason:`provider_auth_${r.status}`};
+    const d=await r.json(),plan=String(d?.plan?.name??d?.plan??d?.tier??"").toLowerCase();
+    const free=!plan||plan.includes("free");
+    return {configured:true,provider:"HALAL_TERMINAL",mode:"FREE_ONLY",plan:plan||"unknown",freeOnlyAllowed:free,quota:d?.quota??d?.tokens_remaining??d?.remaining_tokens??null};
+  }catch{return {configured:false,provider:"HALAL_TERMINAL",mode:"FREE_ONLY",reason:"provider_unreachable"}}
+}
+
+async function halalScreen(symbolRaw:string){
+  const symbol=String(symbolRaw||"").trim().toUpperCase();
+  if(!/^[A-Z0-9.^=\-]{1,24}$/.test(symbol))throw err(400,"halal_symbol_invalid");
+  const key=Deno.env.get("HALAL_TERMINAL_API_KEY");
+  if(!key)throw err(503,"halal_provider_not_configured");
+  const status=await halalProviderStatus();
+  if(!status.configured)throw err(503,String(status.reason||"halal_provider_unavailable"));
+  if(status.freeOnlyAllowed===false)throw err(403,"halal_paid_plan_blocked");
+  const headers={"X-API-Key":key,Accept:"application/json"};
+  let source="CACHED_RESULT",resp=await fetch(`${HALAL_TERMINAL}/api/result/${encodeURIComponent(symbol)}`,{headers});
+  if(resp.status===404||resp.status===422){
+    source="LIVE_SCREEN";
+    resp=await fetch(`${HALAL_TERMINAL}/api/screen/${encodeURIComponent(symbol)}`,{method:"POST",headers:{...headers,"Content-Type":"application/json"}});
+  }
+  if(resp.status===402||resp.status===429)throw err(429,"halal_free_quota_exhausted");
+  if(!resp.ok)throw err(502,`halal_provider_http_${resp.status}`);
+  const d=await resp.json();
+  const raw=String(d?.overall_status??d?.status??d?.compliance_status??"").toUpperCase();
+  const verdict=raw.includes("NON")||raw.includes("NOT")||raw.includes("HARAM")?"NON_COMPLIANT":raw.includes("COMPLIANT")||raw.includes("HALAL")?"COMPLIANT":raw.includes("QUESTION")?"QUESTIONABLE":"UNRATED";
+  return {provider:"HALAL_TERMINAL",symbol,verdict,rawStatus:raw,methodologies:d?.methodologies||null,purificationRate:d?.purification_rate??null,source,checkedAt:new Date().toISOString(),freeOnly:true};
+}
+
+function halalIsin(raw:string){const isin=String(raw||"").trim().toUpperCase();if(!/^[A-Z]{2}[A-Z0-9]{9}[0-9]$/.test(isin))throw err(400,"halal_isin_invalid");return isin}
+
+async function halalEvidence(isin:string){
+  const s=db(),{data,error}=await s.from("hpos_halal_evidence").select("isin,state,source_type,source_name,methodology,symbol,raw_status,reason,evidence,checked_at,expires_at,updated_at").eq("isin",isin).maybeSingle();
+  if(error)throw err(500,"halal_evidence_read_failed");
+  if(!data)return{isin,state:"OPEN_REVIEW",reason:"no_evidence",evidence:[]};
+  if(data.expires_at&&Date.parse(data.expires_at)<Date.now())return{...data,state:"OPEN_REVIEW",reason:"evidence_expired",stale:true};
+  return data;
+}
+
+async function saveHalalEvidence(body:any){
+  const isin=halalIsin(body?.isin||""),state=String(body?.state||"").toUpperCase(),sourceType=String(body?.sourceType||"").toUpperCase();
+  if(!["PASS","FAIL","OPEN_REVIEW"].includes(state))throw err(400,"halal_state_invalid");
+  if(sourceType!=="HPOS_AAOIFI")throw err(403,"halal_source_not_allowed");
+  const reason=String(body?.reason||"").trim().slice(0,2000);if(!reason)throw err(400,"halal_reason_required");
+  const evidence=Array.isArray(body?.evidence)?body.evidence.slice(0,20).map((x:any)=>({provider:String(x?.provider||"HPOS AAOIFI Rule Engine").slice(0,120),status:String(x?.status||state).slice(0,80),note:String(x?.note||"").slice(0,500)})):[];
+  const checkedAt=new Date(String(body?.checkedAt||new Date().toISOString()));if(!Number.isFinite(checkedAt.getTime()))throw err(400,"halal_checked_at_invalid");
+  const row={isin,state,source_type:"HPOS_AAOIFI",source_name:"HPOS AAOIFI Rule Engine",methodology:"AAOIFI SS21",symbol:String(body?.symbol||"").trim().toUpperCase().slice(0,24)||null,raw_status:null,reason,evidence,checked_at:checkedAt.toISOString(),expires_at:new Date(checkedAt.getTime()+7*24*60*60*1000).toISOString(),updated_at:new Date().toISOString()};
+  const s=db(),{data:old,error:re}=await s.from("hpos_halal_evidence").select("source_type").eq("isin",isin).maybeSingle();if(re)throw err(500,"halal_evidence_read_failed");
+  if(old&&old.source_type==="CURATED_ISIN")return halalEvidence(isin);
+  const {error}=await s.from("hpos_halal_evidence").upsert(row,{onConflict:"isin"});if(error)throw err(500,"halal_evidence_store_failed");
+  return halalEvidence(isin);
+}
+
+async function persistProviderEvidence(isin:string,result:any){
+  const s=db(),{data:old,error:re}=await s.from("hpos_halal_evidence").select("source_type").eq("isin",isin).maybeSingle();if(re)throw err(500,"halal_evidence_read_failed");
+  if(old&&old.source_type!=="FREE_PROVIDER")return;
+  const state=result.verdict==="COMPLIANT"?"PASS":"FAIL",checkedAt=new Date(result.checkedAt||Date.now());
+  const row={isin,state,source_type:"FREE_PROVIDER",source_name:"Halal Terminal Free",methodology:String(result.methodologies||"" ).slice(0,200)||null,symbol:String(result.symbol||"").slice(0,24)||null,raw_status:String(result.rawStatus||"").slice(0,120)||null,reason:"Free provider returned an explicit instrument verdict.",evidence:[{provider:"Halal Terminal",status:result.verdict,note:"Free-tier external evidence"}],checked_at:checkedAt.toISOString(),expires_at:new Date(checkedAt.getTime()+30*24*60*60*1000).toISOString(),updated_at:new Date().toISOString()};
+  const {error}=await s.from("hpos_halal_evidence").upsert(row,{onConflict:"isin"});if(error)throw err(500,"halal_evidence_store_failed");
+}
 
 async function marketQuote(symbolRaw:string){
   const symbol=String(symbolRaw||"").trim().toUpperCase();
@@ -90,7 +161,7 @@ async function ppost(path:string,t:string,body:unknown){const r=await fetch(`${P
 function client(){const v=Deno.env.get("PARQET_CLIENT_ID");if(!v)throw err(503,"parqet_not_configured");return v}
 function origin(o:string){if(o!==APP_ORIGIN)throw err(403,"origin_not_allowed")}
 function route(p:string){const m="/hpos-api",i=p.indexOf(m);return i>=0?(p.slice(i+m.length)||"/"):p}
-function cors(o:string){return{"Access-Control-Allow-Origin":o===APP_ORIGIN?APP_ORIGIN:"","Access-Control-Allow-Headers":"Authorization, Content-Type","Access-Control-Allow-Methods":"GET,OPTIONS","Vary":"Origin","Cache-Control":"no-store"}}
+function cors(o:string){return{"Access-Control-Allow-Origin":o===APP_ORIGIN?APP_ORIGIN:"","Access-Control-Allow-Headers":"Authorization, Content-Type","Access-Control-Allow-Methods":"GET,POST,OPTIONS","Vary":"Origin","Cache-Control":"no-store"}}
 function j(d:unknown,s:number,o:string){return new Response(JSON.stringify(d),{status:s,headers:{"Content-Type":"application/json; charset=utf-8",...cors(o)}})}
 function tok(d:any,pr=""){const a=String(d?.access_token||"");if(!a)throw err(502,"parqet_token_missing");return{a,r:String(d?.refresh_token||pr||""),t:String(d?.token_type||"Bearer"),s:String(d?.scope||"portfolio:read"),e:Date.now()+Number(d?.expires_in||3600)*1000}}
 function err(status:number,message:string){const e:any=new Error(message);e.status=status;return e}
