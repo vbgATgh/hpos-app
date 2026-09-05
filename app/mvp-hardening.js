@@ -23,6 +23,6 @@ function schedule(ms=40){clearTimeout(refreshTimer);refreshTimer=setTimeout(refr
 // Lightweight event-driven hardening; no body-wide MutationObserver.
 document.addEventListener('click',()=>schedule(),true);
 const goal=$('#goal');if(goal)goal.addEventListener('input',()=>schedule(0));
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')schedule(0)});
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')schedule(0)});document.addEventListener('hpos:halal-prescreen',()=>schedule(0));document.addEventListener('hpos:halal-manual-evidence',()=>schedule(0));
 setTimeout(refresh,500);
 })();
