@@ -9,7 +9,19 @@ function detail(label){const row=[...document.querySelectorAll('#assetDetails .d
 function identity(){const raw=detail('ISIN').toUpperCase();return{isin:VALID_ISIN.test(raw)?raw:'',name:$('#assetName')?.textContent?.trim()||''}}
 function parsePct(txt){const m=String(txt||'').replace(',','.').match(/([0-9]+(?:\.[0-9]+)?)\s*%/);return m?Number(m[1]):null}
 function currentAllocation(){const out={};[...document.querySelectorAll('#allocation .barrow')].forEach(r=>{const k=r.firstElementChild?.textContent?.trim(),v=parsePct(r.lastElementChild?.textContent);if(k&&v!=null)out[k]=v});return out}
-async function gate1(isin){if(!window.HPOS_HALAL_EVIDENCE?.evaluateIsin)return{state:'OPEN_REVIEW'};try{return await window.HPOS_HALAL_EVIDENCE.evaluateIsin(isin)}catch{return{state:'OPEN_REVIEW'}}}
+async function gate1(isin){
+ if(window.HPOS_HALAL_MANUAL){
+   try{
+     const m=window.HPOS_HALAL_MANUAL.record();
+     if(m?.identityConfirmed&&String(m.isin||'').toUpperCase()===String(isin||'').toUpperCase()){
+       if(m.state==='PASS')return{state:'PASS',source:m.provider||'manual'};
+       if(m.state==='FAIL')return{state:'FAIL',source:m.provider||'manual'};
+     }
+   }catch{}
+ }
+ if(!window.HPOS_HALAL_EVIDENCE?.evaluateIsin)return{state:'OPEN_REVIEW'};
+ try{return await window.HPOS_HALAL_EVIDENCE.evaluateIsin(isin)}catch{return{state:'OPEN_REVIEW'}}
+}
 function mount(){let sec=$('#portfolioFitSection');if(sec)return sec;const h=$('#halalEvidenceSection');if(!h)return null;sec=document.createElement('div');sec.id='portfolioFitSection';sec.className='section';sec.innerHTML='<h2>Portfolio Fit</h2><div id="portfolioFitBox" class="detail"></div>';h.insertAdjacentElement('afterend',sec);return sec}
 function stateLabel(s){return s==='PASS'?'PASS · Portfolio Fit':s==='FAIL'?'FAIL · Kein Portfolio Fit':s==='LOCKED'?'LOCKED · Gate 1 erforderlich':'OPEN REVIEW · Regeln unvollständig'}
 function cls(s){return s==='PASS'?'pos':s==='FAIL'?'neg':'warn'}
@@ -35,6 +47,6 @@ async function render(){
  box.innerHTML=html;gateRow(e.state);
 }
 function schedule(){lastSig='';setTimeout(render,120)}
-document.addEventListener('click',schedule,true);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')schedule()});setTimeout(schedule,700);
+document.addEventListener('click',schedule,true);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')schedule()});document.addEventListener('hpos:halal-manual-evidence',schedule);setTimeout(schedule,700);
 window.HPOS_PORTFOLIO_FIT=Object.freeze({evaluateIsin:async isin=>{await load();return evaluate({isin:String(isin||'').toUpperCase()})}});
 })();
