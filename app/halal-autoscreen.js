@@ -25,33 +25,32 @@ function classifyBusiness(p){
  return{state:'PASS_PARTIAL',category:null,detail:hay?'Kein eindeutiger Treffer in den automatisch prüfbaren ausgeschlossenen Kerngeschäften.':'Geschäftsprofil fehlt.'}
 }
 function financial(p){
- const q=p?.dataQuality||{},mv=Number(p?.marketValue36mAvg)||0,revenue=Number(p?.revenue)||0;
- const debt=Number(p?.totalDebt)||0,assets=Number(p?.interestBearingAssetsUpperBound)||0,interestIncome=Math.abs(Number(p?.interestIncome)||0);
- const debtRatio=mv>0&&q.debt?debt/mv:null,assetRatio=mv>0&&q.interestAssets?assets/mv:null,incomeRatio=revenue>0&&q.interestIncome?interestIncome/revenue:null;
+ const mv=Number(p?.marketValue36mAvg)||0,revenue=Number(p?.revenue)||0,debt=Number(p?.totalDebt)||0,interestAssets=Number(p?.interestBearingAssetsUpperBound)||0,interestIncome=Math.abs(Number(p?.interestIncome)||0),q=p?.dataQuality||{};
+ const debtRatio=mv>0&&q.debt?debt/mv:null;
+ const interestAssetsRatio=mv>0&&q.interestAssets?interestAssets/mv:null;
+ const impureIncomeRatio=revenue>0&&q.interestIncome?interestIncome/revenue:null;
  return{
-   debtRatio,assetRatio,incomeRatio,marketValue36mAvg:mv,marketValue36mMonths:Number(p?.marketValue36mMonths)||0,
-   totalDebt:debt,interestBearingAssetsUpperBound:assets,interestIncome,revenue,
-   debtCheck:debtRatio==null?'UNAVAILABLE':debtRatio<RULES.interestDebtMax?'PASS':'FAIL',
-   interestAssetsCheck:assetRatio==null?'UNAVAILABLE':assetRatio<RULES.interestAssetsMax?'PASS':'FAIL',
-   incomeCheck:incomeRatio==null?'UNAVAILABLE':incomeRatio<RULES.impureIncomeMax?'PASS':'FAIL',
+   marketValue36mAvg:mv||null,marketValue36mMonths:Number(p?.marketValue36mMonths)||0,marketValue36mMethod:p?.marketValue36mMethod||'UNAVAILABLE',
+   totalDebt:q.debt?debt:null,interestBearingAssetsUpperBound:q.interestAssets?interestAssets:null,interestIncome:q.interestIncome?interestIncome:null,revenue:q.revenue?revenue:null,
+   debtRatio,interestAssetsRatio,impureIncomeRatio,
    dataQuality:q,
-   caveat:'Marktwertbasis wird aus bis zu 36 Monatskursen × aktuell verfügbare Aktienzahl approximiert. Für automatische PASS-Freigaben nutzt HPOS deshalb einen Sicherheitsabstand von 27 % bei den 30-%-Quoten.'
+   caveat:'HPOS nutzt nur kostenlos verfügbare Daten. PASS wird nur erteilt, wenn alle benötigten Kriterien belastbar vorliegen und innerhalb der freigegebenen AAOIFI-Grenzen liegen. Unvollständige oder nur als Obergrenze interpretierbare Daten bleiben offen.'
  };
 }
 function derive(p){
- const b=classifyBusiness(p),f=financial(p),q=p?.dataQuality||{};
+ const b=classifyBusiness(p),f=financial(p),mvOk=f.marketValue36mMonths>=30&&f.marketValue36mAvg>0;
  const criteria={
-   business:{rule:'Zulässiges Kerngeschäft',limit:null,state:b.state==='FAIL'?'FAIL':q.profile?'PASS':'OPEN',value:b.category||null,source:p?.profileSource||p?.source||'FREE_PROFILE'},
-   impureIncome:{rule:'Nicht-zulässige Einnahmen / Gesamtumsatz',limit:RULES.impureIncomeMax,state:f.incomeCheck==='FAIL'?'FAIL':f.incomeRatio!=null?'PASS':'OPEN',value:f.incomeRatio,source:f.incomeRatio==null?'FEHLT':'YAHOO_FINANCIAL_STATEMENT'},
-   interestAssets:{rule:'Zinstragende Vermögenswerte / 36M Ø Marktwert',limit:RULES.interestAssetsMax,state:f.interestAssetsCheck==='FAIL'?'FAIL':f.assetRatio!=null?'PASS':'OPEN',value:f.assetRatio,source:f.assetRatio==null?'FEHLT':'YAHOO_BALANCE_SHEET_UPPER_BOUND'},
-   interestDebt:{rule:'Zinstragende Schulden / 36M Ø Marktwert',limit:RULES.interestDebtMax,state:f.debtCheck==='FAIL'?'FAIL':f.debtRatio!=null?'PASS':'OPEN',value:f.debtRatio,source:f.debtRatio==null?'FEHLT':'YAHOO_TOTAL_DEBT_UPPER_BOUND'}
+   business:{rule:'Zulässiges Kerngeschäft',limit:null,state:b.state==='FAIL'?'FAIL':b.state==='PASS_PARTIAL'?'PASS':'OPEN',value:b.category||null,source:p?.profileSource||p?.source||'FREE_PROFILE'},
+   impureIncome:{rule:'Nicht-zulässige Einnahmen / Gesamtumsatz',limit:RULES.impureIncomeMax,state:f.impureIncomeRatio==null?'OPEN':f.impureIncomeRatio<=RULES.impureIncomeMax?'PASS':'FAIL',value:f.impureIncomeRatio,source:f.impureIncomeRatio==null?'FEHLT':'YAHOO_STATEMENT'},
+   interestAssets:{rule:'Zinstragende Vermögenswerte / 36M Ø Marktwert',limit:RULES.interestAssetsMax,state:!mvOk||f.interestAssetsRatio==null?'OPEN':f.interestAssetsRatio<=RULES.interestAssetsMax?'PASS':'OPEN',value:f.interestAssetsRatio,source:f.interestAssetsRatio==null?'FEHLT':'CONSERVATIVE_UPPER_BOUND'},
+   interestDebt:{rule:'Zinstragende Schulden / 36M Ø Marktwert',limit:RULES.interestDebtMax,state:!mvOk||f.debtRatio==null?'OPEN':f.debtRatio<=RULES.interestDebtMax?'PASS':'OPEN',value:f.debtRatio,source:f.debtRatio==null?'FEHLT':'TOTAL_DEBT_CONSERVATIVE'}
  };
- if(Object.values(criteria).some(x=>x.state==='FAIL'))return{state:'FAIL',screen:'HPOS_AAOIFI_RULE_ENGINE_V2',standard:RULES.standard,criteria,business:b,financial:f,reason:'Mindestens ein AAOIFI-Kriterium überschreitet den freigegebenen Grenzwert oder das Kerngeschäft ist ausgeschlossen.'};
- const open=Object.entries(criteria).filter(([,x])=>x.state==='OPEN').map(([,x])=>x.rule);
- if(open.length)return{state:'OPEN_REVIEW',screen:'HPOS_AAOIFI_RULE_ENGINE_V2',standard:RULES.standard,criteria,business:b,financial:f,reason:'Automatische Prüfung konnte nicht alle Pflichtkriterien belastbar berechnen. Offen: '+open.join('; ')+'.'};
- const buffered=(f.debtRatio??1)<RULES.autoPassSafetyMax&&(f.assetRatio??1)<RULES.autoPassSafetyMax&&(f.incomeRatio??1)<RULES.impureIncomeMax;
- if(!buffered)return{state:'OPEN_REVIEW',screen:'HPOS_AAOIFI_RULE_ENGINE_V2',standard:RULES.standard,criteria,business:b,financial:f,reason:'Alle Kriterien sind unter den AAOIFI-Grenzwerten, mindestens eine 30-%-Quote liegt jedoch im 27–30-%-Sicherheitskorridor. Externe Bestätigung erforderlich.'};
- return{state:'PASS',screen:'HPOS_AAOIFI_RULE_ENGINE_V2',standard:RULES.standard,criteria,business:b,financial:f,reason:'Automatische AAOIFI-Prüfung bestanden. Kerngeschäft unauffällig; nicht-zulässige Einnahmen <5 %; Vermögens- und Schuldenquote jeweils mit Sicherheitsabstand unter 30 %.'};
+ if(b.state==='FAIL')return{state:'FAIL',screen:'HPOS_AAOIFI_RULE_ENGINE_V2',standard:RULES.standard,criteria,business:b,financial:f,reason:'Geschäftsmodell verletzt den automatischen AAOIFI-Ausschlussfilter: '+b.category+'.'};
+ if(criteria.impureIncome.state==='FAIL')return{state:'FAIL',screen:'HPOS_AAOIFI_RULE_ENGINE_V2',standard:RULES.standard,criteria,business:b,financial:f,reason:'Nicht-zulässige Einnahmen überschreiten die freigegebene 5%-Grenze.'};
+ const allPass=Object.values(criteria).every(x=>x.state==='PASS');
+ if(allPass)return{state:'PASS',screen:'HPOS_AAOIFI_RULE_ENGINE_V2',standard:RULES.standard,criteria,business:b,financial:f,reason:'Automatische AAOIFI-Prüfung bestanden: Kerngeschäft zulässig und alle verfügbaren Pflichtkennzahlen liegen innerhalb der freigegebenen Grenzwerte.'};
+ const missing=Object.entries(criteria).filter(([k,x])=>x.state!=='PASS').map(([k,x])=>x.rule);
+ return{state:'OPEN_REVIEW',screen:'HPOS_AAOIFI_RULE_ENGINE_V2',standard:RULES.standard,criteria,business:b,financial:f,reason:'Automatische AAOIFI-Prüfung noch nicht eindeutig. Offene Kriterien: '+missing.join('; ')+'. Externe Evidenz ist nur für diesen Restfall vorgesehen.'};
 }
 async function screen(a,force=false){
  const k=keyOf(a),all=read(),cached=all[k],age=cached?.checkedAt?Date.now()-Date.parse(cached.checkedAt):Infinity;
