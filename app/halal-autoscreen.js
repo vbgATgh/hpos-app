@@ -54,7 +54,7 @@ function derive(p){
 }
 async function screen(a,force=false){
  const k=keyOf(a),all=read(),cached=all[k],age=cached?.checkedAt?Date.now()-Date.parse(cached.checkedAt):Infinity;
- if(!force&&cached&&age<TTL)return cached;
+ if(!force&&cached&&age<TTL){window.HPOS_HALAL_STORE?.saveAAOIFI?.(a,cached);return cached;}
  const symbol=symbolOf(a);
  if(!symbol){const x={state:'OPEN_REVIEW',screen:'HPOS_FREE_PRESCREEN',reason:'Kein verlässliches Marktsymbol für die automatische kostenlose Vorprüfung.',checkedAt:new Date().toISOString(),isin:String(a?.isin||'')};all[k]=x;write(all);return x}
  const p=await profile(symbol);
