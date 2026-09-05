@@ -1,7 +1,8 @@
 (()=>{'use strict';
 const REG='../data/halal_evidence_registry.json';
 let registry=null,loading=null;
-const uiState=s=>s==='PASS'?'HALALKONFORM':s==='FAIL'?'NICHT HALALKONFORM':s==='OPEN_REVIEW'?'PRÜFUNG OFFEN':'UNGEPRÜFT';\nconst resolvedState=(e,remote,pre,manual)=>{const decisive=x=>['PASS','FAIL'].includes(String(x?.state||'').toUpperCase())?x.state:null;return e?.state||decisive(remote)||decisive(pre)||decisive(manual)||remote?.state||pre?.state||manual?.state||'UNKNOWN'};
+const uiState=s=>s==='PASS'?'HALALKONFORM':s==='FAIL'?'NICHT HALALKONFORM':s==='OPEN_REVIEW'?'PRÜFUNG OFFEN':'UNGEPRÜFT';
+const resolvedState=(e,remote,pre,manual)=>{const decisive=x=>['PASS','FAIL'].includes(String(x?.state||'').toUpperCase())?x.state:null;return e?.state||decisive(remote)||decisive(pre)||decisive(manual)||remote?.state||pre?.state||manual?.state||'UNKNOWN'};
 const cls=s=>s==='PASS'?'pos':s==='FAIL'?'neg':'warn';
 async function load(){if(registry)return registry;if(loading)return loading;loading=fetch(REG,{cache:'no-store'}).then(r=>r.ok?r.json():{assets:{}}).catch(()=>({assets:{}})).then(x=>registry=x);return loading}
 function manualFor(a){try{const all=JSON.parse(localStorage.getItem('hpos_halal_manual_evidence_v1')||'{}')||{};const e=all[String(a?.isin||'').toUpperCase()];return e?.identityConfirmed?e:null}catch{return null}}
