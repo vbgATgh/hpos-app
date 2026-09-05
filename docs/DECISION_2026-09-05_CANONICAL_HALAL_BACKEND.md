@@ -47,3 +47,8 @@ Missing, stale, ambiguous, or conflicting evidence remains `OPEN_REVIEW`. No mis
 - temporary integration-test evidence and session were deleted and verified absent
 
 Halal Terminal Free is still not connected. No external screening run has been claimed.
+
+
+## Consistency correction — v8.7.32
+
+An `OPEN_REVIEW` cache entry is non-decisive and must never override an available `PASS` or `FAIL` result for the same canonical ISIN. All primary views therefore resolve curated evidence first, then decisive server/local/manual evidence, and only then unresolved states. Existing local AAOIFI cache hits are backfilled to the canonical backend so a previously persisted open state converges automatically.
