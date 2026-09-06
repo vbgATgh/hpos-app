@@ -8,12 +8,13 @@ const VALID_KEY='hpos_parqet_validated';
 const PREV_KEY='hpos_parqet_previous';
 const SYNC_KEY='hpos_parqet_last_sync';
 const REAUTH_GUARD='hpos_parqet_reauth_guard';
+const REAUTH_GUARD_MS=60*1000;
 const originalFetch=window.fetch.bind(window);
 
 function clearSession(){localStorage.removeItem(SESSION_KEY);localStorage.removeItem(SESSION_EXP_KEY);localStorage.removeItem(COMPAT_KEY)}
 function captureOAuthSession(){const hash=new URLSearchParams(location.hash.replace(/^#/,''));if(hash.get('parqet')!=='connected')return false;const s=String(hash.get('session')||''),e=String(hash.get('sessionExpires')||'');if(!/^[A-Za-z0-9_-]{20,}$/.test(s))return false;localStorage.setItem(SESSION_KEY,s);if(e)localStorage.setItem(SESSION_EXP_KEY,e);localStorage.setItem(COMPAT_KEY,'SUPABASE_ADAPTER');history.replaceState(null,'',location.pathname+location.search);return true}
 function session(){const id=localStorage.getItem(SESSION_KEY)||'',exp=Date.parse(localStorage.getItem(SESSION_EXP_KEY)||'');if(exp&&Date.now()>exp){clearSession();return''}return id}
-function reconnect(reason='reauth'){if(sessionStorage.getItem(REAUTH_GUARD)==='redirecting')return;sessionStorage.setItem(REAUTH_GUARD,'redirecting');localStorage.setItem(REAUTH_GUARD,reason);location.href=API+'/auth/parqet/start'}
+function reconnect(reason='reauth'){const started=Number(sessionStorage.getItem(REAUTH_GUARD)||0);if(started&&Date.now()-started<REAUTH_GUARD_MS)return;sessionStorage.setItem(REAUTH_GUARD,String(Date.now()));localStorage.setItem(REAUTH_GUARD,reason);location.href=API+'/auth/parqet/start'}
 function parsed(input){try{return new URL(typeof input==='string'?input:input.url,location.href)}catch{return null}}
 function authLike(status,code){return status===401||status===403||/^(session_|refresh_|not_authenticated|oauth_)/.test(String(code||''))}
 function validateNormalized(data){if(!Array.isArray(data?.holdings))throw new Error('normalisierter Bestand fehlt');const hs=data.holdings;if(hs.length<1||hs.length>200)throw new Error(`normalisierter Bestand unplausibel (${hs.length})`);const ids=new Set();for(const h of hs){const isin=String(h?.isin||'').toUpperCase(),shares=Number(h?.shares),value=Number(h?.currentValue??h?.value);if(!/^[A-Z]{2}[A-Z0-9]{9}[0-9]$/.test(isin)||!Number.isFinite(shares)||shares<=0||!Number.isFinite(value)||value<=0)throw new Error('normalisierte Position unplausibel');if(ids.has(isin))throw new Error('doppelte ISIN im normalisierten Bestand');ids.add(isin)}const c=Number(data?.cash);if(!Number.isFinite(c)||c<-100000||c>10000000)throw new Error('Cash unplausibel');return data}
