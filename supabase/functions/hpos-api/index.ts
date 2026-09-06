@@ -17,7 +17,7 @@ Deno.serve(async(req:Request)=>{
   const u=new URL(req.url),r=route(u.pathname),o=req.headers.get("Origin")||"";
   if(req.method==="OPTIONS")return new Response(null,{status:204,headers:cors(o)});
   try{
-    if(r==="/health")return j({ok:true,service:"hpos-api",version:"0.5.1",parqetConfigured:!!Deno.env.get("PARQET_CLIENT_ID"),marketProxy:true},200,o);
+    if(r==="/health")return j({ok:true,service:"hpos-api",version:"0.5.2",parqetConfigured:!!Deno.env.get("PARQET_CLIENT_ID"),marketProxy:true},200,o);
 
     if(r==="/"&&u.searchParams.get("s")==="yahoo"){
       origin(o);
@@ -146,12 +146,52 @@ async function marketSearch(qRaw:string){
 
 async function start(){const c=client(),state=rnd(32),v=rnd(64),ch=await sha(v),sid=rnd(32),s=db();await s.from("hpos_oauth_pending").delete().lt("expires_at",new Date().toISOString());const {error}=await s.from("hpos_oauth_pending").insert({state,code_verifier:v,session_id:sid,expires_at:new Date(Date.now()+600000).toISOString()});if(error)throw err(500,"oauth_state_store_failed");const u=new URL(AUTH);for(const [k,val] of Object.entries({client_id:c,redirect_uri:REDIRECT,response_type:"code",scope:"portfolio:read",code_challenge:ch,code_challenge_method:"S256",state}))u.searchParams.set(k,val);return Response.redirect(u.toString(),302)}
 
-async function callback(u:URL){const c=client(),ep=u.searchParams.get("error");if(ep)throw err(400,`oauth_authorization_${ep}`);const code=u.searchParams.get("code"),state=u.searchParams.get("state");if(!code||!state)throw err(400,"oauth_callback_invalid");const s=db(),{data:p,error}=await s.from("hpos_oauth_pending").select("state,code_verifier,session_id,expires_at").eq("state",state).maybeSingle();if(error||!p)throw err(400,"oauth_state_invalid");await s.from("hpos_oauth_pending").delete().eq("state",state);if(Date.parse(p.expires_at)<Date.now())throw err(400,"oauth_state_expired");const b=new URLSearchParams({grant_type:"authorization_code",client_id:c,redirect_uri:REDIRECT,code,code_verifier:p.code_verifier}),r=await fetch(TOKEN,{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:b});if(!r.ok)throw err(502,`parqet_token_http_${r.status}`);const t=tok(await r.json()),{error:se}=await s.from("hpos_parqet_sessions").upsert({session_id:p.session_id,access_token:t.a,refresh_token:t.r||null,token_type:t.t,scope:t.s,expires_at:new Date(t.e).toISOString(),updated_at:new Date().toISOString()});if(se)throw err(500,"session_store_failed");const d=new URL(APP_REDIRECT);d.hash=`parqet=connected&session=${encodeURIComponent(p.session_id)}&sessionExpires=${encodeURIComponent(new Date(Date.now()+TTL).toISOString())}`;return oauthSuccess(d)}
+async function callback(u:URL){
+  const ep=u.searchParams.get("error");
+  if(ep)return oauthFailure(`oauth_authorization_${String(ep).replace(/[^A-Za-z0-9_-]/g,"").slice(0,80)||"failed"}`);
+  const code=u.searchParams.get("code"),state=u.searchParams.get("state");
+  if(!code||!state)return oauthFailure("oauth_callback_invalid");
+  const s=db();
+  try{
+    const {data:p,error}=await s.from("hpos_oauth_pending").select("state,code_verifier,session_id,expires_at").eq("state",state).maybeSingle();
+    if(error||!p)return oauthFailure("oauth_state_invalid");
+    if(Date.parse(p.expires_at)<Date.now()){await s.from("hpos_oauth_pending").delete().eq("state",state);return oauthFailure("oauth_state_expired")}
+    await oauthTrace(s,state,"TOKEN_EXCHANGE_STARTED");
+    const b=new URLSearchParams({grant_type:"authorization_code",client_id:client(),redirect_uri:REDIRECT,code,code_verifier:p.code_verifier});
+    let tokenResponse:Response;
+    try{tokenResponse=await fetch(TOKEN,{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:b,signal:AbortSignal.timeout(15000)})}
+    catch{await oauthTrace(s,state,"TOKEN_EXCHANGE_FAILED","parqet_token_unreachable");return oauthFailure("parqet_token_unreachable")}
+    if(!tokenResponse.ok){const failure=`parqet_token_http_${tokenResponse.status}`;await oauthTrace(s,state,"TOKEN_EXCHANGE_FAILED",failure);return oauthFailure(failure)}
+    const raw=await tokenResponse.json().catch(()=>null);
+    let t:any;
+    try{t=tok(raw)}catch{await oauthTrace(s,state,"TOKEN_PARSE_FAILED","parqet_token_missing");return oauthFailure("parqet_token_missing")}
+    await oauthTrace(s,state,"SESSION_STORE_STARTED");
+    const {error:se}=await s.from("hpos_parqet_sessions").upsert({session_id:p.session_id,access_token:t.a,refresh_token:t.r||null,token_type:t.t,scope:t.s,expires_at:new Date(t.e).toISOString(),updated_at:new Date().toISOString()});
+    if(se){await oauthTrace(s,state,"SESSION_STORE_FAILED","session_store_failed");return oauthFailure("session_store_failed")}
+    await s.from("hpos_oauth_pending").delete().eq("state",state);
+    const d=new URL(APP_REDIRECT);
+    d.hash=`parqet=connected&session=${encodeURIComponent(p.session_id)}&sessionExpires=${encodeURIComponent(new Date(Date.now()+TTL).toISOString())}`;
+    return oauthSuccess(d)
+  }catch(e){
+    const m=String((e as any)?.message||"oauth_callback_failed");
+    await oauthTrace(s,state,"CALLBACK_FAILED",m);
+    return oauthFailure(/^(parqet_|session_|oauth_|supabase_)/.test(m)?m:"oauth_callback_failed")
+  }
+}
+
+async function oauthTrace(s:any,state:string,stage:string,failure:string|null=null){
+  try{await s.from("hpos_oauth_pending").update({last_stage:stage,last_error:failure,updated_at:new Date().toISOString()}).eq("state",state)}catch{}
+}
 
 function oauthSuccess(target:URL){
-  const safeTarget=JSON.stringify(target.toString()).replace(/</g,"\\u003c");
-  const html=`<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>HPOS verbunden</title></head><body style="background:#050914;color:#fff;font-family:system-ui;padding:32px"><p>Parqet wurde verbunden. HPOS wird geöffnet …</p><script>location.replace(${safeTarget})</script></body></html>`;
-  return new Response(html,{status:200,headers:{"Content-Type":"text/html; charset=utf-8","Cache-Control":"no-store, max-age=0","X-Content-Type-Options":"nosniff"}});
+  return new Response(null,{status:303,headers:{Location:target.toString(),"Cache-Control":"no-store, max-age=0"}})
+}
+
+function oauthFailure(code:string){
+  const safe=String(code||"oauth_callback_failed").replace(/[^A-Za-z0-9_.-]/g,"").slice(0,120);
+  const target=new URL(APP_REDIRECT);
+  target.hash=`parqet=error&code=${encodeURIComponent(safe)}`;
+  return new Response(null,{status:303,headers:{Location:target.toString(),"Cache-Control":"no-store, max-age=0"}})
 }
 
 function session(req:Request){const m=(req.headers.get("Authorization")||"").match(/^Bearer\s+([A-Za-z0-9_-]{20,})$/i);if(!m)throw err(401,"not_authenticated");return m[1]}
