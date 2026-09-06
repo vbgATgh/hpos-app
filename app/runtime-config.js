@@ -13,7 +13,7 @@ try{
   }
 }catch{}
 window.HPOS_RUNTIME=Object.freeze({
-  version:'8.7.33',
+  version:'8.7.34',
   integration:Object.freeze({
     enabled:true,
     mode:'SUPABASE_PARQET_QUOTES_SEARCH',
