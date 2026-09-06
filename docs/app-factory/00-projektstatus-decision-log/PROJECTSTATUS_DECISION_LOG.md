@@ -384,3 +384,25 @@ Die vollständigen Ausführungsdetails stehen in `docs/app-factory/08-qa-tests/Q
 ## 15. Aktualisierungsregel
 
 Dieses Dokument wird bei Änderungen an Status, Gate, Architektur, Entscheidung, Blocker, Risiko, Scope, Release oder wesentlicher Implementierung aktualisiert. Wesentliche Projektinformationen dürfen nicht ausschließlich im Chat verbleiben.
+
+
+## 16. Statusergänzung 2026-09-06 – v8.7.35 Halal-Pipeline
+
+**Entscheidung DEC-016 – Gate-1-Evidenz ist priorisiert und degradationsgeschützt**
+
+- Exakte ISIN bleibt die kanonische Identität.
+- Quellenpriorität: `CURATED_ISIN` vor `HPOS_AAOIFI` vor `FREE_PROVIDER`; manuelle Evidenz bleibt die letzte Instanz.
+- Fehlende Daten ergeben ausschließlich `OPEN_REVIEW`.
+- Ein automatischer `OPEN_REVIEW`-Lauf darf eine frische entscheidende `PASS`-/`FAIL`-Evidenz nicht überschreiben.
+- Kuratierte Exact-ISIN-Evidenz darf von keinem automatischen Lauf überschrieben werden.
+- Der externe Fallback darf nur bei offenem oder abgelaufenem internen Resultat laufen und nur einen expliziten AAOIFI-Befund übernehmen.
+- Kostenpflichtige Providerpläne bleiben blockiert.
+- Die bestehende Parqet-Bestands-, Rollback-, Validierungs- und Quarantänearchitektur bleibt unverändert.
+
+**Implementierungsstand**
+
+- Supabase `hpos-api` v24 / Service `0.5.3` aktiv.
+- Frontendzielstand v8.7.35.
+- Migration `backfill_confirmed_halal_evidence` übernimmt die bereits bestätigten Gate-1-Stände von `IE00B27YCN58` und `DK0062498333` in den kanonischen Backend-Store.
+- Halal Terminal Free ist weiterhin nicht verbunden; der reale Providerlauf bleibt bis zur serverseitigen Konfiguration von `HALAL_TERMINAL_API_KEY` offen.
+- Ausführliche Evidenz: `docs/STATUS_2026-09-06_HALAL_PIPELINE_HARDENING.md`.

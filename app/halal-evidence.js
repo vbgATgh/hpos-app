@@ -41,12 +41,14 @@ async function render(){
    pre=await window.HPOS_HALAL_AUTOSCREEN.screen(id);
    if(pre?.state==='PASS')e={state:'PASS',reason:pre.reason,source:'HPOS AAOIFI Rule Engine v2',reviewedAt:pre.checkedAt,evidence:[{provider:'HPOS AAOIFI Rule Engine',status:'AUTO_PASS',note:pre.reason}]};else if(pre?.state==='FAIL')e={state:'FAIL',reason:pre.reason,source:'HPOS AAOIFI Rule Engine v2',reviewedAt:pre.checkedAt,evidence:[{provider:'HPOS AAOIFI Rule Engine',status:'AUTO_FAIL',note:pre.reason}]};
  }
- const autoComplete=pre&&pre.state==='OPEN_REVIEW'&&false;
- // External providers are fallback only. They are not called while the internal AAOIFI chain is merely waiting for required source data.
- if(e.state==='OPEN_REVIEW'&&!registry?.assets?.[id.isin]&&id.isin&&window.HPOS_HALAL_PROVIDER&&autoComplete){
-   provider=await window.HPOS_HALAL_PROVIDER.screen(id);
-   if(provider?.verdict==='COMPLIANT')e={state:'PASS',reason:'Kostenlose externe Gegenprüfung bestätigt das bereits automatisch entscheidbare Ergebnis für '+id.isin+'.',source:'Halal Terminal Free',reviewedAt:provider.checkedAt,evidence:[{provider:'Halal Terminal',status:'COMPLIANT',note:'Fallback-Gegenprüfung'}]};
-   else if(provider?.verdict==='NON_COMPLIANT')e={state:'FAIL',reason:'Kostenlose externe Gegenprüfung widerspricht bzw. meldet nicht Shariah-compliant. Gate 1 bleibt fail-closed.',source:'Halal Terminal Free',reviewedAt:provider.checkedAt,evidence:[{provider:'Halal Terminal',status:'NON_COMPLIANT',note:'Fallback-Gegenprüfung'}]};
+ // External provider is used only for a genuine OPEN_REVIEW remainder and only when the verified free tier is configured.
+ if(e.state==='OPEN_REVIEW'&&!registry?.assets?.[id.isin]&&id.isin&&pre?.state==='OPEN_REVIEW'&&window.HPOS_HALAL_PROVIDER){
+   const providerStatus=await window.HPOS_HALAL_PROVIDER.status();
+   if(providerStatus?.configured&&providerStatus?.freeOnlyAllowed===true){
+     provider=await window.HPOS_HALAL_PROVIDER.screen(id);
+     const canonical=await window.HPOS_HALAL_STORE?.get?.(id,{force:true});
+     if(['PASS','FAIL'].includes(canonical?.state))e={state:canonical.state,reason:canonical.reason,source:canonical.source_name||canonical.source_type,reviewedAt:canonical.checked_at,evidence:Array.isArray(canonical.evidence)?canonical.evidence:[]};
+   }
  }
  if(e.state==='OPEN_REVIEW'&&!registry?.assets?.[id.isin]&&window.HPOS_HALAL_MANUAL){
    manual=window.HPOS_HALAL_MANUAL.record();

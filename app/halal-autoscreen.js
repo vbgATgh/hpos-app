@@ -54,12 +54,12 @@ function derive(p){
 }
 async function screen(a,force=false){
  const k=keyOf(a),all=read(),cached=all[k],age=cached?.checkedAt?Date.now()-Date.parse(cached.checkedAt):Infinity;
- if(!force&&cached&&age<TTL){window.HPOS_HALAL_STORE?.saveAAOIFI?.(a,cached);return cached;}
+ if(!force&&cached&&age<TTL){await window.HPOS_HALAL_STORE?.saveAAOIFI?.(a,cached);return cached;}
  const symbol=symbolOf(a);
- if(!symbol){const x={state:'OPEN_REVIEW',screen:'HPOS_FREE_PRESCREEN',reason:'Kein verlässliches Marktsymbol für die automatische kostenlose Vorprüfung.',checkedAt:new Date().toISOString(),isin:String(a?.isin||'')};all[k]=x;write(all);return x}
+ if(!symbol){const x={state:'OPEN_REVIEW',screen:'HPOS_FREE_PRESCREEN',reason:'Kein verlässliches Marktsymbol für die automatische kostenlose Vorprüfung.',checkedAt:new Date().toISOString(),isin:String(a?.isin||'')};all[k]=x;write(all);await window.HPOS_HALAL_STORE?.saveAAOIFI?.(a,x);return x}
  const p=await profile(symbol);
  const x=p?derive(p):{state:'OPEN_REVIEW',screen:'HPOS_FREE_PRESCREEN',reason:'Kostenlose Fundamentaldaten aktuell nicht verfügbar.',business:{state:'UNKNOWN'},financial:{},checkedAt:new Date().toISOString()};
- x.checkedAt=new Date().toISOString();x.isin=String(a?.isin||'').toUpperCase();x.symbol=symbol;x.profileSource=p?.source||'';all[k]=x;write(all);window.HPOS_HALAL_STORE?.saveAAOIFI?.(a,x);return x
+ x.checkedAt=new Date().toISOString();x.isin=String(a?.isin||'').toUpperCase();x.symbol=symbol;x.profileSource=p?.source||'';all[k]=x;write(all);await window.HPOS_HALAL_STORE?.saveAAOIFI?.(a,x);return x
 }
 async function batch(list,{force=false,onItem}={}){
  const uniq=[...new Map((list||[]).map(a=>[keyOf(a),a]).filter(x=>x[0])).values()];
