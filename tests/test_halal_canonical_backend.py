@@ -5,7 +5,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 def test_canonical_halal_store_is_loaded_before_app():
     html = (ROOT / "app" / "index.html").read_text()
-    assert "Portfolio Intelligence · v8.7.32" in html
+    assert "Portfolio Intelligence · v8.7.35" in html
     assert html.index("halal-store.js") < html.index("app.js")
 
 
@@ -43,3 +43,20 @@ def test_decisive_halal_evidence_beats_open_review_cache():
     register_priority = "e?.state||decisive(remote)||decisive(pre)||decisive(manual)||remote?.state||pre?.state||manual?.state"
     assert register_priority in register
     assert "saveAAOIFI?.(a,cached)" in autoscreen
+
+
+
+def test_backend_preserves_decisive_evidence_and_source_priority():
+    api = (ROOT / "supabase" / "functions" / "hpos-api" / "index.ts").read_text()
+    assert 'if(state==="OPEN_REVIEW"&&oldDecisive&&oldFresh)return halalEvidence(isin)' in api
+    assert 'if(old?.source_type==="CURATED_ISIN")return halalEvidence(isin)' in api
+    assert 'if(old?.source_type==="HPOS_AAOIFI"&&oldDecisive&&oldFresh)return' in api
+    assert 'source_type:"FREE_PROVIDER"' in api
+
+
+def test_external_fallback_is_free_only_and_aaoifi_specific():
+    api = (ROOT / "supabase" / "functions" / "hpos-api" / "index.ts").read_text()
+    register = (ROOT / "app" / "halal-register.js").read_text()
+    assert 'if(status.freeOnlyAllowed!==true)throw err(403,"halal_paid_plan_blocked")' in api
+    assert 'd?.by_methodology?.aaoifi' in api
+    assert 'providerStatus.configured&&providerStatus.freeOnlyAllowed===true' in register

@@ -52,6 +52,9 @@ Migration `backfill_confirmed_halal_evidence` übernimmt ausschließlich bereits
 - Kanonische Backendzeilen für Novo Nordisk und den iShares Islamic ETF nach Migration als `PASS` gelesen: PASS.
 - Vierteljährlicher Recheck-Termin für die kuratierte ETF-Evidenz gespeichert: PASS.
 - Produktiver GitHub-Pages-Build liefert v8.7.35; ausgelieferte JavaScript-Dateien bestehen den Syntaxcheck: PASS.
+- `runtime-config.js` und sichtbarer Build melden konsistent v8.7.35: PASS.
+- Aktive Halal-/OAuth-/Parqet-Guard-Testgruppe: 15 Tests bestanden.
+- Gesamte Repository-Suite: 148 Tests bestanden, 7 bereits vorhandene Fehler in historischen Alpha-/News-Pfaden. Diese wurden wegen fehlendem Bezug zum aktiven v8.7.35-Halal-Pfad nicht verändert.
 - Supabase-Advisors: keine neue Warnung; INFO `RLS enabled no policy` ist für den ausschließlich serverseitigen Evidenzstore beabsichtigtes Deny-all, der ungenutzte Session-Ablaufindex bleibt als betriebliche Schutzvorkehrung erhalten.
 - Live-Test des externen Halal-Terminal-Laufs: NICHT AUSGEFÜHRT, da kein Free-API-Key konfiguriert ist.
 

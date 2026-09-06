@@ -4,11 +4,12 @@ ROOT = Path(__file__).resolve().parents[1]
 API = (ROOT / "supabase" / "functions" / "hpos-api" / "index.ts").read_text()
 
 
-def test_oauth_callback_uses_safari_safe_html_navigation():
+def test_oauth_callback_uses_safari_safe_303_navigation():
     assert "return oauthSuccess(d)" in API
-    assert 'Content-Type":"text/html; charset=utf-8' in API
+    assert "status:303" in API
+    assert "Location:target.toString()" in API
     assert '"Cache-Control":"no-store, max-age=0"' in API
-    assert "location.replace" in API
+    assert 'Content-Type":"text/html; charset=utf-8' not in API
     assert "Response.redirect(d.toString(),302)" not in API
 
 
