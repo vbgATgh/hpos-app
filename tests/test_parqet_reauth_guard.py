@@ -11,9 +11,9 @@ def test_reauth_guard_expires_instead_of_blocking_forever():
     assert "==='redirecting'" not in adapter
 
 
-def test_v8733_cache_busts_auth_adapter():
+def test_current_release_keeps_reauth_guard_and_cache_bust():
     html = (ROOT / "app" / "index.html").read_text()
     runtime = (ROOT / "app" / "runtime-config.js").read_text()
-    assert "Portfolio Intelligence · v8.7.33" in html
-    assert "parqet-supabase-adapter.js?v=20260906-reauthguard1" in html
-    assert "version:'8.7.33'" in runtime
+    assert "Portfolio Intelligence · v8.7.35" in html
+    assert "parqet-supabase-adapter.js?v=20260906-callbackdiag1" in html
+    assert "version:'8.7.35'" in runtime
