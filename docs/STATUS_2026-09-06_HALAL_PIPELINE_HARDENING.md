@@ -28,6 +28,7 @@ Die bestehende automatische Gate-1-Prüfung wird in der vorhandenen Supabase-Arc
 - Die Provider-Auswertung nutzt ausschließlich ein explizites AAOIFI-Ergebnis, nicht einen generischen Gesamtstatus.
 - Der Provider versucht zuerst den günstigeren Cache-Leseweg; nur fehlende/veraltete Treffer führen zum Live-Screen.
 - Provider-Evidenz verfällt nach sieben Tagen.
+- Kuratierte ETF-Evidenz erhält entsprechend ihrer bestehenden Recheck-Policy einen vierteljährlichen Ablaufzeitpunkt; abgelaufene Evidenz wird zu `OPEN_REVIEW`.
 - Holdings werden vor dem Hintergrundlauf mit vorhandenen Marktsymbolen angereichert.
 - Halal Register und Detailansicht führen den externen Fallback nur bei `OPEN_REVIEW`, konfiguriertem Provider und Free-Plan aus.
 - Ohne Provider bleibt die UI ausdrücklich bei „noch nicht verbunden“ und `PRÜFUNG OFFEN`.
@@ -49,6 +50,9 @@ Migration `backfill_confirmed_halal_evidence` übernimmt ausschließlich bereits
 - Temporärer Integrationstest: frisches `PASS` gespeichert, anschließendes `OPEN_REVIEW` hat `PASS` nicht überschrieben: PASS.
 - Temporäre Testsession und Testevidenz anschließend gelöscht: PASS.
 - Kanonische Backendzeilen für Novo Nordisk und den iShares Islamic ETF nach Migration als `PASS` gelesen: PASS.
+- Vierteljährlicher Recheck-Termin für die kuratierte ETF-Evidenz gespeichert: PASS.
+- Produktiver GitHub-Pages-Build liefert v8.7.35; ausgelieferte JavaScript-Dateien bestehen den Syntaxcheck: PASS.
+- Supabase-Advisors: keine neue Warnung; INFO `RLS enabled no policy` ist für den ausschließlich serverseitigen Evidenzstore beabsichtigtes Deny-all, der ungenutzte Session-Ablaufindex bleibt als betriebliche Schutzvorkehrung erhalten.
 - Live-Test des externen Halal-Terminal-Laufs: NICHT AUSGEFÜHRT, da kein Free-API-Key konfiguriert ist.
 
 ## Offener Blocker
