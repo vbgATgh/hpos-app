@@ -421,9 +421,11 @@ Dieses Dokument wird bei Änderungen an Status, Gate, Architektur, Entscheidung,
 
 **Implementierungsstand**
 
-- Frontendzielstand: v8.7.36.
-- Supabase `hpos-api` Servicezielstand: `0.5.4`, Modus `ACCOUNT_FREE`.
+- Frontendstand: v8.7.36, produktiv über GitHub Pages verifiziert.
+- Supabase `hpos-api` v25 / Service `0.5.4`, Modus `ACCOUNT_FREE`, produktiv verifiziert.
 - Entfernt: `/api/halal/provider/status`, `/api/halal/screen`, `HALAL_TERMINAL_API_KEY`-Auswertung und `app/halal-provider.js`.
 - Halal Register und Detailansicht erklären den accountfreien Modus und fordern keine Provider-Verbindung mehr an.
 - Aktive Regressionstests sichern das Fehlen der kontobasierten Providerpfade ab.
+- Pull Request #42 wurde nach erfolgreicher `HPOS Current App CI` als Squash-Commit nach `main` übernommen.
+- Produktive Prüfungen: Health HTTP 200, entfernte Providerroute HTTP 404, Evidenz ohne Sitzung HTTP 401.
 - Ausführliche Evidenz: `docs/STATUS_2026-09-07_ACCOUNT_FREE_HALAL.md`.

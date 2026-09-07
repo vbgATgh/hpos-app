@@ -2,8 +2,8 @@
 
 **Datum:** 2026-09-07  
 **Frontend:** v8.7.36  
-**Supabase Edge Function:** `hpos-api` Service `0.5.4`  
-**Status:** LOKAL IMPLEMENTIERT UND GEPRÜFT; PRODUKTIONSNACHWEIS AUSSTEHEND
+**Supabase Edge Function:** `hpos-api` v25 / Service `0.5.4`  
+**Status:** PRODUKTIV VERÖFFENTLICHT UND VERIFIZIERT
 
 ## Verbindliche Entscheidung
 
@@ -36,12 +36,19 @@ HPOS verlangt keine zusätzlichen Konten bei Halal-Prüfdiensten. Halal Terminal
 - Schutz frischer `PASS`-/`FAIL`-Evidenz vor `OPEN_REVIEW`
 - Schutz kuratierter Exact-ISIN-Evidenz
 
-## Lokaler Prüfstatus
+## Prüfstatus
 
 - Browser-JavaScript-Syntaxcheck: PASS.
 - Git-Diff-Check: PASS.
 - Aktive Halal-/OAuth-/Parqet-Schutzsuite: 15 Tests bestanden.
 - Aktiver Laufzeitpfad enthält keine Referenz auf Halal Terminal, dessen API-Key, Providerstatus- oder Screeningroute: PASS.
 - Gesamte Repository-Suite: 148 Tests bestanden, 7 bereits vorhandene Fehler in historischen Alpha-/News-Pfaden. Keine zusätzliche Regression durch v8.7.36 festgestellt.
-
-Der Produktivstatus wird erst nach erfolgreicher Pull-Request-CI, Edge-Function-Deployment und direktem Produktionsabgleich auf PASS gesetzt.
+- Pull Request #42: CI erfolgreich, konfliktfrei als Squash-Commit nach `main` übernommen.
+- GitHub Pages liefert v8.7.36 mit Cache-Key `20260907-accountfree1` und ohne `halal-provider.js`: PASS.
+- Ausgelieferte Produktionsskripte `runtime-config.js`, `halal-register.js` und `halal-evidence.js`: Syntaxcheck PASS.
+- Supabase `hpos-api` v25 / Service `0.5.4`: ACTIVE.
+- Produktiver Healthcheck: HTTP 200, `halalMode: ACCOUNT_FREE`.
+- Entfernte Providerstatusroute: HTTP 404.
+- Halal-Evidenz ohne HPOS-Sitzung: weiterhin HTTP 401.
+- Aktiver Edge-Function-Quellstand enthält keine Halal-Terminal-, API-Key-, Providerstatus- oder Screeningreferenz.
+- Supabase Security Advisor: keine neue Warnung. Der Hinweis `RLS enabled no policy` für `hpos_halal_evidence` ist weiterhin das beabsichtigte serverseitige Deny-all-Modell.
