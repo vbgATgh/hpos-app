@@ -5,7 +5,6 @@ const P="https://connect.parqet.com";
 const AUTH=`${P}/oauth2/authorize`;
 const TOKEN=`${P}/oauth2/token`;
 const YAHOO="https://query1.finance.yahoo.com";
-const HALAL_TERMINAL="https://api.halalterminal.com";
 const APP_ORIGIN="https://vbgatgh.github.io";
 const APP_REDIRECT="https://vbgatgh.github.io/hpos-app/app/";
 const BASE="https://moxyhjfbrmsnphikxqje.supabase.co/functions/v1/hpos-api";
@@ -17,7 +16,7 @@ Deno.serve(async(req:Request)=>{
   const u=new URL(req.url),r=route(u.pathname),o=req.headers.get("Origin")||"";
   if(req.method==="OPTIONS")return new Response(null,{status:204,headers:cors(o)});
   try{
-    if(r==="/health")return j({ok:true,service:"hpos-api",version:"0.5.3",parqetConfigured:!!Deno.env.get("PARQET_CLIENT_ID"),marketProxy:true},200,o);
+    if(r==="/health")return j({ok:true,service:"hpos-api",version:"0.5.4",parqetConfigured:!!Deno.env.get("PARQET_CLIENT_ID"),marketProxy:true,halalMode:"ACCOUNT_FREE"},200,o);
 
     if(r==="/"&&u.searchParams.get("s")==="yahoo"){
       origin(o);
@@ -31,10 +30,8 @@ Deno.serve(async(req:Request)=>{
     if(r==="/auth/parqet/start")return start();
     if(r==="/auth/parqet/callback")return callback(u);
     if(r==="/api/parqet/status"){origin(o);await access(session(req));return j({connected:true},200,o)}
-    if(r==="/api/halal/provider/status"){origin(o);return j(await halalProviderStatus(),200,o)}
     if(r==="/api/halal/evidence"&&req.method==="GET"){origin(o);await access(session(req));const isin=halalIsin(u.searchParams.get("isin")||"");return j(await halalEvidence(isin),200,o)}
     if(r==="/api/halal/evidence"&&req.method==="POST"){origin(o);await access(session(req));const body=await req.json().catch(()=>null);return j(await saveHalalEvidence(body),200,o)}
-    if(r==="/api/halal/screen"){origin(o);await access(session(req));const symbol=String(u.searchParams.get("symbol")||"").trim().toUpperCase(),isin=halalIsin(u.searchParams.get("isin")||"");const result=await halalScreen(symbol);if(result.verdict==="COMPLIANT"||result.verdict==="NON_COMPLIANT")await persistProviderEvidence(isin,result);return j(result,200,o)}
     if(r==="/api/parqet/portfolios"){origin(o);return j(await pf("/portfolios",await access(session(req))),200,o)}
     if(r==="/api/parqet/holdings"){origin(o);const id=u.searchParams.get("portfolioId");if(!id)throw err(400,"portfolioId_required");return j(await pf(`/portfolios/${encodeURIComponent(id)}/holdings`,await access(session(req))),200,o)}
     if(r==="/api/parqet/normalized"){origin(o);return j(await normalized(await access(session(req))),200,o)}
@@ -49,47 +46,6 @@ Deno.serve(async(req:Request)=>{
 });
 
 function db(){const u=Deno.env.get("SUPABASE_URL"),k=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");if(!u||!k)throw err(500,"supabase_service_config_missing");return createClient(u,k,{auth:{persistSession:false,autoRefreshToken:false}})}
-
-async function halalProviderStatus(){
-  const key=Deno.env.get("HALAL_TERMINAL_API_KEY");
-  if(!key)return {configured:false,provider:"HALAL_TERMINAL",mode:"FREE_ONLY",reason:"api_key_missing"};
-  try{
-    const r=await fetch(`${HALAL_TERMINAL}/api/auth/me`,{headers:{"X-API-Key":key,Accept:"application/json"}});
-    if(!r.ok)return {configured:false,provider:"HALAL_TERMINAL",mode:"FREE_ONLY",reason:`provider_auth_${r.status}`};
-    const d=await r.json();
-    const plan=String(d?.plan?.name??d?.plan_name??d?.plan??d?.tier??r.headers.get("X-Plan")??"").trim().toLowerCase();
-    const free=plan==="free"||plan.startsWith("free ");
-    return {configured:true,provider:"HALAL_TERMINAL",mode:"FREE_ONLY",plan:plan||"unknown",freeOnlyAllowed:free,reason:free?null:"non_free_or_unknown_plan",quota:d?.quota??d?.tokens_remaining??d?.remaining_tokens??r.headers.get("X-RateLimit-Remaining")??null};
-  }catch{return {configured:false,provider:"HALAL_TERMINAL",mode:"FREE_ONLY",reason:"provider_unreachable"}}
-}
-
-async function halalScreen(symbolRaw:string){
-  const symbol=String(symbolRaw||"").trim().toUpperCase();
-  if(!/^[A-Z0-9.^=\-]{1,24}$/.test(symbol))throw err(400,"halal_symbol_invalid");
-  const key=Deno.env.get("HALAL_TERMINAL_API_KEY");
-  if(!key)throw err(503,"halal_provider_not_configured");
-  const status=await halalProviderStatus();
-  if(!status.configured)throw err(503,String(status.reason||"halal_provider_unavailable"));
-  if(status.freeOnlyAllowed!==true)throw err(403,"halal_paid_plan_blocked");
-  const headers={"X-API-Key":key,Accept:"application/json"};
-  let source="CACHED_RESULT",resp=await fetch(`${HALAL_TERMINAL}/api/result/${encodeURIComponent(symbol)}`,{headers});
-  let d:any=null;
-  if(resp.ok)d=await resp.json();
-  if(resp.status===404||d?.is_stale===true){
-    source="LIVE_SCREEN";
-    resp=await fetch(`${HALAL_TERMINAL}/api/screen/${encodeURIComponent(symbol)}`,{method:"POST",headers});
-    d=null;
-  }
-  if(resp.status===402||resp.status===429)throw err(429,"halal_free_quota_exhausted");
-  if(!resp.ok)throw err(502,`halal_provider_http_${resp.status}`);
-  d=d??await resp.json();
-  const aa=d?.by_methodology?.aaoifi??d?.by_methodology?.AAOIFI??null;
-  const explicit=typeof aa?.compliant==="boolean"?aa.compliant:typeof d?.aaoifi_compliant==="boolean"?d.aaoifi_compliant:typeof d?.methodology_summary?.aaoifi==="boolean"?d.methodology_summary.aaoifi:null;
-  const verified=aa?.verified??d?.aaoifi_verified??null;
-  const verdict=verified===false||explicit===null?"UNRATED":explicit?"COMPLIANT":"NON_COMPLIANT";
-  const raw=explicit===null?"AAOIFI_UNRATED":explicit?"AAOIFI_COMPLIANT":"AAOIFI_NON_COMPLIANT";
-  return {provider:"HALAL_TERMINAL",symbol,verdict,rawStatus:raw,methodology:"AAOIFI SS21",evidenceVerified:verified,reason:String(d?.compliance_explanation??d?.business_screen_reason??raw).slice(0,1000),purificationRate:d?.purification_rate??null,source,providerCheckedAt:d?.last_checked_at??null,checkedAt:String(d?.last_checked_at||new Date().toISOString()),freeOnly:true};
-}
 
 function halalIsin(raw:string){const isin=String(raw||"").trim().toUpperCase();if(!/^[A-Z]{2}[A-Z0-9]{9}[0-9]$/.test(isin))throw err(400,"halal_isin_invalid");return isin}
 
@@ -115,16 +71,6 @@ async function saveHalalEvidence(body:any){
   if(state==="OPEN_REVIEW"&&oldDecisive&&oldFresh)return halalEvidence(isin);
   const {error}=await s.from("hpos_halal_evidence").upsert(row,{onConflict:"isin"});if(error)throw err(500,"halal_evidence_store_failed");
   return halalEvidence(isin);
-}
-
-async function persistProviderEvidence(isin:string,result:any){
-  const s=db(),{data:old,error:re}=await s.from("hpos_halal_evidence").select("source_type,state,expires_at").eq("isin",isin).maybeSingle();if(re)throw err(500,"halal_evidence_read_failed");
-  const oldDecisive=["PASS","FAIL"].includes(String(old?.state||"")),oldFresh=!old?.expires_at||Date.parse(old.expires_at)>Date.now();
-  if(old?.source_type==="CURATED_ISIN")return;
-  if(old?.source_type==="HPOS_AAOIFI"&&oldDecisive&&oldFresh)return;
-  const state=result.verdict==="COMPLIANT"?"PASS":"FAIL",checkedAt=new Date(result.checkedAt||Date.now());
-  const row={isin,state,source_type:"FREE_PROVIDER",source_name:"Halal Terminal Free",methodology:String(result.methodology||"AAOIFI SS21").slice(0,200),symbol:String(result.symbol||"").slice(0,24)||null,raw_status:String(result.rawStatus||"").slice(0,120)||null,reason:String(result.reason||"Free provider returned an explicit AAOIFI instrument verdict.").slice(0,2000),evidence:[{provider:"Halal Terminal",status:result.verdict,note:`Free-tier AAOIFI evidence${result.evidenceVerified===true?" · verified":""}`}],checked_at:checkedAt.toISOString(),expires_at:new Date(checkedAt.getTime()+7*24*60*60*1000).toISOString(),updated_at:new Date().toISOString()};
-  const {error}=await s.from("hpos_halal_evidence").upsert(row,{onConflict:"isin"});if(error)throw err(500,"halal_evidence_store_failed");
 }
 
 async function marketQuote(symbolRaw:string){

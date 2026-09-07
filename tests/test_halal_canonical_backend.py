@@ -5,7 +5,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 def test_canonical_halal_store_is_loaded_before_app():
     html = (ROOT / "app" / "index.html").read_text()
-    assert "Portfolio Intelligence · v8.7.35" in html
+    assert "Portfolio Intelligence · v8.7.36" in html
     assert html.index("halal-store.js") < html.index("app.js")
 
 
@@ -50,13 +50,17 @@ def test_backend_preserves_decisive_evidence_and_source_priority():
     api = (ROOT / "supabase" / "functions" / "hpos-api" / "index.ts").read_text()
     assert 'if(state==="OPEN_REVIEW"&&oldDecisive&&oldFresh)return halalEvidence(isin)' in api
     assert 'if(old?.source_type==="CURATED_ISIN")return halalEvidence(isin)' in api
-    assert 'if(old?.source_type==="HPOS_AAOIFI"&&oldDecisive&&oldFresh)return' in api
-    assert 'source_type:"FREE_PROVIDER"' in api
 
 
-def test_external_fallback_is_free_only_and_aaoifi_specific():
+def test_halal_runtime_is_account_free():
     api = (ROOT / "supabase" / "functions" / "hpos-api" / "index.ts").read_text()
+    html = (ROOT / "app" / "index.html").read_text()
     register = (ROOT / "app" / "halal-register.js").read_text()
-    assert 'if(status.freeOnlyAllowed!==true)throw err(403,"halal_paid_plan_blocked")' in api
-    assert 'd?.by_methodology?.aaoifi' in api
-    assert 'providerStatus.configured&&providerStatus.freeOnlyAllowed===true' in register
+    evidence = (ROOT / "app" / "halal-evidence.js").read_text()
+    for forbidden in ["HALAL_TERMINAL", "HALAL_TERMINAL_API_KEY", "/api/halal/provider/status", "/api/halal/screen"]:
+        assert forbidden not in api
+    assert "halal-provider.js" not in html
+    assert "HPOS_HALAL_PROVIDER" not in register
+    assert "HPOS_HALAL_PROVIDER" not in evidence
+    assert "Keine externe Konto- oder API-Verbindung erforderlich." in register
+    assert 'halalMode:"ACCOUNT_FREE"' in api

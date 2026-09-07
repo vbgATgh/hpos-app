@@ -35,20 +35,11 @@ function gateLock(state){
 }
 async function render(){
  if(!$('#asset')?.classList.contains('on'))return;await load();const id=identity(),sig=id.name+'|'+id.rawIsin;if(sig===lastSig&&$('#halalEvidenceBox'))return;lastSig=sig;
- const sec=mount();if(!sec)return;let e=evaluate(id),box=$('#halalEvidenceBox');if(!box)return;let pre=null,provider=null,manual=null,remote=null;if(e.state==='OPEN_REVIEW'&&!registry?.assets?.[id.isin]&&id.isin&&window.HPOS_HALAL_STORE){remote=await window.HPOS_HALAL_STORE.get(id);if(['PASS','FAIL'].includes(remote?.state))e={state:remote.state,reason:remote.reason,source:remote.source_name||remote.source_type,reviewedAt:remote.checked_at,evidence:Array.isArray(remote.evidence)?remote.evidence:[]};}
- // Priority: curated exact-ISIN evidence > HPOS AAOIFI Rule Engine > free external provider > manual external evidence.
+ const sec=mount();if(!sec)return;let e=evaluate(id),box=$('#halalEvidenceBox');if(!box)return;let pre=null,manual=null,remote=null;if(e.state==='OPEN_REVIEW'&&!registry?.assets?.[id.isin]&&id.isin&&window.HPOS_HALAL_STORE){remote=await window.HPOS_HALAL_STORE.get(id);if(['PASS','FAIL'].includes(remote?.state))e={state:remote.state,reason:remote.reason,source:remote.source_name||remote.source_type,reviewedAt:remote.checked_at,evidence:Array.isArray(remote.evidence)?remote.evidence:[]};}
+ // Account-free priority: curated exact-ISIN evidence > HPOS AAOIFI Rule Engine > manually confirmed evidence.
  if(e.state==='OPEN_REVIEW'&&!registry?.assets?.[id.isin]&&window.HPOS_HALAL_AUTOSCREEN){
    pre=await window.HPOS_HALAL_AUTOSCREEN.screen(id);
    if(pre?.state==='PASS')e={state:'PASS',reason:pre.reason,source:'HPOS AAOIFI Rule Engine v2',reviewedAt:pre.checkedAt,evidence:[{provider:'HPOS AAOIFI Rule Engine',status:'AUTO_PASS',note:pre.reason}]};else if(pre?.state==='FAIL')e={state:'FAIL',reason:pre.reason,source:'HPOS AAOIFI Rule Engine v2',reviewedAt:pre.checkedAt,evidence:[{provider:'HPOS AAOIFI Rule Engine',status:'AUTO_FAIL',note:pre.reason}]};
- }
- // External provider is used only for a genuine OPEN_REVIEW remainder and only when the verified free tier is configured.
- if(e.state==='OPEN_REVIEW'&&!registry?.assets?.[id.isin]&&id.isin&&pre?.state==='OPEN_REVIEW'&&window.HPOS_HALAL_PROVIDER){
-   const providerStatus=await window.HPOS_HALAL_PROVIDER.status();
-   if(providerStatus?.configured&&providerStatus?.freeOnlyAllowed===true){
-     provider=await window.HPOS_HALAL_PROVIDER.screen(id);
-     const canonical=await window.HPOS_HALAL_STORE?.get?.(id,{force:true});
-     if(['PASS','FAIL'].includes(canonical?.state))e={state:canonical.state,reason:canonical.reason,source:canonical.source_name||canonical.source_type,reviewedAt:canonical.checked_at,evidence:Array.isArray(canonical.evidence)?canonical.evidence:[]};
-   }
  }
  if(e.state==='OPEN_REVIEW'&&!registry?.assets?.[id.isin]&&window.HPOS_HALAL_MANUAL){
    manual=window.HPOS_HALAL_MANUAL.record();
@@ -61,8 +52,8 @@ async function render(){
  let html='<div class="drow"><span class="labelWithInfo">Gate 1<button type="button" class="infoBtn" data-info-eye="Gate 1" data-info-title="Halal-Regel" data-info-html="Nur <strong>PASS</strong> öffnet Gate 2. <strong>OPEN REVIEW</strong> bleibt neutral und gesperrt; <strong>FAIL</strong> beendet die Investment-Pipeline für dieses Instrument." aria-label="Gate-1-Regel anzeigen">i</button></span><strong class="'+cls(e.state)+'">'+esc(label(e.state))+'</strong></div>';
  html+='<div class="drow"><span>Kanonische Identität</span><strong>'+esc(id.isin||'nicht verifiziert')+'</strong></div>';
  html+='<div class="drow"><span>AAOIFI-Methode</span><strong>SS21</strong></div>';
- const evidenceInfo='<strong>Begründung</strong><br>'+esc(e.reason)+(provider&&provider.verdict==='UNRATED'?'<br><br><strong>Halal Terminal</strong><br>'+esc(provider.reason||'Kein verwertbares Free-Tier-Ergebnis.'):'')+(pre?'<br><br><strong>HPOS AAOIFI Rule Engine</strong><br>'+esc(pre.reason)+criteriaHtml:'')+(e.reviewedAt?'<br><br><strong>Geprüft am</strong><br>'+esc(new Date(e.reviewedAt).toLocaleString('de-DE')):'')+(e.source?'<br><br><strong>Quelle</strong><br>'+esc(e.source):'')+'<br><br><strong>Provider</strong>'+providerHtml; html+='<div class="drow"><span class="labelWithInfo">Evidenz<button type="button" class="infoBtn" data-info-eye="Gate 1" data-info-title="Halal-Evidenz" data-info-html="'+esc(evidenceInfo)+'" aria-label="Evidenzdetails anzeigen">i</button></span><strong>'+esc(e.evidence?.length?e.evidence.length+' Quellen':'offen')+'</strong></div>';
- if(e.state==='OPEN_REVIEW'&&pre?.state==='OPEN_REVIEW')html+='<div class="notice">Automatische Basisprüfung abgeschlossen. Für ein vollständiges AAOIFI-Urteil fehlen noch belastbare Quelldaten. Externe Evidenz ist nur der Fallback für diesen unklaren Restfall.</div>';if(e.state==='OPEN_REVIEW')html+='<button id="addManualHalalEvidence" class="secondary full">Unklaren Fall extern klären</button>';box.innerHTML=html;gateLock(e.state);syncPositionHalal(e.state);syncDecisionHalal(e.state);
+ const evidenceInfo='<strong>Begründung</strong><br>'+esc(e.reason)+(pre?'<br><br><strong>HPOS AAOIFI Rule Engine</strong><br>'+esc(pre.reason)+criteriaHtml:'')+(e.reviewedAt?'<br><br><strong>Geprüft am</strong><br>'+esc(new Date(e.reviewedAt).toLocaleString('de-DE')):'')+(e.source?'<br><br><strong>Quelle</strong><br>'+esc(e.source):'')+'<br><br><strong>Evidenz</strong>'+providerHtml; html+='<div class="drow"><span class="labelWithInfo">Evidenz<button type="button" class="infoBtn" data-info-eye="Gate 1" data-info-title="Halal-Evidenz" data-info-html="'+esc(evidenceInfo)+'" aria-label="Evidenzdetails anzeigen">i</button></span><strong>'+esc(e.evidence?.length?e.evidence.length+' Quellen':'offen')+'</strong></div>';
+ if(e.state==='OPEN_REVIEW'&&pre?.state==='OPEN_REVIEW')html+='<div class="notice">Automatische Basisprüfung abgeschlossen. Für ein vollständiges AAOIFI-Urteil fehlen noch belastbare Quelldaten. Der Fall bleibt deshalb PRÜFUNG OFFEN.</div>';if(e.state==='OPEN_REVIEW')html+='<button id="addManualHalalEvidence" class="secondary full">Evidenz manuell ergänzen</button>';box.innerHTML=html;gateLock(e.state);syncPositionHalal(e.state);syncDecisionHalal(e.state);
 }
 function schedule(){lastSig='';setTimeout(render,60)}
 document.addEventListener('click',schedule,true);
