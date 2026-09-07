@@ -406,3 +406,24 @@ Dieses Dokument wird bei Änderungen an Status, Gate, Architektur, Entscheidung,
 - Migration `backfill_confirmed_halal_evidence` übernimmt die bereits bestätigten Gate-1-Stände von `IE00B27YCN58` und `DK0062498333` in den kanonischen Backend-Store.
 - Halal Terminal Free ist weiterhin nicht verbunden; der reale Providerlauf bleibt bis zur serverseitigen Konfiguration von `HALAL_TERMINAL_API_KEY` offen.
 - Ausführliche Evidenz: `docs/STATUS_2026-09-06_HALAL_PIPELINE_HARDENING.md`.
+
+## 17. Statusergänzung 2026-09-07 – accountfreie Halal-Pipeline v8.7.36
+
+**Entscheidung DEC-017 – Keine zusätzlichen Accounts für Halal-Prüfdienste**
+
+- Für HPOS werden keine weiteren Nutzerkonten, API-Accounts oder API-Keys bei Halal-Prüfdiensten angelegt.
+- Der zuvor vorgesehene Halal-Terminal-Free-Pfad ist vollständig aus dem aktiven Frontend- und Backend-Laufzeitpfad entfernt.
+- Die verbindliche Gate-1-Reihenfolge lautet: `CURATED_ISIN` vor `HPOS_AAOIFI` vor manuell bestätigter Evidenz.
+- Fehlende oder unvollständige Daten bleiben ausschließlich `OPEN_REVIEW` beziehungsweise `PRÜFUNG OFFEN`.
+- Es erfolgt keine automatische negative Einstufung nur wegen fehlender Evidenz.
+- Historische Provider-Evidenz wird nicht stillschweigend gelöscht; es werden jedoch keine neuen `FREE_PROVIDER`-Datensätze mehr erzeugt.
+- Die Parqet-, Marktpreis-, Rollback-, Validierungs- und Quarantänelogik bleibt unverändert.
+
+**Implementierungsstand**
+
+- Frontendzielstand: v8.7.36.
+- Supabase `hpos-api` Servicezielstand: `0.5.4`, Modus `ACCOUNT_FREE`.
+- Entfernt: `/api/halal/provider/status`, `/api/halal/screen`, `HALAL_TERMINAL_API_KEY`-Auswertung und `app/halal-provider.js`.
+- Halal Register und Detailansicht erklären den accountfreien Modus und fordern keine Provider-Verbindung mehr an.
+- Aktive Regressionstests sichern das Fehlen der kontobasierten Providerpfade ab.
+- Ausführliche Evidenz: `docs/STATUS_2026-09-07_ACCOUNT_FREE_HALAL.md`.

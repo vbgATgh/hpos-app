@@ -5,6 +5,8 @@
 **Supabase Edge Function:** `hpos-api` v24 (`0.5.3`)  
 **Status:** IMPLEMENTIERT; EXTERNER FREE-PROVIDER WEITERHIN NICHT VERBUNDEN
 
+> Historischer Stand. Die externe Providerstrategie wurde am 07.09.2026 durch DEC-017 abgelöst. HPOS verwendet seit v8.7.36 keinen kontobasierten Halal-Dienst mehr.
+
 ## Ziel
 
 Die bestehende automatische Gate-1-Prüfung wird in der vorhandenen Supabase-Architektur konsolidiert. Die Parqet-Bestands-, Validierungs-, Rollback- und Quarantänelogik wird nicht verändert.
@@ -58,6 +60,6 @@ Migration `backfill_confirmed_halal_evidence` übernimmt ausschließlich bereits
 - Supabase-Advisors: keine neue Warnung; INFO `RLS enabled no policy` ist für den ausschließlich serverseitigen Evidenzstore beabsichtigtes Deny-all, der ungenutzte Session-Ablaufindex bleibt als betriebliche Schutzvorkehrung erhalten.
 - Live-Test des externen Halal-Terminal-Laufs: NICHT AUSGEFÜHRT, da kein Free-API-Key konfiguriert ist.
 
-## Offener Blocker
+## Historischer Blocker
 
-Für den realen externen Gegencheck muss ein kostenloser Halal-Terminal-API-Key ausschließlich als Supabase Edge-Function-Secret `HALAL_TERMINAL_API_KEY` hinterlegt werden. Kein Key gehört ins Repository oder Frontend.
+Dieser frühere Blocker ist mit DEC-017 entfallen. Es wird kein Halal-Terminal-Konto und kein API-Key benötigt oder vorgesehen.
