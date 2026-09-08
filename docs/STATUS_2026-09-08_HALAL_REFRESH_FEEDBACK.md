@@ -1,5 +1,7 @@
 # HPOS v8.7.37 – sichtbares Ergebnis der Halal-Prüfung
 
+**Status:** PRODUKTIV VERÖFFENTLICHT UND VERIFIZIERT
+
 ## Befund
 
 `Halal-Prüfung aktualisieren` führte die accountfreie AAOIFI-Prüfkaskade tatsächlich erneut aus. Wenn dieselben kostenlosen Quelldaten weiterhin unvollständig waren, blieben die Einstufungen fachlich korrekt unverändert. Die Oberfläche zeigte jedoch weder Abschluss noch Ursache und vermittelte deshalb den Eindruck eines wirkungslosen Buttons.
@@ -23,15 +25,14 @@ Ein neutraler Profilabruf bestätigte, dass der kostenlose Fallback zwar Geschä
 - Kuratierte und entscheidende Evidenz behält ihre Priorität.
 - Keine Änderung an Portfolio, Parqet, Cash, Rollback, Validierung oder Quarantäne.
 
-## Verifikation vor Veröffentlichung
+## Verifikation
 
 - Alle Browser-JavaScript-Dateien syntaktisch gültig.
 - `git diff --check` bestanden.
 - 16 aktive Halal-, OAuth- und Parqet-Schutztests bestanden.
 - Versions- und Cache-Konsistenz auf v8.7.37 aktualisiert.
+- Pull Request #44 nach erfolgreicher `HPOS Current App CI` als Squash-Commit nach `main` übernommen.
+- GitHub Pages liefert v8.7.37 mit Cache-Key `20260908-halalrefresh1`.
+- Die ausgelieferten Skripte `halal-register.js` und `halal-autoscreen.js` bestehen den Syntaxcheck und enthalten den erwarteten Laufbericht.
 
-## Noch ausstehend
-
-- Pull Request und GitHub-CI.
-- Produktive Pages-Prüfung.
-- Gerätetest des sichtbaren Laufberichts.
+Noch ausstehend ist ausschließlich der Gerätetest des sichtbaren Laufberichts.
