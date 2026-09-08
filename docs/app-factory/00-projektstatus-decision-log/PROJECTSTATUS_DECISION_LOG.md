@@ -443,9 +443,11 @@ Dieses Dokument wird bei Änderungen an Status, Gate, Architektur, Entscheidung,
 
 **Implementierungsstand**
 
-- Frontendzielstand: v8.7.37.
+- Frontendstand: v8.7.37, produktiv über GitHub Pages verifiziert.
 - `HPOS_HALAL_AUTOSCREEN.batch` liefert eine strukturierte Laufzusammenfassung.
 - Offene AAOIFI-Ergebnisse führen ihre fehlenden Kriterien explizit mit.
 - 16 aktive Halal-, OAuth- und Parqet-Schutztests sowie die JavaScript-Syntaxprüfung sind lokal bestanden.
-- Produktive Veröffentlichung und Gerätetest folgen nach erfolgreicher CI.
+- Pull Request #44 wurde nach erfolgreicher `HPOS Current App CI` als Squash-Commit nach `main` übernommen.
+- GitHub Pages liefert v8.7.37 mit Cache-Key `20260908-halalrefresh1`; die ausgelieferten Halal-Skripte bestehen den Syntaxcheck.
+- Offen ist ausschließlich der Gerätetest des sichtbaren Laufberichts.
 - Ausführliche Evidenz: `docs/STATUS_2026-09-08_HALAL_REFRESH_FEEDBACK.md`.
