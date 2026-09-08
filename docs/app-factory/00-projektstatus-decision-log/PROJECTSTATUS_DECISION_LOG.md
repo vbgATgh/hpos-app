@@ -429,3 +429,23 @@ Dieses Dokument wird bei Änderungen an Status, Gate, Architektur, Entscheidung,
 - Pull Request #42 wurde nach erfolgreicher `HPOS Current App CI` als Squash-Commit nach `main` übernommen.
 - Produktive Prüfungen: Health HTTP 200, entfernte Providerroute HTTP 404, Evidenz ohne Sitzung HTTP 401.
 - Ausführliche Evidenz: `docs/STATUS_2026-09-07_ACCOUNT_FREE_HALAL.md`.
+
+## 18. Statusergänzung 2026-09-08 – transparentes Halal-Prüfergebnis v8.7.37
+
+**Entscheidung DEC-018 – Ein Prüflauf muss seinen tatsächlichen Ausgang sichtbar machen**
+
+- Der bisherige Button führte die accountfreie AAOIFI-Prüfung aus, meldete jedoch weder Abschluss noch Ergebnis. Bei unveränderten Quelldaten entstand dadurch der falsche Eindruck, dass keine Aktion stattgefunden habe.
+- Der manuell ausgelöste Lauf zeigt künftig Uhrzeit, Anzahl neu geprüfter Werte, Statusänderungen, PASS-/FAIL-/OFFEN-Summen, technische Fehler und die Zahl offener Fälle mit fehlenden AAOIFI-Pflichtdaten.
+- Die Schaltfläche heißt präziser `Prüfung erneut ausführen`; sie verspricht keine Statusänderung.
+- Offene Registerzeilen zeigen verfügbare Informationen zum Datenmangel statt der pauschalen Bezeichnung `Kanonische Evidenz`.
+- Fehlende Daten bleiben `OPEN_REVIEW`. Der UX-Fix erzeugt keine neue Halal-Einstufung und lockert keine Evidenzanforderung.
+- Parqet-, Depot-, Rollback-, Validierungs- und Quarantänelogik bleiben unverändert.
+
+**Implementierungsstand**
+
+- Frontendzielstand: v8.7.37.
+- `HPOS_HALAL_AUTOSCREEN.batch` liefert eine strukturierte Laufzusammenfassung.
+- Offene AAOIFI-Ergebnisse führen ihre fehlenden Kriterien explizit mit.
+- 16 aktive Halal-, OAuth- und Parqet-Schutztests sowie die JavaScript-Syntaxprüfung sind lokal bestanden.
+- Produktive Veröffentlichung und Gerätetest folgen nach erfolgreicher CI.
+- Ausführliche Evidenz: `docs/STATUS_2026-09-08_HALAL_REFRESH_FEEDBACK.md`.
