@@ -21,8 +21,9 @@ function keyOf(a){return String(a?.isin||symbolOf(a)||a?.name||'').toUpperCase()
 async function profile(symbol){if(!symbol)return null;try{const r=await fetch(PROFILE_API+'?symbol='+encodeURIComponent(symbol),{cache:'no-store'});if(!r.ok)return null;const p=await r.json();return p&&!p.error?p:null}catch{return null}}
 function classifyBusiness(p){
  const hay=[p?.industry,p?.sector,p?.businessSummary].filter(Boolean).join(' | ');
+ if(!hay)return{state:'OPEN',category:null,detail:'Geschäftsprofil fehlt.'};
  for(const x of HARD)if(x.re.test(hay))return{state:'FAIL',category:x.cat,detail:'Geschäftsprofil enthält einen eindeutigen Treffer in einer ausgeschlossenen Geschäftskategorie.'};
- return{state:'PASS_PARTIAL',category:null,detail:hay?'Kein eindeutiger Treffer in den automatisch prüfbaren ausgeschlossenen Kerngeschäften.':'Geschäftsprofil fehlt.'}
+ return{state:'PASS_PARTIAL',category:null,detail:'Kein eindeutiger Treffer in den automatisch prüfbaren ausgeschlossenen Kerngeschäften.'}
 }
 function financial(p){
  const mv=Number(p?.marketValue36mAvg)||0,revenue=Number(p?.revenue)||0,debt=Number(p?.totalDebt)||0,interestAssets=Number(p?.interestBearingAssetsUpperBound)||0,interestIncome=Math.abs(Number(p?.interestIncome)||0),q=p?.dataQuality||{};
@@ -49,21 +50,22 @@ function derive(p){
  if(criteria.impureIncome.state==='FAIL')return{state:'FAIL',screen:'HPOS_AAOIFI_RULE_ENGINE_V2',standard:RULES.standard,criteria,business:b,financial:f,reason:'Nicht-zulässige Einnahmen überschreiten die freigegebene 5%-Grenze.'};
  const allPass=Object.values(criteria).every(x=>x.state==='PASS');
  if(allPass)return{state:'PASS',screen:'HPOS_AAOIFI_RULE_ENGINE_V2',standard:RULES.standard,criteria,business:b,financial:f,reason:'Automatische AAOIFI-Prüfung bestanden: Kerngeschäft zulässig und alle verfügbaren Pflichtkennzahlen liegen innerhalb der freigegebenen Grenzwerte.'};
- const missing=Object.entries(criteria).filter(([k,x])=>x.state!=='PASS').map(([k,x])=>x.rule);
- return{state:'OPEN_REVIEW',screen:'HPOS_AAOIFI_RULE_ENGINE_V2',standard:RULES.standard,criteria,business:b,financial:f,reason:'Automatische AAOIFI-Prüfung noch nicht eindeutig. Offene Kriterien: '+missing.join('; ')+'. Externe Evidenz ist nur für diesen Restfall vorgesehen.'};
+ const missing=Object.entries(criteria).filter(([,x])=>x.state!=='PASS').map(([,x])=>x.rule);
+ return{state:'OPEN_REVIEW',screen:'HPOS_AAOIFI_RULE_ENGINE_V2',standard:RULES.standard,criteria,business:b,financial:f,missingCriteria:missing,reason:'Automatische AAOIFI-Prüfung noch nicht eindeutig. Offene Kriterien: '+missing.join('; ')+'. Fehlende Daten bleiben PRÜFUNG OFFEN.'};
 }
 async function screen(a,force=false){
  const k=keyOf(a),all=read(),cached=all[k],age=cached?.checkedAt?Date.now()-Date.parse(cached.checkedAt):Infinity;
  if(!force&&cached&&age<TTL){await window.HPOS_HALAL_STORE?.saveAAOIFI?.(a,cached);return cached;}
  const symbol=symbolOf(a);
- if(!symbol){const x={state:'OPEN_REVIEW',screen:'HPOS_FREE_PRESCREEN',reason:'Kein verlässliches Marktsymbol für die automatische kostenlose Vorprüfung.',checkedAt:new Date().toISOString(),isin:String(a?.isin||'')};all[k]=x;write(all);await window.HPOS_HALAL_STORE?.saveAAOIFI?.(a,x);return x}
+ if(!symbol){const x={state:'OPEN_REVIEW',screen:'HPOS_FREE_PRESCREEN',missingCriteria:['Verlässliches Marktsymbol'],reason:'Kein verlässliches Marktsymbol für die automatische kostenlose Vorprüfung. Fehlende Daten bleiben PRÜFUNG OFFEN.',checkedAt:new Date().toISOString(),isin:String(a?.isin||'')};all[k]=x;write(all);await window.HPOS_HALAL_STORE?.saveAAOIFI?.(a,x);return x}
  const p=await profile(symbol);
- const x=p?derive(p):{state:'OPEN_REVIEW',screen:'HPOS_FREE_PRESCREEN',reason:'Kostenlose Fundamentaldaten aktuell nicht verfügbar.',business:{state:'UNKNOWN'},financial:{},checkedAt:new Date().toISOString()};
+ const x=p?derive(p):{state:'OPEN_REVIEW',screen:'HPOS_FREE_PRESCREEN',missingCriteria:['Kostenlose Fundamentaldaten'],reason:'Kostenlose Fundamentaldaten aktuell nicht verfügbar. Fehlende Daten bleiben PRÜFUNG OFFEN.',business:{state:'UNKNOWN'},financial:{},checkedAt:new Date().toISOString()};
  x.checkedAt=new Date().toISOString();x.isin=String(a?.isin||'').toUpperCase();x.symbol=symbol;x.profileSource=p?.source||'';all[k]=x;write(all);await window.HPOS_HALAL_STORE?.saveAAOIFI?.(a,x);return x
 }
 async function batch(list,{force=false,onItem}={}){
  const uniq=[...new Map((list||[]).map(a=>[keyOf(a),a]).filter(x=>x[0])).values()];
- let idx=0;const workers=Array.from({length:Math.min(2,uniq.length)},async()=>{while(idx<uniq.length){const a=uniq[idx++],r=await screen(a,force);try{onItem?.(a,r)}catch{}}});await Promise.all(workers);return uniq.length
+ const summary={total:uniq.length,processed:0,pass:0,fail:0,open:0,errors:0,results:[]};
+ let idx=0;const workers=Array.from({length:Math.min(2,uniq.length)},async()=>{while(idx<uniq.length){const a=uniq[idx++];try{const r=await screen(a,force);summary.processed++;if(r?.state==='PASS')summary.pass++;else if(r?.state==='FAIL')summary.fail++;else summary.open++;summary.results.push({key:keyOf(a),state:r?.state||'OPEN_REVIEW',missingCriteria:r?.missingCriteria||[],reason:r?.reason||''});try{onItem?.(a,r)}catch{}}catch{summary.processed++;summary.open++;summary.errors++;summary.results.push({key:keyOf(a),state:'OPEN_REVIEW',missingCriteria:[],reason:'Prüfung technisch fehlgeschlagen.'});try{onItem?.(a,{state:'OPEN_REVIEW',error:true})}catch{}}}});await Promise.all(workers);return summary
 }
 function cached(a){return read()[keyOf(a)]||null}
 function label(r){if(!r)return'UNGEPRÜFT';if(r.state==='PASS')return'HALALKONFORM';if(r.state==='FAIL')return'NICHT HALALKONFORM';return'PRÜFUNG OFFEN'}

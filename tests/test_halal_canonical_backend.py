@@ -5,7 +5,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 def test_canonical_halal_store_is_loaded_before_app():
     html = (ROOT / "app" / "index.html").read_text()
-    assert "Portfolio Intelligence · v8.7.36" in html
+    assert "Portfolio Intelligence · v8.7.37" in html
     assert html.index("halal-store.js") < html.index("app.js")
 
 
@@ -64,3 +64,15 @@ def test_halal_runtime_is_account_free():
     assert "HPOS_HALAL_PROVIDER" not in evidence
     assert "Keine externe Konto- oder API-Verbindung erforderlich." in register
     assert 'halalMode:"ACCOUNT_FREE"' in api
+
+
+def test_halal_refresh_reports_a_real_outcome():
+    register = (ROOT / "app" / "halal-register.js").read_text()
+    autoscreen = (ROOT / "app" / "halal-autoscreen.js").read_text()
+    assert "Prüfung erneut ausführen" in register
+    assert 'id=\"halalRunReport\"' in register
+    assert "Keine Statusänderung" in register
+    assert "AAOIFI-Pflichtdaten" in register
+    assert "missingCriteria" in autoscreen
+    assert "Fehlende Daten bleiben PRÜFUNG OFFEN" in autoscreen
+    assert "Externe Evidenz ist nur für diesen Restfall vorgesehen" not in autoscreen
