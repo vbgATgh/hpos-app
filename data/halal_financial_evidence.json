@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "updatedAt": "2026-09-09",
+  "policy": {
+    "accountsRequired": false,
+    "officialSourcesOnly": true,
+    "missingDataState": "OPEN_REVIEW",
+    "note": "Öffentliche, ISIN-zentrierte AAOIFI-Pflichtkennzahlen. Jeder Zahlenwert benötigt eine konkrete offizielle Quelle und einen Berichtszeitraum."
+  },
+  "assets": {}
+}

@@ -1,6 +1,8 @@
 (()=>{'use strict';
 const PROFILE_API='https://moxyhjfbrmsnphikxqje.supabase.co/functions/v1/hpos-profile';
+const CURATED_FINANCIALS='../data/halal_financial_evidence.json';
 const KEY='hpos_halal_prescreen_v3',TTL=7*24*60*60*1000;
+let curatedFinancials=null,curatedLoading=null;
 const RULES=Object.freeze({impureIncomeMax:0.05,interestAssetsMax:0.30,interestDebtMax:0.30,autoPassSafetyMax:0.27,standard:'AAOIFI SS21',marketValueBasis:'TRAILING_36M_AVG_MARKET_VALUE'});
 const HARD=[
  {cat:'Zinsbasierte Finanzgeschäfte',re:/\b(banks?\s*-|banks?\b|credit services|mortgage finance|consumer finance|financial conglomerates?)\b/i},
@@ -19,6 +21,8 @@ function write(x){try{localStorage.setItem(KEY,JSON.stringify(x))}catch{}}
 function symbolOf(a){return String(a?.ticker||a?.symbol||'').trim().toUpperCase()}
 function keyOf(a){return String(a?.isin||symbolOf(a)||a?.name||'').toUpperCase()}
 async function profile(symbol){if(!symbol)return null;try{const r=await fetch(PROFILE_API+'?symbol='+encodeURIComponent(symbol),{cache:'no-store'});if(!r.ok)return null;const p=await r.json();return p&&!p.error?p:null}catch{return null}}
+async function curatedFor(a){if(!curatedFinancials){curatedLoading=curatedLoading||fetch(CURATED_FINANCIALS,{cache:'no-store'}).then(r=>r.ok?r.json():{assets:{}}).catch(()=>({assets:{}}));curatedFinancials=await curatedLoading}const isin=String(a?.isin||'').toUpperCase();return curatedFinancials?.assets?.[isin]||null}
+function mergeCurated(p,c){if(!c)return p;const out={...(p||{}),dataQuality:{...(p?.dataQuality||{})},metricSources:{...(p?.metricSources||{})}},metrics=c.metrics||{};for(const key of ['revenue','totalDebt','interestBearingAssetsUpperBound','interestIncome','marketValue36mAvg']){const e=metrics[key],period=e?.period||c.period||'';if(!e||typeof e.value!=='number'||!Number.isFinite(e.value)||!e.sourceUrl||!period)continue;if(key==='marketValue36mAvg'&&Number(e.months)<30)continue;out[key]=e.value;out.dataQuality[key==='totalDebt'?'debt':key==='interestBearingAssetsUpperBound'?'interestAssets':key==='marketValue36mAvg'?'marketValue36m':key]=true;out.metricSources[key]={sourceType:'OFFICIAL_REPORT_CURATED',sourceName:e.sourceName||c.sourceName||'',sourceUrl:e.sourceUrl,period,page:e.page||null,label:e.label||''}}if(metrics.marketValue36mAvg&&out.dataQuality.marketValue36m){out.marketValue36mMonths=Number(metrics.marketValue36mAvg.months);out.marketValue36mMethod=metrics.marketValue36mAvg.method||'CURATED_36M_AVG_MARKET_VALUE'}out.evidenceAsOf=c.checkedAt||c.periodEnd||'';out.fundamentalSource='OFFICIAL_REPORT_CURATED';return out}
 function classifyBusiness(p){
  const hay=[p?.industry,p?.sector,p?.businessSummary].filter(Boolean).join(' | ');
  if(!hay)return{state:'OPEN',category:null,detail:'Geschäftsprofil fehlt.'};
@@ -34,7 +38,7 @@ function financial(p){
    marketValue36mAvg:mv||null,marketValue36mMonths:Number(p?.marketValue36mMonths)||0,marketValue36mMethod:p?.marketValue36mMethod||'UNAVAILABLE',
    totalDebt:q.debt?debt:null,interestBearingAssetsUpperBound:q.interestAssets?interestAssets:null,interestIncome:q.interestIncome?interestIncome:null,revenue:q.revenue?revenue:null,
    debtRatio,interestAssetsRatio,impureIncomeRatio,
-   dataQuality:q,
+   dataQuality:q,metricSources:p?.metricSources||{},evidenceAsOf:p?.evidenceAsOf||'',
    caveat:'HPOS nutzt nur kostenlos verfügbare Daten. PASS wird nur erteilt, wenn alle benötigten Kriterien belastbar vorliegen und innerhalb der freigegebenen AAOIFI-Grenzen liegen. Unvollständige oder nur als Obergrenze interpretierbare Daten bleiben offen.'
  };
 }
@@ -58,7 +62,7 @@ async function screen(a,force=false){
  if(!force&&cached&&age<TTL){await window.HPOS_HALAL_STORE?.saveAAOIFI?.(a,cached);return cached;}
  const symbol=symbolOf(a);
  if(!symbol){const x={state:'OPEN_REVIEW',screen:'HPOS_FREE_PRESCREEN',missingCriteria:['Verlässliches Marktsymbol'],reason:'Kein verlässliches Marktsymbol für die automatische kostenlose Vorprüfung. Fehlende Daten bleiben PRÜFUNG OFFEN.',checkedAt:new Date().toISOString(),isin:String(a?.isin||'')};all[k]=x;write(all);await window.HPOS_HALAL_STORE?.saveAAOIFI?.(a,x);return x}
- const p=await profile(symbol);
+ const p=mergeCurated(await profile(symbol),await curatedFor(a));
  const x=p?derive(p):{state:'OPEN_REVIEW',screen:'HPOS_FREE_PRESCREEN',missingCriteria:['Kostenlose Fundamentaldaten'],reason:'Kostenlose Fundamentaldaten aktuell nicht verfügbar. Fehlende Daten bleiben PRÜFUNG OFFEN.',business:{state:'UNKNOWN'},financial:{},checkedAt:new Date().toISOString()};
  x.checkedAt=new Date().toISOString();x.isin=String(a?.isin||'').toUpperCase();x.symbol=symbol;x.profileSource=p?.source||'';all[k]=x;write(all);await window.HPOS_HALAL_STORE?.saveAAOIFI?.(a,x);return x
 }
