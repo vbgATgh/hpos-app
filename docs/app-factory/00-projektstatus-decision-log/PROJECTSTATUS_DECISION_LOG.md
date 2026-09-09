@@ -476,3 +476,22 @@ Dieses Dokument wird bei Änderungen an Status, Gate, Architektur, Entscheidung,
 - Der leere Rohkennzahlenspeicher wird produktiv mit den festgelegten Account-, Quellen- und Fail-closed-Regeln ausgeliefert. Keine Halal-Einstufung wurde dadurch verändert.
 - Als nächstes beginnt die belegbasierte Befüllung je offenem Wert.
 - Ausführliche Evidenz: `docs/STATUS_2026-09-09_ACCOUNT_FREE_SEC_HALAL.md`.
+
+## 20. Statusergänzung 2026-09-09 – sichtbarer Evidenzfortschritt v8.7.39
+
+**Entscheidung DEC-020 – Teilabdeckung wird sichtbar, bleibt aber nicht entscheidend**
+
+- Ein technisch ausgeführter Halal-Prüflauf muss neben unveränderten Statussummen auch den belegten Datenfortschritt anzeigen.
+- Register und Detailansicht zeigen je Instrument die Anzahl offiziell belegter Finanzkennzahlen von fünf.
+- Offizielle Quellen sind aus der Detailansicht erreichbar und werden bis in die einzelnen AAOIFI-Kriterien als `OFFICIAL_REPORT_CURATED` fortgeführt.
+- Das erste Berichtsdatenpaket umfasst Abbott, McCormick, Medtronic, Merck und Waste Management mit insgesamt 17 belegten Rohkennzahlen.
+- Mehrdeutige leasinghaltige Schuldenwerte und nicht separat ausgewiesene Zinserträge werden nicht übernommen.
+- Der 36-Monats-Durchschnitt des Marktwerts bleibt für alle fünf Instrumente offen. Deshalb erzeugt die Teilabdeckung keine neue `PASS`-/`FAIL`-Einstufung.
+- Parqet-, Depot-, Rollback-, Validierungs- und Quarantänelogik bleiben unverändert.
+
+**Implementierungsziel**
+
+- Frontendstand v8.7.39.
+- Rohkennzahlen in `data/halal_financial_evidence.json` mit Zeitraum, Einheit und offizieller Quellen-URL.
+- Laufbericht mit Anzahl erkannter Berichtsdaten und belegter Kennzahlen.
+- Ausführliche Evidenz: `docs/STATUS_2026-09-09_HALAL_REPORT_BATCH_1.md`.

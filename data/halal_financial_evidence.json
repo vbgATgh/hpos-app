@@ -7,5 +7,186 @@
     "missingDataState": "OPEN_REVIEW",
     "note": "Öffentliche, ISIN-zentrierte AAOIFI-Pflichtkennzahlen. Jeder Zahlenwert benötigt eine konkrete offizielle Quelle und einen Berichtszeitraum."
   },
-  "assets": {}
+  "assets": {
+    "US0028241000": {
+      "name": "Abbott Laboratories",
+      "ticker": "ABT",
+      "checkedAt": "2026-09-09",
+      "periodEnd": "2025-12-31",
+      "metrics": {
+        "revenue": {
+          "value": 44328000000,
+          "unit": "USD",
+          "period": "FY 2025",
+          "sourceName": "Abbott 2025 Annual Report",
+          "sourceUrl": "https://www.abbottinvestor.com/static-files/2db8f507-2fd9-4def-a76f-d7d32773cb5c",
+          "page": 37,
+          "label": "Net Sales"
+        },
+        "totalDebt": {
+          "value": 12929000000,
+          "unit": "USD",
+          "period": "FY 2025",
+          "sourceName": "Abbott 2025 Annual Report",
+          "sourceUrl": "https://www.abbottinvestor.com/static-files/2db8f507-2fd9-4def-a76f-d7d32773cb5c",
+          "page": 51,
+          "label": "Total carrying amount of long-term debt, including current portion"
+        },
+        "interestBearingAssetsUpperBound": {
+          "value": 8939000000,
+          "unit": "USD",
+          "period": "FY 2025",
+          "sourceName": "Abbott 2025 Annual Report",
+          "sourceUrl": "https://www.abbottinvestor.com/static-files/2db8f507-2fd9-4def-a76f-d7d32773cb5c",
+          "page": 40,
+          "label": "Cash and cash equivalents plus short-term investments; conservative upper bound"
+        },
+        "interestIncome": {
+          "value": 308000000,
+          "unit": "USD",
+          "period": "FY 2025",
+          "sourceName": "Abbott 2025 Annual Report",
+          "sourceUrl": "https://www.abbottinvestor.com/static-files/2db8f507-2fd9-4def-a76f-d7d32773cb5c",
+          "page": 37,
+          "label": "Interest income"
+        }
+      }
+    },
+    "US5797802064": {
+      "name": "McCormick & Company",
+      "ticker": "MKC",
+      "checkedAt": "2026-09-09",
+      "periodEnd": "2025-11-30",
+      "metrics": {
+        "revenue": {
+          "value": 6840300000,
+          "unit": "USD",
+          "period": "FY 2025",
+          "sourceName": "McCormick 2025 Form 10-K",
+          "sourceUrl": "https://www.sec.gov/Archives/edgar/data/63754/000006375426000037/mkc-20251130.htm",
+          "label": "Net sales"
+        },
+        "totalDebt": {
+          "value": 3901300000,
+          "unit": "USD",
+          "period": "FY 2025",
+          "sourceName": "McCormick 2025 Form 10-K",
+          "sourceUrl": "https://www.sec.gov/Archives/edgar/data/63754/000006375426000037/mkc-20251130.htm",
+          "label": "Short-term borrowings plus current and non-current long-term debt, excluding finance leases"
+        },
+        "interestBearingAssetsUpperBound": {
+          "value": 95900000,
+          "unit": "USD",
+          "period": "FY 2025",
+          "sourceName": "McCormick 2025 Form 10-K",
+          "sourceUrl": "https://www.sec.gov/Archives/edgar/data/63754/000006375426000037/mkc-20251130.htm",
+          "label": "Cash and cash equivalents; conservative upper bound"
+        },
+        "interestIncome": {
+          "value": 40100000,
+          "unit": "USD",
+          "period": "FY 2025",
+          "sourceName": "McCormick 2025 Form 10-K",
+          "sourceUrl": "https://www.sec.gov/Archives/edgar/data/63754/000006375426000037/mkc-20251130.htm",
+          "label": "Interest income"
+        }
+      }
+    },
+    "IE00BTN1Y115": {
+      "name": "Medtronic plc",
+      "ticker": "MDT",
+      "checkedAt": "2026-09-09",
+      "periodEnd": "2026-04-24",
+      "metrics": {
+        "revenue": {
+          "value": 36364000000,
+          "unit": "USD",
+          "period": "FY 2026",
+          "sourceName": "Medtronic 2026 Form 10-K",
+          "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1613103/000162828026044354/mdt-20260424.htm",
+          "label": "Net sales"
+        },
+        "interestBearingAssetsUpperBound": {
+          "value": 9220000000,
+          "unit": "USD",
+          "period": "FY 2026",
+          "sourceName": "Medtronic 2026 Form 10-K",
+          "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1613103/000162828026044354/mdt-20260424.htm",
+          "label": "Cash and cash equivalents plus current investments; conservative upper bound"
+        },
+        "interestIncome": {
+          "value": 383000000,
+          "unit": "USD",
+          "period": "FY 2026",
+          "sourceName": "Medtronic 2026 Form 10-K",
+          "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1613103/000162828026044354/mdt-20260424.htm",
+          "label": "Interest income"
+        }
+      }
+    },
+    "US58933Y1055": {
+      "name": "Merck & Co., Inc.",
+      "ticker": "MRK",
+      "checkedAt": "2026-09-09",
+      "periodEnd": "2025-12-31",
+      "metrics": {
+        "revenue": {
+          "value": 65011000000,
+          "unit": "USD",
+          "period": "FY 2025",
+          "sourceName": "Merck 2025 Form 10-K",
+          "sourceUrl": "https://www.merck.com/wp-content/uploads/sites/124/2026/02/MRK-12.31.2025-10K-FINAL.pdf",
+          "label": "Sales"
+        },
+        "totalDebt": {
+          "value": 49339000000,
+          "unit": "USD",
+          "period": "FY 2025",
+          "sourceName": "Merck 2025 Form 10-K",
+          "sourceUrl": "https://www.merck.com/wp-content/uploads/sites/124/2026/02/MRK-12.31.2025-10K-FINAL.pdf",
+          "label": "Loans payable and current portion of long-term debt plus long-term debt"
+        },
+        "interestBearingAssetsUpperBound": {
+          "value": 14565000000,
+          "unit": "USD",
+          "period": "FY 2025",
+          "sourceName": "Merck 2025 Form 10-K",
+          "sourceUrl": "https://www.merck.com/wp-content/uploads/sites/124/2026/02/MRK-12.31.2025-10K-FINAL.pdf",
+          "label": "Cash and cash equivalents plus short-term investments; conservative upper bound"
+        },
+        "interestIncome": {
+          "value": 343000000,
+          "unit": "USD",
+          "period": "FY 2025",
+          "sourceName": "Merck 2025 Form 10-K",
+          "sourceUrl": "https://www.merck.com/wp-content/uploads/sites/124/2026/02/MRK-12.31.2025-10K-FINAL.pdf",
+          "label": "Interest income"
+        }
+      }
+    },
+    "US94106L1098": {
+      "name": "Waste Management, Inc.",
+      "ticker": "WM",
+      "checkedAt": "2026-09-09",
+      "periodEnd": "2025-12-31",
+      "metrics": {
+        "revenue": {
+          "value": 25204000000,
+          "unit": "USD",
+          "period": "FY 2025",
+          "sourceName": "Waste Management 2025 Form 10-K",
+          "sourceUrl": "https://www.sec.gov/Archives/edgar/data/823768/000110465926012049/wm-20251231x10k.htm",
+          "label": "Operating revenues"
+        },
+        "interestBearingAssetsUpperBound": {
+          "value": 201000000,
+          "unit": "USD",
+          "period": "FY 2025",
+          "sourceName": "Waste Management 2025 Form 10-K",
+          "sourceUrl": "https://www.sec.gov/Archives/edgar/data/823768/000110465926012049/wm-20251231x10k.htm",
+          "label": "Cash and cash equivalents; conservative upper bound"
+        }
+      }
+    }
+  }
 }
