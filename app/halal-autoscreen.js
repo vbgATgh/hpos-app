@@ -42,13 +42,14 @@ function financial(p){
    caveat:'HPOS nutzt nur kostenlos verfügbare Daten. PASS wird nur erteilt, wenn alle benötigten Kriterien belastbar vorliegen und innerhalb der freigegebenen AAOIFI-Grenzen liegen. Unvollständige oder nur als Obergrenze interpretierbare Daten bleiben offen.'
  };
 }
+function sourceFor(f,...keys){const sources=keys.map(k=>f?.metricSources?.[k]).filter(Boolean);return sources.length===keys.length&&sources.every(x=>x.sourceType==='OFFICIAL_REPORT_CURATED')?'OFFICIAL_REPORT_CURATED':sources[0]?.sourceType||'FEHLT'}
 function derive(p){
  const b=classifyBusiness(p),f=financial(p),mvOk=f.marketValue36mMonths>=30&&f.marketValue36mAvg>0;
  const criteria={
    business:{rule:'Zulässiges Kerngeschäft',limit:null,state:b.state==='FAIL'?'FAIL':b.state==='PASS_PARTIAL'?'PASS':'OPEN',value:b.category||null,source:p?.profileSource||p?.source||'FREE_PROFILE'},
-   impureIncome:{rule:'Nicht-zulässige Einnahmen / Gesamtumsatz',limit:RULES.impureIncomeMax,state:f.impureIncomeRatio==null?'OPEN':f.impureIncomeRatio<=RULES.impureIncomeMax?'PASS':'FAIL',value:f.impureIncomeRatio,source:f.impureIncomeRatio==null?'FEHLT':'YAHOO_STATEMENT'},
-   interestAssets:{rule:'Zinstragende Vermögenswerte / 36M Ø Marktwert',limit:RULES.interestAssetsMax,state:!mvOk||f.interestAssetsRatio==null?'OPEN':f.interestAssetsRatio<=RULES.interestAssetsMax?'PASS':'OPEN',value:f.interestAssetsRatio,source:f.interestAssetsRatio==null?'FEHLT':'CONSERVATIVE_UPPER_BOUND'},
-   interestDebt:{rule:'Zinstragende Schulden / 36M Ø Marktwert',limit:RULES.interestDebtMax,state:!mvOk||f.debtRatio==null?'OPEN':f.debtRatio<=RULES.interestDebtMax?'PASS':'OPEN',value:f.debtRatio,source:f.debtRatio==null?'FEHLT':'TOTAL_DEBT_CONSERVATIVE'}
+   impureIncome:{rule:'Nicht-zulässige Einnahmen / Gesamtumsatz',limit:RULES.impureIncomeMax,state:f.impureIncomeRatio==null?'OPEN':f.impureIncomeRatio<=RULES.impureIncomeMax?'PASS':'FAIL',value:f.impureIncomeRatio,source:f.impureIncomeRatio==null?'FEHLT':sourceFor(f,'interestIncome','revenue')},
+   interestAssets:{rule:'Zinstragende Vermögenswerte / 36M Ø Marktwert',limit:RULES.interestAssetsMax,state:!mvOk||f.interestAssetsRatio==null?'OPEN':f.interestAssetsRatio<=RULES.interestAssetsMax?'PASS':'OPEN',value:f.interestAssetsRatio,source:f.interestAssetsRatio==null?'FEHLT':sourceFor(f,'interestBearingAssetsUpperBound','marketValue36mAvg')},
+   interestDebt:{rule:'Zinstragende Schulden / 36M Ø Marktwert',limit:RULES.interestDebtMax,state:!mvOk||f.debtRatio==null?'OPEN':f.debtRatio<=RULES.interestDebtMax?'PASS':'OPEN',value:f.debtRatio,source:f.debtRatio==null?'FEHLT':sourceFor(f,'totalDebt','marketValue36mAvg')}
  };
  if(b.state==='FAIL')return{state:'FAIL',screen:'HPOS_AAOIFI_RULE_ENGINE_V2',standard:RULES.standard,criteria,business:b,financial:f,reason:'Geschäftsmodell verletzt den automatischen AAOIFI-Ausschlussfilter: '+b.category+'.'};
  if(criteria.impureIncome.state==='FAIL')return{state:'FAIL',screen:'HPOS_AAOIFI_RULE_ENGINE_V2',standard:RULES.standard,criteria,business:b,financial:f,reason:'Nicht-zulässige Einnahmen überschreiten die freigegebene 5%-Grenze.'};

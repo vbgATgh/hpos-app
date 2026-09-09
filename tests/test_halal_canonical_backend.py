@@ -5,7 +5,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 def test_canonical_halal_store_is_loaded_before_app():
     html = (ROOT / "app" / "index.html").read_text()
-    assert "Portfolio Intelligence · v8.7.38" in html
+    assert "Portfolio Intelligence · v8.7.39" in html
     assert html.index("halal-store.js") < html.index("app.js")
 
 
@@ -72,6 +72,8 @@ def test_halal_refresh_reports_a_real_outcome():
     assert "Prüfung erneut ausführen" in register
     assert 'id=\"halalRunReport\"' in register
     assert "Keine Statusänderung" in register
+    assert "Offizielle Berichtsdaten erkannt" in register
+    assert "Finanzwerte belegt" in register
     assert "AAOIFI-Pflichtdaten" in register
     assert "missingCriteria" in autoscreen
     assert "Fehlende Daten bleiben PRÜFUNG OFFEN" in autoscreen
