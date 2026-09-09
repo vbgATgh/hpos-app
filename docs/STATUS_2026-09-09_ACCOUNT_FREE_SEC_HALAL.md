@@ -1,6 +1,6 @@
 # HPOS v8.7.38 – quellengebundene Geschäftsberichtsdaten für Gate 1
 
-**Status:** LOKAL IMPLEMENTIERT UND GEPRÜFT; PRODUKTIONSNACHWEIS AUSSTEHEND
+**Status:** PRODUKTIV VERÖFFENTLICHT UND VERIFIZIERT
 
 ## Ausgangslage
 
@@ -41,3 +41,10 @@ Der neue Rohkennzahlenspeicher `data/halal_financial_evidence.json` startet bewu
 - Alle Browser-JavaScript-Dateien bestehen den Syntaxcheck.
 - 20 aktive Halal-, Quellen-, OAuth- und Parqet-Schutztests bestanden.
 - `git diff --check` bestanden.
+
+## Produktionsnachweis
+
+- Pull Request #46 nach erfolgreicher `HPOS Current App CI` als Squash-Commit nach `main` übernommen.
+- GitHub Pages liefert v8.7.38 mit Cache-Key `20260909-sec1`.
+- `data/halal_financial_evidence.json` wird produktiv ausgeliefert und bestätigt `accountsRequired: false`, `officialSourcesOnly: true` sowie `missingDataState: OPEN_REVIEW`.
+- Der Rohkennzahlenspeicher enthält noch keine Assets. Dadurch wurde keine bestehende Halal-Einstufung verändert.

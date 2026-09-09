@@ -468,9 +468,11 @@ Dieses Dokument wird bei Änderungen an Status, Gate, Architektur, Entscheidung,
 
 **Implementierungsstand**
 
-- Frontendzielstand v8.7.38.
+- Frontendstand v8.7.38, produktiv über GitHub Pages verifiziert.
 - `hpos-profile` wird erstmals vollständig im Repository versioniert.
 - `data/halal_financial_evidence.json` bildet den leeren, fail-closed startenden Rohkennzahlenspeicher.
 - Datenschutz-, Quellenpflicht- und Fail-closed-Verträge sind durch neue Regressionstests abgesichert.
-- Veröffentlichung folgt nach erfolgreicher CI; danach beginnt die belegbasierte Befüllung je offenem Wert.
+- Pull Request #46 wurde nach erfolgreicher `HPOS Current App CI` als Squash-Commit nach `main` übernommen.
+- Der leere Rohkennzahlenspeicher wird produktiv mit den festgelegten Account-, Quellen- und Fail-closed-Regeln ausgeliefert. Keine Halal-Einstufung wurde dadurch verändert.
+- Als nächstes beginnt die belegbasierte Befüllung je offenem Wert.
 - Ausführliche Evidenz: `docs/STATUS_2026-09-09_ACCOUNT_FREE_SEC_HALAL.md`.
