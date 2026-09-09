@@ -451,3 +451,26 @@ Dieses Dokument wird bei Änderungen an Status, Gate, Architektur, Entscheidung,
 - GitHub Pages liefert v8.7.37 mit Cache-Key `20260908-halalrefresh1`; die ausgelieferten Halal-Skripte bestehen den Syntaxcheck.
 - Offen ist ausschließlich der Gerätetest des sichtbaren Laufberichts.
 - Ausführliche Evidenz: `docs/STATUS_2026-09-08_HALAL_REFRESH_FEEDBACK.md`.
+
+## 19. Statusergänzung 2026-09-09 – quellengebundene Geschäftsberichtsdaten v8.7.38
+
+**Entscheidung DEC-019 – Offizielle Berichte statt nicht erreichbarer oder kontobasierter APIs**
+
+- FMP, Finnhub, SimFin und andere Dienste mit Registrierung oder API-Key werden nicht in HPOS aufgenommen.
+- SEC EDGAR Companyfacts ist grundsätzlich kostenlos und keyfrei, wird aber von den HPOS-Laufumgebungen GitHub Actions und Supabase Edge Functions aktuell mit HTTP 403 blockiert. Dieser Pfad wird nicht als produktionsfähig behauptet.
+- Die zwischenzeitlich getestete SEC-Erweiterung der Edge Function wurde nach dem negativen Live-Test sofort wieder entfernt; `hpos-profile` v9 entspricht wieder dem vorherigen Laufzeitverhalten.
+- Verbindliche automatische oder manuelle Rohkennzahlen werden stattdessen ISIN-zentriert aus offiziellen Geschäftsberichten beziehungsweise Emittentenquellen kuratiert.
+- Jeder übernommene Wert benötigt Zahlenwert, Berichtszeitraum und konkrete Quellen-URL. Fehlt eines davon, bleibt das Kriterium offen.
+- Die Berechnung `Monatskurs × aktuelle Aktienanzahl` wird ausdrücklich als Approximation bezeichnet. Ein einzelner Kurs von vor 36 Monaten ist kein 36-Monats-Durchschnitt.
+- Cash und kurzfristige Anlagen gelten nur als konservative Obergrenze für zinstragende Vermögenswerte, nicht als exakte Gleichsetzung.
+- Mehrdeutige Netto-Zinspositionen oder bloße Aggregatorwerte bleiben fehlend und damit `OPEN_REVIEW`.
+- Keine Portfolio-, Broker-, Stückzahl-, Einstands- oder Steuerdaten werden an die öffentliche Fundamentaldatenfunktion übertragen.
+
+**Implementierungsstand**
+
+- Frontendzielstand v8.7.38.
+- `hpos-profile` wird erstmals vollständig im Repository versioniert.
+- `data/halal_financial_evidence.json` bildet den leeren, fail-closed startenden Rohkennzahlenspeicher.
+- Datenschutz-, Quellenpflicht- und Fail-closed-Verträge sind durch neue Regressionstests abgesichert.
+- Veröffentlichung folgt nach erfolgreicher CI; danach beginnt die belegbasierte Befüllung je offenem Wert.
+- Ausführliche Evidenz: `docs/STATUS_2026-09-09_ACCOUNT_FREE_SEC_HALAL.md`.

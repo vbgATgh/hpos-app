@@ -6,6 +6,9 @@ on:
     paths:
       - 'app/**'
       - 'supabase/functions/hpos-api/**'
+      - 'supabase/functions/hpos-profile/**'
+      - 'data/halal_financial_evidence.json'
+      - 'tests/test_hpos_profile_sources.py'
       - 'tests/test_halal_canonical_backend.py'
       - 'tests/test_oauth_callback_diagnostics.py'
       - 'tests/test_oauth_callback_safari.py'
@@ -15,6 +18,9 @@ on:
     paths:
       - 'app/**'
       - 'supabase/functions/hpos-api/**'
+      - 'supabase/functions/hpos-profile/**'
+      - 'data/halal_financial_evidence.json'
+      - 'tests/test_hpos_profile_sources.py'
       - 'tests/test_halal_canonical_backend.py'
       - 'tests/test_oauth_callback_diagnostics.py'
       - 'tests/test_oauth_callback_safari.py'
@@ -43,6 +49,7 @@ jobs:
         run: >-
           python -m pytest -q
           tests/test_halal_canonical_backend.py
+          tests/test_hpos_profile_sources.py
           tests/test_oauth_callback_diagnostics.py
           tests/test_oauth_callback_safari.py
           tests/test_parqet_reauth_guard.py
