@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-09-09",
+  "updatedAt": "2026-09-10",
   "policy": {
     "accountsRequired": false,
     "officialSourcesOnly": true,
@@ -13,6 +13,12 @@
       "ticker": "ABT",
       "checkedAt": "2026-09-09",
       "periodEnd": "2025-12-31",
+      "businessProfile": {
+        "description": "Diversified healthcare company focused on medical devices, diagnostics, nutritional products and established pharmaceutical products.",
+        "sourceName": "Abbott 2025 Annual Report",
+        "sourceUrl": "https://www.abbottinvestor.com/static-files/2db8f507-2fd9-4def-a76f-d7d32773cb5c",
+        "period": "FY 2025"
+      },
       "metrics": {
         "revenue": {
           "value": 44328000000,
@@ -49,6 +55,22 @@
           "sourceUrl": "https://www.abbottinvestor.com/static-files/2db8f507-2fd9-4def-a76f-d7d32773cb5c",
           "page": 37,
           "label": "Interest income"
+        },
+        "marketValue36mAvg": {
+          "value": 199064968227.78,
+          "unit": "USD",
+          "period": "2023-09 to 2026-08",
+          "months": 36,
+          "method": "LAST_TRADING_DAY_EACH_FULL_MONTH_X_LATEST_PRIOR_REPORTED_SHARES",
+          "sourceName": "Nasdaq historical prices plus SEC EDGAR reported shares",
+          "sourceUrl": "https://api.nasdaq.com/api/quote/ABT/historical?assetclass=stocks&fromdate=2023-08-01&limit=5000",
+          "supportingSources": [
+            {
+              "name": "SEC EDGAR shares",
+              "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000001800.json"
+            }
+          ],
+          "label": "36 full-month average market value; month-end close multiplied by latest prior reported shares"
         }
       }
     },
@@ -57,6 +79,12 @@
       "ticker": "MKC",
       "checkedAt": "2026-09-09",
       "periodEnd": "2025-11-30",
+      "businessProfile": {
+        "description": "Manufacturer and marketer of flavor products including spices, seasoning mixes, condiments and other flavoring products.",
+        "sourceName": "McCormick 2025 Form 10-K",
+        "sourceUrl": "https://www.sec.gov/Archives/edgar/data/63754/000006375426000037/mkc-20251130.htm",
+        "period": "FY 2025"
+      },
       "metrics": {
         "revenue": {
           "value": 6840300000,
@@ -89,6 +117,22 @@
           "sourceName": "McCormick 2025 Form 10-K",
           "sourceUrl": "https://www.sec.gov/Archives/edgar/data/63754/000006375426000037/mkc-20251130.htm",
           "label": "Interest income"
+        },
+        "marketValue36mAvg": {
+          "value": 18566436985.47,
+          "unit": "USD",
+          "period": "2023-09 to 2026-08",
+          "months": 36,
+          "method": "LAST_TRADING_DAY_EACH_FULL_MONTH_X_LATEST_PRIOR_REPORTED_SHARES",
+          "sourceName": "Nasdaq historical prices plus SEC EDGAR reported shares",
+          "sourceUrl": "https://api.nasdaq.com/api/quote/MKC/historical?assetclass=stocks&fromdate=2023-08-01&limit=5000",
+          "supportingSources": [
+            {
+              "name": "SEC EDGAR shares",
+              "url": "https://data.sec.gov/submissions/CIK0000063754.json"
+            }
+          ],
+          "label": "36 full-month average market value; month-end close multiplied by latest prior reported shares"
         }
       }
     },
@@ -97,6 +141,12 @@
       "ticker": "MDT",
       "checkedAt": "2026-09-09",
       "periodEnd": "2026-04-24",
+      "businessProfile": {
+        "description": "Medical technology company developing and manufacturing device-based medical therapies and healthcare solutions.",
+        "sourceName": "Medtronic 2026 Form 10-K",
+        "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1613103/000162828026044354/mdt-20260424.htm",
+        "period": "FY 2026"
+      },
       "metrics": {
         "revenue": {
           "value": 36364000000,
@@ -121,6 +171,22 @@
           "sourceName": "Medtronic 2026 Form 10-K",
           "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1613103/000162828026044354/mdt-20260424.htm",
           "label": "Interest income"
+        },
+        "marketValue36mAvg": {
+          "value": 111999101020.15,
+          "unit": "USD",
+          "period": "2023-09 to 2026-08",
+          "months": 36,
+          "method": "LAST_TRADING_DAY_EACH_FULL_MONTH_X_LATEST_PRIOR_REPORTED_SHARES",
+          "sourceName": "Nasdaq historical prices plus SEC EDGAR reported shares",
+          "sourceUrl": "https://api.nasdaq.com/api/quote/MDT/historical?assetclass=stocks&fromdate=2023-08-01&limit=5000",
+          "supportingSources": [
+            {
+              "name": "SEC EDGAR shares",
+              "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001613103.json"
+            }
+          ],
+          "label": "36 full-month average market value; month-end close multiplied by latest prior reported shares"
         }
       }
     },
@@ -129,6 +195,12 @@
       "ticker": "MRK",
       "checkedAt": "2026-09-09",
       "periodEnd": "2025-12-31",
+      "businessProfile": {
+        "description": "Research-based biopharmaceutical company offering prescription medicines, vaccines, biologic therapies and animal-health products.",
+        "sourceName": "Merck 2025 Form 10-K",
+        "sourceUrl": "https://www.merck.com/wp-content/uploads/sites/124/2026/02/MRK-12.31.2025-10K-FINAL.pdf",
+        "period": "FY 2025"
+      },
       "metrics": {
         "revenue": {
           "value": 65011000000,
@@ -161,6 +233,22 @@
           "sourceName": "Merck 2025 Form 10-K",
           "sourceUrl": "https://www.merck.com/wp-content/uploads/sites/124/2026/02/MRK-12.31.2025-10K-FINAL.pdf",
           "label": "Interest income"
+        },
+        "marketValue36mAvg": {
+          "value": 270245343910.19,
+          "unit": "USD",
+          "period": "2023-09 to 2026-08",
+          "months": 36,
+          "method": "LAST_TRADING_DAY_EACH_FULL_MONTH_X_LATEST_PRIOR_REPORTED_SHARES",
+          "sourceName": "Nasdaq historical prices plus SEC EDGAR reported shares",
+          "sourceUrl": "https://api.nasdaq.com/api/quote/MRK/historical?assetclass=stocks&fromdate=2023-08-01&limit=5000",
+          "supportingSources": [
+            {
+              "name": "SEC EDGAR shares",
+              "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000310158.json"
+            }
+          ],
+          "label": "36 full-month average market value; month-end close multiplied by latest prior reported shares"
         }
       }
     },
@@ -169,6 +257,12 @@
       "ticker": "WM",
       "checkedAt": "2026-09-09",
       "periodEnd": "2025-12-31",
+      "businessProfile": {
+        "description": "Environmental solutions company providing waste collection, transfer, recycling, disposal and related resource-recovery services.",
+        "sourceName": "Waste Management 2025 Form 10-K",
+        "sourceUrl": "https://www.sec.gov/Archives/edgar/data/823768/000110465926012049/wm-20251231x10k.htm",
+        "period": "FY 2025"
+      },
       "metrics": {
         "revenue": {
           "value": 25204000000,
@@ -185,6 +279,22 @@
           "sourceName": "Waste Management 2025 Form 10-K",
           "sourceUrl": "https://www.sec.gov/Archives/edgar/data/823768/000110465926012049/wm-20251231x10k.htm",
           "label": "Cash and cash equivalents; conservative upper bound"
+        },
+        "marketValue36mAvg": {
+          "value": 85747142438.28,
+          "unit": "USD",
+          "period": "2023-09 to 2026-08",
+          "months": 36,
+          "method": "LAST_TRADING_DAY_EACH_FULL_MONTH_X_LATEST_PRIOR_REPORTED_SHARES",
+          "sourceName": "Nasdaq historical prices plus SEC EDGAR reported shares",
+          "sourceUrl": "https://api.nasdaq.com/api/quote/WM/historical?assetclass=stocks&fromdate=2023-08-01&limit=5000",
+          "supportingSources": [
+            {
+              "name": "SEC EDGAR shares",
+              "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000823768.json"
+            }
+          ],
+          "label": "36 full-month average market value; month-end close multiplied by latest prior reported shares"
         }
       }
     }

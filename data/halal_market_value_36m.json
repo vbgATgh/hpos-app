@@ -1,0 +1,1683 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-09-10",
+  "period": {
+    "start": "2023-09-01",
+    "end": "2026-08-31",
+    "months": 36
+  },
+  "method": "LAST_TRADING_DAY_EACH_FULL_MONTH_X_LATEST_PRIOR_REPORTED_SHARES",
+  "policy": {
+    "accountsRequired": false,
+    "priceSource": "NASDAQ_OFFICIAL_HISTORICAL",
+    "sharesSource": "SEC_EDGAR_FILINGS",
+    "note": "McCormick includes both reported common-stock classes. Values are historical market-value approximations because reported shares are carried forward between filing dates."
+  },
+  "assets": {
+    "US0028241000": {
+      "name": "Abbott Laboratories",
+      "symbol": "ABT",
+      "averageMarketValueUsd": 199064968227.78,
+      "priceSourceUrl": "https://api.nasdaq.com/api/quote/ABT/historical?assetclass=stocks&fromdate=2023-08-01&limit=5000",
+      "sharesIndexUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000001800.json",
+      "observations": [
+        {
+          "month": "2023-09",
+          "date": "2023-09-29",
+          "closeUsd": 96.85,
+          "sharesDate": "2023-06-30",
+          "sharesOutstanding": 1735357980,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000001800.json",
+          "marketValueUsd": 168069420363.0
+        },
+        {
+          "month": "2023-10",
+          "date": "2023-10-31",
+          "closeUsd": 94.55,
+          "sharesDate": "2023-09-30",
+          "sharesOutstanding": 1736058536,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000001800.json",
+          "marketValueUsd": 164144334578.8
+        },
+        {
+          "month": "2023-11",
+          "date": "2023-11-30",
+          "closeUsd": 104.29,
+          "sharesDate": "2023-09-30",
+          "sharesOutstanding": 1736058536,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000001800.json",
+          "marketValueUsd": 181053544719.44
+        },
+        {
+          "month": "2023-12",
+          "date": "2023-12-29",
+          "closeUsd": 110.07,
+          "sharesDate": "2023-09-30",
+          "sharesOutstanding": 1736058536,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000001800.json",
+          "marketValueUsd": 191087963057.52
+        },
+        {
+          "month": "2024-01",
+          "date": "2024-01-31",
+          "closeUsd": 113.15,
+          "sharesDate": "2024-01-31",
+          "sharesOutstanding": 1735184289,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000001800.json",
+          "marketValueUsd": 196336102300.35
+        },
+        {
+          "month": "2024-02",
+          "date": "2024-02-29",
+          "closeUsd": 118.64,
+          "sharesDate": "2024-01-31",
+          "sharesOutstanding": 1735184289,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000001800.json",
+          "marketValueUsd": 205862264046.96
+        },
+        {
+          "month": "2024-03",
+          "date": "2024-03-28",
+          "closeUsd": 113.66,
+          "sharesDate": "2024-01-31",
+          "sharesOutstanding": 1735184289,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000001800.json",
+          "marketValueUsd": 197221046287.74
+        },
+        {
+          "month": "2024-04",
+          "date": "2024-04-30",
+          "closeUsd": 105.97,
+          "sharesDate": "2024-03-31",
+          "sharesOutstanding": 1739633759,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000001800.json",
+          "marketValueUsd": 184348989441.23
+        },
+        {
+          "month": "2024-05",
+          "date": "2024-05-31",
+          "closeUsd": 102.19,
+          "sharesDate": "2024-03-31",
+          "sharesOutstanding": 1739633759,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000001800.json",
+          "marketValueUsd": 177773173832.21
+        },
+        {
+          "month": "2024-06",
+          "date": "2024-06-28",
+          "closeUsd": 103.91,
+          "sharesDate": "2024-03-31",
+          "sharesOutstanding": 1739633759,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000001800.json",
+          "marketValueUsd": 180765343897.69
+        },
+        {
+          "month": "2024-07",
+          "date": "2024-07-31",
+          "closeUsd": 105.94,
+          "sharesDate": "2024-06-30",
+          "sharesOutstanding": 1739897004,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000001800.json",
+          "marketValueUsd": 184324688603.76
+        },
+        {
+          "month": "2024-08",
+          "date": "2024-08-30",
+          "closeUsd": 113.27,
+          "sharesDate": "2024-06-30",
+          "sharesOutstanding": 1739897004,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000001800.json",
+          "marketValueUsd": 197078133643.08
+        },
+        {
+          "month": "2024-09",
+          "date": "2024-09-30",
+          "closeUsd": 114.01,
+          "sharesDate": "2024-09-30",
+          "sharesOutstanding": 1734455213,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000001800.json",
+          "marketValueUsd": 197745238834.13
+        },
+        {
+          "month": "2024-10",
+          "date": "2024-10-31",
+          "closeUsd": 113.37,
+          "sharesDate": "2024-09-30",
+          "sharesOutstanding": 1734455213,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000001800.json",
+          "marketValueUsd": 196635187497.81
+        },
+        {
+          "month": "2024-11",
+          "date": "2024-11-29",
+          "closeUsd": 118.77,
+          "sharesDate": "2024-09-30",
+          "sharesOutstanding": 1734455213,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000001800.json",
+          "marketValueUsd": 206001245648.01
+        },
+        {
+          "month": "2024-12",
+          "date": "2024-12-31",
+          "closeUsd": 113.11,
+          "sharesDate": "2024-09-30",
+          "sharesOutstanding": 1734455213,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000001800.json",
+          "marketValueUsd": 196184229142.43
+        },
+        {
+          "month": "2025-01",
+          "date": "2025-01-31",
+          "closeUsd": 127.93,
+          "sharesDate": "2025-01-31",
+          "sharesOutstanding": 1734323411,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000001800.json",
+          "marketValueUsd": 221871993969.23
+        },
+        {
+          "month": "2025-02",
+          "date": "2025-02-28",
+          "closeUsd": 138.01,
+          "sharesDate": "2025-01-31",
+          "sharesOutstanding": 1734323411,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000001800.json",
+          "marketValueUsd": 239353973952.11
+        },
+        {
+          "month": "2025-03",
+          "date": "2025-03-31",
+          "closeUsd": 132.65,
+          "sharesDate": "2025-03-31",
+          "sharesOutstanding": 1739836465,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000001800.json",
+          "marketValueUsd": 230789307082.25
+        },
+        {
+          "month": "2025-04",
+          "date": "2025-04-30",
+          "closeUsd": 130.75,
+          "sharesDate": "2025-03-31",
+          "sharesOutstanding": 1739836465,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000001800.json",
+          "marketValueUsd": 227483617798.75
+        },
+        {
+          "month": "2025-05",
+          "date": "2025-05-30",
+          "closeUsd": 133.58,
+          "sharesDate": "2025-03-31",
+          "sharesOutstanding": 1739836465,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000001800.json",
+          "marketValueUsd": 232407354994.7
+        },
+        {
+          "month": "2025-06",
+          "date": "2025-06-30",
+          "closeUsd": 136.01,
+          "sharesDate": "2025-06-30",
+          "sharesOutstanding": 1740459014,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000001800.json",
+          "marketValueUsd": 236719830494.14
+        },
+        {
+          "month": "2025-07",
+          "date": "2025-07-31",
+          "closeUsd": 126.19,
+          "sharesDate": "2025-06-30",
+          "sharesOutstanding": 1740459014,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000001800.json",
+          "marketValueUsd": 219628522976.66
+        },
+        {
+          "month": "2025-08",
+          "date": "2025-08-29",
+          "closeUsd": 132.66,
+          "sharesDate": "2025-06-30",
+          "sharesOutstanding": 1740459014,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000001800.json",
+          "marketValueUsd": 230889292797.24
+        },
+        {
+          "month": "2025-09",
+          "date": "2025-09-30",
+          "closeUsd": 133.94,
+          "sharesDate": "2025-09-30",
+          "sharesOutstanding": 1738871947,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000001800.json",
+          "marketValueUsd": 232904508581.18
+        },
+        {
+          "month": "2025-10",
+          "date": "2025-10-31",
+          "closeUsd": 123.62,
+          "sharesDate": "2025-09-30",
+          "sharesOutstanding": 1738871947,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000001800.json",
+          "marketValueUsd": 214959350088.14
+        },
+        {
+          "month": "2025-11",
+          "date": "2025-11-28",
+          "closeUsd": 128.9,
+          "sharesDate": "2025-09-30",
+          "sharesOutstanding": 1738871947,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000001800.json",
+          "marketValueUsd": 224140593968.3
+        },
+        {
+          "month": "2025-12",
+          "date": "2025-12-31",
+          "closeUsd": 125.29,
+          "sharesDate": "2025-09-30",
+          "sharesOutstanding": 1738871947,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000001800.json",
+          "marketValueUsd": 217863266239.63
+        },
+        {
+          "month": "2026-01",
+          "date": "2026-01-30",
+          "closeUsd": 109.3,
+          "sharesDate": "2025-09-30",
+          "sharesOutstanding": 1738871947,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000001800.json",
+          "marketValueUsd": 190058703807.1
+        },
+        {
+          "month": "2026-02",
+          "date": "2026-02-27",
+          "closeUsd": 116.35,
+          "sharesDate": "2026-01-31",
+          "sharesOutstanding": 1737682887,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000001800.json",
+          "marketValueUsd": 202179403902.45
+        },
+        {
+          "month": "2026-03",
+          "date": "2026-03-31",
+          "closeUsd": 102.67,
+          "sharesDate": "2026-03-31",
+          "sharesOutstanding": 1741812429,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000001800.json",
+          "marketValueUsd": 178831882085.43
+        },
+        {
+          "month": "2026-04",
+          "date": "2026-04-30",
+          "closeUsd": 90.79,
+          "sharesDate": "2026-03-31",
+          "sharesOutstanding": 1741812429,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000001800.json",
+          "marketValueUsd": 158139150428.91
+        },
+        {
+          "month": "2026-05",
+          "date": "2026-05-29",
+          "closeUsd": 85.6,
+          "sharesDate": "2026-03-31",
+          "sharesOutstanding": 1741812429,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000001800.json",
+          "marketValueUsd": 149099143922.4
+        },
+        {
+          "month": "2026-06",
+          "date": "2026-06-30",
+          "closeUsd": 90.74,
+          "sharesDate": "2026-03-31",
+          "sharesOutstanding": 1741812429,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000001800.json",
+          "marketValueUsd": 158052059807.46
+        },
+        {
+          "month": "2026-07",
+          "date": "2026-07-31",
+          "closeUsd": 105.7,
+          "sharesDate": "2026-03-31",
+          "sharesOutstanding": 1741812429,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000001800.json",
+          "marketValueUsd": 184109573745.3
+        },
+        {
+          "month": "2026-08",
+          "date": "2026-08-31",
+          "closeUsd": 110.36,
+          "sharesDate": "2026-03-31",
+          "sharesOutstanding": 1741812429,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000001800.json",
+          "marketValueUsd": 192226419664.44
+        }
+      ]
+    },
+    "US5797802064": {
+      "name": "McCormick & Company",
+      "symbol": "MKC",
+      "averageMarketValueUsd": 18566436985.47,
+      "priceSourceUrl": "https://api.nasdaq.com/api/quote/MKC/historical?assetclass=stocks&fromdate=2023-08-01&limit=5000",
+      "sharesIndexUrl": "https://data.sec.gov/submissions/CIK0000063754.json",
+      "observations": [
+        {
+          "month": "2023-09",
+          "date": "2023-09-29",
+          "closeUsd": 75.64,
+          "sharesDate": "2023-08-31",
+          "sharesOutstanding": 268331802,
+          "sharesSourceUrl": "https://www.sec.gov/Archives/edgar/data/63754/000006375423000045/mkc-20230831.htm",
+          "marketValueUsd": 20296617503.28
+        },
+        {
+          "month": "2023-10",
+          "date": "2023-10-31",
+          "closeUsd": 63.9,
+          "sharesDate": "2023-08-31",
+          "sharesOutstanding": 268331802,
+          "sharesSourceUrl": "https://www.sec.gov/Archives/edgar/data/63754/000006375423000045/mkc-20230831.htm",
+          "marketValueUsd": 17146402147.8
+        },
+        {
+          "month": "2023-11",
+          "date": "2023-11-30",
+          "closeUsd": 64.83,
+          "sharesDate": "2023-08-31",
+          "sharesOutstanding": 268331802,
+          "sharesSourceUrl": "https://www.sec.gov/Archives/edgar/data/63754/000006375423000045/mkc-20230831.htm",
+          "marketValueUsd": 17395950723.66
+        },
+        {
+          "month": "2023-12",
+          "date": "2023-12-29",
+          "closeUsd": 68.42,
+          "sharesDate": "2023-12-29",
+          "sharesOutstanding": 268237168,
+          "sharesSourceUrl": "https://www.sec.gov/Archives/edgar/data/63754/000006375424000027/mkc-20231130.htm",
+          "marketValueUsd": 18352787034.56
+        },
+        {
+          "month": "2024-01",
+          "date": "2024-01-31",
+          "closeUsd": 68.16,
+          "sharesDate": "2023-12-29",
+          "sharesOutstanding": 268237168,
+          "sharesSourceUrl": "https://www.sec.gov/Archives/edgar/data/63754/000006375424000027/mkc-20231130.htm",
+          "marketValueUsd": 18283045370.88
+        },
+        {
+          "month": "2024-02",
+          "date": "2024-02-29",
+          "closeUsd": 68.86,
+          "sharesDate": "2024-02-29",
+          "sharesOutstanding": 268412705,
+          "sharesSourceUrl": "https://www.sec.gov/Archives/edgar/data/63754/000006375424000033/mkc-20240229.htm",
+          "marketValueUsd": 18482898866.3
+        },
+        {
+          "month": "2024-03",
+          "date": "2024-03-28",
+          "closeUsd": 76.81,
+          "sharesDate": "2024-02-29",
+          "sharesOutstanding": 268412705,
+          "sharesSourceUrl": "https://www.sec.gov/Archives/edgar/data/63754/000006375424000033/mkc-20240229.htm",
+          "marketValueUsd": 20616779871.05
+        },
+        {
+          "month": "2024-04",
+          "date": "2024-04-30",
+          "closeUsd": 76.06,
+          "sharesDate": "2024-02-29",
+          "sharesOutstanding": 268412705,
+          "sharesSourceUrl": "https://www.sec.gov/Archives/edgar/data/63754/000006375424000033/mkc-20240229.htm",
+          "marketValueUsd": 20415470342.3
+        },
+        {
+          "month": "2024-05",
+          "date": "2024-05-31",
+          "closeUsd": 72.22,
+          "sharesDate": "2024-05-31",
+          "sharesOutstanding": 268630137,
+          "sharesSourceUrl": "https://www.sec.gov/Archives/edgar/data/63754/000006375424000057/mkc-20240531.htm",
+          "marketValueUsd": 19400468494.14
+        },
+        {
+          "month": "2024-06",
+          "date": "2024-06-28",
+          "closeUsd": 70.94,
+          "sharesDate": "2024-05-31",
+          "sharesOutstanding": 268630137,
+          "sharesSourceUrl": "https://www.sec.gov/Archives/edgar/data/63754/000006375424000057/mkc-20240531.htm",
+          "marketValueUsd": 19056621918.78
+        },
+        {
+          "month": "2024-07",
+          "date": "2024-07-31",
+          "closeUsd": 77.01,
+          "sharesDate": "2024-05-31",
+          "sharesOutstanding": 268630137,
+          "sharesSourceUrl": "https://www.sec.gov/Archives/edgar/data/63754/000006375424000057/mkc-20240531.htm",
+          "marketValueUsd": 20687206850.37
+        },
+        {
+          "month": "2024-08",
+          "date": "2024-08-30",
+          "closeUsd": 80.03,
+          "sharesDate": "2024-05-31",
+          "sharesOutstanding": 268630137,
+          "sharesSourceUrl": "https://www.sec.gov/Archives/edgar/data/63754/000006375424000057/mkc-20240531.htm",
+          "marketValueUsd": 21498469864.11
+        },
+        {
+          "month": "2024-09",
+          "date": "2024-09-30",
+          "closeUsd": 82.3,
+          "sharesDate": "2024-08-31",
+          "sharesOutstanding": 268357046,
+          "sharesSourceUrl": "https://www.sec.gov/Archives/edgar/data/63754/000006375424000064/mkc-20240831.htm",
+          "marketValueUsd": 22085784885.8
+        },
+        {
+          "month": "2024-10",
+          "date": "2024-10-31",
+          "closeUsd": 78.24,
+          "sharesDate": "2024-08-31",
+          "sharesOutstanding": 268357046,
+          "sharesSourceUrl": "https://www.sec.gov/Archives/edgar/data/63754/000006375424000064/mkc-20240831.htm",
+          "marketValueUsd": 20996255279.04
+        },
+        {
+          "month": "2024-11",
+          "date": "2024-11-29",
+          "closeUsd": 78.41,
+          "sharesDate": "2024-08-31",
+          "sharesOutstanding": 268357046,
+          "sharesSourceUrl": "https://www.sec.gov/Archives/edgar/data/63754/000006375424000064/mkc-20240831.htm",
+          "marketValueUsd": 21041875976.86
+        },
+        {
+          "month": "2024-12",
+          "date": "2024-12-31",
+          "closeUsd": 76.24,
+          "sharesDate": "2024-12-31",
+          "sharesOutstanding": 268154267,
+          "sharesSourceUrl": "https://www.sec.gov/Archives/edgar/data/63754/000006375425000005/mkc-20241130.htm",
+          "marketValueUsd": 20444081316.08
+        },
+        {
+          "month": "2025-01",
+          "date": "2025-01-31",
+          "closeUsd": 77.23,
+          "sharesDate": "2024-12-31",
+          "sharesOutstanding": 268154267,
+          "sharesSourceUrl": "https://www.sec.gov/Archives/edgar/data/63754/000006375425000005/mkc-20241130.htm",
+          "marketValueUsd": 20709554040.41
+        },
+        {
+          "month": "2025-02",
+          "date": "2025-02-28",
+          "closeUsd": 82.61,
+          "sharesDate": "2025-02-28",
+          "sharesOutstanding": 268187057,
+          "sharesSourceUrl": "https://www.sec.gov/Archives/edgar/data/63754/000006375425000024/mkc-20250228.htm",
+          "marketValueUsd": 22154932778.77
+        },
+        {
+          "month": "2025-03",
+          "date": "2025-03-31",
+          "closeUsd": 82.31,
+          "sharesDate": "2025-02-28",
+          "sharesOutstanding": 268187057,
+          "sharesSourceUrl": "https://www.sec.gov/Archives/edgar/data/63754/000006375425000024/mkc-20250228.htm",
+          "marketValueUsd": 22074476661.67
+        },
+        {
+          "month": "2025-04",
+          "date": "2025-04-30",
+          "closeUsd": 76.66,
+          "sharesDate": "2025-02-28",
+          "sharesOutstanding": 268187057,
+          "sharesSourceUrl": "https://www.sec.gov/Archives/edgar/data/63754/000006375425000024/mkc-20250228.htm",
+          "marketValueUsd": 20559219789.62
+        },
+        {
+          "month": "2025-05",
+          "date": "2025-05-30",
+          "closeUsd": 72.73,
+          "sharesDate": "2025-02-28",
+          "sharesOutstanding": 268187057,
+          "sharesSourceUrl": "https://www.sec.gov/Archives/edgar/data/63754/000006375425000024/mkc-20250228.htm",
+          "marketValueUsd": 19505244655.61
+        },
+        {
+          "month": "2025-06",
+          "date": "2025-06-30",
+          "closeUsd": 75.82,
+          "sharesDate": "2025-05-31",
+          "sharesOutstanding": 268368903,
+          "sharesSourceUrl": "https://www.sec.gov/Archives/edgar/data/63754/000006375425000041/mkc-20250531.htm",
+          "marketValueUsd": 20347730225.46
+        },
+        {
+          "month": "2025-07",
+          "date": "2025-07-31",
+          "closeUsd": 70.63,
+          "sharesDate": "2025-05-31",
+          "sharesOutstanding": 268368903,
+          "sharesSourceUrl": "https://www.sec.gov/Archives/edgar/data/63754/000006375425000041/mkc-20250531.htm",
+          "marketValueUsd": 18954895618.89
+        },
+        {
+          "month": "2025-08",
+          "date": "2025-08-29",
+          "closeUsd": 70.37,
+          "sharesDate": "2025-05-31",
+          "sharesOutstanding": 268368903,
+          "sharesSourceUrl": "https://www.sec.gov/Archives/edgar/data/63754/000006375425000041/mkc-20250531.htm",
+          "marketValueUsd": 18885119704.11
+        },
+        {
+          "month": "2025-09",
+          "date": "2025-09-30",
+          "closeUsd": 66.91,
+          "sharesDate": "2025-08-31",
+          "sharesOutstanding": 268375659,
+          "sharesSourceUrl": "https://www.sec.gov/Archives/edgar/data/63754/000006375425000065/mkc-20250831.htm",
+          "marketValueUsd": 17957015343.69
+        },
+        {
+          "month": "2025-10",
+          "date": "2025-10-31",
+          "closeUsd": 64.16,
+          "sharesDate": "2025-08-31",
+          "sharesOutstanding": 268375659,
+          "sharesSourceUrl": "https://www.sec.gov/Archives/edgar/data/63754/000006375425000065/mkc-20250831.htm",
+          "marketValueUsd": 17218982281.44
+        },
+        {
+          "month": "2025-11",
+          "date": "2025-11-28",
+          "closeUsd": 67.48,
+          "sharesDate": "2025-08-31",
+          "sharesOutstanding": 268375659,
+          "sharesSourceUrl": "https://www.sec.gov/Archives/edgar/data/63754/000006375425000065/mkc-20250831.htm",
+          "marketValueUsd": 18109989469.32
+        },
+        {
+          "month": "2025-12",
+          "date": "2025-12-31",
+          "closeUsd": 68.11,
+          "sharesDate": "2025-12-31",
+          "sharesOutstanding": 268438239,
+          "sharesSourceUrl": "https://www.sec.gov/Archives/edgar/data/63754/000006375426000037/mkc-20251130.htm",
+          "marketValueUsd": 18283328458.29
+        },
+        {
+          "month": "2026-01",
+          "date": "2026-01-30",
+          "closeUsd": 61.83,
+          "sharesDate": "2025-12-31",
+          "sharesOutstanding": 268438239,
+          "sharesSourceUrl": "https://www.sec.gov/Archives/edgar/data/63754/000006375426000037/mkc-20251130.htm",
+          "marketValueUsd": 16597536317.37
+        },
+        {
+          "month": "2026-02",
+          "date": "2026-02-27",
+          "closeUsd": 71.04,
+          "sharesDate": "2025-12-31",
+          "sharesOutstanding": 268438239,
+          "sharesSourceUrl": "https://www.sec.gov/Archives/edgar/data/63754/000006375426000037/mkc-20251130.htm",
+          "marketValueUsd": 19069852498.56
+        },
+        {
+          "month": "2026-03",
+          "date": "2026-03-31",
+          "closeUsd": 50.44,
+          "sharesDate": "2026-02-28",
+          "sharesOutstanding": 268724970,
+          "sharesSourceUrl": "https://www.sec.gov/Archives/edgar/data/63754/000006375426000192/mkc-20260228.htm",
+          "marketValueUsd": 13554487486.8
+        },
+        {
+          "month": "2026-04",
+          "date": "2026-04-30",
+          "closeUsd": 50.84,
+          "sharesDate": "2026-02-28",
+          "sharesOutstanding": 268724970,
+          "sharesSourceUrl": "https://www.sec.gov/Archives/edgar/data/63754/000006375426000192/mkc-20260228.htm",
+          "marketValueUsd": 13661977474.8
+        },
+        {
+          "month": "2026-05",
+          "date": "2026-05-29",
+          "closeUsd": 47.37,
+          "sharesDate": "2026-02-28",
+          "sharesOutstanding": 268724970,
+          "sharesSourceUrl": "https://www.sec.gov/Archives/edgar/data/63754/000006375426000192/mkc-20260228.htm",
+          "marketValueUsd": 12729501828.9
+        },
+        {
+          "month": "2026-06",
+          "date": "2026-06-30",
+          "closeUsd": 50.42,
+          "sharesDate": "2026-05-31",
+          "sharesOutstanding": 268851552,
+          "sharesSourceUrl": "https://www.sec.gov/Archives/edgar/data/63754/000006375426000274/mkc-20260531.htm",
+          "marketValueUsd": 13555495251.84
+        },
+        {
+          "month": "2026-07",
+          "date": "2026-07-31",
+          "closeUsd": 50.9,
+          "sharesDate": "2026-05-31",
+          "sharesOutstanding": 268851552,
+          "sharesSourceUrl": "https://www.sec.gov/Archives/edgar/data/63754/000006375426000274/mkc-20260531.htm",
+          "marketValueUsd": 13684543996.8
+        },
+        {
+          "month": "2026-08",
+          "date": "2026-08-31",
+          "closeUsd": 54.22,
+          "sharesDate": "2026-05-31",
+          "sharesOutstanding": 268851552,
+          "sharesSourceUrl": "https://www.sec.gov/Archives/edgar/data/63754/000006375426000274/mkc-20260531.htm",
+          "marketValueUsd": 14577131149.44
+        }
+      ]
+    },
+    "IE00BTN1Y115": {
+      "name": "Medtronic plc",
+      "symbol": "MDT",
+      "averageMarketValueUsd": 111999101020.15,
+      "priceSourceUrl": "https://api.nasdaq.com/api/quote/MDT/historical?assetclass=stocks&fromdate=2023-08-01&limit=5000",
+      "sharesIndexUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001613103.json",
+      "observations": [
+        {
+          "month": "2023-09",
+          "date": "2023-09-29",
+          "closeUsd": 78.36,
+          "sharesDate": "2023-08-25",
+          "sharesOutstanding": 1330533713,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001613103.json",
+          "marketValueUsd": 104260621750.68
+        },
+        {
+          "month": "2023-10",
+          "date": "2023-10-31",
+          "closeUsd": 70.56,
+          "sharesDate": "2023-08-25",
+          "sharesOutstanding": 1330533713,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001613103.json",
+          "marketValueUsd": 93882458789.28
+        },
+        {
+          "month": "2023-11",
+          "date": "2023-11-30",
+          "closeUsd": 79.27,
+          "sharesDate": "2023-11-24",
+          "sharesOutstanding": 1329654311,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001613103.json",
+          "marketValueUsd": 105401697232.97
+        },
+        {
+          "month": "2023-12",
+          "date": "2023-12-29",
+          "closeUsd": 82.38,
+          "sharesDate": "2023-11-24",
+          "sharesOutstanding": 1329654311,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001613103.json",
+          "marketValueUsd": 109536922140.18
+        },
+        {
+          "month": "2024-01",
+          "date": "2024-01-31",
+          "closeUsd": 87.54,
+          "sharesDate": "2023-11-24",
+          "sharesOutstanding": 1329654311,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001613103.json",
+          "marketValueUsd": 116397938384.94
+        },
+        {
+          "month": "2024-02",
+          "date": "2024-02-29",
+          "closeUsd": 83.36,
+          "sharesDate": "2024-02-21",
+          "sharesOutstanding": 1327822539,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001613103.json",
+          "marketValueUsd": 110687286851.04
+        },
+        {
+          "month": "2024-03",
+          "date": "2024-03-28",
+          "closeUsd": 87.15,
+          "sharesDate": "2024-02-21",
+          "sharesOutstanding": 1327822539,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001613103.json",
+          "marketValueUsd": 115719734273.85
+        },
+        {
+          "month": "2024-04",
+          "date": "2024-04-30",
+          "closeUsd": 80.24,
+          "sharesDate": "2024-02-21",
+          "sharesOutstanding": 1327822539,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001613103.json",
+          "marketValueUsd": 106544480529.36
+        },
+        {
+          "month": "2024-05",
+          "date": "2024-05-31",
+          "closeUsd": 81.37,
+          "sharesDate": "2024-02-21",
+          "sharesOutstanding": 1327822539,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001613103.json",
+          "marketValueUsd": 108044919998.43
+        },
+        {
+          "month": "2024-06",
+          "date": "2024-06-28",
+          "closeUsd": 78.71,
+          "sharesDate": "2024-06-17",
+          "sharesOutstanding": 1282269783,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001613103.json",
+          "marketValueUsd": 100927454619.93
+        },
+        {
+          "month": "2024-07",
+          "date": "2024-07-31",
+          "closeUsd": 80.32,
+          "sharesDate": "2024-06-17",
+          "sharesOutstanding": 1282269783,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001613103.json",
+          "marketValueUsd": 102991908970.56
+        },
+        {
+          "month": "2024-08",
+          "date": "2024-08-30",
+          "closeUsd": 88.58,
+          "sharesDate": "2024-08-22",
+          "sharesOutstanding": 1282490493,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001613103.json",
+          "marketValueUsd": 113603007869.94
+        },
+        {
+          "month": "2024-09",
+          "date": "2024-09-30",
+          "closeUsd": 90.03,
+          "sharesDate": "2024-08-22",
+          "sharesOutstanding": 1282490493,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001613103.json",
+          "marketValueUsd": 115462619084.79
+        },
+        {
+          "month": "2024-10",
+          "date": "2024-10-31",
+          "closeUsd": 89.25,
+          "sharesDate": "2024-08-22",
+          "sharesOutstanding": 1282490493,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001613103.json",
+          "marketValueUsd": 114462276500.25
+        },
+        {
+          "month": "2024-11",
+          "date": "2024-11-29",
+          "closeUsd": 86.54,
+          "sharesDate": "2024-11-20",
+          "sharesOutstanding": 1282285681,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001613103.json",
+          "marketValueUsd": 110969002833.74
+        },
+        {
+          "month": "2024-12",
+          "date": "2024-12-31",
+          "closeUsd": 79.88,
+          "sharesDate": "2024-11-20",
+          "sharesOutstanding": 1282285681,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001613103.json",
+          "marketValueUsd": 102428980198.28
+        },
+        {
+          "month": "2025-01",
+          "date": "2025-01-31",
+          "closeUsd": 90.82,
+          "sharesDate": "2024-11-20",
+          "sharesOutstanding": 1282285681,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001613103.json",
+          "marketValueUsd": 116457185548.42
+        },
+        {
+          "month": "2025-02",
+          "date": "2025-02-28",
+          "closeUsd": 92.02,
+          "sharesDate": "2025-02-19",
+          "sharesOutstanding": 1282543505,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001613103.json",
+          "marketValueUsd": 118019653330.1
+        },
+        {
+          "month": "2025-03",
+          "date": "2025-03-31",
+          "closeUsd": 89.86,
+          "sharesDate": "2025-02-19",
+          "sharesOutstanding": 1282543505,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001613103.json",
+          "marketValueUsd": 115249359359.3
+        },
+        {
+          "month": "2025-04",
+          "date": "2025-04-30",
+          "closeUsd": 84.76,
+          "sharesDate": "2025-02-19",
+          "sharesOutstanding": 1282543505,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001613103.json",
+          "marketValueUsd": 108708387483.8
+        },
+        {
+          "month": "2025-05",
+          "date": "2025-05-30",
+          "closeUsd": 82.98,
+          "sharesDate": "2025-02-19",
+          "sharesOutstanding": 1282543505,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001613103.json",
+          "marketValueUsd": 106425460044.9
+        },
+        {
+          "month": "2025-06",
+          "date": "2025-06-30",
+          "closeUsd": 87.17,
+          "sharesDate": "2025-06-17",
+          "sharesOutstanding": 1281264703,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001613103.json",
+          "marketValueUsd": 111687844160.51
+        },
+        {
+          "month": "2025-07",
+          "date": "2025-07-31",
+          "closeUsd": 90.24,
+          "sharesDate": "2025-06-17",
+          "sharesOutstanding": 1281264703,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001613103.json",
+          "marketValueUsd": 115621326798.72
+        },
+        {
+          "month": "2025-08",
+          "date": "2025-08-29",
+          "closeUsd": 92.81,
+          "sharesDate": "2025-08-20",
+          "sharesOutstanding": 1282685882,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001613103.json",
+          "marketValueUsd": 119046076708.42
+        },
+        {
+          "month": "2025-09",
+          "date": "2025-09-30",
+          "closeUsd": 95.24,
+          "sharesDate": "2025-08-20",
+          "sharesOutstanding": 1282685882,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001613103.json",
+          "marketValueUsd": 122163003401.68
+        },
+        {
+          "month": "2025-10",
+          "date": "2025-10-31",
+          "closeUsd": 90.7,
+          "sharesDate": "2025-08-20",
+          "sharesOutstanding": 1282685882,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001613103.json",
+          "marketValueUsd": 116339609497.4
+        },
+        {
+          "month": "2025-11",
+          "date": "2025-11-28",
+          "closeUsd": 105.33,
+          "sharesDate": "2025-11-19",
+          "sharesOutstanding": 1282014208,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001613103.json",
+          "marketValueUsd": 135034556528.64
+        },
+        {
+          "month": "2025-12",
+          "date": "2025-12-31",
+          "closeUsd": 96.06,
+          "sharesDate": "2025-11-19",
+          "sharesOutstanding": 1282014208,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001613103.json",
+          "marketValueUsd": 123150284820.48
+        },
+        {
+          "month": "2026-01",
+          "date": "2026-01-30",
+          "closeUsd": 102.96,
+          "sharesDate": "2025-11-19",
+          "sharesOutstanding": 1282014208,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001613103.json",
+          "marketValueUsd": 131996182855.68
+        },
+        {
+          "month": "2026-02",
+          "date": "2026-02-27",
+          "closeUsd": 97.66,
+          "sharesDate": "2026-02-18",
+          "sharesOutstanding": 1283884964,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001613103.json",
+          "marketValueUsd": 125384205584.24
+        },
+        {
+          "month": "2026-03",
+          "date": "2026-03-31",
+          "closeUsd": 86.65,
+          "sharesDate": "2026-02-18",
+          "sharesOutstanding": 1283884964,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001613103.json",
+          "marketValueUsd": 111248632130.6
+        },
+        {
+          "month": "2026-04",
+          "date": "2026-04-30",
+          "closeUsd": 80.97,
+          "sharesDate": "2026-02-18",
+          "sharesOutstanding": 1283884964,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001613103.json",
+          "marketValueUsd": 103956165535.08
+        },
+        {
+          "month": "2026-05",
+          "date": "2026-05-29",
+          "closeUsd": 73.81,
+          "sharesDate": "2026-02-18",
+          "sharesOutstanding": 1283884964,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001613103.json",
+          "marketValueUsd": 94763549192.84
+        },
+        {
+          "month": "2026-06",
+          "date": "2026-06-30",
+          "closeUsd": 78.23,
+          "sharesDate": "2026-06-12",
+          "sharesOutstanding": 1280045190,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001613103.json",
+          "marketValueUsd": 100137935213.7
+        },
+        {
+          "month": "2026-07",
+          "date": "2026-07-31",
+          "closeUsd": 85.39,
+          "sharesDate": "2026-06-12",
+          "sharesOutstanding": 1280045190,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001613103.json",
+          "marketValueUsd": 109303058774.1
+        },
+        {
+          "month": "2026-08",
+          "date": "2026-08-31",
+          "closeUsd": 90.65,
+          "sharesDate": "2026-08-28",
+          "sharesOutstanding": 1279137890,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001613103.json",
+          "marketValueUsd": 115953849728.5
+        }
+      ]
+    },
+    "US58933Y1055": {
+      "name": "Merck & Co., Inc.",
+      "symbol": "MRK",
+      "averageMarketValueUsd": 270245343910.19,
+      "priceSourceUrl": "https://api.nasdaq.com/api/quote/MRK/historical?assetclass=stocks&fromdate=2023-08-01&limit=5000",
+      "sharesIndexUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000310158.json",
+      "observations": [
+        {
+          "month": "2023-09",
+          "date": "2023-09-29",
+          "closeUsd": 102.95,
+          "sharesDate": "2023-07-31",
+          "sharesOutstanding": 2537521169,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000310158.json",
+          "marketValueUsd": 261237804348.55
+        },
+        {
+          "month": "2023-10",
+          "date": "2023-10-31",
+          "closeUsd": 102.7,
+          "sharesDate": "2023-10-31",
+          "sharesOutstanding": 2534023084,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000310158.json",
+          "marketValueUsd": 260244170726.8
+        },
+        {
+          "month": "2023-11",
+          "date": "2023-11-30",
+          "closeUsd": 102.48,
+          "sharesDate": "2023-10-31",
+          "sharesOutstanding": 2534023084,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000310158.json",
+          "marketValueUsd": 259686685648.32
+        },
+        {
+          "month": "2023-12",
+          "date": "2023-12-29",
+          "closeUsd": 109.02,
+          "sharesDate": "2023-10-31",
+          "sharesOutstanding": 2534023084,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000310158.json",
+          "marketValueUsd": 276259196617.68
+        },
+        {
+          "month": "2024-01",
+          "date": "2024-01-31",
+          "closeUsd": 120.78,
+          "sharesDate": "2024-01-31",
+          "sharesOutstanding": 2532643872,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000310158.json",
+          "marketValueUsd": 305892726860.16
+        },
+        {
+          "month": "2024-02",
+          "date": "2024-02-29",
+          "closeUsd": 127.15,
+          "sharesDate": "2024-01-31",
+          "sharesOutstanding": 2532643872,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000310158.json",
+          "marketValueUsd": 322025668324.8
+        },
+        {
+          "month": "2024-03",
+          "date": "2024-03-28",
+          "closeUsd": 131.95,
+          "sharesDate": "2024-01-31",
+          "sharesOutstanding": 2532643872,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000310158.json",
+          "marketValueUsd": 334182358910.4
+        },
+        {
+          "month": "2024-04",
+          "date": "2024-04-30",
+          "closeUsd": 129.22,
+          "sharesDate": "2024-04-30",
+          "sharesOutstanding": 2532806307,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000310158.json",
+          "marketValueUsd": 327289230990.54
+        },
+        {
+          "month": "2024-05",
+          "date": "2024-05-31",
+          "closeUsd": 125.54,
+          "sharesDate": "2024-04-30",
+          "sharesOutstanding": 2532806307,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000310158.json",
+          "marketValueUsd": 317968503780.78
+        },
+        {
+          "month": "2024-06",
+          "date": "2024-06-28",
+          "closeUsd": 123.8,
+          "sharesDate": "2024-04-30",
+          "sharesOutstanding": 2532806307,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000310158.json",
+          "marketValueUsd": 313561420806.6
+        },
+        {
+          "month": "2024-07",
+          "date": "2024-07-31",
+          "closeUsd": 113.13,
+          "sharesDate": "2024-07-31",
+          "sharesOutstanding": 2534809312,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000310158.json",
+          "marketValueUsd": 286762977466.56
+        },
+        {
+          "month": "2024-08",
+          "date": "2024-08-30",
+          "closeUsd": 118.45,
+          "sharesDate": "2024-07-31",
+          "sharesOutstanding": 2534809312,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000310158.json",
+          "marketValueUsd": 300248163006.4
+        },
+        {
+          "month": "2024-09",
+          "date": "2024-09-30",
+          "closeUsd": 113.56,
+          "sharesDate": "2024-07-31",
+          "sharesOutstanding": 2534809312,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000310158.json",
+          "marketValueUsd": 287852945470.72
+        },
+        {
+          "month": "2024-10",
+          "date": "2024-10-31",
+          "closeUsd": 102.32,
+          "sharesDate": "2024-10-31",
+          "sharesOutstanding": 2529635645,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000310158.json",
+          "marketValueUsd": 258832319196.4
+        },
+        {
+          "month": "2024-11",
+          "date": "2024-11-29",
+          "closeUsd": 101.64,
+          "sharesDate": "2024-10-31",
+          "sharesOutstanding": 2529635645,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000310158.json",
+          "marketValueUsd": 257112166957.8
+        },
+        {
+          "month": "2024-12",
+          "date": "2024-12-31",
+          "closeUsd": 99.48,
+          "sharesDate": "2024-10-31",
+          "sharesOutstanding": 2529635645,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000310158.json",
+          "marketValueUsd": 251648153964.6
+        },
+        {
+          "month": "2025-01",
+          "date": "2025-01-31",
+          "closeUsd": 98.82,
+          "sharesDate": "2025-01-31",
+          "sharesOutstanding": 2526036240,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000310158.json",
+          "marketValueUsd": 249622901236.8
+        },
+        {
+          "month": "2025-02",
+          "date": "2025-02-28",
+          "closeUsd": 92.25,
+          "sharesDate": "2025-01-31",
+          "sharesOutstanding": 2526036240,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000310158.json",
+          "marketValueUsd": 233026843140.0
+        },
+        {
+          "month": "2025-03",
+          "date": "2025-03-31",
+          "closeUsd": 89.76,
+          "sharesDate": "2025-01-31",
+          "sharesOutstanding": 2526036240,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000310158.json",
+          "marketValueUsd": 226737012902.4
+        },
+        {
+          "month": "2025-04",
+          "date": "2025-04-30",
+          "closeUsd": 85.2,
+          "sharesDate": "2025-04-30",
+          "sharesOutstanding": 2511031253,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000310158.json",
+          "marketValueUsd": 213939862755.6
+        },
+        {
+          "month": "2025-05",
+          "date": "2025-05-30",
+          "closeUsd": 76.84,
+          "sharesDate": "2025-04-30",
+          "sharesOutstanding": 2511031253,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000310158.json",
+          "marketValueUsd": 192947641480.52
+        },
+        {
+          "month": "2025-06",
+          "date": "2025-06-30",
+          "closeUsd": 79.16,
+          "sharesDate": "2025-04-30",
+          "sharesOutstanding": 2511031253,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000310158.json",
+          "marketValueUsd": 198773233987.48
+        },
+        {
+          "month": "2025-07",
+          "date": "2025-07-31",
+          "closeUsd": 78.12,
+          "sharesDate": "2025-07-31",
+          "sharesOutstanding": 2497783211,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000310158.json",
+          "marketValueUsd": 195126824443.32
+        },
+        {
+          "month": "2025-08",
+          "date": "2025-08-29",
+          "closeUsd": 84.12,
+          "sharesDate": "2025-07-31",
+          "sharesOutstanding": 2497783211,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000310158.json",
+          "marketValueUsd": 210113523709.32
+        },
+        {
+          "month": "2025-09",
+          "date": "2025-09-30",
+          "closeUsd": 83.93,
+          "sharesDate": "2025-07-31",
+          "sharesOutstanding": 2497783211,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000310158.json",
+          "marketValueUsd": 209638944899.23
+        },
+        {
+          "month": "2025-10",
+          "date": "2025-10-31",
+          "closeUsd": 85.98,
+          "sharesDate": "2025-10-31",
+          "sharesOutstanding": 2482022536,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000310158.json",
+          "marketValueUsd": 213404297645.28
+        },
+        {
+          "month": "2025-11",
+          "date": "2025-11-28",
+          "closeUsd": 104.83,
+          "sharesDate": "2025-10-31",
+          "sharesOutstanding": 2482022536,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000310158.json",
+          "marketValueUsd": 260190422448.88
+        },
+        {
+          "month": "2025-12",
+          "date": "2025-12-31",
+          "closeUsd": 105.26,
+          "sharesDate": "2025-10-31",
+          "sharesOutstanding": 2482022536,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000310158.json",
+          "marketValueUsd": 261257692139.36
+        },
+        {
+          "month": "2026-01",
+          "date": "2026-01-30",
+          "closeUsd": 110.27,
+          "sharesDate": "2025-10-31",
+          "sharesOutstanding": 2482022536,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000310158.json",
+          "marketValueUsd": 273692625044.72
+        },
+        {
+          "month": "2026-02",
+          "date": "2026-02-27",
+          "closeUsd": 123.82,
+          "sharesDate": "2026-01-31",
+          "sharesOutstanding": 2472392003,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000310158.json",
+          "marketValueUsd": 306131577811.46
+        },
+        {
+          "month": "2026-03",
+          "date": "2026-03-31",
+          "closeUsd": 120.29,
+          "sharesDate": "2026-01-31",
+          "sharesOutstanding": 2472392003,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000310158.json",
+          "marketValueUsd": 297404034040.87
+        },
+        {
+          "month": "2026-04",
+          "date": "2026-04-30",
+          "closeUsd": 109.18,
+          "sharesDate": "2026-04-30",
+          "sharesOutstanding": 2469824415,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000310158.json",
+          "marketValueUsd": 269655429629.7
+        },
+        {
+          "month": "2026-05",
+          "date": "2026-05-29",
+          "closeUsd": 118.72,
+          "sharesDate": "2026-04-30",
+          "sharesOutstanding": 2469824415,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000310158.json",
+          "marketValueUsd": 293217554548.8
+        },
+        {
+          "month": "2026-06",
+          "date": "2026-06-30",
+          "closeUsd": 128.5,
+          "sharesDate": "2026-04-30",
+          "sharesOutstanding": 2469824415,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000310158.json",
+          "marketValueUsd": 317372437327.5
+        },
+        {
+          "month": "2026-07",
+          "date": "2026-07-31",
+          "closeUsd": 130.2,
+          "sharesDate": "2026-07-31",
+          "sharesOutstanding": 2467171638,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000310158.json",
+          "marketValueUsd": 321225747267.6
+        },
+        {
+          "month": "2026-08",
+          "date": "2026-08-31",
+          "closeUsd": 147.76,
+          "sharesDate": "2026-07-31",
+          "sharesOutstanding": 2467171638,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000310158.json",
+          "marketValueUsd": 364549281230.88
+        }
+      ]
+    },
+    "US94106L1098": {
+      "name": "Waste Management, Inc.",
+      "symbol": "WM",
+      "averageMarketValueUsd": 85747142438.28,
+      "priceSourceUrl": "https://api.nasdaq.com/api/quote/WM/historical?assetclass=stocks&fromdate=2023-08-01&limit=5000",
+      "sharesIndexUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000823768.json",
+      "observations": [
+        {
+          "month": "2023-09",
+          "date": "2023-09-29",
+          "closeUsd": 152.44,
+          "sharesDate": "2023-07-21",
+          "sharesOutstanding": 405059457,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000823768.json",
+          "marketValueUsd": 61747263625.08
+        },
+        {
+          "month": "2023-10",
+          "date": "2023-10-31",
+          "closeUsd": 164.33,
+          "sharesDate": "2023-10-20",
+          "sharesOutstanding": 402775427,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000823768.json",
+          "marketValueUsd": 66188085918.91
+        },
+        {
+          "month": "2023-11",
+          "date": "2023-11-30",
+          "closeUsd": 170.99,
+          "sharesDate": "2023-10-20",
+          "sharesOutstanding": 402775427,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000823768.json",
+          "marketValueUsd": 68870570262.73
+        },
+        {
+          "month": "2023-12",
+          "date": "2023-12-29",
+          "closeUsd": 179.1,
+          "sharesDate": "2023-10-20",
+          "sharesOutstanding": 402775427,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000823768.json",
+          "marketValueUsd": 72137078975.7
+        },
+        {
+          "month": "2024-01",
+          "date": "2024-01-31",
+          "closeUsd": 185.63,
+          "sharesDate": "2023-10-20",
+          "sharesOutstanding": 402775427,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000823768.json",
+          "marketValueUsd": 74767202514.01
+        },
+        {
+          "month": "2024-02",
+          "date": "2024-02-29",
+          "closeUsd": 205.65,
+          "sharesDate": "2024-02-08",
+          "sharesOutstanding": 401598077,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000823768.json",
+          "marketValueUsd": 82588644535.05
+        },
+        {
+          "month": "2024-03",
+          "date": "2024-03-28",
+          "closeUsd": 213.15,
+          "sharesDate": "2024-02-08",
+          "sharesOutstanding": 401598077,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000823768.json",
+          "marketValueUsd": 85600630112.55
+        },
+        {
+          "month": "2024-04",
+          "date": "2024-04-30",
+          "closeUsd": 208.02,
+          "sharesDate": "2024-04-22",
+          "sharesOutstanding": 401083098,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000823768.json",
+          "marketValueUsd": 83433306045.96
+        },
+        {
+          "month": "2024-05",
+          "date": "2024-05-31",
+          "closeUsd": 210.73,
+          "sharesDate": "2024-04-22",
+          "sharesOutstanding": 401083098,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000823768.json",
+          "marketValueUsd": 84520241241.54
+        },
+        {
+          "month": "2024-06",
+          "date": "2024-06-28",
+          "closeUsd": 213.34,
+          "sharesDate": "2024-04-22",
+          "sharesOutstanding": 401083098,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000823768.json",
+          "marketValueUsd": 85567068127.32
+        },
+        {
+          "month": "2024-07",
+          "date": "2024-07-31",
+          "closeUsd": 202.66,
+          "sharesDate": "2024-07-22",
+          "sharesOutstanding": 401314827,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000823768.json",
+          "marketValueUsd": 81330462839.82
+        },
+        {
+          "month": "2024-08",
+          "date": "2024-08-30",
+          "closeUsd": 212.04,
+          "sharesDate": "2024-07-22",
+          "sharesOutstanding": 401314827,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000823768.json",
+          "marketValueUsd": 85094795917.08
+        },
+        {
+          "month": "2024-09",
+          "date": "2024-09-30",
+          "closeUsd": 207.6,
+          "sharesDate": "2024-07-22",
+          "sharesOutstanding": 401314827,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000823768.json",
+          "marketValueUsd": 83312958085.2
+        },
+        {
+          "month": "2024-10",
+          "date": "2024-10-31",
+          "closeUsd": 215.85,
+          "sharesDate": "2024-10-24",
+          "sharesOutstanding": 401365541,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000823768.json",
+          "marketValueUsd": 86634752024.85
+        },
+        {
+          "month": "2024-11",
+          "date": "2024-11-29",
+          "closeUsd": 228.22,
+          "sharesDate": "2024-10-24",
+          "sharesOutstanding": 401365541,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000823768.json",
+          "marketValueUsd": 91599643767.02
+        },
+        {
+          "month": "2024-12",
+          "date": "2024-12-31",
+          "closeUsd": 201.79,
+          "sharesDate": "2024-10-24",
+          "sharesOutstanding": 401365541,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000823768.json",
+          "marketValueUsd": 80991552518.39
+        },
+        {
+          "month": "2025-01",
+          "date": "2025-01-31",
+          "closeUsd": 220.26,
+          "sharesDate": "2024-10-24",
+          "sharesOutstanding": 401365541,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000823768.json",
+          "marketValueUsd": 88404774060.66
+        },
+        {
+          "month": "2025-02",
+          "date": "2025-02-28",
+          "closeUsd": 232.78,
+          "sharesDate": "2025-02-14",
+          "sharesOutstanding": 402115439,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000823768.json",
+          "marketValueUsd": 93604431890.42
+        },
+        {
+          "month": "2025-03",
+          "date": "2025-03-31",
+          "closeUsd": 231.51,
+          "sharesDate": "2025-02-14",
+          "sharesOutstanding": 402115439,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000823768.json",
+          "marketValueUsd": 93093745282.89
+        },
+        {
+          "month": "2025-04",
+          "date": "2025-04-30",
+          "closeUsd": 233.36,
+          "sharesDate": "2025-04-25",
+          "sharesOutstanding": 402407976,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000823768.json",
+          "marketValueUsd": 93905925279.36
+        },
+        {
+          "month": "2025-05",
+          "date": "2025-05-30",
+          "closeUsd": 240.97,
+          "sharesDate": "2025-04-25",
+          "sharesOutstanding": 402407976,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000823768.json",
+          "marketValueUsd": 96968249976.72
+        },
+        {
+          "month": "2025-06",
+          "date": "2025-06-30",
+          "closeUsd": 228.82,
+          "sharesDate": "2025-04-25",
+          "sharesOutstanding": 402407976,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000823768.json",
+          "marketValueUsd": 92078993068.32
+        },
+        {
+          "month": "2025-07",
+          "date": "2025-07-31",
+          "closeUsd": 229.16,
+          "sharesDate": "2025-07-25",
+          "sharesOutstanding": 402830315,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000823768.json",
+          "marketValueUsd": 92312594985.4
+        },
+        {
+          "month": "2025-08",
+          "date": "2025-08-29",
+          "closeUsd": 226.39,
+          "sharesDate": "2025-07-25",
+          "sharesOutstanding": 402830315,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000823768.json",
+          "marketValueUsd": 91196755012.85
+        },
+        {
+          "month": "2025-09",
+          "date": "2025-09-30",
+          "closeUsd": 220.83,
+          "sharesDate": "2025-07-25",
+          "sharesOutstanding": 402830315,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000823768.json",
+          "marketValueUsd": 88957018461.45
+        },
+        {
+          "month": "2025-10",
+          "date": "2025-10-31",
+          "closeUsd": 199.77,
+          "sharesDate": "2025-10-24",
+          "sharesOutstanding": 402867051,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000823768.json",
+          "marketValueUsd": 80480750778.27
+        },
+        {
+          "month": "2025-11",
+          "date": "2025-11-28",
+          "closeUsd": 217.87,
+          "sharesDate": "2025-10-24",
+          "sharesOutstanding": 402867051,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000823768.json",
+          "marketValueUsd": 87772644401.37
+        },
+        {
+          "month": "2025-12",
+          "date": "2025-12-31",
+          "closeUsd": 219.71,
+          "sharesDate": "2025-10-24",
+          "sharesOutstanding": 402867051,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000823768.json",
+          "marketValueUsd": 88513919775.21
+        },
+        {
+          "month": "2026-01",
+          "date": "2026-01-30",
+          "closeUsd": 222.24,
+          "sharesDate": "2025-10-24",
+          "sharesOutstanding": 402867051,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000823768.json",
+          "marketValueUsd": 89533173414.24
+        },
+        {
+          "month": "2026-02",
+          "date": "2026-02-27",
+          "closeUsd": 240.84,
+          "sharesDate": "2026-02-05",
+          "sharesOutstanding": 403335781,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000823768.json",
+          "marketValueUsd": 97139389496.04
+        },
+        {
+          "month": "2026-03",
+          "date": "2026-03-31",
+          "closeUsd": 229.79,
+          "sharesDate": "2026-02-05",
+          "sharesOutstanding": 403335781,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000823768.json",
+          "marketValueUsd": 92682529115.99
+        },
+        {
+          "month": "2026-04",
+          "date": "2026-04-30",
+          "closeUsd": 232.55,
+          "sharesDate": "2026-04-24",
+          "sharesOutstanding": 401575752,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000823768.json",
+          "marketValueUsd": 93386441127.6
+        },
+        {
+          "month": "2026-05",
+          "date": "2026-05-29",
+          "closeUsd": 211.46,
+          "sharesDate": "2026-04-24",
+          "sharesOutstanding": 401575752,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000823768.json",
+          "marketValueUsd": 84917208517.92
+        },
+        {
+          "month": "2026-06",
+          "date": "2026-06-30",
+          "closeUsd": 222.88,
+          "sharesDate": "2026-04-24",
+          "sharesOutstanding": 401575752,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000823768.json",
+          "marketValueUsd": 89503203605.76
+        },
+        {
+          "month": "2026-07",
+          "date": "2026-07-31",
+          "closeUsd": 226.55,
+          "sharesDate": "2026-07-24",
+          "sharesOutstanding": 399715184,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000823768.json",
+          "marketValueUsd": 90555474935.2
+        },
+        {
+          "month": "2026-08",
+          "date": "2026-08-31",
+          "closeUsd": 218.92,
+          "sharesDate": "2026-07-24",
+          "sharesOutstanding": 399715184,
+          "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000823768.json",
+          "marketValueUsd": 87505648081.28
+        }
+      ]
+    }
+  }
+}
