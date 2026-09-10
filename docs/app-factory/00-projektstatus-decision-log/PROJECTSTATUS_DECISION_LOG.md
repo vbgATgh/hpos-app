@@ -506,3 +506,17 @@ Dieses Dokument wird bei Änderungen an Status, Gate, Architektur, Entscheidung,
 - Der Prescreen-Cache wird auf v4 angehoben, damit die mit v8.7.39 eingeführten offiziellen Berichtsdaten unabhängig von älteren lokalen Cache-Einträgen ausgewertet werden.
 - Halal-Entscheidungslogik, Supabase, Parqet und Portfolio-Schutz bleiben unverändert.
 - Ausführliche Evidenz: `docs/HOTFIX_2026-09-10_HALAL_RUN_STATE.md`.
+
+## 22. Statusergänzung 2026-09-10 – 36-Monats-Marktwert v8.7.41
+
+**Entscheidung DEC-022 – Monatsschlusskurse und zeitnahe berichtete Aktienzahlen statt Einzelkurs oder aktuellem Rückrechnen**
+
+- Der AAOIFI-Marktwert wird aus 36 abgeschlossenen Monatswerten gebildet: letzter Nasdaq-Handelsschlusskurs des Monats multipliziert mit der zuletzt zuvor offiziell gemeldeten Aktienzahl.
+- Die Periode umfasst September 2023 bis August 2026. Der unvollständige laufende Monat wird nicht verwendet.
+- SEC Companyfacts ist die primäre Quelle der Aktienzahlen. Bei McCormick werden wegen der zwei Klassen die einzelnen Deckblattwerte der 10-Q-/10-K-Filings addiert.
+- Alle 180 Monatsbeobachtungen und ihre Quellen werden dauerhaft im Repository nachweisbar gespeichert.
+- Die zwischen Berichtsstichtagen fortgeführte Aktienzahl wird ausdrücklich als Approximation dokumentiert.
+- Offizielle Geschäftsprofile aus den jeweiligen Jahresberichten ersetzen für diese fünf Werte das inoffizielle Profil als Gate-1-Geschäftsfeldquelle.
+- Abbott, McCormick und Merck erreichen dadurch vollständige Finanzdaten. Medtronic und Waste Management bleiben wegen weiterhin fehlender Pflichtwerte offen.
+- Supabase, Parqet und Portfolio-Schutz bleiben unverändert.
+- Ausführliche Evidenz: `docs/STATUS_2026-09-10_HALAL_MARKET_VALUE_36M.md`.

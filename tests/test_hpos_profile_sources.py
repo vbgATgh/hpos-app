@@ -43,18 +43,18 @@ def test_first_curated_report_batch_has_only_traceable_partial_metrics():
     data = json.loads((ROOT / "data" / "halal_financial_evidence.json").read_text())
     assets = data["assets"]
     expected_coverage = {
-        "US0028241000": 4,
-        "US5797802064": 4,
-        "IE00BTN1Y115": 3,
-        "US58933Y1055": 4,
-        "US94106L1098": 2,
+        "US0028241000": 5,
+        "US5797802064": 5,
+        "IE00BTN1Y115": 4,
+        "US58933Y1055": 5,
+        "US94106L1098": 3,
     }
     assert set(assets) == set(expected_coverage)
     for isin, expected in expected_coverage.items():
         assert re.fullmatch(r"[A-Z]{2}[A-Z0-9]{9}\d", isin)
         metrics = assets[isin]["metrics"]
         assert len(metrics) == expected
-        assert "marketValue36mAvg" not in metrics
+        assert metrics["marketValue36mAvg"]["months"] == 36
         for metric in metrics.values():
             assert isinstance(metric["value"], (int, float))
             assert math.isfinite(metric["value"])
@@ -80,11 +80,73 @@ def test_curated_sources_are_propagated_to_criteria_and_ui():
     assert "target=\"_blank\"" in evidence
 
 
+def test_36_month_market_values_are_complete_and_reproducible():
+    import json
+    market = json.loads((ROOT / "data" / "halal_market_value_36m.json").read_text())
+    financial = json.loads((ROOT / "data" / "halal_financial_evidence.json").read_text())
+    assert market["period"] == {"start": "2023-09-01", "end": "2026-08-31", "months": 36}
+    assert market["policy"]["accountsRequired"] is False
+    assert market["policy"]["priceSource"] == "NASDAQ_OFFICIAL_HISTORICAL"
+    assert market["policy"]["sharesSource"] == "SEC_EDGAR_FILINGS"
+    assert set(market["assets"]) == set(financial["assets"])
+    for isin, asset in market["assets"].items():
+        observations = asset["observations"]
+        assert len(observations) == 36
+        assert len({item["month"] for item in observations}) == 36
+        assert observations[0]["month"] == "2023-09"
+        assert observations[-1]["month"] == "2026-08"
+        for item in observations:
+            assert item["date"].startswith(item["month"])
+            assert item["sharesDate"] <= item["date"]
+            assert item["closeUsd"] > 0
+            assert item["sharesOutstanding"] > 0
+            assert math.isclose(
+                item["marketValueUsd"],
+                item["closeUsd"] * item["sharesOutstanding"],
+                rel_tol=0,
+                abs_tol=0.01,
+            )
+            assert item["sharesSourceUrl"].startswith("https://www.sec.gov/") or item[
+                "sharesSourceUrl"
+            ].startswith("https://data.sec.gov/")
+        calculated = sum(item["marketValueUsd"] for item in observations) / 36
+        assert math.isclose(asset["averageMarketValueUsd"], calculated, rel_tol=0, abs_tol=0.01)
+        assert asset["priceSourceUrl"].startswith("https://api.nasdaq.com/")
+        metric = financial["assets"][isin]["metrics"]["marketValue36mAvg"]
+        assert metric["value"] == asset["averageMarketValueUsd"]
+        assert metric["months"] == 36
+        assert metric["supportingSources"]
+    assert min(item["sharesOutstanding"] for item in market["assets"]["US5797802064"]["observations"]) > 250_000_000
+
+
+def test_curated_business_profiles_are_official_and_fail_closed():
+    import json
+    data = json.loads((ROOT / "data" / "halal_financial_evidence.json").read_text())
+    autoscreen = (ROOT / "app" / "halal-autoscreen.js").read_text()
+    for asset in data["assets"].values():
+        profile = asset["businessProfile"]
+        assert profile["description"]
+        assert profile["period"]
+        assert profile["sourceName"]
+        assert profile["sourceUrl"].startswith("https://")
+    assert "business?.description&&business?.sourceUrl&&business?.period" in autoscreen
+    assert "p?.businessSource?.sourceType" in autoscreen
+
+
+def test_market_value_builder_requires_no_account_or_api_key():
+    builder = (ROOT / "scripts" / "build_halal_market_value_evidence.py").read_text()
+    assert "api.nasdaq.com" in builder
+    assert "data.sec.gov" in builder
+    assert "accountsRequired\": False" in builder
+    for forbidden in ["API_KEY", "apikey=", "FINNHUB", "FMP", "yfinance", "requests"]:
+        assert forbidden not in builder
+
+
 def test_current_release_loads_fresh_profile_logic():
     html = (ROOT / "app" / "index.html").read_text()
     runtime = (ROOT / "app" / "runtime-config.js").read_text()
-    assert "Portfolio Intelligence · v8.7.40" in html
-    assert "halal-autoscreen.js?v=20260910-runstate1" in html
+    assert "Portfolio Intelligence · v8.7.41" in html
+    assert "halal-autoscreen.js?v=20260910-marketvalue1" in html
     assert "halal-register.js?v=20260910-runstate1" in html
-    assert "halal-evidence.js?v=20260909-report1" in html
-    assert "version:'8.7.40'" in runtime
+    assert "halal-evidence.js?v=20260910-marketvalue1" in html
+    assert "version:'8.7.41'" in runtime
