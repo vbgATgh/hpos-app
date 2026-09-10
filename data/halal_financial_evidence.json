@@ -156,6 +156,14 @@
           "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1613103/000162828026044354/mdt-20260424.htm",
           "label": "Net sales"
         },
+        "totalDebt": {
+          "value": 27901000000,
+          "unit": "USD",
+          "period": "FY 2026",
+          "sourceName": "Medtronic 2026 Form 10-K",
+          "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1613103/000162828026044354/mdt-20260424.htm",
+          "label": "Current debt obligations plus long-term debt, excluding separately disclosed current and long-term finance lease obligations"
+        },
         "interestBearingAssetsUpperBound": {
           "value": 9220000000,
           "unit": "USD",
@@ -272,6 +280,14 @@
           "sourceUrl": "https://www.sec.gov/Archives/edgar/data/823768/000110465926012049/wm-20251231x10k.htm",
           "label": "Operating revenues"
         },
+        "totalDebt": {
+          "value": 22344000000,
+          "unit": "USD",
+          "period": "FY 2025",
+          "sourceName": "Waste Management 2025 Form 10-K",
+          "sourceUrl": "https://www.sec.gov/Archives/edgar/data/823768/000110465926012049/wm-20251231x10k.htm",
+          "label": "Current and long-term debt, excluding separately disclosed current and long-term financing lease liabilities"
+        },
         "interestBearingAssetsUpperBound": {
           "value": 201000000,
           "unit": "USD",
@@ -292,6 +308,60 @@
             {
               "name": "SEC EDGAR shares",
               "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000823768.json"
+            }
+          ],
+          "label": "36 full-month average market value; month-end close multiplied by latest prior reported shares"
+        }
+      }
+    },
+    "US4781601046": {
+      "name": "Johnson & Johnson",
+      "ticker": "JNJ",
+      "checkedAt": "2026-09-10",
+      "periodEnd": "2025-12-28",
+      "businessProfile": {
+        "description": "Healthcare company researching, developing, manufacturing and selling products through its Innovative Medicine and MedTech segments.",
+        "sourceName": "Johnson & Johnson 2025 Form 10-K",
+        "sourceUrl": "https://www.sec.gov/Archives/edgar/data/200406/000020040626000016/jnj-20251228.htm",
+        "period": "FY 2025"
+      },
+      "metrics": {
+        "revenue": {
+          "value": 94193000000,
+          "unit": "USD",
+          "period": "FY 2025",
+          "sourceName": "Johnson & Johnson 2025 Form 10-K",
+          "sourceUrl": "https://www.sec.gov/Archives/edgar/data/200406/000020040626000016/jnj-20251228.htm",
+          "label": "Sales to customers"
+        },
+        "interestBearingAssetsUpperBound": {
+          "value": 20102000000,
+          "unit": "USD",
+          "period": "FY 2025",
+          "sourceName": "Johnson & Johnson 2025 Form 10-K",
+          "sourceUrl": "https://www.sec.gov/Archives/edgar/data/200406/000020040626000016/jnj-20251228.htm",
+          "label": "Cash and cash equivalents plus current marketable securities; conservative upper bound"
+        },
+        "interestIncome": {
+          "value": 1056000000,
+          "unit": "USD",
+          "period": "FY 2025",
+          "sourceName": "Johnson & Johnson 2025 Form 10-K",
+          "sourceUrl": "https://www.sec.gov/Archives/edgar/data/200406/000020040626000016/jnj-20251228.htm",
+          "label": "Interest income"
+        },
+        "marketValue36mAvg": {
+          "value": 435975519778.53,
+          "unit": "USD",
+          "period": "2023-09 to 2026-08",
+          "months": 36,
+          "method": "LAST_TRADING_DAY_EACH_FULL_MONTH_X_LATEST_PRIOR_REPORTED_SHARES",
+          "sourceName": "Nasdaq historical prices plus SEC EDGAR reported shares",
+          "sourceUrl": "https://api.nasdaq.com/api/quote/JNJ/historical?assetclass=stocks&fromdate=2023-08-01&limit=5000",
+          "supportingSources": [
+            {
+              "name": "SEC EDGAR shares",
+              "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000200406.json"
             }
           ],
           "label": "36 full-month average market value; month-end close multiplied by latest prior reported shares"

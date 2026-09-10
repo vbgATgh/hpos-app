@@ -520,3 +520,15 @@ Dieses Dokument wird bei Änderungen an Status, Gate, Architektur, Entscheidung,
 - Abbott, McCormick und Merck erreichen dadurch vollständige Finanzdaten. Medtronic und Waste Management bleiben wegen weiterhin fehlender Pflichtwerte offen.
 - Supabase, Parqet und Portfolio-Schutz bleiben unverändert.
 - Ausführliche Evidenz: `docs/STATUS_2026-09-10_HALAL_MARKET_VALUE_36M.md`.
+
+## 23. Statusergänzung 2026-09-10 – leasingbereinigte Schulden v8.7.42
+
+**Entscheidung DEC-023 – Finanzierungsleasing wird nur anhand bezifferter Primärquellen abgezogen**
+
+- Medtronic weist 6 Mio. USD kurzfristige und 54 Mio. USD langfristige Finanzierungsleasing-Verbindlichkeiten separat aus. Die AAOIFI-Schuldenkennzahl beträgt deshalb 27,901 Mrd. USD und die Schuldenquote 24,912 %.
+- Waste Management weist 86 Mio. USD kurzfristige und 477 Mio. USD langfristige Finanzierungsleasing-Verbindlichkeiten separat aus. Die AAOIFI-Schuldenkennzahl beträgt deshalb 22,344 Mrd. USD und die Schuldenquote 26,058 %.
+- Ein Netto-Zinsaufwand wird nicht als Zinsertrag verwendet. Waste Management bleibt deshalb trotz ergänzter Schuldenkennzahl offen.
+- Johnson & Johnson wird als sechstes Instrument mit 36 Monatsmarktwerten und vier offiziellen Pflichtkennzahlen aufgenommen. Da das Finanzierungsleasing nur als nicht wesentlich beschrieben, aber nicht beziffert wird, bleibt die Schuldenkennzahl offen.
+- Der Prescreen-Cache wird auf v6 angehoben, damit der nächste Buttonlauf die neuen Evidenzen sicher neu auswertet.
+- Supabase, Parqet und Portfolio-Schutz bleiben unverändert.
+- Ausführliche Evidenz: `docs/STATUS_2026-09-10_HALAL_DEBT_EVIDENCE.md`.

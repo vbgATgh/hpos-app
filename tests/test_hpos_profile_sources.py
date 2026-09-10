@@ -45,9 +45,10 @@ def test_first_curated_report_batch_has_only_traceable_partial_metrics():
     expected_coverage = {
         "US0028241000": 5,
         "US5797802064": 5,
-        "IE00BTN1Y115": 4,
+        "IE00BTN1Y115": 5,
         "US58933Y1055": 5,
-        "US94106L1098": 3,
+        "US94106L1098": 4,
+        "US4781601046": 4,
     }
     assert set(assets) == set(expected_coverage)
     for isin, expected in expected_coverage.items():
@@ -145,8 +146,16 @@ def test_market_value_builder_requires_no_account_or_api_key():
 def test_current_release_loads_fresh_profile_logic():
     html = (ROOT / "app" / "index.html").read_text()
     runtime = (ROOT / "app" / "runtime-config.js").read_text()
-    assert "Portfolio Intelligence · v8.7.41" in html
-    assert "halal-autoscreen.js?v=20260910-marketvalue1" in html
+    assert "Portfolio Intelligence · v8.7.42" in html
+    assert "halal-autoscreen.js?v=20260910-debtevidence1" in html
     assert "halal-register.js?v=20260910-runstate1" in html
-    assert "halal-evidence.js?v=20260910-marketvalue1" in html
-    assert "version:'8.7.41'" in runtime
+    assert "halal-evidence.js?v=20260910-debtevidence1" in html
+    assert "version:'8.7.42'" in runtime
+
+
+def test_debt_evidence_is_lease_adjusted_and_unquantified_debt_stays_open():
+    import json
+    data = json.loads((ROOT / "data" / "halal_financial_evidence.json").read_text())
+    assert data["assets"]["IE00BTN1Y115"]["metrics"]["totalDebt"]["value"] == 27_901_000_000
+    assert data["assets"]["US94106L1098"]["metrics"]["totalDebt"]["value"] == 22_344_000_000
+    assert "totalDebt" not in data["assets"]["US4781601046"]["metrics"]

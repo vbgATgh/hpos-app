@@ -1,7 +1,7 @@
 (()=>{'use strict';
 const PROFILE_API='https://moxyhjfbrmsnphikxqje.supabase.co/functions/v1/hpos-profile';
 const CURATED_FINANCIALS='../data/halal_financial_evidence.json';
-const KEY='hpos_halal_prescreen_v5',TTL=7*24*60*60*1000;
+const KEY='hpos_halal_prescreen_v6',TTL=7*24*60*60*1000;
 let curatedFinancials=null,curatedLoading=null;
 const RULES=Object.freeze({impureIncomeMax:0.05,interestAssetsMax:0.30,interestDebtMax:0.30,autoPassSafetyMax:0.27,standard:'AAOIFI SS21',marketValueBasis:'TRAILING_36M_AVG_MARKET_VALUE'});
 const HARD=[
