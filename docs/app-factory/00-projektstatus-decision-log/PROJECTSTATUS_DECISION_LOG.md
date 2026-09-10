@@ -532,3 +532,13 @@ Dieses Dokument wird bei Änderungen an Status, Gate, Architektur, Entscheidung,
 - Der Prescreen-Cache wird auf v6 angehoben, damit der nächste Buttonlauf die neuen Evidenzen sicher neu auswertet.
 - Supabase, Parqet und Portfolio-Schutz bleiben unverändert.
 - Ausführliche Evidenz: `docs/STATUS_2026-09-10_HALAL_DEBT_EVIDENCE.md`.
+
+## 24. Statusergänzung 2026-09-10 – Watchlist-Identität v8.7.43
+
+**Entscheidung DEC-024 – Alte Ticker-Watchlist-Einträge werden nur bei eindeutigem lokalem ISIN-Treffer hochgestuft**
+
+- Der Gerätetest von v8.7.42 bestätigt 6 halalkonforme und 17 offene Werte sowie die erfolgreiche Medtronic-Auswertung.
+- Johnson & Johnson konnte seinen produktiven Berichtsdatenbestand nicht lesen, weil der ältere lokale Watchlist-Eintrag keine ISIN enthielt.
+- HPOS ergänzt eine fehlende Watchlist-ISIN künftig ausschließlich dann, wenn der exakte Ticker in der versionierten, verifizierten Marktkonfiguration genau einmal vorkommt.
+- Mehrdeutige Identitäten bleiben offen. Die Migration erzeugt keine Halal-Einstufung und verändert keine Depotposition.
+- Ausführliche Evidenz: `docs/HOTFIX_2026-09-10_WATCHLIST_IDENTITY.md`.

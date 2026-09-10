@@ -146,11 +146,12 @@ def test_market_value_builder_requires_no_account_or_api_key():
 def test_current_release_loads_fresh_profile_logic():
     html = (ROOT / "app" / "index.html").read_text()
     runtime = (ROOT / "app" / "runtime-config.js").read_text()
-    assert "Portfolio Intelligence · v8.7.42" in html
+    assert "Portfolio Intelligence · v8.7.43" in html
+    assert "app.js?v=20260910-watchidentity1" in html
     assert "halal-autoscreen.js?v=20260910-debtevidence1" in html
     assert "halal-register.js?v=20260910-runstate1" in html
     assert "halal-evidence.js?v=20260910-debtevidence1" in html
-    assert "version:'8.7.42'" in runtime
+    assert "version:'8.7.43'" in runtime
 
 
 def test_debt_evidence_is_lease_adjusted_and_unquantified_debt_stays_open():
@@ -159,3 +160,16 @@ def test_debt_evidence_is_lease_adjusted_and_unquantified_debt_stays_open():
     assert data["assets"]["IE00BTN1Y115"]["metrics"]["totalDebt"]["value"] == 27_901_000_000
     assert data["assets"]["US94106L1098"]["metrics"]["totalDebt"]["value"] == 22_344_000_000
     assert "totalDebt" not in data["assets"]["US4781601046"]["metrics"]
+
+
+def test_legacy_watchlist_identity_is_promoted_only_by_unique_verified_market_mapping():
+    import json
+    app = (ROOT / "app" / "app.js").read_text()
+    market = json.loads((ROOT / "config" / "market_sources.json").read_text())["assets"]
+    matches = [item for item in market if item.get("enabled") is not False and item.get("symbol") == "JNJ"]
+    assert len(matches) == 1
+    assert matches[0]["isin"] == "US4781601046"
+    assert "function promoteWatchlistIdentities()" in app
+    assert "matches.length===1" in app
+    assert "source:'MARKET_CONFIG_MATCH',verified:true" in app
+    assert "promoteWatchlistIdentities();render()" in app
