@@ -495,3 +495,14 @@ Dieses Dokument wird bei Änderungen an Status, Gate, Architektur, Entscheidung,
 - Rohkennzahlen in `data/halal_financial_evidence.json` mit Zeitraum, Einheit und offizieller Quellen-URL.
 - Laufbericht mit Anzahl erkannter Berichtsdaten und belegter Kennzahlen.
 - Ausführliche Evidenz: `docs/STATUS_2026-09-09_HALAL_REPORT_BATCH_1.md`.
+
+## 21. Statusergänzung 2026-09-10 – stabiler Halal-Laufstatus v8.7.40
+
+**Entscheidung DEC-021 – Zwischenereignisse dürfen einen laufenden Prüfvorgang nicht optisch beenden**
+
+- Der manuelle Sammellauf besitzt einen persistenten Laufzustand außerhalb des neu gerenderten Halal-Register-DOM.
+- Schaltfläche und Laufbericht zeigen während der gesamten Verarbeitung `x/y`; parallele Doppelstarts sind gesperrt.
+- Erst nach Abschluss aller Kandidaten wird der finale Ergebnisbericht angezeigt.
+- Der Prescreen-Cache wird auf v4 angehoben, damit die mit v8.7.39 eingeführten offiziellen Berichtsdaten unabhängig von älteren lokalen Cache-Einträgen ausgewertet werden.
+- Halal-Entscheidungslogik, Supabase, Parqet und Portfolio-Schutz bleiben unverändert.
+- Ausführliche Evidenz: `docs/HOTFIX_2026-09-10_HALAL_RUN_STATE.md`.
