@@ -22,6 +22,7 @@ ASSETS = {
     "IE00BTN1Y115": {"symbol": "MDT", "cik": "0001613103", "name": "Medtronic plc"},
     "US58933Y1055": {"symbol": "MRK", "cik": "0000310158", "name": "Merck & Co., Inc."},
     "US94106L1098": {"symbol": "WM", "cik": "0000823768", "name": "Waste Management, Inc."},
+    "US4781601046": {"symbol": "JNJ", "cik": "0000200406", "name": "Johnson & Johnson"},
 }
 NASDAQ_HEADERS = {
     "User-Agent": "Mozilla/5.0",
