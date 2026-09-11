@@ -168,12 +168,12 @@ def test_market_value_builder_requires_no_account_or_api_key():
 def test_current_release_loads_fresh_profile_logic():
     html = (ROOT / "app" / "index.html").read_text()
     runtime = (ROOT / "app" / "runtime-config.js").read_text()
-    assert "Portfolio Intelligence · v8.7.50" in html
-    assert "app.js?v=20260911-cardinal1" in html
-    assert "halal-autoscreen.js?v=20260911-cardinal1" in html
+    assert "Portfolio Intelligence · v8.7.51" in html
+    assert "app.js?v=20260911-cardinal2" in html
+    assert "halal-autoscreen.js?v=20260911-cardinal2" in html
     assert "halal-register.js?v=20260910-runstate1" in html
     assert "halal-evidence.js?v=20260910-debtevidence1" in html
-    assert "version:'8.7.50'" in runtime
+    assert "version:'8.7.51'" in runtime
 
 
 def test_cardinal_profile_and_aaoifi_evidence_are_complete_and_identity_safe():
@@ -196,6 +196,8 @@ def test_cardinal_profile_and_aaoifi_evidence_are_complete_and_identity_safe():
         "marketValue36mAvg",
     }
     market_value = metrics["marketValue36mAvg"]["value"]
+    assert metrics["marketValue36mAvg"]["period"] == "2023-07 to 2026-06"
+    assert financial["assets"]["US0028241000"]["metrics"]["marketValue36mAvg"]["period"] == "2023-09 to 2026-08"
     assert metrics["interestIncome"]["value"] / metrics["revenue"]["value"] < 0.05
     assert metrics["interestBearingAssetsUpperBound"]["value"] / market_value < 0.27
     assert metrics["totalDebt"]["value"] / market_value < 0.27
