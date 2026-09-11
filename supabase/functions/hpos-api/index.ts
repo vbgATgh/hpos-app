@@ -16,7 +16,7 @@ Deno.serve(async(req:Request)=>{
   const u=new URL(req.url),r=route(u.pathname),o=req.headers.get("Origin")||"";
   if(req.method==="OPTIONS")return new Response(null,{status:204,headers:cors(o)});
   try{
-    if(r==="/health")return j({ok:true,service:"hpos-api",version:"0.5.4",parqetConfigured:!!Deno.env.get("PARQET_CLIENT_ID"),marketProxy:true,halalMode:"ACCOUNT_FREE"},200,o);
+    if(r==="/health")return j({ok:true,service:"hpos-api",version:"0.5.5",parqetConfigured:!!Deno.env.get("PARQET_CLIENT_ID"),marketProxy:true,halalMode:"ACCOUNT_FREE",parqetIncome:true},200,o);
 
     if(r==="/"&&u.searchParams.get("s")==="yahoo"){
       origin(o);
@@ -35,7 +35,7 @@ Deno.serve(async(req:Request)=>{
     if(r==="/api/parqet/portfolios"){origin(o);return j(await pf("/portfolios",await access(session(req))),200,o)}
     if(r==="/api/parqet/holdings"){origin(o);const id=u.searchParams.get("portfolioId");if(!id)throw err(400,"portfolioId_required");return j(await pf(`/portfolios/${encodeURIComponent(id)}/holdings`,await access(session(req))),200,o)}
     if(r==="/api/parqet/normalized"){origin(o);return j(await normalized(await access(session(req))),200,o)}
-    if(r==="/api/parqet/activities"){origin(o);const id=u.searchParams.get("portfolioId");if(!id)throw err(400,"portfolioId_required");const q=new URLSearchParams();for(const k of ["limit","cursor"]){const v=u.searchParams.get(k);if(v)q.set(k,v)}return j(await pf(`/portfolios/${encodeURIComponent(id)}/activities${q.toString()?`?${q}`:""}`,await access(session(req))),200,o)}
+    if(r==="/api/parqet/activities"){origin(o);const id=u.searchParams.get("portfolioId");if(!id)throw err(400,"portfolioId_required");const q=new URLSearchParams();for(const k of ["limit","cursor","activityType","assetType","holdingId"]){const v=u.searchParams.get(k);if(v)q.set(k,v)}return j(await pf(`/portfolios/${encodeURIComponent(id)}/activities${q.toString()?`?${q}`:""}`,await access(session(req))),200,o)}
     return j({error:"not_found"},404,o);
   }catch(e){
     const s=Number((e as any)?.status)||500,m=String((e as any)?.message||"request_failed");
@@ -155,7 +155,62 @@ function session(req:Request){const m=(req.headers.get("Authorization")||"").mat
 
 async function access(id:string){const s=db(),{data:x,error}=await s.from("hpos_parqet_sessions").select("session_id,access_token,refresh_token,expires_at,created_at").eq("session_id",id).maybeSingle();if(error||!x)throw err(401,"session_expired");if(Date.now()-Date.parse(x.created_at)>TTL){await s.from("hpos_parqet_sessions").delete().eq("session_id",id);throw err(401,"session_expired")}const e=x.expires_at?Date.parse(x.expires_at):0;if(e&&Date.now()<e-60000)return x.access_token;if(!x.refresh_token)throw err(401,"refresh_token_missing");const b=new URLSearchParams({grant_type:"refresh_token",client_id:client(),refresh_token:x.refresh_token}),r=await fetch(TOKEN,{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:b});if(!r.ok)throw err(401,`refresh_failed_${r.status}`);const t=tok(await r.json(),x.refresh_token),{error:ue}=await s.from("hpos_parqet_sessions").update({access_token:t.a,refresh_token:t.r||null,token_type:t.t,scope:t.s,expires_at:new Date(t.e).toISOString(),updated_at:new Date().toISOString()}).eq("session_id",id);if(ue)throw err(500,"session_refresh_store_failed");return t.a}
 
-async function normalized(t:string){const portfolios=await pf("/portfolios",t),portfolioId=findPortfolioId(portfolios);if(!portfolioId)throw err(502,"parqet_portfolio_not_found");const perf=await ppost("/performance",t,{portfolioIds:[portfolioId],interval:{type:"relative",value:"max"},currency:"EUR"});const raw=Array.isArray(perf?.holdings)?perf.holdings:[];if(raw.length<1||raw.length>1000)throw err(502,`parqet_performance_holdings_unplausible_${raw.length}`);let cash=0;const active:any[]=[],watch:any[]=[];for(const x of raw){const a=x?.asset||{},p=x?.position||{};if(p?.isSold===true)continue;const type=String(a?.type||"").toLowerCase(),shares=n(p?.shares),value=n(p?.currentValue),price=n(p?.currentPrice??x?.quote?.price);if(type==="cash"){cash+=value||shares;continue}if(type!=="security")continue;const isin=String(a?.isin||"").toUpperCase();if(!isin||shares<=0)continue;const currentValue=value||shares*price;if(currentValue<=0)continue;const h={name:String(a?.name??x?.nickname??isin),isin,shares,currentPrice:price,currentValue,averagePrice:n(p?.purchasePrice),broker:TR.has(isin)?"TRADE_REPUBLIC":"SCALABLE",halalStatus:"UNKNOWN"};(currentValue<1?watch:active).push(currentValue<1?{...h,candidate:true}:h)}const dedup=new Map<string,any>();for(const h of active){const old=dedup.get(h.isin);if(!old||h.currentValue>old.currentValue)dedup.set(h.isin,h)}const holdings=[...dedup.values()];if(holdings.length<1||holdings.length>200)throw err(502,`parqet_active_count_unplausible_${holdings.length}`);if(!Number.isFinite(cash)||cash<-100000||cash>10000000)throw err(502,"parqet_cash_unplausible");return{source:"PARQET_SUPABASE",portfolioId,holdings,cash,watchCandidates:watch,reconciliation:{rawHoldings:raw.length,activePositions:holdings.length,watchCandidates:watch.length,brokerCounts:{SCALABLE:holdings.filter(x=>x.broker==="SCALABLE").length,TRADE_REPUBLIC:holdings.filter(x=>x.broker==="TRADE_REPUBLIC").length},valuationAtEnd:n(perf?.performance?.valuation?.atIntervalEnd)}}}
+async function normalized(t:string){
+  const portfolios=await pf("/portfolios",t),portfolioId=findPortfolioId(portfolios);
+  if(!portfolioId)throw err(502,"parqet_portfolio_not_found");
+  const perf=await ppost("/performance",t,{portfolioIds:[portfolioId],interval:{type:"relative",value:"max"},currency:"EUR"});
+  const raw=Array.isArray(perf?.holdings)?perf.holdings:[];
+  if(raw.length<1||raw.length>1000)throw err(502,`parqet_performance_holdings_unplausible_${raw.length}`);
+  let cash=0;
+  const active:any[]=[],watch:any[]=[];
+  for(const x of raw){
+    const a=x?.asset||{},p=x?.position||{};
+    if(p?.isSold===true)continue;
+    const type=String(a?.type||"").toLowerCase(),shares=n(p?.shares),value=n(p?.currentValue),price=n(p?.currentPrice??x?.quote?.price);
+    if(type==="cash"){cash+=value||shares;continue}
+    if(type!=="security")continue;
+    const isin=String(a?.isin||"").toUpperCase();
+    if(!isin||shares<=0)continue;
+    const currentValue=value||shares*price;
+    if(currentValue<=0)continue;
+    const h={name:String(a?.name??x?.nickname??isin),isin,shares,currentPrice:price,currentValue,averagePrice:n(p?.purchasePrice),broker:TR.has(isin)?"TRADE_REPUBLIC":"SCALABLE",halalStatus:"UNKNOWN"};
+    (currentValue<1?watch:active).push(currentValue<1?{...h,candidate:true}:h)
+  }
+  const dedup=new Map<string,any>();
+  for(const h of active){const old=dedup.get(h.isin);if(!old||h.currentValue>old.currentValue)dedup.set(h.isin,h)}
+  const holdings=[...dedup.values()];
+  if(holdings.length<1||holdings.length>200)throw err(502,`parqet_active_count_unplausible_${holdings.length}`);
+  if(!Number.isFinite(cash)||cash<-100000||cash>10000000)throw err(502,"parqet_cash_unplausible");
+
+  let dividends:any[]=[],incomeStatus="AVAILABLE";
+  try{
+    const activities=await pf(`/portfolios/${encodeURIComponent(portfolioId)}/activities?limit=500&activityType=dividend`,t);
+    dividends=normalizeDividends(activities,raw)
+  }catch(e){
+    incomeStatus="UNAVAILABLE";
+    console.warn("parqet-income",String((e as any)?.message||"activity_read_failed").slice(0,80))
+  }
+  return{source:"PARQET_SUPABASE",portfolioId,holdings,cash,dividends,watchCandidates:watch,reconciliation:{rawHoldings:raw.length,activePositions:holdings.length,watchCandidates:watch.length,dividendCount:dividends.length,incomeStatus,brokerCounts:{SCALABLE:holdings.filter(x=>x.broker==="SCALABLE").length,TRADE_REPUBLIC:holdings.filter(x=>x.broker==="TRADE_REPUBLIC").length},valuationAtEnd:n(perf?.performance?.valuation?.atIntervalEnd)}}
+}
+
+function normalizeDividends(root:any,rawHoldings:any[]){
+  const activities=Array.isArray(root?.activities)?root.activities:[];
+  const names=new Map<string,string>();
+  for(const x of rawHoldings){const a=x?.asset||{},isin=String(a?.isin||"").toUpperCase();if(isin)names.set(isin,String(a?.name??x?.nickname??isin))}
+  const seen=new Set<string>(),out:any[]=[];
+  for(const x of activities){
+    if(String(x?.type||"").toLowerCase()!=="dividend")continue;
+    const isin=String(x?.asset?.isin||"").toUpperCase(),date=String(x?.datetime||"");
+    if(!/^[A-Z]{2}[A-Z0-9]{9}[0-9]$/.test(isin)||!date||Number.isNaN(Date.parse(date)))continue;
+    const gross=Math.abs(n(x?.amount)),netRaw=Number(x?.amountNet),net=Math.abs(Number.isFinite(netRaw)?netRaw:gross);
+    if(gross<=0&&net<=0)continue;
+    const id=String(x?.id||x?.externalId||`${isin}_${date}_${net.toFixed(8)}`);
+    if(seen.has(id))continue;
+    seen.add(id);
+    out.push({id,type:"DIVIDEND",date,paymentDate:date,name:names.get(isin)||isin,isin,shares:n(x?.shares),gross,net,tax:Math.abs(n(x?.tax)),fee:Math.abs(n(x?.fee)),currency:String(x?.currency||"EUR").toUpperCase(),broker:TR.has(isin)?"TRADE_REPUBLIC":"SCALABLE",source:"PARQET",fx:x?.fx&&typeof x.fx==="object"?{rate:n(x.fx.rate),originalCurrency:String(x.fx.originalCurrency||"").toUpperCase(),originalAmount:n(x.fx.originalAmount),originalAmountNet:n(x.fx.originalAmountNet)}:null})
+  }
+  return out.sort((a,b)=>b.date.localeCompare(a.date))
+}
 
 function findPortfolioId(root:any){const stack=[root],seen=new Set<any>();while(stack.length){const x=stack.shift();if(x==null)continue;if(Array.isArray(x)){stack.push(...x);continue}if(typeof x!=="object"||seen.has(x))continue;seen.add(x);const id=String(x.id??x.portfolioId??x.uuid??"");if(/^[a-f0-9]{24}$/i.test(id))return id;for(const v of Object.values(x))if(v&&typeof v==="object")stack.push(v)}return""}
 function n(v:any){const x=Number(v);return Number.isFinite(x)?x:0}

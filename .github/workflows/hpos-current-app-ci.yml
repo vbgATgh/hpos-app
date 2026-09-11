@@ -15,6 +15,7 @@ on:
       - 'tests/test_oauth_callback_diagnostics.py'
       - 'tests/test_oauth_callback_safari.py'
       - 'tests/test_parqet_reauth_guard.py'
+      - 'tests/test_parqet_income_sync.py'
       - '.github/workflows/hpos-current-app-ci.yml'
   pull_request:
     paths:
@@ -29,6 +30,7 @@ on:
       - 'tests/test_oauth_callback_diagnostics.py'
       - 'tests/test_oauth_callback_safari.py'
       - 'tests/test_parqet_reauth_guard.py'
+      - 'tests/test_parqet_income_sync.py'
       - '.github/workflows/hpos-current-app-ci.yml'
 
 permissions:
@@ -57,3 +59,4 @@ jobs:
           tests/test_oauth_callback_diagnostics.py
           tests/test_oauth_callback_safari.py
           tests/test_parqet_reauth_guard.py
+          tests/test_parqet_income_sync.py
