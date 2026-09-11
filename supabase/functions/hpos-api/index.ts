@@ -16,7 +16,7 @@ Deno.serve(async(req:Request)=>{
   const u=new URL(req.url),r=route(u.pathname),o=req.headers.get("Origin")||"";
   if(req.method==="OPTIONS")return new Response(null,{status:204,headers:cors(o)});
   try{
-    if(r==="/health")return j({ok:true,service:"hpos-api",version:"0.5.5",parqetConfigured:!!Deno.env.get("PARQET_CLIENT_ID"),marketProxy:true,halalMode:"ACCOUNT_FREE",parqetIncome:true},200,o);
+    if(r==="/health")return j({ok:true,service:"hpos-api",version:"0.5.6",parqetConfigured:!!Deno.env.get("PARQET_CLIENT_ID"),marketProxy:true,halalMode:"ACCOUNT_FREE",parqetIncome:true},200,o);
 
     if(r==="/"&&u.searchParams.get("s")==="yahoo"){
       origin(o);
@@ -204,12 +204,20 @@ function normalizeDividends(root:any,rawHoldings:any[]){
     if(!/^[A-Z]{2}[A-Z0-9]{9}[0-9]$/.test(isin)||!date||Number.isNaN(Date.parse(date)))continue;
     const gross=Math.abs(n(x?.amount)),netRaw=Number(x?.amountNet),net=Math.abs(Number.isFinite(netRaw)?netRaw:gross);
     if(gross<=0&&net<=0)continue;
+    const shares=n(x?.shares),tax=Math.abs(n(x?.tax)),fee=Math.abs(n(x?.fee)),currency=String(x?.currency||"EUR").toUpperCase();
     const id=String(x?.id||x?.externalId||`${isin}_${date}_${net.toFixed(8)}`);
-    if(seen.has(id))continue;
-    seen.add(id);
-    out.push({id,type:"DIVIDEND",date,paymentDate:date,name:names.get(isin)||isin,isin,shares:n(x?.shares),gross,net,tax:Math.abs(n(x?.tax)),fee:Math.abs(n(x?.fee)),currency:String(x?.currency||"EUR").toUpperCase(),broker:TR.has(isin)?"TRADE_REPUBLIC":"SCALABLE",source:"PARQET",fx:x?.fx&&typeof x.fx==="object"?{rate:n(x.fx.rate),originalCurrency:String(x.fx.originalCurrency||"").toUpperCase(),originalAmount:n(x.fx.originalAmount),originalAmountNet:n(x.fx.originalAmountNet)}:null})
+    const key=dividendKey(isin,date,gross,net,tax,fee,shares,currency);
+    if(seen.has(key))continue;
+    seen.add(key);
+    const normalizedDate=new Date(date).toISOString();
+    out.push({id,type:"DIVIDEND",date:normalizedDate,paymentDate:normalizedDate,name:names.get(isin)||isin,isin,shares,gross,net,tax,fee,currency,broker:TR.has(isin)?"TRADE_REPUBLIC":"SCALABLE",source:"PARQET",fx:x?.fx&&typeof x.fx==="object"?{rate:n(x.fx.rate),originalCurrency:String(x.fx.originalCurrency||"").toUpperCase(),originalAmount:n(x.fx.originalAmount),originalAmountNet:n(x.fx.originalAmountNet)}:null})
   }
   return out.sort((a,b)=>b.date.localeCompare(a.date))
+}
+
+function dividendKey(isin:string,date:string,gross:number,net:number,tax:number,fee:number,shares:number,currency:string){
+  const day=new Date(date).toISOString().slice(0,10);
+  return[isin,day,gross,net,tax,fee,shares].map((v,i)=>i<2?String(v):Number(v).toFixed(8)).join("|")+`|${currency}`
 }
 
 function findPortfolioId(root:any){const stack=[root],seen=new Set<any>();while(stack.length){const x=stack.shift();if(x==null)continue;if(Array.isArray(x)){stack.push(...x);continue}if(typeof x!=="object"||seen.has(x))continue;seen.add(x);const id=String(x.id??x.portfolioId??x.uuid??"");if(/^[a-f0-9]{24}$/i.test(id))return id;for(const v of Object.values(x))if(v&&typeof v==="object")stack.push(v)}return""}
