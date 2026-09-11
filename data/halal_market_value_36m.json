@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-09-10",
+  "generatedAt": "2026-09-11",
   "period": {
     "start": "2023-09-01",
     "end": "2026-08-31",
@@ -11,7 +11,7 @@
     "accountsRequired": false,
     "priceSource": "NASDAQ_OFFICIAL_HISTORICAL",
     "sharesSource": "SEC_EDGAR_FILINGS",
-    "note": "McCormick includes both reported common-stock classes. Values are historical market-value approximations because reported shares are carried forward between filing dates."
+    "note": "US values use official Nasdaq prices and SEC shares. Cardinal Energy uses issuer-reported weighted-average prices and shares because a free official TSX daily history was not available without an account. All values are documented approximations."
   },
   "assets": {
     "US0028241000": {
@@ -2009,6 +2009,54 @@
           "sharesOutstanding": 2409898597,
           "sharesSourceUrl": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000200406.json",
           "marketValueUsd": 640671542012.45
+        }
+      ]
+    },
+    "CA14150G4007": {
+      "name": "Cardinal Energy Ltd.",
+      "symbol": "CJ.TO",
+      "averageMarketValueCad": 1226389950.08,
+      "method": "ISSUER_REPORTED_PERIOD_AVG_PRICE_X_WEIGHTED_AVG_SHARES",
+      "period": {
+        "start": "2023-07-01",
+        "end": "2026-06-30",
+        "months": 36
+      },
+      "coverageMonths": 36,
+      "priceSourceUrl": "https://cardinalenergy.ca/wp-content/uploads/2026/03/2025-Financial-Statements-FINAL.pdf",
+      "sharesIndexUrl": "https://cardinalenergy.ca/investors/financial-reports/",
+      "periodObservations": [
+        {
+          "period": "2023-H2",
+          "months": 6,
+          "averagePriceCad": 7.1,
+          "weightedAverageShares": 157689789,
+          "marketValueCad": 1119597501.9,
+          "sourceUrl": "https://cardinalenergy.ca/wp-content/uploads/2024/03/2023-FS-FINAL.pdf"
+        },
+        {
+          "period": "FY 2024",
+          "months": 12,
+          "averagePriceCad": 6.67,
+          "weightedAverageShares": 158916583,
+          "marketValueCad": 1059973608.61,
+          "sourceUrl": "https://cardinalenergy.ca/wp-content/uploads/2026/03/2025-Financial-Statements-FINAL.pdf"
+        },
+        {
+          "period": "FY 2025",
+          "months": 12,
+          "averagePriceCad": 7.11,
+          "weightedAverageShares": 160243718,
+          "marketValueCad": 1139332834.98,
+          "sourceUrl": "https://cardinalenergy.ca/wp-content/uploads/2026/03/2025-Financial-Statements-FINAL.pdf"
+        },
+        {
+          "period": "2026-H1",
+          "months": 6,
+          "averagePriceCad": 10.7,
+          "weightedAverageShares": 171974702,
+          "marketValueCad": 1840129311.4,
+          "sourceUrl": "https://cardinalenergy.ca/wp-content/uploads/2026/07/Q2-2026-Financial-Statements-FINAL.pdf"
         }
       ]
     }
