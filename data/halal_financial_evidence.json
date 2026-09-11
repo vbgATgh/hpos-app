@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-09-10",
+  "updatedAt": "2026-09-11",
   "policy": {
     "accountsRequired": false,
     "officialSourcesOnly": true,
@@ -59,7 +59,7 @@
         "marketValue36mAvg": {
           "value": 199064968227.78,
           "unit": "USD",
-          "period": "2023-09 to 2026-08",
+          "period": "2023-07 to 2026-06",
           "months": 36,
           "method": "LAST_TRADING_DAY_EACH_FULL_MONTH_X_LATEST_PRIOR_REPORTED_SHARES",
           "sourceName": "Nasdaq historical prices plus SEC EDGAR reported shares",
@@ -365,6 +365,78 @@
             }
           ],
           "label": "36 full-month average market value; month-end close multiplied by latest prior reported shares"
+        }
+      }
+    },
+    "CA14150G4007": {
+      "name": "Cardinal Energy Ltd.",
+      "ticker": "CJ.TO",
+      "checkedAt": "2026-09-11",
+      "periodEnd": "2025-12-31",
+      "businessProfile": {
+        "description": "Canadian oil and natural gas producer focused on acquiring, exploring and producing low-decline assets in Alberta, British Columbia and Saskatchewan.",
+        "sourceName": "Cardinal Energy Q2 2026 Financial Statements",
+        "sourceUrl": "https://cardinalenergy.ca/wp-content/uploads/2026/07/Q2-2026-Financial-Statements-FINAL.pdf",
+        "period": "Q2 2026",
+        "page": 6
+      },
+      "metrics": {
+        "revenue": {
+          "value": 538342000,
+          "unit": "CAD",
+          "period": "FY 2025",
+          "sourceName": "Cardinal Energy 2025 Audited Financial Statements",
+          "sourceUrl": "https://cardinalenergy.ca/wp-content/uploads/2026/03/2025-Financial-Statements-FINAL.pdf",
+          "page": 3,
+          "label": "Petroleum and natural gas revenue plus processing and other revenue"
+        },
+        "totalDebt": {
+          "value": 238644000,
+          "unit": "CAD",
+          "period": "FY 2025",
+          "sourceName": "Cardinal Energy 2025 Audited Financial Statements",
+          "sourceUrl": "https://cardinalenergy.ca/wp-content/uploads/2026/03/2025-Financial-Statements-FINAL.pdf",
+          "page": 2,
+          "label": "Bank debt plus debentures; lease liabilities excluded"
+        },
+        "interestBearingAssetsUpperBound": {
+          "value": 59211000,
+          "unit": "CAD",
+          "period": "FY 2025",
+          "sourceName": "Cardinal Energy 2025 Audited Financial Statements",
+          "sourceUrl": "https://cardinalenergy.ca/wp-content/uploads/2026/03/2025-Financial-Statements-FINAL.pdf",
+          "page": 2,
+          "label": "All current financial assets, deposits and prepayments plus non-current derivative assets; conservative upper bound"
+        },
+        "interestIncome": {
+          "value": 4674000,
+          "unit": "CAD",
+          "period": "FY 2025",
+          "sourceName": "Cardinal Energy 2025 Audited Financial Statements",
+          "sourceUrl": "https://cardinalenergy.ca/wp-content/uploads/2026/03/2025-Financial-Statements-FINAL.pdf",
+          "page": 3,
+          "label": "Conservative non-permissible-income upper bound: all processing and other revenue; reported other income was nil",
+          "interpretation": "NON_PERMISSIBLE_INCOME_UPPER_BOUND"
+        },
+        "marketValue36mAvg": {
+          "value": 1226389950.08,
+          "unit": "CAD",
+          "period": "2023-09 to 2026-08",
+          "months": 36,
+          "method": "ISSUER_REPORTED_PERIOD_AVG_PRICE_X_WEIGHTED_AVG_SHARES",
+          "sourceName": "Cardinal Energy audited annual and Q2 2026 financial statements",
+          "sourceUrl": "https://cardinalenergy.ca/wp-content/uploads/2026/03/2025-Financial-Statements-FINAL.pdf",
+          "supportingSources": [
+            {
+              "name": "Cardinal Energy 2023 Audited Financial Statements",
+              "url": "https://cardinalenergy.ca/wp-content/uploads/2024/03/2023-FS-FINAL.pdf"
+            },
+            {
+              "name": "Cardinal Energy Q2 2026 Financial Statements",
+              "url": "https://cardinalenergy.ca/wp-content/uploads/2026/07/Q2-2026-Financial-Statements-FINAL.pdf"
+            }
+          ],
+          "label": "36-month weighted average market value from issuer-reported average share prices and weighted-average shares"
         }
       }
     }

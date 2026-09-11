@@ -3,6 +3,18 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 const APP_ORIGIN="https://vbgatgh.github.io";
 const Y1="https://query1.finance.yahoo.com";
 const Y2="https://query2.finance.yahoo.com";
+const OFFICIAL_PROFILES:Record<string,{name:string;sector:string;industry:string;businessSummary:string;website:string;country:string;profileSource:string;profileUrl:string}>={
+  "CJ.TO":{
+    name:"Cardinal Energy Ltd.",
+    sector:"Energy",
+    industry:"Oil & Gas Exploration & Production",
+    businessSummary:"Canadian oil and natural gas producer focused on acquiring, exploring and producing low-decline assets in Alberta, British Columbia and Saskatchewan.",
+    website:"https://cardinalenergy.ca/",
+    country:"Canada",
+    profileSource:"CARDINAL_ENERGY_OFFICIAL",
+    profileUrl:"https://cardinalenergy.ca/"
+  }
+};
 
 Deno.serve(async(req:Request)=>{
   const origin=req.headers.get("Origin")||"";
@@ -19,6 +31,7 @@ Deno.serve(async(req:Request)=>{
 });
 
 async function loadProfile(symbol:string){
+  const official=OFFICIAL_PROFILES[symbol];
   const modules="assetProfile,price,summaryDetail,defaultKeyStatistics,financialData,balanceSheetHistory,balanceSheetHistoryQuarterly,incomeStatementHistory,incomeStatementHistoryQuarterly";
   for(const base of [Y1,Y2]){
     try{
@@ -58,19 +71,20 @@ async function loadProfile(symbol:string){
           interestIncome:!!(inc.interestIncomeNonOperating||inc.interestIncome||inc.netInterestIncome),marketValue36m:mv36.months>=30
         }
       };
+      if(official){Object.assign(baseProfile,official);baseProfile.dataQuality.profile=true}
       if(!baseProfile.businessSummary){const wiki=await wikipediaProfile(baseProfile.name);if(wiki){baseProfile.businessSummary=wiki.summary;baseProfile.profileSource=wiki.source;baseProfile.profileUrl=wiki.url}}
       return baseProfile;
     }catch{}
   }
   const search=await yahooSearch(symbol); if(!search)throw new Error("profile_missing");
-  const q=await yahooQuote(symbol),name=String(search.longname||search.shortname||q?.longName||q?.shortName||symbol),wiki=await wikipediaProfile(name);
-  return {symbol,name,sector:String(search.sector||search.sectorDisp||""),industry:String(search.industry||search.industryDisp||""),
-    businessSummary:String(wiki?.summary||""),employees:0,website:"",city:"",country:"",marketCap:num(q?.marketCap),
+  const q=await yahooQuote(symbol),name=String(search.longname||search.shortname||q?.longName||q?.shortName||symbol),wiki=official?null:await wikipediaProfile(name);
+  return {symbol,name:official?.name||name,sector:official?.sector||String(search.sector||search.sectorDisp||""),industry:official?.industry||String(search.industry||search.industryDisp||""),
+    businessSummary:official?.businessSummary||String(wiki?.summary||""),employees:0,website:official?.website||"",city:"",country:official?.country||"",marketCap:num(q?.marketCap),
     sharesOutstanding:num(q?.sharesOutstanding),marketValue36mAvg:0,marketValue36mMonths:0,currency:String(q?.currency||""),
     quoteType:String(search.quoteType||q?.quoteType||""),revenue:0,totalDebt:0,totalCash:0,cashAndShortTermInvestments:0,
     shortTermInvestments:0,interestBearingAssetsUpperBound:0,interestIncome:0,
-    source:"YAHOO_SEARCH_QUOTE_FALLBACK",profileSource:wiki?.source||"",profileUrl:wiki?.url||"",fetchedAt:new Date().toISOString(),
-    dataQuality:{profile:!!wiki?.summary,revenue:false,debt:false,interestAssets:false,interestIncome:false,marketValue36m:false}};
+    source:"YAHOO_SEARCH_QUOTE_FALLBACK",profileSource:official?.profileSource||wiki?.source||"",profileUrl:official?.profileUrl||wiki?.url||"",fetchedAt:new Date().toISOString(),
+    dataQuality:{profile:!!(official?.businessSummary||wiki?.summary),revenue:false,debt:false,interestAssets:false,interestIncome:false,marketValue36m:false}};
 }
 
 async function avgMarketValue36m(symbol:string,shares:number){
@@ -93,7 +107,7 @@ async function yahooSearch(symbol:string){for(const base of [Y1,Y2]){try{const r
 async function yahooQuote(symbol:string){for(const base of [Y1,Y2]){try{const r=await fetch(`${base}/v7/finance/quote?symbols=${encodeURIComponent(symbol)}`,{headers:{Accept:"application/json","User-Agent":"Mozilla/5.0 HPOS/1.0"}});if(!r.ok)continue;const d=await r.json(),x=d?.quoteResponse?.result?.[0];if(x)return x}catch{}}return null}
 async function wikipediaProfile(companyName:string){
  const query=cleanCompanyName(companyName);if(!query)return null;
- for(const lang of ["de","en"]){try{const api=`https://${lang}.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)}&srlimit=5&format=json&origin=*`;const r=await fetch(api,{headers:{Accept:"application/json","User-Agent":"HPOS/1.0 company-profile"}});if(!r.ok)continue;const d=await r.json(),rows=Array.isArray(d?.query?.search)?d.query.search:[],candidate=rows.find((x:any)=>titleMatches(query,String(x?.title||"")))||rows[0];if(!candidate?.title)continue;const sr=await fetch(`https://${lang}.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(candidate.title)}`,{headers:{Accept:"application/json","User-Agent":"HPOS/1.0 company-profile"}});if(!sr.ok)continue;const s=await sr.json(),extract=String(s?.extract||"").replace(/\s+/g," ").trim();if(!extract||!summaryLooksCorporate(extract,query))continue;return{summary:extract.slice(0,900),source:`WIKIPEDIA_${lang.toUpperCase()}`,url:String(s?.content_urls?.desktop?.page||"")}}catch{}}return null}
+ for(const lang of ["de","en"]){try{const api=`https://${lang}.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)}&srlimit=5&format=json&origin=*`;const r=await fetch(api,{headers:{Accept:"application/json","User-Agent":"HPOS/1.0 company-profile"}});if(!r.ok)continue;const d=await r.json(),rows=Array.isArray(d?.query?.search)?d.query.search:[],candidate=rows.find((x:any)=>titleMatches(query,String(x?.title||"")));if(!candidate?.title)continue;const sr=await fetch(`https://${lang}.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(candidate.title)}`,{headers:{Accept:"application/json","User-Agent":"HPOS/1.0 company-profile"}});if(!sr.ok)continue;const s=await sr.json(),extract=String(s?.extract||"").replace(/\s+/g," ").trim();if(!extract||!summaryLooksCorporate(extract,query))continue;return{summary:extract.slice(0,900),source:`WIKIPEDIA_${lang.toUpperCase()}`,url:String(s?.content_urls?.desktop?.page||"")}}catch{}}return null}
 function cleanCompanyName(v:string){return String(v||"").replace(/\b(AG|SE|PLC|LTD\.?|LIMITED|INC\.?|CORPORATION|CORP\.?|COMPANY|CO\.?|NV|SA|S\.A\.|HOLDINGS?)\b/gi," ").replace(/\s+/g," ").trim()}
 function titleMatches(q:string,t:string){const a=normWords(q),b=normWords(t);if(!a.length||!b.length)return false;return a.some(w=>w.length>=3&&b.includes(w))}
 function normWords(v:string){return String(v||"").toLowerCase().replace(/[^a-z0-9äöüß]+/gi," ").split(/\s+/).filter(Boolean)}

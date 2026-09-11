@@ -49,6 +49,7 @@ def test_first_curated_report_batch_has_only_traceable_partial_metrics():
         "US58933Y1055": 5,
         "US94106L1098": 4,
         "US4781601046": 4,
+        "CA14150G4007": 5,
     }
     assert set(assets) == set(expected_coverage)
     for isin, expected in expected_coverage.items():
@@ -60,7 +61,7 @@ def test_first_curated_report_batch_has_only_traceable_partial_metrics():
             assert isinstance(metric["value"], (int, float))
             assert math.isfinite(metric["value"])
             assert metric["value"] > 0
-            assert metric["unit"] == "USD"
+            assert metric["unit"] in {"USD", "CAD"}
             assert metric["period"]
             assert metric["sourceName"]
             assert metric["sourceUrl"].startswith("https://")
@@ -91,6 +92,27 @@ def test_36_month_market_values_are_complete_and_reproducible():
     assert market["policy"]["sharesSource"] == "SEC_EDGAR_FILINGS"
     assert set(market["assets"]) == set(financial["assets"])
     for isin, asset in market["assets"].items():
+        if isin == "CA14150G4007":
+            periods = asset["periodObservations"]
+            assert asset["method"] == "ISSUER_REPORTED_PERIOD_AVG_PRICE_X_WEIGHTED_AVG_SHARES"
+            assert asset["period"] == {"start": "2023-07-01", "end": "2026-06-30", "months": 36}
+            assert sum(item["months"] for item in periods) == 36
+            for item in periods:
+                assert item["averagePriceCad"] > 0
+                assert item["weightedAverageShares"] > 0
+                assert math.isclose(
+                    item["marketValueCad"],
+                    item["averagePriceCad"] * item["weightedAverageShares"],
+                    rel_tol=0,
+                    abs_tol=0.01,
+                )
+                assert item["sourceUrl"].startswith("https://cardinalenergy.ca/")
+            calculated = sum(item["marketValueCad"] * item["months"] for item in periods) / 36
+            assert math.isclose(asset["averageMarketValueCad"], calculated, rel_tol=0, abs_tol=0.01)
+            metric = financial["assets"][isin]["metrics"]["marketValue36mAvg"]
+            assert metric["value"] == asset["averageMarketValueCad"]
+            assert metric["months"] == 36
+            continue
         observations = asset["observations"]
         assert len(observations) == 36
         assert len({item["month"] for item in observations}) == 36
@@ -146,12 +168,38 @@ def test_market_value_builder_requires_no_account_or_api_key():
 def test_current_release_loads_fresh_profile_logic():
     html = (ROOT / "app" / "index.html").read_text()
     runtime = (ROOT / "app" / "runtime-config.js").read_text()
-    assert "Portfolio Intelligence · v8.7.49" in html
-    assert "app.js?v=20260911-income3" in html
-    assert "halal-autoscreen.js?v=20260910-debtevidence1" in html
+    assert "Portfolio Intelligence · v8.7.50" in html
+    assert "app.js?v=20260911-cardinal1" in html
+    assert "halal-autoscreen.js?v=20260911-cardinal1" in html
     assert "halal-register.js?v=20260910-runstate1" in html
     assert "halal-evidence.js?v=20260910-debtevidence1" in html
-    assert "version:'8.7.49'" in runtime
+    assert "version:'8.7.50'" in runtime
+
+
+def test_cardinal_profile_and_aaoifi_evidence_are_complete_and_identity_safe():
+    import json
+
+    profile = source()
+    financial = json.loads((ROOT / "data" / "halal_financial_evidence.json").read_text())
+    cardinal = financial["assets"]["CA14150G4007"]
+    metrics = cardinal["metrics"]
+    assert '"CJ.TO"' in profile
+    assert "CARDINAL_ENERGY_OFFICIAL" in profile
+    assert "rows.find((x:any)=>titleMatches" in profile
+    assert ")||rows[0]" not in profile
+    assert cardinal["ticker"] == "CJ.TO"
+    assert set(metrics) == {
+        "revenue",
+        "totalDebt",
+        "interestBearingAssetsUpperBound",
+        "interestIncome",
+        "marketValue36mAvg",
+    }
+    market_value = metrics["marketValue36mAvg"]["value"]
+    assert metrics["interestIncome"]["value"] / metrics["revenue"]["value"] < 0.05
+    assert metrics["interestBearingAssetsUpperBound"]["value"] / market_value < 0.27
+    assert metrics["totalDebt"]["value"] / market_value < 0.27
+    assert metrics["interestIncome"]["interpretation"] == "NON_PERMISSIBLE_INCOME_UPPER_BOUND"
 
 
 def test_debt_evidence_is_lease_adjusted_and_unquantified_debt_stays_open():
