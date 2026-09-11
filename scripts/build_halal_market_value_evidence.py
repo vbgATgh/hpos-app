@@ -24,6 +24,38 @@ ASSETS = {
     "US94106L1098": {"symbol": "WM", "cik": "0000823768", "name": "Waste Management, Inc."},
     "US4781601046": {"symbol": "JNJ", "cik": "0000200406", "name": "Johnson & Johnson"},
 }
+CARDINAL_ISIN = "CA14150G4007"
+CARDINAL_REPORTS_URL = "https://cardinalenergy.ca/investors/financial-reports/"
+CARDINAL_PERIODS = [
+    {
+        "period": "2023-H2",
+        "months": 6,
+        "averagePriceCad": 7.10,
+        "weightedAverageShares": 157_689_789,
+        "sourceUrl": "https://cardinalenergy.ca/wp-content/uploads/2024/03/2023-FS-FINAL.pdf",
+    },
+    {
+        "period": "FY 2024",
+        "months": 12,
+        "averagePriceCad": 6.67,
+        "weightedAverageShares": 158_916_583,
+        "sourceUrl": "https://cardinalenergy.ca/wp-content/uploads/2026/03/2025-Financial-Statements-FINAL.pdf",
+    },
+    {
+        "period": "FY 2025",
+        "months": 12,
+        "averagePriceCad": 7.11,
+        "weightedAverageShares": 160_243_718,
+        "sourceUrl": "https://cardinalenergy.ca/wp-content/uploads/2026/03/2025-Financial-Statements-FINAL.pdf",
+    },
+    {
+        "period": "2026-H1",
+        "months": 6,
+        "averagePriceCad": 10.70,
+        "weightedAverageShares": 171_974_702,
+        "sourceUrl": "https://cardinalenergy.ca/wp-content/uploads/2026/07/Q2-2026-Financial-Statements-FINAL.pdf",
+    },
+]
 NASDAQ_HEADERS = {
     "User-Agent": "Mozilla/5.0",
     "Accept": "application/json, text/plain, */*",
@@ -148,19 +180,19 @@ def latest_prior(points: list[dict], date: str) -> dict:
 def main() -> None:
     result = {
         "schemaVersion": 1,
-        "generatedAt": "2026-09-10",
+        "generatedAt": "2026-09-11",
         "period": {"start": START.isoformat(), "end": END.isoformat(), "months": 36},
         "method": "LAST_TRADING_DAY_EACH_FULL_MONTH_X_LATEST_PRIOR_REPORTED_SHARES",
         "policy": {
             "accountsRequired": False,
             "priceSource": "NASDAQ_OFFICIAL_HISTORICAL",
             "sharesSource": "SEC_EDGAR_FILINGS",
-            "note": "McCormick includes both reported common-stock classes. Values are historical market-value approximations because reported shares are carried forward between filing dates.",
+            "note": "US values use official Nasdaq prices and SEC shares. Cardinal Energy uses issuer-reported weighted-average prices and shares because a free official TSX daily history was not available without an account. All values are documented approximations.",
         },
         "assets": {},
     }
     financials = json.loads(FINANCIAL_EVIDENCE.read_text())
-    financials["updatedAt"] = "2026-09-10"
+    financials["updatedAt"] = "2026-09-11"
     for isin, asset in ASSETS.items():
         price_url, prices = nasdaq_month_ends(asset["symbol"])
         shares_url, share_points = mkc_filing_shares() if asset["symbol"] == "MKC" else companyfacts_shares(asset["cik"])
@@ -196,6 +228,27 @@ def main() -> None:
             "supportingSources": [{"name": "SEC EDGAR shares", "url": shares_url}],
             "label": "36 full-month average market value; month-end close multiplied by latest prior reported shares",
         }
+    cardinal_periods = []
+    weighted_total = 0.0
+    for item in CARDINAL_PERIODS:
+        market_value = round(item["averagePriceCad"] * item["weightedAverageShares"], 2)
+        cardinal_periods.append({**item, "marketValueCad": market_value})
+        weighted_total += market_value * item["months"]
+    cardinal_average = round(weighted_total / 36, 2)
+    expected_cardinal = financials["assets"][CARDINAL_ISIN]["metrics"]["marketValue36mAvg"]["value"]
+    if cardinal_average != expected_cardinal:
+        raise ValueError(f"Cardinal market value mismatch: {cardinal_average} != {expected_cardinal}")
+    result["assets"][CARDINAL_ISIN] = {
+        "name": "Cardinal Energy Ltd.",
+        "symbol": "CJ.TO",
+        "averageMarketValueCad": cardinal_average,
+        "method": "ISSUER_REPORTED_PERIOD_AVG_PRICE_X_WEIGHTED_AVG_SHARES",
+        "period": {"start": "2023-07-01", "end": "2026-06-30", "months": 36},
+        "coverageMonths": 36,
+        "priceSourceUrl": CARDINAL_PERIODS[1]["sourceUrl"],
+        "sharesIndexUrl": CARDINAL_REPORTS_URL,
+        "periodObservations": cardinal_periods,
+    }
     MARKET_EVIDENCE.write_text(json.dumps(result, indent=2, ensure_ascii=False) + "\n")
     FINANCIAL_EVIDENCE.write_text(json.dumps(financials, indent=2, ensure_ascii=False) + "\n")
 
