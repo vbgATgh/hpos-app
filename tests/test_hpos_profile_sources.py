@@ -146,12 +146,12 @@ def test_market_value_builder_requires_no_account_or_api_key():
 def test_current_release_loads_fresh_profile_logic():
     html = (ROOT / "app" / "index.html").read_text()
     runtime = (ROOT / "app" / "runtime-config.js").read_text()
-    assert "Portfolio Intelligence · v8.7.43" in html
+    assert "Portfolio Intelligence · v8.7.44" in html
     assert "app.js?v=20260910-watchidentity1" in html
     assert "halal-autoscreen.js?v=20260910-debtevidence1" in html
     assert "halal-register.js?v=20260910-runstate1" in html
     assert "halal-evidence.js?v=20260910-debtevidence1" in html
-    assert "version:'8.7.43'" in runtime
+    assert "version:'8.7.44'" in runtime
 
 
 def test_debt_evidence_is_lease_adjusted_and_unquantified_debt_stays_open():
