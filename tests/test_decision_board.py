@@ -13,10 +13,10 @@ def test_decision_board_is_mounted_and_versioned():
     assert 'id="decisionBoardSummary"' in HTML
     assert 'id="decisionBoardFilters"' in HTML
     assert 'id="decisionBoard"' in HTML
-    assert 'decision-board.css?v=20260911-board1' in HTML
-    assert 'decision-board.js?v=20260911-board1' in HTML
-    assert "Portfolio Intelligence · v8.7.48" in HTML
-    assert "version:'8.7.48'" in RUNTIME
+    assert 'decision-board.css?v=20260911-board2' in HTML
+    assert 'decision-board.js?v=20260911-board2' in HTML
+    assert "Portfolio Intelligence · v8.7.49" in HTML
+    assert "version:'8.7.49'" in RUNTIME
 
 
 def test_gate_order_is_fail_closed():
@@ -41,3 +41,12 @@ def test_board_explains_each_template_without_trade_instruction():
 def test_gate_two_is_not_misrepresented_as_released():
     assert "Halalkonform · Gate 2 freigegeben" not in HARDENING
     assert "Gate 1 bestanden · Gate 2 prüfbar" in HARDENING
+
+
+def test_mobile_board_defaults_to_top_five_and_keeps_details_optional():
+    assert "filtered.slice(0,5)" in BOARD
+    assert "Nächste Entscheidungen" in BOARD
+    assert "weitere Werte anzeigen" in BOARD
+    assert "Auf Top 5 reduzieren" in BOARD
+    assert '<details class="decisionDetails">' in BOARD
+    assert "Investment-Akte öffnen" in BOARD
