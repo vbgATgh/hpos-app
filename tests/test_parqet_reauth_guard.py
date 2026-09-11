@@ -14,6 +14,6 @@ def test_reauth_guard_expires_instead_of_blocking_forever():
 def test_current_release_keeps_reauth_guard_and_cache_bust():
     html = (ROOT / "app" / "index.html").read_text()
     runtime = (ROOT / "app" / "runtime-config.js").read_text()
-    assert "Portfolio Intelligence · v8.7.47" in html
+    assert "Portfolio Intelligence · v8.7.48" in html
     assert "parqet-supabase-adapter.js?v=20260911-income4" in html
-    assert "version:'8.7.47'" in runtime
+    assert "version:'8.7.48'" in runtime
