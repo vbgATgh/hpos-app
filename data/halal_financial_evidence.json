@@ -59,7 +59,7 @@
         "marketValue36mAvg": {
           "value": 199064968227.78,
           "unit": "USD",
-          "period": "2023-07 to 2026-06",
+          "period": "2023-09 to 2026-08",
           "months": 36,
           "method": "LAST_TRADING_DAY_EACH_FULL_MONTH_X_LATEST_PRIOR_REPORTED_SHARES",
           "sourceName": "Nasdaq historical prices plus SEC EDGAR reported shares",
@@ -421,7 +421,7 @@
         "marketValue36mAvg": {
           "value": 1226389950.08,
           "unit": "CAD",
-          "period": "2023-09 to 2026-08",
+          "period": "2023-07 to 2026-06",
           "months": 36,
           "method": "ISSUER_REPORTED_PERIOD_AVG_PRICE_X_WEIGHTED_AVG_SHARES",
           "sourceName": "Cardinal Energy audited annual and Q2 2026 financial statements",
