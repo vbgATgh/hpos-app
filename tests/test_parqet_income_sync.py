@@ -41,6 +41,14 @@ def test_frontend_preserves_validated_dividends_locally():
     assert "seen.has(key)" in ADAPTER
 
 
+def test_live_state_exposes_dividends_to_monthly_income_calculation():
+    app = (ROOT / "app" / "app.js").read_text()
+    hardening = (ROOT / "app" / "mvp-hardening.js").read_text()
+    assert "dividends:dividends.map(x=>({...x}))" in app
+    assert "window.HPOS_STATE_SNAPSHOT?.()" in hardening
+    assert "const m=currentMonthIncome()" in hardening
+
+
 def test_frontend_semantically_deduplicates_parqet_timestamp_variants():
     key_fn = re.search(r"function dividendKey\([^}]+\}", ADAPTER)
     assert key_fn
@@ -58,8 +66,9 @@ def test_frontend_semantically_deduplicates_parqet_timestamp_variants():
 def test_release_exposes_income_capability_without_new_provider():
     html = (ROOT / "app" / "index.html").read_text()
     runtime = (ROOT / "app" / "runtime-config.js").read_text()
-    assert "Portfolio Intelligence · v8.7.45" in html
+    assert "Portfolio Intelligence · v8.7.46" in html
     assert "parqet-supabase-adapter.js?v=20260911-income2" in html
-    assert "version:'8.7.45'" in runtime
+    assert "app.js?v=20260911-income3" in html
+    assert "version:'8.7.46'" in runtime
     assert 'parqetIncome:true' in API
     assert 'version:"0.5.6"' in API
