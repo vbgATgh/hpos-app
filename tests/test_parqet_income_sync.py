@@ -81,9 +81,9 @@ def test_frontend_semantically_deduplicates_parqet_timestamp_variants():
 def test_release_exposes_income_capability_without_new_provider():
     html = (ROOT / "app" / "index.html").read_text()
     runtime = (ROOT / "app" / "runtime-config.js").read_text()
-    assert "Portfolio Intelligence · v8.7.53" in html
+    assert "Portfolio Intelligence · v8.7.54" in html
     assert "parqet-supabase-adapter.js?v=20260911-income4" in html
     assert "app.js?v=20260911-cardinal2" in html
-    assert "version:'8.7.53'" in runtime
+    assert "version:'8.7.54'" in runtime
     assert 'parqetIncome:true' in API
     assert 'version:"0.5.7"' in API

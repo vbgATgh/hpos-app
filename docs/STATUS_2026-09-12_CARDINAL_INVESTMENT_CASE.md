@@ -32,3 +32,7 @@ Alle Quellen sind im kanonischen Investment-Case mit direkter URL hinterlegt.
 ## v8.7.53 Darstellungsfix
 
 Die Investment-Akte wird beim ersten Öffnen auch dann eingeblendet, wenn das ältere Portfolio-Fit-Modul erst verzögert in den DOM eingesetzt wird. Gestaffelte Wiederholungsversuche beseitigen das auf dem Gerät nachgewiesene Initialisierungsrennen; Entscheidungsdaten und Gate-Zustände bleiben unverändert.
+
+## v8.7.54 Interaktionsfix
+
+Klicks auf die aufklappbaren Gate-Abschnitte lösen keinen Neuaufbau der Investment-Akte mehr aus. Der geöffnete Zustand bleibt erhalten. Portfolio Fit übernimmt außerdem den bereits geladenen, vollständigen Gate-1-PASS des Investment-Case und zeigt nicht länger fälschlich LOCKED.
