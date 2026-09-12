@@ -9,6 +9,7 @@ HTML = (ROOT / "app/index.html").read_text()
 JS = (ROOT / "app/investment-case.js").read_text()
 POLICY = json.loads((ROOT / "data/portfolio_fit_policy.json").read_text())
 THESES = json.loads((ROOT / "data/thesis_registry.json").read_text())
+CATALOG = json.loads((ROOT / "data/asset_catalog.json").read_text())
 CURATED = json.loads((ROOT / "data/fundamental/evidence_curated.json").read_text())
 SIGNAL_BUILDER = (ROOT / "scripts/build_thesis_signals.py").read_text()
 
@@ -51,6 +52,7 @@ def test_cardinal_has_bucket_thesis_and_primary_sources():
     assert THESES["assets"]["CARDINAL_ENERGY"]["role"] == "ENERGY_INCOME_SATELLITE"
     assert len(CASE["sources"]) >= 4
     assert all(source["tier"] == "PRIMARY" for source in CASE["sources"])
+    assert CATALOG["assets"]["CARDINAL_ENERGY"]["isin"] == CASE["isin"]
 
 
 def test_cardinal_metrics_match_documented_calculations():

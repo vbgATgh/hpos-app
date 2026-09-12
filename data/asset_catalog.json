@@ -1,6 +1,6 @@
 {
   "schemaVersion":1,
-  "asOf":"2026-08-28",
+  "asOf":"2026-09-12",
   "note":"Public identity/role metadata only. Assets are replaceable records; no private holdings or broker state.",
   "assets":{
     "NOVO_NORDISK":{"name":"Novo Nordisk","isin":"DK0062498333","aliases":["Novo Nordisk B","Novo Nordisk"],"role":"HEALTHCARE","family":"HEALTHCARE"},
@@ -18,6 +18,8 @@
     "FILTRONIC":{"name":"Filtronic","isin":null,"aliases":["Filtronic","Filtronic PLC"],"role":"SPECIAL_SITUATION","family":"SPECIAL_SITUATION"},
     "LAGERCRANTZ":{"name":"Lagercrantz","isin":null,"aliases":["Lagercrantz","Lagercrantz Group"],"role":"COMPOUNDER","family":"COMPOUNDER"},
     "JUDGES_SCIENTIFIC":{"name":"Judges Scientific","isin":null,"aliases":["Judges Scientific","Judges Scientific PLC"],"role":"COMPOUNDER","family":"COMPOUNDER"},
-    "BUREAU_VERITAS":{"name":"Bureau Veritas","isin":"FR0006174348","aliases":["Bureau Veritas"],"role":"DEFENSIVE_COMPOUNDER","family":"COMPOUNDER"}
+    "BUREAU_VERITAS":{"name":"Bureau Veritas","isin":"FR0006174348","aliases":["Bureau Veritas"],"role":"DEFENSIVE_COMPOUNDER","family":"COMPOUNDER"},
+    "4IMPRINT_GROUP":{"name":"4imprint Group plc","isin":"GB0006640972","aliases":["4imprint Group","4imprint Group plc","4imprint"],"role":"ROTATION_SOURCE","family":"ROTATION_SOURCE"},
+    "CARDINAL_ENERGY":{"name":"Cardinal Energy Ltd.","isin":"CA14150G4007","aliases":["Cardinal Energy","Cardinal Energy Ltd.","CJ"],"role":"ENERGY_INCOME_SATELLITE","family":"ENERGY"}
   }
 }
