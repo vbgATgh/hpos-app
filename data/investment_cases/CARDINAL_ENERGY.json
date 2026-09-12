@@ -1,0 +1,109 @@
+{
+  "schemaVersion": 1,
+  "assetKey": "CARDINAL_ENERGY",
+  "isin": "CA14150G4007",
+  "name": "Cardinal Energy Ltd.",
+  "asOf": "2026-09-12",
+  "evidenceCutoff": "2026-09-12",
+  "gate1": {
+    "state": "PASS",
+    "label": "HALALKONFORM",
+    "basis": "HPOS AAOIFI Rule Engine mit vollständiger offizieller Finanz- und Geschäftsfeldevidenz."
+  },
+  "gate2": {
+    "state": "REVIEW",
+    "label": "REVIEW · KEINE AUFSTOCKUNG",
+    "bucket": "Turbo",
+    "role": "Energy Income Satellite",
+    "basis": "Die Einzelposition liegt deutlich unter dem 25-%-Hard-Cap. Der Turbo-Bucket liegt im zuletzt sichtbaren Depot jedoch über seinem 30-%-Ziel; ohne freigegebenes Toleranzband entsteht keine automatische PASS-Freigabe.",
+    "blockingRule": "PORTFOLIO_BEATS_SINGLE_STOCK"
+  },
+  "gate3": {
+    "state": "SUPPORTED",
+    "label": "THESE BELEGT",
+    "signal": "STRENGTHENING",
+    "thesis": [
+      "Niedrige Förderratenrückgänge der konventionellen Anlagen stabilisieren die Basisproduktion.",
+      "Reford 1 liefert über Nennkapazität und senkt die operativen Stückkosten.",
+      "Reford 2 erweitert den Wachstumspfad, erhöht bis zur Inbetriebnahme aber das Ausführungs- und Kapitalrisiko.",
+      "Der monatliche Dividendensatz von 0,06 CAD je Aktie wird durch laufenden freien Cashflow gestützt."
+    ],
+    "falsification": [
+      "Reford 1 fällt ohne geplante Wartung nachhaltig unter seine Nennkapazität.",
+      "Reford 2 erleidet eine materielle Verzögerung oder Kostenüberschreitung.",
+      "Die Verschuldung steigt trotz normaler Rohstoffpreise und positiver operativer Mittelzuflüsse dauerhaft.",
+      "Die Dividende muss wegen fehlender Cashflow-Deckung gekürzt werden."
+    ]
+  },
+  "gate4": {
+    "state": "STRENGTHENING",
+    "label": "FUNDAMENTALS STÄRKEND",
+    "period": "Q2 2026 / H1 2026",
+    "metrics": [
+      {"label": "Produktion Q2", "value": "25.636 boe/Tag", "change": "+21 % ggü. Vorjahr", "tone": "positive"},
+      {"label": "Öl- und Gasumsatz Q2", "value": "231,6 Mio. CAD", "change": "+82 %", "tone": "positive"},
+      {"label": "Bereinigter Mittelzufluss Q2", "value": "123,4 Mio. CAD", "change": "+150 %", "tone": "positive"},
+      {"label": "Freier Cashflow Q2", "value": "64,5 Mio. CAD", "change": "positiv", "tone": "positive"},
+      {"label": "Netto-Schulden", "value": "172,7 Mio. CAD", "change": "-39 % seit 31.12.2025", "tone": "positive"},
+      {"label": "Netto-Betriebskosten", "value": "20,38 CAD/boe", "change": "-12 %", "tone": "positive"}
+    ],
+    "risks": [
+      "Cardinal ist aktuell beim Rohöl ungesichert und damit stark vom Ölpreis abhängig.",
+      "Reford 2 bindet Kapital und soll erst ab Q4 2027 wesentlich zum Umsatz beitragen.",
+      "Die ausstehenden Aktien lagen Ende Q2 2026 rund 9 % über dem Vorjahreswert."
+    ]
+  },
+  "gate5": {
+    "state": "FAIR_TO_DEMANDING",
+    "label": "FAIR BIS ANSPRUCHSVOLL",
+    "marketPriceCad": 12.23,
+    "marketPriceAsOf": "2026-09-02",
+    "metrics": [
+      {"label": "Marktkapitalisierung", "value": "2,15 Mrd. CAD"},
+      {"label": "Unternehmenswert", "value": "2,32 Mrd. CAD"},
+      {"label": "EV / 2P-NPV10 vor Steuern", "value": "1,17×"},
+      {"label": "Kurs / annualisierter H1-FCF", "value": "12,1×"},
+      {"label": "Kurs / annualisierter H1-AFF", "value": "5,8×"},
+      {"label": "Indikative Dividendenrendite", "value": "5,9 %"}
+    ],
+    "basis": "Der Marktwert liegt über dem vorsteuerlichen 2P-NPV10 der gebuchten Reserven. Nicht gebuchte Thermalprojekte schaffen Upside, während die H1-Hochrechnung stark vom Ölpreis abhängt. Daraus folgt kein Sicherheitsabschlag für eine Aufstockung."
+  },
+  "gate6": {
+    "state": "WAIT",
+    "label": "ABWARTEN · NICHT HINTERHERLAUFEN",
+    "marketPriceCad": 12.23,
+    "metrics": [
+      {"label": "Abstand 50-Tage-Mittel", "value": "+8,9 %"},
+      {"label": "Abstand 200-Tage-Mittel", "value": "+16,2 %"},
+      {"label": "Abstand 52-Wochen-Hoch", "value": "-6,9 %"}
+    ],
+    "basis": "Der Trend ist positiv, der Kurs liegt aber deutlich über den mittleren Trendlinien und nahe am 52-Wochen-Hoch. Momentum allein ist nach HPOS keine Aufstockungsbegründung."
+  },
+  "gate7": {
+    "state": "CURRENT",
+    "label": "EVIDENZ AKTUELL",
+    "signal": "STRENGTHENING",
+    "latestMaterialEvent": "Q2 2026: Reford 1 über Nennkapazität, starke Mittelzuflüsse, sinkende Nettoverschuldung.",
+    "nextReview": "2026-11-05",
+    "nextReviewReason": "Q3-2026-Bericht nach Börsenschluss",
+    "basis": "Nach dem Q2-Bericht folgten bis zum Evidenzstichtag ausschließlich reguläre Dividendenmeldungen; kein neuer offizieller These-Bruch wurde gefunden."
+  },
+  "gate8": {
+    "state": "EXTERNAL_ONLY",
+    "label": "NUR EXTERN BEIM BROKER",
+    "basis": "HPOS erzeugt keine Order. Wegen Gate 2 REVIEW und Gate 6 WAIT besteht keine Aufstockungsfreigabe."
+  },
+  "decision": {
+    "state": "HOLD_REVIEW",
+    "label": "BESTAND BEOBACHTEN",
+    "summary": "Operativ und fundamental verbessert, aber Portfolio-Fit nicht freigegeben und Timing ohne Sicherheitsmarge. Keine automatische Aufstockung.",
+    "nextStep": "Q3-Bericht am 5. November 2026 gegen Reford-2-Zeitplan, Nettoverschuldung und Cashflow-Deckung der Dividende prüfen."
+  },
+  "sources": [
+    {"title": "Cardinal Energy Q2 2026 Ergebnis", "url": "https://cardinalenergy.ca/wp-content/uploads/2026/07/July-28-2026-Press-Release-Q2-Final.pdf", "tier": "PRIMARY"},
+    {"title": "Cardinal Energy Q2 2026 Finanzbericht", "url": "https://cardinalenergy.ca/wp-content/uploads/2026/07/Q2-2026-Financial-Statements-FINAL.pdf", "tier": "PRIMARY"},
+    {"title": "Cardinal Energy 2025 Reserven", "url": "https://cardinalenergy.ca/wp-content/uploads/2026/02/February-23-2026-Reserves-Final.pdf", "tier": "PRIMARY"},
+    {"title": "Cardinal Energy Dividenden", "url": "https://cardinalenergy.ca/investors/dividend/", "tier": "PRIMARY"},
+    {"title": "Cardinal Energy News Releases", "url": "https://cardinalenergy.ca/investors/news-releases/", "tier": "PRIMARY"}
+  ]
+}

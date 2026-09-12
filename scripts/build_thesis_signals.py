@@ -4,7 +4,7 @@ import datetime as dt, json, re
 from collections import defaultdict
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
-EVID=ROOT/'data'/'fundamental'/'evidence.json'; THESIS=ROOT/'data'/'thesis_registry.json'; POLICY=ROOT/'config'/'thesis_evidence_policy.json'; OUT=ROOT/'data'/'fundamental'/'thesis_signals.json'
+EVID=ROOT/'data'/'fundamental'/'evidence.json'; CURATED=ROOT/'data'/'fundamental'/'evidence_curated.json'; THESIS=ROOT/'data'/'thesis_registry.json'; POLICY=ROOT/'config'/'thesis_evidence_policy.json'; OUT=ROOT/'data'/'fundamental'/'thesis_signals.json'
 
 def now(): return dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace('+00:00','Z')
 def period_rank(p):
@@ -37,9 +37,9 @@ def metric_signal(item, prior, rule):
         return 'NEUTRAL',change,'absolute_change'
     return 'INSUFFICIENT',change,'no_rule'
 def main():
-    e=json.loads(EVID.read_text()) if EVID.exists() else {'items':[]}; t=json.loads(THESIS.read_text())['assets']; p=json.loads(POLICY.read_text()); rules=p['metricRules']
+    e=json.loads(EVID.read_text()) if EVID.exists() else {'items':[]}; curated=json.loads(CURATED.read_text()) if CURATED.exists() else {'items':[]}; t=json.loads(THESIS.read_text())['assets']; p=json.loads(POLICY.read_text()); rules=p['metricRules']
     grouped=defaultdict(list)
-    for x in e.get('items',[]):
+    for x in [*e.get('items',[]),*curated.get('items',[])]:
         if x.get('metric') and x.get('assetKey') in t: grouped[(x['assetKey'],x['metric'])].append(x)
     metric_rows=[]; by_asset=defaultdict(list)
     for (asset,metric),rows in grouped.items():
