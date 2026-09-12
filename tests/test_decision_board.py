@@ -15,8 +15,8 @@ def test_decision_board_is_mounted_and_versioned():
     assert 'id="decisionBoard"' in HTML
     assert 'decision-board.css?v=20260911-board2' in HTML
     assert 'decision-board.js?v=20260911-board2' in HTML
-    assert "Portfolio Intelligence · v8.7.54" in HTML
-    assert "version:'8.7.54'" in RUNTIME
+    assert "Portfolio Intelligence · v8.7.55" in HTML
+    assert "version:'8.7.55'" in RUNTIME
 
 
 def test_gate_order_is_fail_closed():

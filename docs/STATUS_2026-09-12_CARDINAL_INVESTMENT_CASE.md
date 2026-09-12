@@ -36,3 +36,7 @@ Die Investment-Akte wird beim ersten Öffnen auch dann eingeblendet, wenn das ä
 ## v8.7.54 Interaktionsfix
 
 Klicks auf die aufklappbaren Gate-Abschnitte lösen keinen Neuaufbau der Investment-Akte mehr aus. Der geöffnete Zustand bleibt erhalten. Portfolio Fit übernimmt außerdem den bereits geladenen, vollständigen Gate-1-PASS des Investment-Case und zeigt nicht länger fälschlich LOCKED.
+
+## v8.7.55 Visuelles Entscheidungscockpit
+
+Die doppelte Gate-Liste und der separate Portfolio-Fit-Block werden im vollständigen Cardinal-Fall ausgeblendet. Eine kompakte Übersicht zeigt Entscheidung, Halal-Status, Portfolio-Freigabe, Gewichtung, nächsten Prüftermin, den achtstufigen Pfad, den Live-Portfolio-Fit, Pro/Contra und die qualitative Bewertung. Analyse und Primärquellen sind über die Register Übersicht, Analyse und Evidenz erreichbar.
