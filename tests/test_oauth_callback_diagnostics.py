@@ -30,7 +30,7 @@ def test_frontend_consumes_callback_error_and_clears_guard():
 def test_current_release_cache_busts_callback_adapter():
     html = (ROOT / "app" / "index.html").read_text()
     runtime = (ROOT / "app" / "runtime-config.js").read_text()
-    assert "Portfolio Intelligence · v8.7.52" in html
+    assert "Portfolio Intelligence · v8.7.53" in html
     assert "parqet-supabase-adapter.js?v=20260911-income4" in html
     assert "runtime-config.js?v=20260911-cardinal2" in html
-    assert "version:'8.7.52'" in runtime
+    assert "version:'8.7.53'" in runtime

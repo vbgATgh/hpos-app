@@ -28,3 +28,7 @@ Die Investment-Akte zeigt einen kompakten visuellen Acht-Gate-Pfad, die begruend
 - Cardinal Energy News Releases
 
 Alle Quellen sind im kanonischen Investment-Case mit direkter URL hinterlegt.
+
+## v8.7.53 Darstellungsfix
+
+Die Investment-Akte wird beim ersten Öffnen auch dann eingeblendet, wenn das ältere Portfolio-Fit-Modul erst verzögert in den DOM eingesetzt wird. Gestaffelte Wiederholungsversuche beseitigen das auf dem Gerät nachgewiesene Initialisierungsrennen; Entscheidungsdaten und Gate-Zustände bleiben unverändert.
