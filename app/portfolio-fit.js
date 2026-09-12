@@ -24,9 +24,9 @@ async function gate1(isin){
  try{return await window.HPOS_HALAL_EVIDENCE.evaluateIsin(isin)}catch{return{state:'OPEN_REVIEW'}}
 }
 function mount(){let sec=$('#portfolioFitSection');if(sec)return sec;const h=$('#halalEvidenceSection');if(!h)return null;sec=document.createElement('div');sec.id='portfolioFitSection';sec.className='section';sec.innerHTML='<h2>Portfolio Fit</h2><div id="portfolioFitBox" class="detail"></div>';h.insertAdjacentElement('afterend',sec);return sec}
-function stateLabel(s){return s==='PASS'?'PASS · Portfolio Fit':s==='FAIL'?'FAIL · Kein Portfolio Fit':s==='LOCKED'?'LOCKED · Gate 1 erforderlich':'OPEN REVIEW · Regeln unvollständig'}
+function stateLabel(s){return s==='PASS'?'PASS · Portfolio Fit':s==='FAIL'?'FAIL · Kein Portfolio Fit':s==='LOCKED'?'LOCKED · Gate 1 erforderlich':s==='REVIEW'?'REVIEW · Keine Aufstockung':'OPEN REVIEW · Regeln unvollständig'}
 function cls(s){return s==='PASS'?'pos':s==='FAIL'?'neg':'warn'}
-function gateRow(state){const rows=[...document.querySelectorAll('#assetGateRows .drow')],r=rows[1],v=r?.lastElementChild;if(!v)return;if(state==='LOCKED'){v.textContent='Wartet auf Halal-Prüfung';v.className='warn'}else if(state==='OPEN_REVIEW'){v.textContent='Portfolio Fit offen';v.className='warn'}else if(state==='PASS'){v.textContent='Portfolio Fit belegt';v.className='pos'}else{v.textContent='Portfolio Fit FAIL';v.className='neg'}}
+function gateRow(state){const rows=[...document.querySelectorAll('#assetGateRows .drow')],r=rows[1],v=r?.lastElementChild;if(!v)return;if(state==='LOCKED'){v.textContent='Wartet auf Halal-Prüfung';v.className='warn'}else if(state==='OPEN_REVIEW'){v.textContent='Portfolio Fit offen';v.className='warn'}else if(state==='REVIEW'){v.textContent='Review · keine Aufstockung';v.className='warn'}else if(state==='PASS'){v.textContent='Portfolio Fit belegt';v.className='pos'}else{v.textContent='Portfolio Fit FAIL';v.className='neg'}}
 async function evaluate(id){
  const g1=await gate1(id.isin);
  if(g1.state!=='PASS')return{state:'LOCKED',bucket:null,reason:'Gate 1 ist nicht PASS. Portfolio Fit wird deshalb nicht bewertet.'};
@@ -36,6 +36,7 @@ async function evaluate(id){
  if(!c)return{state:'OPEN_REVIEW',bucket:null,reason:'Für diese ISIN ist noch keine freigegebene Core/Turbo/Sukuk-Klassifikation hinterlegt.'};
  const a=currentAllocation(),target=strategy.allocationTargets?.[c.bucket];
  if(target==null)return{state:'OPEN_REVIEW',bucket:c.bucket,strategy,reason:'Für den Portfolio-Bucket fehlt in der aktiven Strategieversion ein freigegebenes Ziel.'};
+ if(c.reviewState==='REVIEW')return{state:'REVIEW',bucket:c.bucket,strategy,reason:c.reviewReason||'Portfolio Fit wurde geprüft; eine automatische Aufstockungsfreigabe besteht nicht.',allocation:a,target};
  return{state:'OPEN_REVIEW',bucket:c.bucket,strategy,reason:'Strategischer Bucket ist klassifiziert. Die aktive Strategieversion ist geladen. Eine automatische PASS/FAIL-Entscheidung bleibt gesperrt, bis Toleranzband und Konzentrationsgrenze ausdrücklich freigegeben sind.',allocation:a,target};
 }
 async function render(){
@@ -45,7 +46,7 @@ async function render(){
  html+='<div class="drow"><span>Strategischer Bucket</span><strong>'+esc(e.bucket||'—')+'</strong></div>';
  if(e.bucket&&e.target!=null)html+='<div class="drow"><span>Zielrahmen</span><strong>'+esc(e.bucket)+' '+(e.target*100).toFixed(0)+' %</strong></div>';
  if(e.bucket&&e.allocation?.[e.bucket]!=null)html+='<div class="drow"><span>Aktueller Anteil</span><strong>'+Number(e.allocation[e.bucket]).toFixed(1)+' %</strong></div>';
- html+='<div class="drow"><span class="labelWithInfo">Begründung<button type="button" class="infoBtn" data-info-eye="Gate 2" data-info-title="Portfolio-Fit-Begründung" data-info-html="'+esc(e.reason)+'" aria-label="Portfolio-Fit-Begründung anzeigen">i</button></span><strong>'+esc(e.state==='LOCKED'?'gesperrt':e.state==='OPEN_REVIEW'?'offen':e.state)+'</strong></div>';
+ html+='<div class="drow"><span class="labelWithInfo">Begründung<button type="button" class="infoBtn" data-info-eye="Gate 2" data-info-title="Portfolio-Fit-Begründung" data-info-html="'+esc(e.reason)+'" aria-label="Portfolio-Fit-Begründung anzeigen">i</button></span><strong>'+esc(e.state==='LOCKED'?'gesperrt':e.state==='OPEN_REVIEW'?'offen':e.state==='REVIEW'?'geprüft · Review':e.state)+'</strong></div>';
  box.innerHTML=html;gateRow(e.state);
 }
 function schedule(){lastSig='';setTimeout(render,120)}

@@ -6,16 +6,17 @@ const FILTERS=[['ALL','Alle'],['OPEN_REVIEW','Offen'],['FREEZE','Freeze'],['REVI
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const num=v=>Number.isFinite(Number(v))?Number(v):0;
 const eur=v=>new Intl.NumberFormat('de-DE',{style:'currency',currency:'EUR'}).format(num(v));
-let catalog=null,theses=null,activeFilter='ALL',expanded=false,renderToken=0;
-async function loadReference(){if(catalog&&theses)return;const [c,t]=await Promise.all([fetch('../data/asset_catalog.json',{cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null),fetch('../data/thesis_registry.json',{cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null)]);catalog=c?.assets||{};theses=t?.assets||{};}
+let catalog=null,theses=null,cases={},activeFilter='ALL',expanded=false,renderToken=0;
+async function loadReference(){if(catalog&&theses)return;const [c,t,i]=await Promise.all([fetch('../data/asset_catalog.json',{cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null),fetch('../data/thesis_registry.json',{cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null),fetch('../data/investment_cases/index.json',{cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null)]);catalog=c?.assets||{};theses=t?.assets||{};const entries=Object.entries(i?.casesByIsin||{});const loaded=await Promise.all(entries.map(async([isin,file])=>{try{const r=await fetch('../data/investment_cases/'+encodeURIComponent(file),{cache:'no-store'});return[isin,r.ok?await r.json():null]}catch{return[isin,null]}}));cases=Object.fromEntries(loaded.filter(([,x])=>x));}
 function state(){return window.HPOS_STATE_SNAPSHOT?.()||{holdings:[],cash:0};}
 function halal(h){return String(h?.halal??h?.halalStatus??'UNKNOWN').toUpperCase();}
 function refFor(h){const isin=String(h?.isin||'').toUpperCase(),name=String(h?.name||'').toLowerCase();return Object.entries(catalog||{}).find(([,a])=>String(a?.isin||'').toUpperCase()===isin||(a?.aliases||[]).some(x=>String(x).toLowerCase()===name))?.[0]||null;}
 function classify(h,total){
  const hs=halal(h),value=num(h?.value??h?.currentValue??h?.marketValue),weight=total>0?value/total*100:0,key=refFor(h),thesis=key?theses?.[key]:null;
- const common={holding:h,value,weight,thesis,key};
+ const investmentCase=cases[String(h?.isin||'').toUpperCase()]||null,common={holding:h,value,weight,thesis,key,investmentCase};
  if(FAIL.has(hs))return{...common,status:'EXIT_REVIEW',label:'EXIT-REVIEW',tone:'neg',gate:'Gate 1 nicht bestanden',winning:'Das Halal-Veto hat höchste Priorität.',blocking:'Gate 1 ist mit belastbarer Evidenz nicht bestanden.',next:'Position und belastbare Ausstiegsfolgen prüfen. Keine automatische Order.'};
  if(!PASS.has(hs))return{...common,status:'OPEN_REVIEW',label:'PRÜFUNG OFFEN',tone:'warn',gate:'Gate 1 offen',winning:'Halal steht vor Rendite, Kurs und Dividende.',blocking:'Für Gate 1 fehlt vollständige, belastbare AAOIFI-Evidenz.',next:'AAOIFI-Pflichtdaten und offizielle Quellen vervollständigen.'};
+ if(investmentCase)return{...common,status:'REVIEW',label:'REVIEW',tone:'warn',gate:'Gate 2 geprüft · keine Aufstockungsfreigabe',winning:'These und Fundamentaldaten sind belegt und stärkend.',blocking:'Portfolio-Fit bleibt Review; das Timing bietet keine Sicherheitsmarge.',next:investmentCase.decision?.nextStep||'Nächsten Pflichttermin und neue Primärquellen prüfen.'};
  if(value<300)return{...common,status:'REVIEW',label:'REVIEW',tone:'warn',gate:'Gate 1 bestanden · Gate 2 offen',winning:'Halal ist belegt; der Unter-300-€-Review greift.',blocking:'Portfolio Fit ist ohne freigegebene Toleranz- und Konzentrationsgrenzen offen.',next:'Rolle, Zielgewicht und Fortführungsgrund der kleinen Position belegen.'};
  return{...common,status:'FREEZE',label:'FREEZE',tone:'',gate:'Gate 1 bestanden · Gate 2 offen',winning:'Halal ist belegt; der Bestand bleibt beobachtbar.',blocking:'Portfolio Fit ist ohne freigegebene Toleranz- und Konzentrationsgrenzen offen.',next:'Gate 2 vervollständigen; bis dahin keine Aufstockungsfreigabe.'};
 }

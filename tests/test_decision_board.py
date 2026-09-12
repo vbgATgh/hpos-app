@@ -15,8 +15,8 @@ def test_decision_board_is_mounted_and_versioned():
     assert 'id="decisionBoard"' in HTML
     assert 'decision-board.css?v=20260911-board2' in HTML
     assert 'decision-board.js?v=20260911-board2' in HTML
-    assert "Portfolio Intelligence · v8.7.51" in HTML
-    assert "version:'8.7.51'" in RUNTIME
+    assert "Portfolio Intelligence · v8.7.52" in HTML
+    assert "version:'8.7.52'" in RUNTIME
 
 
 def test_gate_order_is_fail_closed():
@@ -50,3 +50,10 @@ def test_mobile_board_defaults_to_top_five_and_keeps_details_optional():
     assert "Auf Top 5 reduzieren" in BOARD
     assert '<details class="decisionDetails">' in BOARD
     assert "Investment-Akte öffnen" in BOARD
+
+
+def test_completed_case_is_used_before_generic_small_position_review():
+    assert "data/investment_cases/index.json" in BOARD
+    assert "if(investmentCase)return" in BOARD
+    assert BOARD.index("if(investmentCase)return") < BOARD.index("if(value<300)")
+    assert "Gate 2 geprüft · keine Aufstockungsfreigabe" in BOARD

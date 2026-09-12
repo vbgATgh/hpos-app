@@ -39,6 +39,15 @@
       "basis": "Existing HPOS portfolio classification: iShares MSCI World Islamic UCITS ETF.",
       "validFrom": "2026-09-01",
       "validTo": null
+    },
+    "CA14150G4007": {
+      "bucket": "Turbo",
+      "role": "Energy Income Satellite",
+      "basis": "Cardinal Energy is a small, commodity-sensitive single-stock satellite and is not a diversified Core holding.",
+      "reviewState": "REVIEW",
+      "reviewReason": "Der Titel ist als Turbo-/Energie-Satellit klassifiziert. Wegen der bereits über dem Ziel liegenden Turbo-Allokation und noch nicht freigegebener Toleranz- und Einzelpositionsgrenzen besteht keine Aufstockungsfreigabe.",
+      "validFrom": "2026-09-12",
+      "validTo": null
     }
   }
 }

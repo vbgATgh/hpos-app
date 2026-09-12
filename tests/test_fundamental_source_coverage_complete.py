@@ -7,7 +7,8 @@ class SourceCoverageTests(unittest.TestCase):
         x=json.loads((ROOT/'data/fundamental/coverage.json').read_text())
         missing=[a['assetKey'] for a in x['assets'] if not a['sourceMapped']]
         self.assertEqual(missing,[],f'Missing primary sources: {missing}')
-        self.assertEqual(len(x['assets']),16)
+        registry=json.loads((ROOT/'data/thesis_registry.json').read_text())
+        self.assertEqual(len(x['assets']),len(registry['assets']))
     def test_source_registries_stay_public_generic(self):
         rows=[]
         for p in ['config/asset_sources.json','config/fundamental_asset_sources.json']:
