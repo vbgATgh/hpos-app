@@ -17,8 +17,8 @@ SIGNAL_BUILDER = (ROOT / "scripts/build_thesis_signals.py").read_text()
 def test_cardinal_case_is_isin_centered_and_loaded():
     assert CASE["isin"] == "CA14150G4007"
     assert INDEX["casesByIsin"][CASE["isin"]] == "CARDINAL_ENERGY.json"
-    assert 'investment-case.js?v=20260912-cardinaldetails1' in HTML
-    assert 'investment-case.css?v=20260912-cardinalcase1' in HTML
+    assert 'investment-case.js?v=20260912-cardinalux1' in HTML
+    assert 'investment-case.css?v=20260912-cardinalux1' in HTML
 
 
 def test_all_eight_gates_have_explicit_non_open_states():
@@ -41,7 +41,7 @@ def test_cardinal_portfolio_fit_is_explicit_review_not_open():
 
 
 def test_case_mounts_even_when_portfolio_fit_arrives_late():
-    assert "$('#portfolioFitSection')||$('#halalEvidenceSection')" in JS
+    assert "halal?halal.insertAdjacentElement('beforebegin',s)" in JS
     assert "[180,700,1500]" in JS
 
 
@@ -50,6 +50,20 @@ def test_gate_details_are_not_rebuilt_when_they_are_opened():
     assert "e.target.closest('#investmentCaseSection')" in JS
     portfolio_fit = (ROOT / "app/portfolio-fit.js").read_text()
     assert "window.HPOS_INVESTMENT_CASE?.current?.()" in portfolio_fit
+
+
+def test_mobile_decision_cockpit_has_progressive_disclosure():
+    css = (ROOT / "app/investment-case.css").read_text()
+    assert 'data-case-tab="overview"' in JS
+    assert 'data-case-tab="analysis"' in JS
+    assert 'data-case-tab="evidence"' in JS
+    assert "caseFitTrack" in JS
+    assert "caseWhy" in JS
+    assert "caseValuationScale" in JS
+    assert "detail('Depotgewicht')" in JS
+    assert "return positionWeight(isin())" in JS
+    assert ".caseEnhanced .caseLegacyStatus" in css
+    assert ".caseTabs" in css
 
 
 def test_case_keeps_decision_and_evidence_separate():

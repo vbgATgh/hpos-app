@@ -15,6 +15,7 @@
     "label": "REVIEW · KEINE AUFSTOCKUNG",
     "bucket": "Turbo",
     "role": "Energy Income Satellite",
+    "targetPct": 30,
     "basis": "Die Einzelposition liegt deutlich unter dem 25-%-Hard-Cap. Der Turbo-Bucket liegt im zuletzt sichtbaren Depot jedoch über seinem 30-%-Ziel; ohne freigegebenes Toleranzband entsteht keine automatische PASS-Freigabe.",
     "blockingRule": "PORTFOLIO_BEATS_SINGLE_STOCK"
   },
