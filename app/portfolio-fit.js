@@ -11,6 +11,8 @@ function parsePct(txt){const m=String(txt||'').replace(',','.').match(/([0-9]+(?
 function currentAllocation(){const out={};[...document.querySelectorAll('#allocation .barrow')].forEach(r=>{const k=r.firstElementChild?.textContent?.trim(),v=parsePct(r.lastElementChild?.textContent);if(k&&v!=null)out[k]=v});return out}
 function activeStrategy(){const sp=policy?.strategyPolicy;if(!sp)return null;const today=new Date().toISOString().slice(0,10);const versions=(sp.versions||[]).filter(v=>v?.status!=='RETIRED'&&String(v?.validFrom||'0000-00-00')<=today&&(!v?.validTo||String(v.validTo)>=today)).sort((a,b)=>String(b.validFrom||'').localeCompare(String(a.validFrom||'')));return versions.find(v=>v.id===sp.activeStrategyId)||versions[0]||null}
 async function gate1(isin){
+ const c=window.HPOS_INVESTMENT_CASE?.current?.();
+ if(c?.isin===String(isin||'').toUpperCase()&&c?.gate1?.state==='PASS')return c.gate1;
  if(window.HPOS_HALAL_MANUAL){
    try{
      const m=window.HPOS_HALAL_MANUAL.record();

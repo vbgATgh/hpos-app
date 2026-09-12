@@ -5,7 +5,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 def test_canonical_halal_store_is_loaded_before_app():
     html = (ROOT / "app" / "index.html").read_text()
-    assert "Portfolio Intelligence · v8.7.53" in html
+    assert "Portfolio Intelligence · v8.7.54" in html
     assert html.index("halal-store.js") < html.index("app.js")
 
 
