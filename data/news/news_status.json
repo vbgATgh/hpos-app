@@ -2,37 +2,33 @@
   "schemaVersion": 1,
   "state": "CURRENT",
   "source": "github-actions/google-news-rss-discovery",
-  "asOf": "2026-09-02T08:45:01Z",
-  "lastAttemptAt": "2026-09-02T08:45:01Z",
+  "asOf": "2026-09-12T18:42:45Z",
+  "lastAttemptAt": "2026-09-12T18:42:45Z",
   "message": "Discovery-News aktualisiert: 27 konfigurierte Abfragen erfolgreich. Öffentliches Asset-Universum: 22 Titel; Primärquellen-Registry: 19/19. Depot-/Watchlist-Scope bleibt lokal.",
   "queriesTotal": 27,
   "queriesOk": 27,
   "queriesFailed": 0,
-  "articlesFetchedThisRun": 127,
+  "articlesFetchedThisRun": 146,
   "articlesStored": 350,
   "articlesByAsset": {
-    "JNJ": 38,
-    "PQ_ATFREQUENT09": 1,
-    "PQ_DE000A3E5D56": 4,
-    "PQ_US4943681035": 1,
-    "PQ_US8725401090": 2,
-    "PUB_CA14150G4007": 4,
-    "PUB_CH0012005267": 43,
-    "PUB_DE000A3E5D56": 7,
-    "PUB_FR0000120073": 45,
-    "PUB_FR0006174348": 8,
-    "PUB_GB00B2B0DG97": 10,
-    "PUB_IE00BTN1Y115": 32,
-    "PUB_US0028241000": 25,
-    "PUB_US58933Y1055": 16,
-    "PUB_US94106L1098": 20,
-    "RIO_TINTO": 21,
-    "SPACEX": 62,
-    "XIAOMI": 11
+    "JNJ": 35,
+    "PUB_CA14150G4007": 5,
+    "PUB_CH0012005267": 42,
+    "PUB_DE000A3E5D56": 13,
+    "PUB_DK0062498333": 4,
+    "PUB_FR0000120073": 48,
+    "PUB_FR0006174348": 16,
+    "PUB_GB00B2B0DG97": 14,
+    "PUB_IE00BTN1Y115": 31,
+    "PUB_US0028241000": 23,
+    "PUB_US58933Y1055": 13,
+    "PUB_US94106L1098": 21,
+    "RIO_TINTO": 23,
+    "SPACEX": 52,
+    "XIAOMI": 10
   },
   "articlesByScope": {
-    "UNIVERSE": 342,
-    "UNKNOWN": 8
+    "UNIVERSE": 350
   },
   "queryResults": [
     {
@@ -51,7 +47,7 @@
       "assetKey": "RIO_TINTO",
       "query": "\"Rio Tinto\"",
       "ok": true,
-      "items": 9
+      "items": 11
     },
     {
       "assetKey": "RIO_TINTO",
@@ -81,7 +77,7 @@
       "assetKey": "XIAOMI",
       "query": "\"Xiaomi Corporation\"",
       "ok": true,
-      "items": 5
+      "items": 4
     },
     {
       "assetKey": "XIAOMI",
@@ -99,25 +95,25 @@
       "assetKey": "JNJ",
       "query": "\"Johnson & Johnson\" earnings OR dividend OR FDA",
       "ok": true,
-      "items": 5
+      "items": 0
     },
     {
       "assetKey": "PUB_DK0062498333",
       "query": "\"Novo Nordisk B\"",
       "ok": true,
-      "items": 0
+      "items": 4
     },
     {
       "assetKey": "PUB_US0028241000",
       "query": "\"Abbott Laboratories\"",
       "ok": true,
-      "items": 10
+      "items": 12
     },
     {
       "assetKey": "PUB_DE000A3E5D56",
       "query": "\"FUCHS SE Vz\"",
       "ok": true,
-      "items": 6
+      "items": 10
     },
     {
       "assetKey": "PUB_CH0012005267",
@@ -147,7 +143,7 @@
       "assetKey": "PUB_FR0006174348",
       "query": "\"Bureau Veritas\"",
       "ok": true,
-      "items": 0
+      "items": 10
     },
     {
       "assetKey": "PUB_IE00B27YCP72",
@@ -171,13 +167,13 @@
       "assetKey": "PUB_US58933Y1055",
       "query": "\"Merck & Co., Inc.\"",
       "ok": true,
-      "items": 10
+      "items": 7
     },
     {
       "assetKey": "PUB_GB00B2B0DG97",
       "query": "\"RELX PLC\"",
       "ok": true,
-      "items": 6
+      "items": 11
     },
     {
       "assetKey": "PUB_GB0006640972",
@@ -189,7 +185,7 @@
       "assetKey": "PUB_CA14150G4007",
       "query": "\"Cardinal Energy\"",
       "ok": true,
-      "items": 3
+      "items": 4
     },
     {
       "assetKey": "PUB_CA8051121090",
