@@ -16,7 +16,7 @@ Deno.serve(async(req:Request)=>{
   const u=new URL(req.url),r=route(u.pathname),o=req.headers.get("Origin")||"";
   if(req.method==="OPTIONS")return new Response(null,{status:204,headers:cors(o)});
   try{
-    if(r==="/health")return j({ok:true,service:"hpos-api",version:"0.5.7",parqetConfigured:!!Deno.env.get("PARQET_CLIENT_ID"),marketProxy:true,halalMode:"ACCOUNT_FREE",parqetIncome:true},200,o);
+    if(r==="/health")return j({ok:true,service:"hpos-api",version:"0.5.8",parqetConfigured:!!Deno.env.get("PARQET_CLIENT_ID"),marketProxy:true,halalMode:"ACCOUNT_FREE",parqetIncome:true,averageEntryFallback:true},200,o);
 
     if(r==="/"&&u.searchParams.get("s")==="yahoo"){
       origin(o);
@@ -173,7 +173,8 @@ async function normalized(t:string){
     if(!isin||shares<=0)continue;
     const currentValue=value||shares*price;
     if(currentValue<=0)continue;
-    const h={name:String(a?.name??x?.nickname??isin),isin,shares,currentPrice:price,currentValue,averagePrice:n(p?.purchasePrice),broker:TR.has(isin)?"TRADE_REPUBLIC":"SCALABLE",halalStatus:"UNKNOWN"};
+    const averagePrice=averageEntryPrice(p,shares);
+    const h={name:String(a?.name??x?.nickname??isin),isin,shares,currentPrice:price,currentValue,averagePrice,averagePriceSource:averagePrice>0?"PARQET":"UNAVAILABLE",broker:TR.has(isin)?"TRADE_REPUBLIC":"SCALABLE",halalStatus:"UNKNOWN"};
     (currentValue<1?watch:active).push(currentValue<1?{...h,candidate:true}:h)
   }
   const dedup=new Map<string,any>();
@@ -191,6 +192,13 @@ async function normalized(t:string){
     console.warn("parqet-income",String((e as any)?.message||"activity_read_failed").slice(0,80))
   }
   return{source:"PARQET_SUPABASE",portfolioId,holdings,cash,dividends,watchCandidates:watch,reconciliation:{rawHoldings:raw.length,activePositions:holdings.length,watchCandidates:watch.length,dividendCount:dividends.length,incomeStatus,brokerCounts:{SCALABLE:holdings.filter(x=>x.broker==="SCALABLE").length,TRADE_REPUBLIC:holdings.filter(x=>x.broker==="TRADE_REPUBLIC").length},valuationAtEnd:n(perf?.performance?.valuation?.atIntervalEnd)}}
+}
+
+function averageEntryPrice(position:any,shares:number){
+  const direct=[position?.purchasePrice,position?.averagePrice,position?.averagePurchasePrice,position?.avgPrice].map(n).find(v=>v>0);
+  if(direct)return direct;
+  const total=[position?.purchaseValue,position?.investedCapital,position?.totalPurchaseValue,position?.totalCost].map(n).find(v=>v>0);
+  return total&&shares>0?total/shares:0
 }
 
 function normalizeDividends(root:any,rawHoldings:any[]){
