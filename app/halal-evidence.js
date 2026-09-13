@@ -20,12 +20,13 @@ function financialCoverage(r){const keys=['revenue','totalDebt','interestBearing
 function mount(){
  let sec=$('#halalEvidenceSection');if(sec)return sec;
  const decision=$('#assetDecision')?.closest('.section');if(!decision)return null;
- sec=document.createElement('div');sec.id='halalEvidenceSection';sec.className='section';
- sec.innerHTML='<h2>Halal-Evidenz</h2><div id="halalEvidenceBox" class="detail"></div>';
+ sec=document.createElement('details');sec.id='halalEvidenceSection';sec.className='section assetDisclosure';
+ sec.innerHTML='<summary><span><b>Halal-Evidenz</b><small>Gate 1, Methode und Quellen</small></span><i aria-hidden="true">⌄</i></summary><div id="halalEvidenceBox" class="detail"></div>';
  decision.insertAdjacentElement('afterend',sec);return sec;
 }
 function syncPositionHalal(state){const row=[...document.querySelectorAll('#assetDetails .drow')].find(r=>r.firstElementChild?.textContent?.trim()==='Halal');const v=row?.lastElementChild;if(!v)return;v.textContent=state==='PASS'?'HALALKONFORM':state==='FAIL'?'NICHT HALALKONFORM':'PRÜFUNG OFFEN';v.className=cls(state)}
 function syncDecisionHalal(state){const p=$('#assetDecision p');if(!p)return;const who=p.textContent.includes('Depotposition')?'Depotposition':'Beobachtung';p.innerHTML=who+' · Halal: <b class="'+cls(state)+'">'+(state==='PASS'?'HALALKONFORM':state==='FAIL'?'NICHT HALALKONFORM':'PRÜFUNG OFFEN')+'</b>'}
+function syncHeroHalal(state){const v=$('#assetHeroStatus');if(!v)return;v.textContent=label(state);v.className='assetHeroStatus '+cls(state)}
 function gateLock(state){
  const rows=[...document.querySelectorAll('#assetGateRows .drow')];
  rows.forEach((r,i)=>{const v=r.lastElementChild;if(!v)return;
@@ -55,7 +56,7 @@ async function render(){
  html+='<div class="drow"><span>Kanonische Identität</span><strong>'+esc(id.isin||'nicht verifiziert')+'</strong></div>';
  html+='<div class="drow"><span>AAOIFI-Methode</span><strong>SS21</strong></div>';
  const evidenceInfo='<strong>Begründung</strong><br>'+esc(e.reason)+(pre?'<br><br><strong>HPOS AAOIFI Rule Engine</strong><br>'+esc(pre.reason)+criteriaHtml+sourceHtml:'')+(e.reviewedAt?'<br><br><strong>Geprüft am</strong><br>'+esc(new Date(e.reviewedAt).toLocaleString('de-DE')):'')+(e.source?'<br><br><strong>Quelle</strong><br>'+esc(e.source):'')+'<br><br><strong>Evidenz</strong>'+providerHtml; html+='<div class="drow"><span class="labelWithInfo">Evidenz<button type="button" class="infoBtn" data-info-eye="Gate 1" data-info-title="Halal-Evidenz" data-info-html="'+esc(evidenceInfo)+'" aria-label="Evidenzdetails anzeigen">i</button></span><strong>'+esc(e.evidence?.length?e.evidence.length+' Quellen':coverage.count?coverage.count+'/'+coverage.total+' Finanzwerte':'offen')+'</strong></div>';
- if(e.state==='OPEN_REVIEW'&&pre?.state==='OPEN_REVIEW')html+='<div class="notice">Automatische Basisprüfung abgeschlossen. Für ein vollständiges AAOIFI-Urteil fehlen noch belastbare Quelldaten. Der Fall bleibt deshalb PRÜFUNG OFFEN.</div>';if(e.state==='OPEN_REVIEW')html+='<button id="addManualHalalEvidence" class="secondary full">Evidenz manuell ergänzen</button>';box.innerHTML=html;gateLock(e.state);syncPositionHalal(e.state);syncDecisionHalal(e.state);
+ if(e.state==='OPEN_REVIEW'&&pre?.state==='OPEN_REVIEW')html+='<div class="notice">Automatische Basisprüfung abgeschlossen. Für ein vollständiges AAOIFI-Urteil fehlen noch belastbare Quelldaten. Der Fall bleibt deshalb PRÜFUNG OFFEN.</div>';if(e.state==='OPEN_REVIEW')html+='<button id="addManualHalalEvidence" class="secondary full">Evidenz manuell ergänzen</button>';box.innerHTML=html;gateLock(e.state);syncPositionHalal(e.state);syncDecisionHalal(e.state);syncHeroHalal(e.state);
 }
 function schedule(){lastSig='';setTimeout(render,60)}
 document.addEventListener('click',schedule,true);

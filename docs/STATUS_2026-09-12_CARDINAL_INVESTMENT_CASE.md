@@ -48,3 +48,11 @@ Die doppelte Gate-Liste und der separate Portfolio-Fit-Block werden im vollstän
 - Vollständig belegte Werte wie Cardinal Energy behalten ihre ausgearbeiteten Gates und Kennzahlen.
 - Bei allen anderen Werten bleiben fehlende Prüfungen ausdrücklich offen oder gesperrt; es werden keine Daten ergänzt oder Freigaben erfunden.
 - Der Wechsel zwischen Aktien ersetzt die Akte vollständig, damit keine Inhalte eines vorherigen Werts stehen bleiben.
+
+## v8.7.57 Mobile-UX und visuelle Konsistenz
+
+- Der Aktienkopf ist kompakter und zeigt Kürzel, Identität sowie den evidenzbasierten Halal-Status unmittelbar.
+- Die Entscheidungskarte verwendet Grün, Gelb und Rot ausschließlich entsprechend dem tatsächlichen Entscheidungszustand.
+- Der Fortschritt wird aus den acht realen Gate-Zuständen berechnet; offene und gesperrte Gates zählen nicht als abgeschlossen.
+- Position, Marktdaten, Dividenden, Halal-Evidenz sowie Kennzahlen und Unternehmensprofil sind platzsparend aufklappbar.
+- Lesbarkeit, Kontrast und mobile Informationsdichte wurden verbessert, ohne Daten oder Entscheidungsergebnisse zu verändern.
