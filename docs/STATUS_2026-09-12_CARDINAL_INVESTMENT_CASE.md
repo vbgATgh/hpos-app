@@ -67,3 +67,9 @@ Die doppelte Gate-Liste und der separate Portfolio-Fit-Block werden im vollstän
 
 - Pro und Contra stehen auf Smartphones untereinander und bleiben dadurch ohne schmale Textspalten lesbar.
 - Der Portfolio-Fit benennt ausdrücklich den Turbo-Bucket, den aktuellen Turbo-Anteil und das maximale Ziel. Damit ist die Bucket-Allokation klar von der Einzelgewichtung der Aktie getrennt.
+
+## v8.7.60 Einstandspreis-Härtung
+
+- Der Supabase-/Parqet-Normalisierer berücksichtigt mehrere eindeutig benannte Felder für Durchschnittspreis und investiertes Kapital.
+- Ist nur ein validierter Gesamteinstand vorhanden, wird der durchschnittliche Einstand durch die aktuelle Stückzahl geteilt.
+- Fehlt der Einstand bei einem einzelnen Sync vorübergehend, bleibt der letzte validierte Wert nur dann erhalten, wenn die Stückzahl exakt unverändert ist. Bei einer Bestandsänderung wird nicht geschätzt.
