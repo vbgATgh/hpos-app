@@ -16,7 +16,7 @@ Deno.serve(async(req:Request)=>{
   const u=new URL(req.url),r=route(u.pathname),o=req.headers.get("Origin")||"";
   if(req.method==="OPTIONS")return new Response(null,{status:204,headers:cors(o)});
   try{
-    if(r==="/health")return j({ok:true,service:"hpos-api",version:"0.5.9",parqetConfigured:!!Deno.env.get("PARQET_CLIENT_ID"),marketProxy:true,halalMode:"ACCOUNT_FREE",parqetIncome:true,averageEntryFallback:true,moneyObjectEntrySupport:true},200,o);
+    if(r==="/health")return j({ok:true,service:"hpos-api",version:"0.5.10",parqetConfigured:!!Deno.env.get("PARQET_CLIENT_ID"),marketProxy:true,halalMode:"ACCOUNT_FREE",parqetIncome:true,averageEntryFallback:true,moneyObjectEntrySupport:true,activityEntryReconciliation:true},200,o);
 
     if(r==="/"&&u.searchParams.get("s")==="yahoo"){
       origin(o);
@@ -161,6 +161,9 @@ async function normalized(t:string){
   const perf=await ppost("/performance",t,{portfolioIds:[portfolioId],interval:{type:"relative",value:"max"},currency:"EUR"});
   const raw=Array.isArray(perf?.holdings)?perf.holdings:[];
   if(raw.length<1||raw.length>1000)throw err(502,`parqet_performance_holdings_unplausible_${raw.length}`);
+  let activityRoot:any=null,activityStatus="AVAILABLE";
+  try{activityRoot=await pf(`/portfolios/${encodeURIComponent(portfolioId)}/activities?limit=500`,t)}
+  catch(e){activityStatus="UNAVAILABLE";console.warn("parqet-activities",String((e as any)?.message||"activity_read_failed").slice(0,80))}
   let cash=0;
   const active:any[]=[],watch:any[]=[];
   for(const x of raw){
@@ -173,8 +176,8 @@ async function normalized(t:string){
     if(!isin||shares<=0)continue;
     const currentValue=value||shares*price;
     if(currentValue<=0)continue;
-    const averagePrice=averageEntryPrice(p,shares);
-    const h={name:String(a?.name??x?.nickname??isin),isin,shares,currentPrice:price,currentValue,averagePrice,averagePriceSource:averagePrice>0?"PARQET":"UNAVAILABLE",broker:TR.has(isin)?"TRADE_REPUBLIC":"SCALABLE",halalStatus:"UNKNOWN"};
+    const providerAverage=averageEntryPrice(p,shares),activityAverage=providerAverage>0?0:entryFromActivities(activityRoot,isin,shares),averagePrice=providerAverage||activityAverage;
+    const h={name:String(a?.name??x?.nickname??isin),isin,shares,currentPrice:price,currentValue,averagePrice,averagePriceSource:providerAverage>0?"PARQET":activityAverage>0?"PARQET_ACTIVITY_RECONCILED":"UNAVAILABLE",broker:TR.has(isin)?"TRADE_REPUBLIC":"SCALABLE",halalStatus:"UNKNOWN"};
     (currentValue<1?watch:active).push(currentValue<1?{...h,candidate:true}:h)
   }
   const dedup=new Map<string,any>();
@@ -183,15 +186,8 @@ async function normalized(t:string){
   if(holdings.length<1||holdings.length>200)throw err(502,`parqet_active_count_unplausible_${holdings.length}`);
   if(!Number.isFinite(cash)||cash<-100000||cash>10000000)throw err(502,"parqet_cash_unplausible");
 
-  let dividends:any[]=[],incomeStatus="AVAILABLE";
-  try{
-    const activities=await pf(`/portfolios/${encodeURIComponent(portfolioId)}/activities?limit=500&activityType=dividend`,t);
-    dividends=normalizeDividends(activities,raw)
-  }catch(e){
-    incomeStatus="UNAVAILABLE";
-    console.warn("parqet-income",String((e as any)?.message||"activity_read_failed").slice(0,80))
-  }
-  return{source:"PARQET_SUPABASE",portfolioId,holdings,cash,dividends,watchCandidates:watch,reconciliation:{rawHoldings:raw.length,activePositions:holdings.length,watchCandidates:watch.length,dividendCount:dividends.length,incomeStatus,brokerCounts:{SCALABLE:holdings.filter(x=>x.broker==="SCALABLE").length,TRADE_REPUBLIC:holdings.filter(x=>x.broker==="TRADE_REPUBLIC").length},valuationAtEnd:n(perf?.performance?.valuation?.atIntervalEnd)}}
+  const dividends=activityRoot?normalizeDividends(activityRoot,raw):[],incomeStatus=activityStatus;
+  return{source:"PARQET_SUPABASE",portfolioId,holdings,cash,dividends,watchCandidates:watch,reconciliation:{rawHoldings:raw.length,activePositions:holdings.length,watchCandidates:watch.length,dividendCount:dividends.length,incomeStatus,entryPricesFromActivities:holdings.filter(x=>x.averagePriceSource==="PARQET_ACTIVITY_RECONCILED").length,entryPricesUnavailable:holdings.filter(x=>x.averagePrice<=0).length,brokerCounts:{SCALABLE:holdings.filter(x=>x.broker==="SCALABLE").length,TRADE_REPUBLIC:holdings.filter(x=>x.broker==="TRADE_REPUBLIC").length},valuationAtEnd:n(perf?.performance?.valuation?.atIntervalEnd)}}
 }
 
 function averageEntryPrice(position:any,shares:number){
@@ -209,8 +205,17 @@ function money(v:any){
   return n(v)
 }
 
+function activityRows(root){return Array.isArray(root?.activities)?root.activities:Array.isArray(root?.items)?root.items:Array.isArray(root?.data)?root.data:[]}
+function activitiesComplete(root,rows){const total=n(root?.total??root?.totalCount??root?.pagination?.total);return root&&!root?.nextCursor&&root?.pageInfo?.hasNextPage!==true&&root?.pagination?.hasNextPage!==true&&(!total||total<=rows.length)}
+function activityIsin(x){return String(x?.asset?.isin??x?.security?.isin??x?.isin??"").toUpperCase()}
+function activityKind(x){return String(x?.type??x?.activityType??"").toUpperCase().replace(/[^A-Z0-9]+/g,"_")}
+function activityQuantity(x){return Math.abs(money(x?.shares??x?.quantity??x?.units??x?.position?.shares))}
+function activityTotal(x){return Math.abs(money(x?.amount??x?.totalAmount??x?.cashAmount??x?.value))}
+function activityUnitPrice(x){return money(x?.price??x?.unitPrice??x?.purchasePrice??x?.executionPrice)}
+function entryFromActivities(root,isin,expectedShares){const rows=activityRows(root);if(!activitiesComplete(root,rows))return 0;const buys=new Set(["BUY","PURCHASE","SECURITY_BUY","SAVINGS_PLAN","SAVINGS_PLAN_EXECUTION","OPENING_POSITION"]),sells=new Set(["SELL","SALE","SECURITY_SELL"]),invalid=new Set(["TRANSFER_IN","TRANSFER_OUT","SPLIT","REVERSE_SPLIT","MERGER"]);let qty=0,cost=0,seen=0,blocked=false;const relevant=rows.filter(x=>activityIsin(x)===isin).sort((a,b)=>String(a?.datetime??a?.date??a?.createdAt??"").localeCompare(String(b?.datetime??b?.date??b?.createdAt??"")));for(const x of relevant){const kind=activityKind(x),q=activityQuantity(x);if(invalid.has(kind)&&q>0){blocked=true;break}if(!buys.has(kind)&&!sells.has(kind))continue;if(q<=0){blocked=true;break}if(buys.has(kind)){const total=activityTotal(x),unit=activityUnitPrice(x),add=total>0?total:q*unit+Math.abs(money(x?.fee??x?.fees));if(add<=0){blocked=true;break}qty+=q;cost+=add;seen++}else{if(q>qty+1e-8){blocked=true;break}const avg=qty>0?cost/qty:0;qty-=q;cost=Math.max(0,cost-q*avg);seen++}}const tolerance=Math.max(1e-8,Math.abs(expectedShares)*1e-6);return !blocked&&seen>0&&qty>0&&Math.abs(qty-expectedShares)<=tolerance?cost/qty:0}
+
 function normalizeDividends(root:any,rawHoldings:any[]){
-  const activities=Array.isArray(root?.activities)?root.activities:[];
+  const activities=activityRows(root);
   const names=new Map<string,string>();
   for(const x of rawHoldings){const a=x?.asset||{},isin=String(a?.isin||"").toUpperCase();if(isin)names.set(isin,String(a?.name??x?.nickname??isin))}
   const seen=new Set<string>(),out:any[]=[];

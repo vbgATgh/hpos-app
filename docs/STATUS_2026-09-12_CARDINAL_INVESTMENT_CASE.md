@@ -79,3 +79,10 @@ Die doppelte Gate-Liste und der separate Portfolio-Fit-Block werden im vollstän
 - Einstandspreis und investiertes Kapital werden zusätzlich aus strukturierten Geldwerten wie `{ value, currency }` oder `{ amount, currency }` gelesen.
 - Backend und Browser-Adapter verwenden dieselben erlaubten Zahlenfelder.
 - Der aktuelle Marktpreis bleibt ausdrücklich ausgeschlossen und wird niemals als Einstand eingesetzt.
+
+## v8.7.62 Transaktionsbasierte Kostenbasis
+
+- Fehlt die Kostenbasis im Parqet-Performancebestand, wird sie aus Käufen und Verkäufen rekonstruiert.
+- Verkäufe reduzieren die Kostenbasis zum bis dahin geltenden gewichteten Durchschnitt.
+- Ein Ergebnis wird nur übernommen, wenn die rekonstruierte Stückzahl exakt mit dem aktuellen Parqet-Bestand übereinstimmt.
+- Unvollständige Aktivitätsseiten, Transfers, Splits, Fusionen oder unplausible Transaktionen sperren die Ableitung; der Einstand bleibt dann sichtbar unbekannt.
