@@ -10,8 +10,9 @@ APP = (ROOT / "app/app.js").read_text()
 
 
 def run_app_holding(current, previous=None):
+    helper = next(line for line in ADAPTER.splitlines() if line.startswith("function moneyNumber"))
     fn = next(line for line in ADAPTER.splitlines() if line.startswith("function appHolding"))
-    script = f"{fn};console.log(JSON.stringify(appHolding({json.dumps(current)},{json.dumps(previous)})))"
+    script = f"{helper};{fn};console.log(JSON.stringify(appHolding({json.dumps(current)},{json.dumps(previous)})))"
     return json.loads(subprocess.run(["node", "-e", script], check=True, capture_output=True, text=True).stdout)
 
 
@@ -29,6 +30,22 @@ def test_frontend_derives_average_from_validated_total_cost():
     row = run_app_holding({"isin": "CA14150G4007", "shares": 20.726415, "investedCapital": 137.08})
     assert abs(row["avg"] - 137.08 / 20.726415) < 1e-10
     assert row["avgSource"] == "PARQET"
+
+
+def test_frontend_accepts_structured_parqet_money_values():
+    direct = run_app_holding({"isin": "CA14150G4007", "shares": 20.726415, "averagePrice": {"value": 6.61, "currency": "CAD"}})
+    total = run_app_holding({"isin": "CA14150G4007", "shares": 20.726415, "investedCapital": {"amount": 137.08, "currency": "EUR"}})
+    assert direct["avg"] == 6.61
+    assert abs(total["avg"] - 137.08 / 20.726415) < 1e-10
+    assert direct["avgSource"] == total["avgSource"] == "PARQET"
+
+
+def test_backend_extracts_structured_money_values_without_using_market_price():
+    assert "function money(v:any)" in API
+    for field in ["v?.value", "v?.amount", "v?.price", "v?.numericValue", "v?.raw"]:
+        assert field in API
+    assert ".map(money).find(v=>v>0)" in API
+    assert "currentPrice" not in API.split("function averageEntryPrice", 1)[1].split("function normalizeDividends", 1)[0]
 
 
 def test_frontend_preserves_last_valid_average_only_when_shares_are_unchanged():

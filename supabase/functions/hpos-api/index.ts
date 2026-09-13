@@ -16,7 +16,7 @@ Deno.serve(async(req:Request)=>{
   const u=new URL(req.url),r=route(u.pathname),o=req.headers.get("Origin")||"";
   if(req.method==="OPTIONS")return new Response(null,{status:204,headers:cors(o)});
   try{
-    if(r==="/health")return j({ok:true,service:"hpos-api",version:"0.5.8",parqetConfigured:!!Deno.env.get("PARQET_CLIENT_ID"),marketProxy:true,halalMode:"ACCOUNT_FREE",parqetIncome:true,averageEntryFallback:true},200,o);
+    if(r==="/health")return j({ok:true,service:"hpos-api",version:"0.5.9",parqetConfigured:!!Deno.env.get("PARQET_CLIENT_ID"),marketProxy:true,halalMode:"ACCOUNT_FREE",parqetIncome:true,averageEntryFallback:true,moneyObjectEntrySupport:true},200,o);
 
     if(r==="/"&&u.searchParams.get("s")==="yahoo"){
       origin(o);
@@ -195,10 +195,18 @@ async function normalized(t:string){
 }
 
 function averageEntryPrice(position:any,shares:number){
-  const direct=[position?.purchasePrice,position?.averagePrice,position?.averagePurchasePrice,position?.avgPrice].map(n).find(v=>v>0);
+  const direct=[position?.purchasePrice,position?.averagePrice,position?.averagePurchasePrice,position?.avgPrice].map(money).find(v=>v>0);
   if(direct)return direct;
-  const total=[position?.purchaseValue,position?.investedCapital,position?.totalPurchaseValue,position?.totalCost].map(n).find(v=>v>0);
+  const total=[position?.purchaseValue,position?.investedCapital,position?.totalPurchaseValue,position?.totalCost].map(money).find(v=>v>0);
   return total&&shares>0?total/shares:0
+}
+
+function money(v:any){
+  if(v&&typeof v==="object"){
+    for(const x of [v?.value,v?.amount,v?.price,v?.numericValue,v?.raw]){const parsed=n(x);if(parsed>0)return parsed}
+    return 0
+  }
+  return n(v)
 }
 
 function normalizeDividends(root:any,rawHoldings:any[]){
