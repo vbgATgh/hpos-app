@@ -56,3 +56,9 @@ Die doppelte Gate-Liste und der separate Portfolio-Fit-Block werden im vollstän
 - Der Fortschritt wird aus den acht realen Gate-Zuständen berechnet; offene und gesperrte Gates zählen nicht als abgeschlossen.
 - Position, Marktdaten, Dividenden, Halal-Evidenz sowie Kennzahlen und Unternehmensprofil sind platzsparend aufklappbar.
 - Lesbarkeit, Kontrast und mobile Informationsdichte wurden verbessert, ohne Daten oder Entscheidungsergebnisse zu verändern.
+
+## v8.7.58 Ergebnis- und Evidenzklarheit
+
+- Eine vollständig ausgewertete Gate-Kette wird nicht mehr mit einer Freigabe verwechselt: Fortschritt, Entscheidung und Aufstockungsstatus werden getrennt benannt.
+- Im vollständigen Investment-Case entfällt der doppelte Halal-Evidenzblock unterhalb der Tabs; offene Fälle behalten ihn für die noch erforderliche Belegarbeit.
+- Pro- und Contra-Punkte sind größer und kompakter dargestellt. Die vollständigen Inhalte bleiben in der Analyse erhalten.
