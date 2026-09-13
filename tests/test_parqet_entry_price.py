@@ -16,6 +16,24 @@ def run_app_holding(current, previous=None):
     return json.loads(subprocess.run(["node", "-e", script], check=True, capture_output=True, text=True).stdout)
 
 
+def run_activity_entry(root, isin, shares):
+    names = ["n", "money", "activityRows", "activitiesComplete", "activityIsin", "activityKind", "activityQuantity", "activityTotal", "activityUnitPrice", "entryFromActivities"]
+    functions = []
+    for name in names:
+        start = API.index(f"function {name}(")
+        opening = API.index("{", start)
+        depth = 0
+        end = opening
+        for end in range(opening, len(API)):
+            depth += API[end] == "{"
+            depth -= API[end] == "}"
+            if depth == 0:
+                break
+        functions.append(API[start:end + 1].replace("(v:any)", "(v)"))
+    script = ";".join(functions) + f";console.log(entryFromActivities({json.dumps(root)},{json.dumps(isin)},{shares}))"
+    return float(subprocess.run(["node", "-e", script], check=True, capture_output=True, text=True).stdout)
+
+
 def test_backend_accepts_parqet_average_and_total_cost_aliases():
     assert "function averageEntryPrice(position:any,shares:number)" in API
     for field in ["purchasePrice", "averagePrice", "averagePurchasePrice", "avgPrice"]:
@@ -23,7 +41,7 @@ def test_backend_accepts_parqet_average_and_total_cost_aliases():
     for field in ["purchaseValue", "investedCapital", "totalPurchaseValue", "totalCost"]:
         assert f"position?.{field}" in API
     assert "total/shares" in API
-    assert 'averagePriceSource:averagePrice>0?"PARQET":"UNAVAILABLE"' in API
+    assert 'averagePriceSource:providerAverage>0?"PARQET":activityAverage>0?"PARQET_ACTIVITY_RECONCILED":"UNAVAILABLE"' in API
 
 
 def test_frontend_derives_average_from_validated_total_cost():
@@ -46,6 +64,30 @@ def test_backend_extracts_structured_money_values_without_using_market_price():
         assert field in API
     assert ".map(money).find(v=>v>0)" in API
     assert "currentPrice" not in API.split("function averageEntryPrice", 1)[1].split("function normalizeDividends", 1)[0]
+
+
+def test_backend_reconstructs_weighted_cost_basis_and_reduces_sells_proportionally():
+    root = {"activities": [
+        {"type": "buy", "datetime": "2026-01-01", "asset": {"isin": "CA14150G4007"}, "shares": 10, "amount": 60},
+        {"type": "buy", "datetime": "2026-02-01", "asset": {"isin": "CA14150G4007"}, "shares": 20, "amount": 150},
+        {"type": "sell", "datetime": "2026-03-01", "asset": {"isin": "CA14150G4007"}, "shares": 5, "amount": 50},
+    ]}
+    assert run_activity_entry(root, "CA14150G4007", 25) == 7
+
+
+def test_backend_rejects_unreconciled_or_structurally_incomplete_activity_history():
+    buy = {"type": "buy", "asset": {"isin": "CA14150G4007"}, "shares": 20.726415, "amount": {"value": 137.08, "currency": "EUR"}}
+    assert abs(run_activity_entry({"activities": [buy]}, "CA14150G4007", 20.726415) - 137.08 / 20.726415) < 1e-10
+    assert run_activity_entry({"activities": [buy]}, "CA14150G4007", 21) == 0
+    assert run_activity_entry({"activities": [buy], "nextCursor": "more"}, "CA14150G4007", 20.726415) == 0
+    transfer = {"type": "transfer_in", "asset": {"isin": "CA14150G4007"}, "shares": 20.726415, "amount": 137.08}
+    assert run_activity_entry({"activities": [transfer]}, "CA14150G4007", 20.726415) == 0
+
+
+def test_backend_reports_activity_reconciliation_source_and_quality_counts():
+    assert 'averagePriceSource:providerAverage>0?"PARQET":activityAverage>0?"PARQET_ACTIVITY_RECONCILED":"UNAVAILABLE"' in API
+    assert 'entryPricesFromActivities:holdings.filter(x=>x.averagePriceSource==="PARQET_ACTIVITY_RECONCILED").length' in API
+    assert 'entryPricesUnavailable:holdings.filter(x=>x.averagePrice<=0).length' in API
 
 
 def test_frontend_preserves_last_valid_average_only_when_shares_are_unchanged():

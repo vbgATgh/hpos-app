@@ -10,13 +10,13 @@ ADAPTER = (ROOT / "app" / "parqet-supabase-adapter.js").read_text()
 
 
 def test_normalized_portfolio_requests_dividends_read_only():
-    assert "/activities?limit=500&activityType=dividend" in API
+    assert "/activities?limit=500" in API
     assert 'String(x?.type||"").toLowerCase()!=="dividend"' in API
     assert 'source:"PARQET"' in API
 
 
 def test_dividends_are_normalized_by_isin_and_deduplicated():
-    assert "normalizeDividends(activities,raw)" in API
+    assert "normalizeDividends(activityRoot,raw)" in API
     assert "seen.has(key)" in API
     assert "dividendKey(isin,date,net,currency)" in API
     assert ".toISOString().slice(0,10)" in API
@@ -28,9 +28,10 @@ def test_dividends_are_normalized_by_isin_and_deduplicated():
 
 def test_income_failure_never_blocks_holdings_sync():
     normalized = API[API.index("async function normalized"):API.index("function findPortfolioId")]
-    assert 'incomeStatus="AVAILABLE"' in normalized
-    assert 'incomeStatus="UNAVAILABLE"' in normalized
-    assert 'console.warn("parqet-income"' in normalized
+    assert 'activityStatus="AVAILABLE"' in normalized
+    assert 'activityStatus="UNAVAILABLE"' in normalized
+    assert 'console.warn("parqet-activities"' in normalized
+    assert 'incomeStatus=activityStatus' in normalized
     assert 'return{source:"PARQET_SUPABASE"' in normalized
 
 
@@ -81,9 +82,9 @@ def test_frontend_semantically_deduplicates_parqet_timestamp_variants():
 def test_release_exposes_income_capability_without_new_provider():
     html = (ROOT / "app" / "index.html").read_text()
     runtime = (ROOT / "app" / "runtime-config.js").read_text()
-    assert "Portfolio Intelligence · v8.7.61" in html
-    assert "parqet-supabase-adapter.js?v=20260913-entryobject1" in html
-    assert "app.js?v=20260913-entryobject1" in html
-    assert "version:'8.7.61'" in runtime
+    assert "Portfolio Intelligence · v8.7.62" in html
+    assert "parqet-supabase-adapter.js?v=20260913-entryledger1" in html
+    assert "app.js?v=20260913-entryledger1" in html
+    assert "version:'8.7.62'" in runtime
     assert 'parqetIncome:true' in API
-    assert 'version:"0.5.9"' in API
+    assert 'version:"0.5.10"' in API
