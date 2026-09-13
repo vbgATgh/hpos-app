@@ -62,3 +62,8 @@ Die doppelte Gate-Liste und der separate Portfolio-Fit-Block werden im vollstän
 - Eine vollständig ausgewertete Gate-Kette wird nicht mehr mit einer Freigabe verwechselt: Fortschritt, Entscheidung und Aufstockungsstatus werden getrennt benannt.
 - Im vollständigen Investment-Case entfällt der doppelte Halal-Evidenzblock unterhalb der Tabs; offene Fälle behalten ihn für die noch erforderliche Belegarbeit.
 - Pro- und Contra-Punkte sind größer und kompakter dargestellt. Die vollständigen Inhalte bleiben in der Analyse erhalten.
+
+## v8.7.59 Finaler Mobile-Schliff
+
+- Pro und Contra stehen auf Smartphones untereinander und bleiben dadurch ohne schmale Textspalten lesbar.
+- Der Portfolio-Fit benennt ausdrücklich den Turbo-Bucket, den aktuellen Turbo-Anteil und das maximale Ziel. Damit ist die Bucket-Allokation klar von der Einzelgewichtung der Aktie getrennt.

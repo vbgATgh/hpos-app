@@ -46,6 +46,13 @@ def test_pro_and_contra_are_readable_and_concise():
     css = (ROOT / "app/investment-case.css").read_text()
     assert "function concise(value,max=112)" in CASE
     assert ".caseWhy .caseList{padding-left:17px;font-size:13px;line-height:1.48}" in css
+    assert "@media(max-width:480px){.caseWhy{grid-template-columns:1fr}}" in css
+
+
+def test_portfolio_fit_distinguishes_bucket_from_single_asset_weight():
+    assert "Portfolio Fit · ${esc(c.gate2.bucket)}-Bucket" in CASE
+    assert "${esc(c.gate2.bucket)}-Anteil aktuell" in CASE
+    assert "Ziel maximal ${target.toFixed(0)} %" in CASE
 
 
 def test_long_asset_sections_use_progressive_disclosure():
