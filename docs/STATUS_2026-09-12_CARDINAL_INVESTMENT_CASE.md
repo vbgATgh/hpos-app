@@ -73,3 +73,9 @@ Die doppelte Gate-Liste und der separate Portfolio-Fit-Block werden im vollstän
 - Der Supabase-/Parqet-Normalisierer berücksichtigt mehrere eindeutig benannte Felder für Durchschnittspreis und investiertes Kapital.
 - Ist nur ein validierter Gesamteinstand vorhanden, wird der durchschnittliche Einstand durch die aktuelle Stückzahl geteilt.
 - Fehlt der Einstand bei einem einzelnen Sync vorübergehend, bleibt der letzte validierte Wert nur dann erhalten, wenn die Stückzahl exakt unverändert ist. Bei einer Bestandsänderung wird nicht geschätzt.
+
+## v8.7.61 Strukturierte Parqet-Geldwerte
+
+- Einstandspreis und investiertes Kapital werden zusätzlich aus strukturierten Geldwerten wie `{ value, currency }` oder `{ amount, currency }` gelesen.
+- Backend und Browser-Adapter verwenden dieselben erlaubten Zahlenfelder.
+- Der aktuelle Marktpreis bleibt ausdrücklich ausgeschlossen und wird niemals als Einstand eingesetzt.
