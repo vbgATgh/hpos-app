@@ -31,8 +31,21 @@ def test_gate_progress_is_derived_from_the_eight_real_states():
     assert "pending=['OPEN_REVIEW','LOCKED','UNKNOWN','NOT_EVALUATED']" in CASE
     assert "for(const g of gates)" in CASE
     assert "if(!g||pending.includes(g.state))break" in CASE
-    assert "8 von 8 Gates ausgewertet" in CASE
+    assert "8 von 8 Gates bewertet" in CASE
+    assert "keine Aufstockungsfreigabe" in CASE
     assert CASE.count("${progressVisual(c)}") == 2
+
+
+def test_complete_case_avoids_duplicate_halal_evidence_but_generic_case_keeps_it():
+    assert "classList.toggle('caseComplete',!!s.querySelector('.caseSources'))" in CASE
+    assert "classList.remove('caseEnhanced','caseComplete')" in CASE
+    assert ".caseComplete #halalEvidenceSection{display:none}" in (ROOT / "app/investment-case.css").read_text()
+
+
+def test_pro_and_contra_are_readable_and_concise():
+    css = (ROOT / "app/investment-case.css").read_text()
+    assert "function concise(value,max=112)" in CASE
+    assert ".caseWhy .caseList{padding-left:17px;font-size:13px;line-height:1.48}" in css
 
 
 def test_long_asset_sections_use_progressive_disclosure():
