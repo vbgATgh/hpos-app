@@ -17,8 +17,8 @@ SIGNAL_BUILDER = (ROOT / "scripts/build_thesis_signals.py").read_text()
 def test_cardinal_case_is_isin_centered_and_loaded():
     assert CASE["isin"] == "CA14150G4007"
     assert INDEX["casesByIsin"][CASE["isin"]] == "CARDINAL_ENERGY.json"
-    assert 'investment-case.js?v=20260912-cardinalux1' in HTML
-    assert 'investment-case.css?v=20260912-cardinalux1' in HTML
+    assert 'investment-case.js?v=20260913-allassets1' in HTML
+    assert 'investment-case.css?v=20260913-allassets1' in HTML
 
 
 def test_all_eight_gates_have_explicit_non_open_states():
