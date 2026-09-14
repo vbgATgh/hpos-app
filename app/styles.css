@@ -7,3 +7,9 @@
 .assetCheckHead span{display:flex;flex-direction:column;gap:2px}.assetCheckHead small,.assetCheckHead time,.assetCheckReport p{color:var(--muted);font-size:.75rem}.assetCheckHead time{white-space:nowrap}
 .assetCheckSteps{display:grid;gap:0;margin-top:9px;border-top:1px solid var(--line)}.assetCheckSteps div{min-height:35px;border-bottom:1px solid var(--line);font-size:.78rem}.assetCheckSteps b{text-align:right;font-size:.72rem}
 .assetCheckReport p{margin:10px 0 0;line-height:1.4}
+
+.assetCheckVerdict{display:flex;flex-direction:column;gap:5px;padding:12px;border:1px solid currentColor;border-radius:13px;background:rgba(255,255,255,.025)}
+.assetCheckVerdict small{font-size:.69rem;letter-spacing:.08em;text-transform:uppercase}.assetCheckVerdict strong{font-size:1.1rem}.assetCheckVerdict span{color:var(--text);font-size:.76rem;line-height:1.4}
+.assetCheckMissing{margin-top:10px;padding:10px;border-radius:11px;background:rgba(246,185,72,.08);color:var(--warn)}.assetCheckMissing b{font-size:.75rem}.assetCheckMissing ul{margin:6px 0 0;padding-left:18px;color:var(--text);font-size:.74rem;line-height:1.45}
+.caseScopeNote{display:flex;flex-direction:column;gap:3px;margin:0 0 9px;padding:9px 11px;border-left:3px solid var(--accent);border-radius:9px;background:rgba(154,104,255,.08)}.caseScopeNote b{font-size:.78rem}.caseScopeNote span{color:var(--muted);font-size:.72rem;line-height:1.35}
+.halalVerdictBlock{display:flex;flex-direction:column;gap:4px;margin-bottom:9px;padding:12px;border:1px solid currentColor;border-radius:12px;background:rgba(255,255,255,.025)}.halalVerdictBlock small{font-size:.68rem;text-transform:uppercase;letter-spacing:.08em}.halalVerdictBlock strong{font-size:1rem}.halalVerdictBlock span{color:var(--text);font-size:.74rem;line-height:1.4}

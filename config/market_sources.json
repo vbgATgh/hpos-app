@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 5,
+  "schemaVersion": 6,
   "provider": "YAHOO_CHART_UNOFFICIAL",
   "fxProvider": "FRANKFURTER_ECB",
   "defaultQuotePolicy": "VALIDATED_LIVE",
@@ -328,6 +328,26 @@
       "quotePolicy": "VALIDATED_LIVE",
       "identitySource": "Citi Depositary Receipt Services",
       "identitySourceUrl": "https://depositaryreceipts.citi.com/"
+    },
+    {
+      "assetKey": "SIEMENS",
+      "symbol": "SIE.DE",
+      "name": "Siemens Aktiengesellschaft",
+      "isin": "DE0007236101",
+      "aliases": [
+        "Siemens AG",
+        "Siemens Aktiengesellschaft",
+        "SIE",
+        "SIE.DE",
+        "DE0007236101",
+        "723610"
+      ],
+      "enabled": true,
+      "exchange": "XETRA",
+      "expectedCurrency": "EUR",
+      "quotePolicy": "VALIDATED_LIVE",
+      "identitySource": "Siemens Investor Relations",
+      "identitySourceUrl": "https://www.siemens.com/en-us/company/investor-relations/share-bonds-rating/basic-data-key-share-figures/"
     }
   ]
 }
