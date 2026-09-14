@@ -125,3 +125,11 @@ def test_missing_entry_price_forces_a_repair_sync_on_boot_and_visibility():
     assert APP.count(repair_condition) == 2
     assert "appHoldings(data.holdings)" in ADAPTER
     assert "data.holdings.map(appHolding)" not in ADAPTER
+
+
+def test_entry_quality_is_visible_for_every_holding():
+    assert "function entrySourceLabel(v)" in APP
+    assert "function entryCoverage()" in APP
+    assert "Einstandsquelle" in APP
+    assert "Einstandsdaten" in APP
+    assert "${entryCoverage()}/${holdings.length} vollständig" in APP

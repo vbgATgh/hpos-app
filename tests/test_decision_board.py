@@ -15,7 +15,7 @@ def test_decision_board_is_mounted_and_versioned():
     assert 'id="decisionBoard"' in HTML
     assert 'decision-board.css?v=20260911-board2' in HTML
     assert 'decision-board.js?v=20260911-board2' in HTML
-    assert "Portfolio Intelligence · v8.7.63" in HTML
+    assert "Portfolio Intelligence · v8.7.64" in HTML
     assert "version:'8.7.63'" in RUNTIME
 
 
