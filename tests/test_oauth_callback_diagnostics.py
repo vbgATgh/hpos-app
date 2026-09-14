@@ -33,4 +33,4 @@ def test_current_release_cache_busts_callback_adapter():
     assert "Portfolio Intelligence · v8.7.64" in html
     assert "parqet-supabase-adapter.js?v=20260913-entryledger2" in html
     assert "runtime-config.js?v=20260914-entryquality1" in html
-    assert "version:'8.7.63'" in runtime
+    assert "version:'8.7.64'" in runtime

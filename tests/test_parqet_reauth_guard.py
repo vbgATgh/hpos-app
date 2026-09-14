@@ -16,4 +16,4 @@ def test_current_release_keeps_reauth_guard_and_cache_bust():
     runtime = (ROOT / "app" / "runtime-config.js").read_text()
     assert "Portfolio Intelligence · v8.7.64" in html
     assert "parqet-supabase-adapter.js?v=20260913-entryledger2" in html
-    assert "version:'8.7.63'" in runtime
+    assert "version:'8.7.64'" in runtime

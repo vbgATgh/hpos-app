@@ -173,7 +173,7 @@ def test_current_release_loads_fresh_profile_logic():
     assert "halal-autoscreen.js?v=20260911-cardinal2" in html
     assert "halal-register.js?v=20260910-runstate1" in html
     assert "halal-evidence.js?v=20260910-debtevidence1" in html
-    assert "version:'8.7.63'" in runtime
+    assert "version:'8.7.64'" in runtime
 
 
 def test_cardinal_profile_and_aaoifi_evidence_are_complete_and_identity_safe():

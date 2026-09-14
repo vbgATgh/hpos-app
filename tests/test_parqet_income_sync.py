@@ -85,6 +85,6 @@ def test_release_exposes_income_capability_without_new_provider():
     assert "Portfolio Intelligence · v8.7.64" in html
     assert "parqet-supabase-adapter.js?v=20260913-entryledger2" in html
     assert "app.js?v=20260914-entryquality1" in html
-    assert "version:'8.7.63'" in runtime
+    assert "version:'8.7.64'" in runtime
     assert 'parqetIncome:true' in API
     assert 'version:"0.5.11"' in API
