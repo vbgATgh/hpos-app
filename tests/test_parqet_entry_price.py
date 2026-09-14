@@ -16,7 +16,7 @@ def run_app_holding(current, previous=None):
     return json.loads(subprocess.run(["node", "-e", script], check=True, capture_output=True, text=True).stdout)
 
 
-def run_activity_entry(root, isin, shares):
+def run_activity_entry(root, isin, shares, holding_id=""):
     names = ["n", "money", "activityRows", "activitiesComplete", "activityIsin", "activityKind", "activityQuantity", "activityTotal", "activityUnitPrice", "entryFromActivities"]
     functions = []
     for name in names:
@@ -30,7 +30,7 @@ def run_activity_entry(root, isin, shares):
             if depth == 0:
                 break
         functions.append(API[start:end + 1].replace("(v:any)", "(v)"))
-    script = ";".join(functions) + f";console.log(entryFromActivities({json.dumps(root)},{json.dumps(isin)},{shares}))"
+    script = ";".join(functions) + f";console.log(entryFromActivities({json.dumps(root)},{json.dumps(isin)},{shares},{json.dumps(holding_id)}))"
     return float(subprocess.run(["node", "-e", script], check=True, capture_output=True, text=True).stdout)
 
 
@@ -41,13 +41,15 @@ def test_backend_accepts_parqet_average_and_total_cost_aliases():
     for field in ["purchaseValue", "investedCapital", "totalPurchaseValue", "totalCost"]:
         assert f"position?.{field}" in API
     assert "total/shares" in API
-    assert 'averagePriceSource:providerAverage>0?"PARQET":activityAverage>0?"PARQET_ACTIVITY_RECONCILED":"UNAVAILABLE"' in API
+    assert 'averagePriceSource:providerAverage>0?"PARQET_POSITION_PURCHASE_PRICE":activityAverage>0?"PARQET_ACTIVITY_RECONCILED":"UNAVAILABLE"' in API
+    assert "purchasePrice:averagePrice" in API
+    assert "purchaseValue:averagePrice>0?averagePrice*shares:0" in API
 
 
 def test_frontend_derives_average_from_validated_total_cost():
     row = run_app_holding({"isin": "CA14150G4007", "shares": 20.726415, "investedCapital": 137.08})
     assert abs(row["avg"] - 137.08 / 20.726415) < 1e-10
-    assert row["avgSource"] == "PARQET"
+    assert row["avgSource"] == "PARQET_POSITION_PURCHASE_PRICE"
 
 
 def test_frontend_accepts_structured_parqet_money_values():
@@ -55,7 +57,13 @@ def test_frontend_accepts_structured_parqet_money_values():
     total = run_app_holding({"isin": "CA14150G4007", "shares": 20.726415, "investedCapital": {"amount": 137.08, "currency": "EUR"}})
     assert direct["avg"] == 6.61
     assert abs(total["avg"] - 137.08 / 20.726415) < 1e-10
-    assert direct["avgSource"] == total["avgSource"] == "PARQET"
+    assert direct["avgSource"] == total["avgSource"] == "PARQET_POSITION_PURCHASE_PRICE"
+
+
+def test_frontend_prefers_official_parqet_purchase_price_contract():
+    row = run_app_holding({"isin": "CA14150G4007", "shares": 20.726415, "purchasePrice": 6.61, "purchaseValue": 137.08})
+    assert row["avg"] == row["purchasePrice"] == 6.61
+    assert abs(row["purchaseValue"] - 6.61 * 20.726415) < 1e-10
 
 
 def test_backend_extracts_structured_money_values_without_using_market_price():
@@ -84,8 +92,13 @@ def test_backend_rejects_unreconciled_or_structurally_incomplete_activity_histor
     assert run_activity_entry({"activities": [transfer]}, "CA14150G4007", 20.726415) == 0
 
 
+def test_backend_matches_official_activity_contract_by_holding_id():
+    buy = {"type": "buy", "holdingId": "holding-cardinal", "shares": 20.726415, "price": 6.61}
+    assert run_activity_entry({"activities": [buy]}, "CA14150G4007", 20.726415, "holding-cardinal") == 6.61
+
+
 def test_backend_reports_activity_reconciliation_source_and_quality_counts():
-    assert 'averagePriceSource:providerAverage>0?"PARQET":activityAverage>0?"PARQET_ACTIVITY_RECONCILED":"UNAVAILABLE"' in API
+    assert 'averagePriceSource:providerAverage>0?"PARQET_POSITION_PURCHASE_PRICE":activityAverage>0?"PARQET_ACTIVITY_RECONCILED":"UNAVAILABLE"' in API
     assert 'entryPricesFromActivities:holdings.filter(x=>x.averagePriceSource==="PARQET_ACTIVITY_RECONCILED").length' in API
     assert 'entryPricesUnavailable:holdings.filter(x=>x.averagePrice<=0).length' in API
 
@@ -102,5 +115,13 @@ def test_frontend_preserves_last_valid_average_only_when_shares_are_unchanged():
 
 def test_entry_source_survives_app_normalization_for_diagnostics():
     assert "avgSource:String(h.avgSource??h.averagePriceSource??'')" in APP
-    assert "previousByIsin" in ADAPTER
-    assert "payload={version:4" in ADAPTER
+    assert "function previousHoldings()" in ADAPTER
+    assert "holdings:appHoldings(data.holdings)" in ADAPTER
+    assert "payload={version:5" in ADAPTER
+
+
+def test_missing_entry_price_forces_a_repair_sync_on_boot_and_visibility():
+    repair_condition = "holdings.some(h=>h.shares>0&&h.avg<=0)"
+    assert APP.count(repair_condition) == 2
+    assert "appHoldings(data.holdings)" in ADAPTER
+    assert "data.holdings.map(appHolding)" not in ADAPTER

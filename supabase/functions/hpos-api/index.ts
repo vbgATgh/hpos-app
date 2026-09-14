@@ -16,7 +16,7 @@ Deno.serve(async(req:Request)=>{
   const u=new URL(req.url),r=route(u.pathname),o=req.headers.get("Origin")||"";
   if(req.method==="OPTIONS")return new Response(null,{status:204,headers:cors(o)});
   try{
-    if(r==="/health")return j({ok:true,service:"hpos-api",version:"0.5.10",parqetConfigured:!!Deno.env.get("PARQET_CLIENT_ID"),marketProxy:true,halalMode:"ACCOUNT_FREE",parqetIncome:true,averageEntryFallback:true,moneyObjectEntrySupport:true,activityEntryReconciliation:true},200,o);
+    if(r==="/health")return j({ok:true,service:"hpos-api",version:"0.5.11",parqetConfigured:!!Deno.env.get("PARQET_CLIENT_ID"),marketProxy:true,halalMode:"ACCOUNT_FREE",parqetIncome:true,averageEntryFallback:true,moneyObjectEntrySupport:true,activityEntryReconciliation:true,parqetPurchasePriceContract:true},200,o);
 
     if(r==="/"&&u.searchParams.get("s")==="yahoo"){
       origin(o);
@@ -176,8 +176,8 @@ async function normalized(t:string){
     if(!isin||shares<=0)continue;
     const currentValue=value||shares*price;
     if(currentValue<=0)continue;
-    const providerAverage=averageEntryPrice(p,shares),activityAverage=providerAverage>0?0:entryFromActivities(activityRoot,isin,shares),averagePrice=providerAverage||activityAverage;
-    const h={name:String(a?.name??x?.nickname??isin),isin,shares,currentPrice:price,currentValue,averagePrice,averagePriceSource:providerAverage>0?"PARQET":activityAverage>0?"PARQET_ACTIVITY_RECONCILED":"UNAVAILABLE",broker:TR.has(isin)?"TRADE_REPUBLIC":"SCALABLE",halalStatus:"UNKNOWN"};
+    const providerAverage=averageEntryPrice(p,shares),activityAverage=providerAverage>0?0:entryFromActivities(activityRoot,isin,shares,String(x?.id||"")),averagePrice=providerAverage||activityAverage;
+    const h={name:String(a?.name??x?.nickname??isin),isin,shares,currentPrice:price,currentValue,averagePrice,purchasePrice:averagePrice,purchaseValue:averagePrice>0?averagePrice*shares:0,averagePriceSource:providerAverage>0?"PARQET_POSITION_PURCHASE_PRICE":activityAverage>0?"PARQET_ACTIVITY_RECONCILED":"UNAVAILABLE",broker:TR.has(isin)?"TRADE_REPUBLIC":"SCALABLE",halalStatus:"UNKNOWN"};
     (currentValue<1?watch:active).push(currentValue<1?{...h,candidate:true}:h)
   }
   const dedup=new Map<string,any>();
@@ -212,7 +212,7 @@ function activityKind(x){return String(x?.type??x?.activityType??"").toUpperCase
 function activityQuantity(x){return Math.abs(money(x?.shares??x?.quantity??x?.units??x?.position?.shares))}
 function activityTotal(x){return Math.abs(money(x?.amount??x?.totalAmount??x?.cashAmount??x?.value))}
 function activityUnitPrice(x){return money(x?.price??x?.unitPrice??x?.purchasePrice??x?.executionPrice)}
-function entryFromActivities(root,isin,expectedShares){const rows=activityRows(root);if(!activitiesComplete(root,rows))return 0;const buys=new Set(["BUY","PURCHASE","SECURITY_BUY","SAVINGS_PLAN","SAVINGS_PLAN_EXECUTION","OPENING_POSITION"]),sells=new Set(["SELL","SALE","SECURITY_SELL"]),invalid=new Set(["TRANSFER_IN","TRANSFER_OUT","SPLIT","REVERSE_SPLIT","MERGER"]);let qty=0,cost=0,seen=0,blocked=false;const relevant=rows.filter(x=>activityIsin(x)===isin).sort((a,b)=>String(a?.datetime??a?.date??a?.createdAt??"").localeCompare(String(b?.datetime??b?.date??b?.createdAt??"")));for(const x of relevant){const kind=activityKind(x),q=activityQuantity(x);if(invalid.has(kind)&&q>0){blocked=true;break}if(!buys.has(kind)&&!sells.has(kind))continue;if(q<=0){blocked=true;break}if(buys.has(kind)){const total=activityTotal(x),unit=activityUnitPrice(x),add=total>0?total:q*unit+Math.abs(money(x?.fee??x?.fees));if(add<=0){blocked=true;break}qty+=q;cost+=add;seen++}else{if(q>qty+1e-8){blocked=true;break}const avg=qty>0?cost/qty:0;qty-=q;cost=Math.max(0,cost-q*avg);seen++}}const tolerance=Math.max(1e-8,Math.abs(expectedShares)*1e-6);return !blocked&&seen>0&&qty>0&&Math.abs(qty-expectedShares)<=tolerance?cost/qty:0}
+function entryFromActivities(root,isin,expectedShares,holdingId=""){const rows=activityRows(root);if(!activitiesComplete(root,rows))return 0;const buys=new Set(["BUY","PURCHASE","SECURITY_BUY","SAVINGS_PLAN","SAVINGS_PLAN_EXECUTION","OPENING_POSITION"]),sells=new Set(["SELL","SALE","SECURITY_SELL"]),invalid=new Set(["TRANSFER_IN","TRANSFER_OUT","SPLIT","REVERSE_SPLIT","MERGER"]);let qty=0,cost=0,seen=0,blocked=false;const relevant=rows.filter(x=>(holdingId&&String(x?.holdingId||"")===holdingId)||activityIsin(x)===isin).sort((a,b)=>String(a?.datetime??a?.date??a?.createdAt??"").localeCompare(String(b?.datetime??b?.date??b?.createdAt??"")));for(const x of relevant){const kind=activityKind(x),q=activityQuantity(x);if(invalid.has(kind)&&q>0){blocked=true;break}if(!buys.has(kind)&&!sells.has(kind))continue;if(q<=0){blocked=true;break}if(buys.has(kind)){const total=activityTotal(x),unit=activityUnitPrice(x),add=total>0?total:q*unit+Math.abs(money(x?.fee??x?.fees));if(add<=0){blocked=true;break}qty+=q;cost+=add;seen++}else{if(q>qty+1e-8){blocked=true;break}const avg=qty>0?cost/qty:0;qty-=q;cost=Math.max(0,cost-q*avg);seen++}}const tolerance=Math.max(1e-8,Math.abs(expectedShares)*1e-6);return !blocked&&seen>0&&qty>0&&Math.abs(qty-expectedShares)<=tolerance?cost/qty:0}
 
 function normalizeDividends(root:any,rawHoldings:any[]){
   const activities=activityRows(root);
