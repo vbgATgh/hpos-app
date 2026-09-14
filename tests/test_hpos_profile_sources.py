@@ -169,7 +169,7 @@ def test_current_release_loads_fresh_profile_logic():
     html = (ROOT / "app" / "index.html").read_text()
     runtime = (ROOT / "app" / "runtime-config.js").read_text()
     assert "Portfolio Intelligence · v8.7.65" in html
-    assert "app.js?v=20260914-entryquality1" in html
+    assert "app.js?v=20260914-assetcheck1" in html
     assert "halal-autoscreen.js?v=20260911-cardinal2" in html
     assert "halal-register.js?v=20260910-runstate1" in html
     assert "halal-evidence.js?v=20260910-debtevidence1" in html
