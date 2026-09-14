@@ -168,12 +168,12 @@ def test_market_value_builder_requires_no_account_or_api_key():
 def test_current_release_loads_fresh_profile_logic():
     html = (ROOT / "app" / "index.html").read_text()
     runtime = (ROOT / "app" / "runtime-config.js").read_text()
-    assert "Portfolio Intelligence · v8.7.64" in html
+    assert "Portfolio Intelligence · v8.7.65" in html
     assert "app.js?v=20260914-entryquality1" in html
     assert "halal-autoscreen.js?v=20260911-cardinal2" in html
     assert "halal-register.js?v=20260910-runstate1" in html
     assert "halal-evidence.js?v=20260910-debtevidence1" in html
-    assert "version:'8.7.64'" in runtime
+    assert "version:'8.7.65'" in runtime
 
 
 def test_cardinal_profile_and_aaoifi_evidence_are_complete_and_identity_safe():
@@ -223,3 +223,18 @@ def test_legacy_watchlist_identity_is_promoted_only_by_unique_verified_market_ma
     assert "matches.length===1" in app
     assert "source:'MARKET_CONFIG_MATCH',verified:true" in app
     assert "promoteWatchlistIdentities();render()" in app
+
+
+def test_contextual_asset_check_and_external_broker_action_are_separated():
+    app = (ROOT / "app" / "app.js").read_text(encoding="utf-8")
+    guard = (ROOT / "app" / "search-guard.js").read_text(encoding="utf-8")
+    case = (ROOT / "app" / "investment-case.js").read_text(encoding="utf-8")
+    assert "Prüfung starten" in app
+    assert "Prüfung aktualisieren" in app
+    assert "Prüfung läuft …" in app
+    assert "HPOS_RUN_ASSET_CHECK" in app
+    assert "HPOS_HALAL_AUTOSCREEN?.screen?.(target,true)" in app
+    assert "Identität prüfen" in guard
+    assert "data-broker-order" in case
+    assert "HPOS_OPEN_BROKER_ORDER" in case
+    assert "Transaktion ausschließlich beim hinterlegten Broker" in case
