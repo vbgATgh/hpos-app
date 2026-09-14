@@ -172,7 +172,7 @@ def test_current_release_loads_fresh_profile_logic():
     assert "app.js?v=20260914-halalflow1" in html
     assert "halal-autoscreen.js?v=20260911-cardinal2" in html
     assert "halal-register.js?v=20260910-runstate1" in html
-    assert "halal-evidence.js?v=20260910-debtevidence1" in html
+    assert "halal-evidence.js?v=20260914-halalflow1" in html
     assert "version:'8.7.67'" in runtime
 
 
@@ -229,8 +229,8 @@ def test_contextual_asset_check_and_external_broker_action_are_separated():
     app = (ROOT / "app" / "app.js").read_text(encoding="utf-8")
     guard = (ROOT / "app" / "search-guard.js").read_text(encoding="utf-8")
     case = (ROOT / "app" / "investment-case.js").read_text(encoding="utf-8")
-    assert "Prüfung starten" in app
-    assert "Prüfung aktualisieren" in app
+    assert "Halal prüfen" in app
+    assert "Halal neu prüfen" in app
     assert "Prüfung läuft …" in app
     assert "HPOS_RUN_ASSET_CHECK" in app
     assert "HPOS_HALAL_AUTOSCREEN?.screen?.(target,true)" in app
@@ -247,7 +247,7 @@ def test_single_asset_check_exposes_visible_module_report_and_refreshes_all_avai
     assert "assetCheckReport" in app
     assert "HPOS_PORTFOLIO_FIT?.evaluateIsin" in app
     assert "HPOS_INVESTMENT_CASE?.refresh" in app
-    assert "Investmentthese, Bewertung, Timing und News bleiben offen" in app
+    assert "Gate 1 entscheidet ausschließlich über halal oder nicht halal" in app
     assert "refresh:async()=>{index=null;active=null;await render();return active}" in case
     assert '"symbol": "XPEV"' in market
     assert '"isin": "US98422D1054"' in market
