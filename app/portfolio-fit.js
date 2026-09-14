@@ -52,6 +52,6 @@ async function render(){
  box.innerHTML=html;gateRow(e.state);
 }
 function schedule(){lastSig='';[120,600,1400].forEach(ms=>setTimeout(render,ms))}
-document.addEventListener('click',schedule,true);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')schedule()});document.addEventListener('hpos:halal-manual-evidence',schedule);setTimeout(schedule,700);
+document.addEventListener('click',schedule,true);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')schedule()});document.addEventListener('hpos:halal-prescreen',schedule);document.addEventListener('hpos:asset-check-complete',schedule);document.addEventListener('hpos:halal-manual-evidence',schedule);setTimeout(schedule,700);
 window.HPOS_PORTFOLIO_FIT=Object.freeze({evaluateIsin:async isin=>{await load();return evaluate({isin:String(isin||'').toUpperCase()})}});
 })();
