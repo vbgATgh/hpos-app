@@ -31,5 +31,5 @@ function clearCase(){const section=$('#investmentCaseSection');section?.remove()
 async function render(){if(!$('#asset')?.classList.contains('on'))return;const id=isin();if(!id){clearCase();return}if(active?.isin===id&&$('#investmentCaseSection')&&(!active.generic||index)){applyGates(active);return}const mine=++token,idx=await getIndex();if(mine!==token)return;const file=idx?.casesByIsin?.[id];if(!file){const c=genericCase(id);active=c;applyGates(c);renderGenericCase(c);return}try{const r=await fetch('../data/investment_cases/'+encodeURIComponent(file),{cache:'no-store'}),c=r.ok?await r.json():null;if(mine!==token||!c)return;active=c;applyGates(c);renderCase(c)}catch{if(mine!==token)return;const c=genericCase(id);active=c;applyGates(c);renderGenericCase(c)}}
 function schedule(){[180,700,1500].forEach(ms=>setTimeout(render,ms))}
 document.addEventListener('click',e=>{if(e.target.closest('#investmentCaseSection'))return;schedule()},true);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')schedule()});setTimeout(schedule,950);
-window.HPOS_INVESTMENT_CASE=Object.freeze({current:()=>active});
+window.HPOS_INVESTMENT_CASE=Object.freeze({current:()=>active,refresh:async()=>{index=null;active=null;await render();return active}});
 })();

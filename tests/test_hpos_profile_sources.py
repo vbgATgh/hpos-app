@@ -168,12 +168,12 @@ def test_market_value_builder_requires_no_account_or_api_key():
 def test_current_release_loads_fresh_profile_logic():
     html = (ROOT / "app" / "index.html").read_text()
     runtime = (ROOT / "app" / "runtime-config.js").read_text()
-    assert "Portfolio Intelligence · v8.7.65" in html
-    assert "app.js?v=20260914-assetcheck1" in html
+    assert "Portfolio Intelligence · v8.7.66" in html
+    assert "app.js?v=20260914-assetcheck2" in html
     assert "halal-autoscreen.js?v=20260911-cardinal2" in html
     assert "halal-register.js?v=20260910-runstate1" in html
     assert "halal-evidence.js?v=20260910-debtevidence1" in html
-    assert "version:'8.7.65'" in runtime
+    assert "version:'8.7.66'" in runtime
 
 
 def test_cardinal_profile_and_aaoifi_evidence_are_complete_and_identity_safe():
@@ -238,3 +238,16 @@ def test_contextual_asset_check_and_external_broker_action_are_separated():
     assert "data-broker-order" in case
     assert "HPOS_OPEN_BROKER_ORDER" in case
     assert "Transaktion ausschließlich beim hinterlegten Broker" in case
+
+
+def test_single_asset_check_exposes_visible_module_report_and_refreshes_all_available_engines():
+    app = (ROOT / "app" / "app.js").read_text(encoding="utf-8")
+    case = (ROOT / "app" / "investment-case.js").read_text(encoding="utf-8")
+    market = (ROOT / "config" / "market_sources.json").read_text(encoding="utf-8")
+    assert "assetCheckReport" in app
+    assert "HPOS_PORTFOLIO_FIT?.evaluateIsin" in app
+    assert "HPOS_INVESTMENT_CASE?.refresh" in app
+    assert "Investmentthese, Bewertung, Timing und News bleiben offen" in app
+    assert "refresh:async()=>{index=null;active=null;await render();return active}" in case
+    assert '"symbol": "XPEV"' in market
+    assert '"isin": "US98422D1054"' in market
