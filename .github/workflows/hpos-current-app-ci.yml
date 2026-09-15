@@ -7,6 +7,8 @@ on:
       - 'app/**'
       - 'supabase/functions/hpos-api/**'
       - 'supabase/functions/hpos-profile/**'
+      - 'supabase/functions/hpos-screen/**'
+      - 'supabase/migrations/20260915073547_create_generic_identity_evidence_service.sql'
       - 'data/halal_financial_evidence.json'
       - 'data/halal_market_value_36m.json'
       - 'scripts/build_halal_market_value_evidence.py'
@@ -17,12 +19,15 @@ on:
       - 'tests/test_parqet_reauth_guard.py'
       - 'tests/test_parqet_income_sync.py'
       - 'tests/test_decision_board.py'
+      - 'tests/test_generic_halal_research.py'
       - '.github/workflows/hpos-current-app-ci.yml'
   pull_request:
     paths:
       - 'app/**'
       - 'supabase/functions/hpos-api/**'
       - 'supabase/functions/hpos-profile/**'
+      - 'supabase/functions/hpos-screen/**'
+      - 'supabase/migrations/20260915073547_create_generic_identity_evidence_service.sql'
       - 'data/halal_financial_evidence.json'
       - 'data/halal_market_value_36m.json'
       - 'scripts/build_halal_market_value_evidence.py'
@@ -33,6 +38,7 @@ on:
       - 'tests/test_parqet_reauth_guard.py'
       - 'tests/test_parqet_income_sync.py'
       - 'tests/test_decision_board.py'
+      - 'tests/test_generic_halal_research.py'
       - '.github/workflows/hpos-current-app-ci.yml'
 
 permissions:
@@ -63,3 +69,4 @@ jobs:
           tests/test_parqet_reauth_guard.py
           tests/test_parqet_income_sync.py
           tests/test_decision_board.py
+          tests/test_generic_halal_research.py

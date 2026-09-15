@@ -13,12 +13,13 @@ try{
   }
 }catch{}
 window.HPOS_RUNTIME=Object.freeze({
-  version:'8.7.67',
+  version:'8.7.68',
   integration:Object.freeze({
     enabled:true,
     mode:'SUPABASE_PARQET_QUOTES_SEARCH',
     baseUrl:'https://moxyhjfbrmsnphikxqje.supabase.co/functions/v1/hpos-api',
-    parqetBaseUrl:'https://moxyhjfbrmsnphikxqje.supabase.co/functions/v1/hpos-api'
+    parqetBaseUrl:'https://moxyhjfbrmsnphikxqje.supabase.co/functions/v1/hpos-api',
+    screenUrl:'https://moxyhjfbrmsnphikxqje.supabase.co/functions/v1/hpos-screen'
   }),
   publicSources:Object.freeze({
     frankfurter:'https://api.frankfurter.app',

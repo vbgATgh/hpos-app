@@ -1,6 +1,6 @@
 # HPOS App – Projektstatus & Decision Log
 
-Stand: 2026-09-02
+Stand: 2026-09-15
 
 > Zentrale Steuerungsakte für HPOS nach der App Factory. Nur tatsächlich belegte Zustände werden als abgeschlossen dokumentiert. Nicht durchgeführte Tests oder Gates gelten nicht als bestanden.
 
@@ -16,11 +16,11 @@ Stand: 2026-09-02
 
 **Frontend:** `https://vbgatgh.github.io/hpos-app/app/`
 
-**Private Integrationsschicht:** Supabase Edge Function `hpos-api`
+**Private Integrationsschicht:** Supabase Edge Functions `hpos-api`, `hpos-profile` und `hpos-screen`
 
 **Supabase Project Ref:** `moxyhjfbrmsnphikxqje`
 
-**Function Base:** `https://moxyhjfbrmsnphikxqje.supabase.co/functions/v1/hpos-api`
+**Function Bases:** `https://moxyhjfbrmsnphikxqje.supabase.co/functions/v1/hpos-api`, `https://moxyhjfbrmsnphikxqje.supabase.co/functions/v1/hpos-profile` und `https://moxyhjfbrmsnphikxqje.supabase.co/functions/v1/hpos-screen`
 
 **Parqet Callback:** `https://moxyhjfbrmsnphikxqje.supabase.co/functions/v1/hpos-api/auth/parqet/callback`
 
@@ -39,7 +39,7 @@ Stand: 2026-09-02
 
 **Status:** IN DEVELOPMENT
 
-**Phase:** Kanonischer Produktpfad `app/` ist im realen Browser nachgewiesen. Parqet-Live-Sync, Search/ISIN, Quotes, Watchlist-Persistenz, Investment-Akte, Decision Layer, Income-Grundlogik, Halal-UNKNOWN-Verhalten, Broker-Guard und Hauptnavigation wurden real geprüft. Der serverseitige GitHub-Cleanup des früheren sensiblen Snapshot-Commits wurde von GitHub Support durchgeführt und die alte SHA liefert anschließend keinen Commit mehr. Offen sind gezielter Providerfehler/Fallback-Nachweis, verbleibende System-/Diagnosepfade, Safari/PWA-Primärfluss sowie anschließendes Legacy-Cleanup und v9-RC-Regression.
+**Phase:** Kanonischer Produktpfad `app/` sowie Parqet-Live-Sync, Suche/ISIN, Quotes, Watchlist, Investment-Akte, Decision Layer, Income, Broker-Guard und Gate-1-Einzelprüfung sind nachgewiesen. Der generische Supabase-Dienst für Identität, Finanz-Evidenz, AAOIFI-Auswertung und persistente Prüfprotokolle ist produktiv; ein offizieller SEC-Ticker-/CIK-Snapshot sichert die Emittentenauflösung ab. Die automatische offizielle Finanzabdeckung bleibt wegen der noch nicht ausreichend robusten regulatorischen Upstream-Beschaffung in Arbeit. Offen sind der Dokument-/XBRL-Cache, verbleibende System-/Diagnosepfade, Safari/PWA-Primärfluss sowie Legacy-Cleanup und v9-RC-Regression.
 
 **Letztes formal abgeschlossenes App-Factory-Gate:** keines nachgewiesen
 
@@ -50,7 +50,7 @@ Stand: 2026-09-02
 ### Aktiv / Zielarchitektur
 - GitHub Pages: statisches Frontend
 - Supabase: private Integrationsschicht und Market-Proxy
-- Edge Function: `hpos-api`
+- Edge Functions: `hpos-api`, `hpos-profile` und `hpos-screen`
 - serverseitiger OAuth-State-/Session-Store in Supabase
 - Browser erhält nur eine opake HPOS-Session-ID als Bearer-Wert
 - Parqet Access-/Refresh-Tokens bleiben ausschließlich serverseitig
@@ -72,7 +72,7 @@ Legacy darf nicht erweitert werden. Parqet, Search und Quotes sind funktional ü
 Tatsächlich durchgeführt und nachgewiesen:
 
 - Supabase-Projekt `moxyhjfbrmsnphikxqje`: aktiv und erreichbar.
-- Edge Function `hpos-api`: `ACTIVE`, aktuell deployte Version `17`.
+- Edge Functions `hpos-api` Version 32, `hpos-profile` Version 10 und `hpos-screen` Version 10: `ACTIVE` (Stand 2026-09-15).
 - `verify_jwt: false` bleibt bewusst aktiv, da OAuth-Start/-Callback öffentlich erreichbar sein müssen; geschützte Parqet-API-Pfade prüfen eigene HPOS-Session und Origin.
 - `PARQET_CLIENT_ID` wurde in Supabase als Custom Secret angelegt.
 - Private Parqet-Integration `HPOS` wurde mit Scope `portfolio:read` und der festgelegten Supabase-Callback-URL angelegt.
@@ -542,3 +542,21 @@ Dieses Dokument wird bei Änderungen an Status, Gate, Architektur, Entscheidung,
 - HPOS ergänzt eine fehlende Watchlist-ISIN künftig ausschließlich dann, wenn der exakte Ticker in der versionierten, verifizierten Marktkonfiguration genau einmal vorkommt.
 - Mehrdeutige Identitäten bleiben offen. Die Migration erzeugt keine Halal-Einstufung und verändert keine Depotposition.
 - Ausführliche Evidenz: `docs/HOTFIX_2026-09-10_WATCHLIST_IDENTITY.md`.
+
+## 25. Statusergänzung 2026-09-15 – generischer Identitäts- und Evidenzdienst v8.7.68
+
+**Entscheidung DEC-025 – Keine weiteren aktienspezifischen Implementierungen vor dem generischen Backend-Pfad**
+
+- Die kanonische Einzelprüfung ruft zuerst den Supabase-Dienst `hpos-screen` auf; der lokale Prescreen bleibt als degradierter Fallback bestehen.
+- Identitäten werden über ISIN, Ticker und Börsenplatz abgeglichen. Eine formal gültige ISIN oder ein widersprüchlicher Einzeltreffer genügt nicht als externe Verifikation.
+- Eine vom Browser behauptete Quelle wie `PARQET` darf die externe Identitätsbestätigung nicht ersetzen.
+- Offizielle SEC-XBRL-Fakten, Einreichungen und 36 abgeschlossene Monatsmarktwerte bilden den accountfreien Zielpfad für die AAOIFI-Kriterien.
+- SEC-SIC und Zinsertrag werden nur als Ausschluss- beziehungsweise Untergrenzen-Evidenz verwendet; sie erzeugen ohne vollständigen Geschäfts- oder Einnahmenbeleg keinen positiven Gate-1-Nachweis. Leasinghaltige Schuldentags gelten als Obergrenze.
+- `PASS`, `FAIL` und `OPEN_REVIEW` werden ausschließlich aus nachvollziehbaren Kriterien erzeugt. Fehlende, widersprüchliche oder währungsinkompatible Daten bleiben offen.
+- Jeder abgeschlossene Lauf wird mit Methodik, Kriterien, Evidenz und Zeitpunkten in `hpos_halal_runs` gespeichert und kann über die geschützte Sitzung wieder abgerufen werden.
+- Kuratierte Evidenz und frische entscheidende Ergebnisse sind gegen degradierende offene Läufe geschützt.
+- Gate 1 bleibt die Halal-Entscheidung. Gates 2 bis 8 bleiben davon getrennte Portfolio- und Investmentbewertungen.
+- Parqet, Broker, Stückzahlen, Einstandsdaten, Rollback, Validierung und Quarantäne bleiben unverändert.
+- Ein aus dem offiziellen SEC-Tickerindex erzeugter Snapshot mit mehr als 12.000 Ticker-/CIK-Zuordnungen schließt die im Live-Test nachgewiesene Indexlücke der Edge-Runtime; unvollständige HTTP-200-Antworten werden ebenfalls verworfen.
+- Der Live-Test bestätigt den fail-closed Betrieb und die SEC-CIK-Auflösung über den Snapshot. Die offizielle Companyfacts-/Submissions-Beschaffung bleibt aus der Edge-Runtime unzuverlässig; als nächstes ist deshalb ein eigener Cache für regulatorische Dokumente und XBRL-Fakten umzusetzen.
+- Ausführliche Evidenz: `docs/STATUS_2026-09-15_GENERIC_IDENTITY_EVIDENCE_SERVICE.md`.
