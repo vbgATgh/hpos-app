@@ -10,6 +10,13 @@ async function get(path){const h=headers();if(!h){lastError='not_authenticated';
 async function resolve(a){const result=await post('/identity',asset(a));return result?.identity&&VALID_ISIN.test(String(result.identity.isin||'').toUpperCase())?result:null}
 async function check(a,{force=true}={}){const result=await post('/check',{asset:asset(a),force});if(!result)return null;if(!['PASS','FAIL','OPEN_REVIEW'].includes(String(result.state||'').toUpperCase()))return null;return result}
 async function latest(isin){isin=String(isin||'').trim().toUpperCase();return VALID_ISIN.test(isin)?get('/runs/latest?isin='+encodeURIComponent(isin)):null}
+async function batch(list,{force=false,onItem}={}){
+ const keyOf=a=>String(a?.isin||a?.ticker||a?.symbol||a?.name||'').trim().toUpperCase();
+ const uniq=[...new Map((list||[]).map(a=>[keyOf(a),a]).filter(x=>x[0])).values()];
+ const summary={total:uniq.length,processed:0,pass:0,fail:0,open:0,errors:0,results:[]};
+ let idx=0;const workers=Array.from({length:Math.min(2,uniq.length)},async()=>{while(idx<uniq.length){const a=uniq[idx++];let r=null;try{r=await check(a,{force});if(!r)throw new Error(error()||'research_unavailable');if(r.identity?.isin)await window.HPOS_HALAL_STORE?.get?.({isin:r.identity.isin},{force:true});summary.processed++;if(r.state==='PASS')summary.pass++;else if(r.state==='FAIL')summary.fail++;else summary.open++;summary.results.push({key:keyOf(a),state:r.state,missingCriteria:r.missingCriteria||[],reason:r.reason||''});try{onItem?.(a,r)}catch{}}catch{summary.processed++;summary.open++;summary.errors++;summary.results.push({key:keyOf(a),state:'OPEN_REVIEW',missingCriteria:[],reason:'Prüfung technisch fehlgeschlagen.'});try{onItem?.(a,{state:'OPEN_REVIEW',error:true})}catch{}}}});await Promise.all(workers);return summary
+}
 function error(){return lastError}
-window.HPOS_HALAL_RESEARCH=Object.freeze({resolve,check,latest,error,available:()=>!!session(),endpoint:API});
+window.HPOS_HALAL_RESEARCH=Object.freeze({resolve,check,batch,latest,error,available:()=>!!session(),endpoint:API});
+setTimeout(()=>{const s=window.HPOS_STATE_SNAPSHOT?.();if(s&&session())batch([...(s.holdings||[]),...(s.watchlist||[])],{force:false,onItem:()=>document.dispatchEvent(new CustomEvent('hpos:halal-canonical'))})},3500);
 })();

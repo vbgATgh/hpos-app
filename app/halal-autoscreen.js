@@ -75,5 +75,4 @@ async function batch(list,{force=false,onItem}={}){
 function cached(a){return read()[keyOf(a)]||null}
 function label(r){if(!r)return'UNGEPRÜFT';if(r.state==='PASS')return'HALALKONFORM';if(r.state==='FAIL')return'NICHT HALALKONFORM';return'PRÜFUNG OFFEN'}
 window.HPOS_HALAL_AUTOSCREEN=Object.freeze({screen,batch,cached,label,rules:RULES,methodology:'HPOS AAOIFI Rule Engine v2 · SS21 · automatic/free · fail-closed'});
-setTimeout(()=>{const s=window.HPOS_STATE_SNAPSHOT?.();if(s)batch([...(s.holdings||[]),...(s.watchlist||[])],{onItem:()=>document.dispatchEvent(new CustomEvent('hpos:halal-prescreen'))})},3500);
 })();

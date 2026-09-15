@@ -23,7 +23,7 @@ Deno.serve(async (req: Request) => {
   try {
     allowOrigin(origin);
     const url = new URL(req.url), path = route(url.pathname);
-    if (path === "/health") return json({ ok: true, service: "hpos-screen", version: "1.3.0", identity: "GENERIC", evidence: "SEC_XBRL_OFFICIAL", failClosed: true, auditLog: true, secTickerSnapshot: true, canonicalDegradationGuard: true }, 200, origin);
+    if (path === "/health") return json({ ok: true, service: "hpos-screen", version: "1.4.0", identity: "GENERIC_ALIAS_AWARE", evidence: "SEC_XBRL_OFFICIAL", failClosed: true, auditLog: true, secTickerSnapshot: true, canonicalDegradationGuard: true }, 200, origin);
     if (path === "/identity" && req.method === "POST") {
       await requireSession(req);
       const input = cleanInput(await req.json().catch(() => ({})));
@@ -101,11 +101,15 @@ function preservedCanonical(existing: any, identity: any, research: any) {
 
 async function resolveIdentity(input: IdentityInput) {
   const isin = upper(input.isin), ticker = upper(input.ticker || input.symbol), name = text(input.name, 180), exchange = upper(input.exchange);
+  if (validIsin(isin)) {
+    const stored = await readIdentity(isin);
+    if (stored) return { identity: { isin, ticker: ticker || stored.symbol || "", name: stored.name || name || isin, exchange: exchange || stored.exchange || "", quoteType: stored.quote_type || "EQUITY", status: "VERIFIED", confidence: Number(stored.confidence || .99), source: stored.source_name || "VERIFIED_IDENTITY_CACHE", sourceUrl: stored.source_url || null, cachedIdentity: true }, candidates: [] };
+  }
   const candidates = await yahooCandidates([isin, ticker, name].filter(Boolean));
   if (validIsin(isin)) {
     const exact = candidates.filter(x => x.isin === isin);
-    const match = ticker ? exact.find(x => x.ticker === ticker) : exact[0];
-    const figi = match ? null : await verifyIsinWithOpenFigi(isin, ticker);
+    const match = ticker ? exact.find(x => tickerEqual(x.ticker, ticker)) : exact[0];
+    const figi = match ? null : await verifyIsinWithOpenFigi(isin, ticker, exchange);
     if (match || figi) return { identity: { isin, ticker: match?.ticker || figi?.ticker || ticker, name: match?.name || figi?.name || name || isin, exchange: match?.exchange || figi?.exchange || exchange, quoteType: match?.quoteType || "EQUITY", status: "VERIFIED", confidence: 1, source: match ? "YAHOO_EXACT_ISIN" : "OPENFIGI_EXACT_ISIN", sourceUrl: match ? `${YAHOO}/v1/finance/search?q=${encodeURIComponent(isin)}` : OPENFIGI }, candidates };
     return { identity: null, status: "UNRESOLVED", candidates, reason: "valid_isin_not_source_verified" };
   }
@@ -215,6 +219,12 @@ async function readCanonical(isin: string) {
   return data;
 }
 
+async function readIdentity(isin: string) {
+  const { data, error } = await db().from("hpos_security_identities").select("isin,symbol,exchange,name,quote_type,resolution_status,confidence,source_name,source_url").eq("isin", isin).maybeSingle();
+  if (error || data?.resolution_status !== "VERIFIED") return null;
+  return data;
+}
+
 async function latestRun(isin: string) {
   const { data, error } = await db().from("hpos_halal_runs").select("id,isin,symbol,state,methodology,reason,missing_criteria,criteria,evidence,started_at,completed_at").eq("isin", isin).order("completed_at", { ascending: false }).limit(1).maybeSingle();
   if (error) throw httpError(500, "run_read_failed");
@@ -261,14 +271,13 @@ async function yahooCandidates(queries: string[]) {
   return uniqueBy(rows, x => `${x.isin || "-"}|${x.ticker}|${x.exchange}`);
 }
 
-async function verifyIsinWithOpenFigi(isin: string, ticker: string) {
+async function verifyIsinWithOpenFigi(isin: string, ticker: string, exchange: string) {
   try {
     const r = await fetch(OPENFIGI, { method: "POST", headers: { "Content-Type": "application/json", "User-Agent": "HPOS/1.0" }, body: JSON.stringify([{ idType: "ID_ISIN", idValue: isin }]), signal: AbortSignal.timeout(12000) });
     if (!r.ok) return null; const d = await r.json(), rows = Array.isArray(d?.[0]?.data) ? d[0].data : [];
-    const x = ticker
-      ? rows.find((v: any) => upper(v?.ticker) === ticker)
-      : (rows.length === 1 ? rows[0] : null);
-    return x ? { ticker: upper(x.ticker), name: text(x.name || x.securityDescription, 180), exchange: upper(x.exchCode) } : null;
+    const scored = rows.filter((v: any) => v?.ticker || v?.name || v?.securityDescription).map((v: any) => ({ v, score: (tickerEqual(v?.ticker, ticker) ? 100 : 0) + (exchange && exchangeEqual(v?.exchCode, exchange) ? 20 : 0) + (upper(v?.marketSector) === "EQUITY" ? 5 : 0) })).sort((a: any, b: any) => b.score - a.score);
+    const x = scored[0]?.v || null;
+    return x ? { ticker: ticker || upper(x.ticker), verifiedTicker: upper(x.ticker), name: text(x.name || x.securityDescription, 180), exchange: exchange || upper(x.exchCode) } : null;
   } catch { return null; }
 }
 
@@ -368,6 +377,8 @@ async function fetchText(url: string, headers: Record<string, string>, timeout =
 async function optionalJson(url: string, headers: Record<string, string>) { try { return await fetchJson(url, headers); } catch { return null; } }
 function cleanInput(x: any): IdentityInput { return { isin: upper(x?.isin), ticker: upper(x?.ticker || x?.symbol), exchange: upper(x?.exchange), name: text(x?.name, 180), source: upper(x?.source) }; }
 function validIsin(v: string) { if (!/^[A-Z]{2}[A-Z0-9]{9}\d$/.test(v)) return false; let s = ""; for (const c of v) s += /[A-Z]/.test(c) ? String(c.charCodeAt(0) - 55) : c; let sum = 0, alt = false; for (let i = s.length - 1; i >= 0; i--) { let n = Number(s[i]); if (alt) { n *= 2; if (n > 9) n -= 9; } sum += n; alt = !alt; } return sum % 10 === 0; }
+function tickerKey(v: string) { return upper(v).split(".")[0].replace(/[^A-Z0-9]/g, ""); }
+function tickerEqual(a: string, b: string) { const x = tickerKey(a), y = tickerKey(b); return !!x && !!y && x === y; }
 function exchangeEqual(a: string, b: string) { a = upper(a); b = upper(b); return a === b || a.includes(b) || b.includes(a); }
 function compareFactsNewest(a: any, b: any) { const end = String(b.end || "").localeCompare(String(a.end || "")); if (end) return end; const filed = String(b.filed || "").localeCompare(String(a.filed || "")); if (filed) return filed; return /A$/.test(String(a.form)) ? 1 : /A$/.test(String(b.form)) ? -1 : 0; }
 function days(a: string, b: string) { return Math.round(Math.abs(Date.parse(b) - Date.parse(a)) / 86400000); }
