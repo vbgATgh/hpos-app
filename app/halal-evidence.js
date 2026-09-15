@@ -14,6 +14,7 @@ function evaluate(id){
  const state=['PASS','FAIL','OPEN_REVIEW'].includes(String(e.state||'').toUpperCase())?String(e.state).toUpperCase():'OPEN_REVIEW';
  return{state,reason:e.reason||'',source:e.source||null,reviewedAt:e.reviewedAt||null,evidence:Array.isArray(e.evidence)?e.evidence:[]};
 }
+function canonicalEvidence(remote){const state=window.HPOS_HALAL_STATUS?.stateOf(remote)||'';return state?{state,reason:remote.reason||'',source:remote.source_name||remote.source_type||'HPOS Backend',reviewedAt:remote.checked_at||null,evidence:Array.isArray(remote.evidence)?remote.evidence:[]}:null}
 function label(s){return s==='PASS'?'HALALKONFORM':s==='FAIL'?'NICHT HALALKONFORM':'PRÜFUNG OFFEN'}
 function cls(s){return s==='PASS'?'pos':s==='FAIL'?'neg':'warn'}
 function financialCoverage(r){const keys=['revenue','totalDebt','interestBearingAssetsUpperBound','interestIncome','marketValue36mAvg'],sources=r?.financial?.metricSources||{};return{count:keys.filter(k=>sources[k]?.sourceUrl).length,total:keys.length,sources}}
@@ -37,13 +38,13 @@ function gateLock(state){
 }
 async function render(){
  if(!$('#asset')?.classList.contains('on'))return;await load();const id=identity(),sig=id.name+'|'+id.rawIsin;if(sig===lastSig&&$('#halalEvidenceBox'))return;lastSig=sig;
- const sec=mount();if(!sec)return;let e=evaluate(id),box=$('#halalEvidenceBox');if(!box)return;let pre=null,manual=null,remote=null;if(e.state==='OPEN_REVIEW'&&!registry?.assets?.[id.isin]&&id.isin&&window.HPOS_HALAL_STORE){remote=await window.HPOS_HALAL_STORE.get(id);if(['PASS','FAIL'].includes(remote?.state))e={state:remote.state,reason:remote.reason,source:remote.source_name||remote.source_type,reviewedAt:remote.checked_at,evidence:Array.isArray(remote.evidence)?remote.evidence:[]};}
- // Account-free priority: curated exact-ISIN evidence > HPOS AAOIFI Rule Engine > manually confirmed evidence.
- if(e.state==='OPEN_REVIEW'&&!registry?.assets?.[id.isin]&&window.HPOS_HALAL_AUTOSCREEN){
+ const sec=mount();if(!sec)return;let e=evaluate(id),box=$('#halalEvidenceBox');if(!box)return;let pre=null,manual=null,remote=null,hasCanonical=false;if(id.isin&&window.HPOS_HALAL_STORE){remote=await window.HPOS_HALAL_STORE.get(id);const canonical=canonicalEvidence(remote);if(canonical){e=canonical;hasCanonical=true}}
+ // The backend projection is authoritative. Local engines are fallback-only when no canonical record exists.
+ if(e.state==='OPEN_REVIEW'&&!hasCanonical&&!registry?.assets?.[id.isin]&&window.HPOS_HALAL_AUTOSCREEN){
    pre=await window.HPOS_HALAL_AUTOSCREEN.screen(id);
    if(pre?.state==='PASS')e={state:'PASS',reason:pre.reason,source:'HPOS AAOIFI Rule Engine v2',reviewedAt:pre.checkedAt,evidence:[{provider:'HPOS AAOIFI Rule Engine',status:'AUTO_PASS',note:pre.reason}]};else if(pre?.state==='FAIL')e={state:'FAIL',reason:pre.reason,source:'HPOS AAOIFI Rule Engine v2',reviewedAt:pre.checkedAt,evidence:[{provider:'HPOS AAOIFI Rule Engine',status:'AUTO_FAIL',note:pre.reason}]};
  }
- if(e.state==='OPEN_REVIEW'&&!registry?.assets?.[id.isin]&&window.HPOS_HALAL_MANUAL){
+ if(e.state==='OPEN_REVIEW'&&!hasCanonical&&!registry?.assets?.[id.isin]&&window.HPOS_HALAL_MANUAL){
    manual=window.HPOS_HALAL_MANUAL.record();
    if(manual?.identityConfirmed&&(manual?.standard==='AAOIFI'||manual?.standard==='PROVIDER_VERDICT')){
      if(manual.state==='PASS')e={state:'PASS',reason:'Manuell bestätigte externe Evidenz von '+manual.provider+' wurde der verifizierten ISIN '+id.isin+' zugeordnet.',source:manual.provider+' · Copy-Paste',reviewedAt:manual.createdAt,evidence:[{provider:manual.provider,status:'MANUAL_PASS',note:'Vom Nutzer bestätigte externe Evidenz'}]};
@@ -62,5 +63,5 @@ function schedule(){lastSig='';setTimeout(render,60)}
 document.addEventListener('click',schedule,true);
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')schedule()});document.addEventListener('hpos:halal-prescreen',schedule);document.addEventListener('hpos:asset-check-complete',schedule);document.addEventListener('hpos:halal-manual-evidence',schedule);document.addEventListener('hpos:halal-canonical',schedule);
 setTimeout(schedule,500);
-window.HPOS_HALAL_EVIDENCE=Object.freeze({evaluateIsin:async isin=>{await load();return evaluate({isin:VALID_ISIN.test(String(isin||'').toUpperCase())?String(isin).toUpperCase():'',rawIsin:String(isin||'').toUpperCase()})}});
+window.HPOS_HALAL_EVIDENCE=Object.freeze({evaluateIsin:async isin=>{await load();const id={isin:VALID_ISIN.test(String(isin||'').toUpperCase())?String(isin).toUpperCase():'',rawIsin:String(isin||'').toUpperCase()};if(id.isin&&window.HPOS_HALAL_STORE){const canonical=canonicalEvidence(await window.HPOS_HALAL_STORE.get(id));if(canonical)return canonical}return evaluate(id)}});
 })();

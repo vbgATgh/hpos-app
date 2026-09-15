@@ -574,3 +574,15 @@ Dieses Dokument wird bei Änderungen an Status, Gate, Architektur, Entscheidung,
 - Offene, fehlende oder abgelaufene Altstände werden nicht geschützt.
 - Der produktive Cardinal-Request bestätigt den Fix mit `PASS`, `cached: true` und `degraded: true`; kanonischer Datensatz und Laufhistorie blieben unverändert. `hpos-screen` Version 11 ist aktiv, 53 aktive App-Regressionstests sind grün.
 - Ausführliche Evidenz: `docs/HOTFIX_2026-09-15_CANONICAL_HALAL_DEGRADATION_GUARD.md`.
+
+## 27. Statusergänzung 2026-09-15 – einheitlicher Halal-Status und Identitätsaliase v8.7.69
+
+**Entscheidung DEC-027 – Supabase ist die verbindliche Gate-1-Projektion für alle Primäransichten**
+
+- Ein kanonisches `OPEN_REVIEW` darf nicht länger von einem lokalen alten `PASS` oder `FAIL` übermalt werden.
+- Detailkopf, Position, Halal-Evidenz, Halal-Register, Depot und Watchlist verwenden dieselbe Statuspriorität.
+- Sammel- und Einzelprüfung laufen über denselben generischen `hpos-screen`-Dienst; die lokale Vorprüfung bleibt Fallback und startet nicht mehr konkurrierend im Hintergrund.
+- Eine exakte, extern bestätigte ISIN darf nicht allein wegen unterschiedlicher Ticker-Schreibweisen scheitern. Börsensuffixe und Klassen-Trennzeichen werden normalisiert, ohne mehrdeutige ISINs zu erraten.
+- Der produktive Test bestätigt `DK0062498333` / `NOVO-B.CO` als `VERIFIED`; der anschließende Prüflauf bleibt wegen fehlender offizieller AAOIFI-Pflichtdaten korrekt offen.
+- Supabase `hpos-screen` Version 14 / Service 1.4.0 ist aktiv.
+- Ausführliche Evidenz: `docs/STATUS_2026-09-15_UNIFIED_HALAL_IDENTITY.md`.

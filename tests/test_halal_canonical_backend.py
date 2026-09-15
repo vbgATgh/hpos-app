@@ -5,7 +5,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 def test_canonical_halal_store_is_loaded_before_app():
     html = (ROOT / "app" / "index.html").read_text()
-    assert "Portfolio Intelligence · v8.7.68" in html
+    assert "Portfolio Intelligence · v8.7.69" in html
     assert html.index("halal-store.js") < html.index("app.js")
 
 
@@ -38,10 +38,10 @@ def test_decisive_halal_evidence_beats_open_review_cache():
     app = (ROOT / "app" / "app.js").read_text()
     register = (ROOT / "app" / "halal-register.js").read_text()
     autoscreen = (ROOT / "app" / "halal-autoscreen.js").read_text()
-    decisive = "e?.state||decisive(s)||decisive(a)||decisive(m)||s?.state||a?.state||m?.state"
-    assert decisive in app
-    register_priority = "e?.state||decisive(remote)||decisive(pre)||decisive(manual)||remote?.state||pre?.state||manual?.state"
-    assert register_priority in register
+    status = (ROOT / "app" / "halal-status.js").read_text()
+    assert "canonical:s,curated:e,automatic:a,manual:m" in app
+    assert "canonical:remote,curated:e,automatic:pre,manual" in register
+    assert "['CANONICAL_BACKEND',canonical]" in status
     assert "saveAAOIFI?.(a,cached)" in autoscreen
 
 

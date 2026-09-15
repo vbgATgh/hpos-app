@@ -32,9 +32,13 @@ def test_screen_service_is_session_guarded_and_fail_closed():
     assert 'reason: "valid_isin_not_source_verified"' in SCREEN
     assert "PARQET_CANONICAL_ISIN" not in SCREEN
     assert 'source: "VALID_ISIN_INPUT"' not in SCREEN
-    assert "const match = ticker ? exact.find(x => x.ticker === ticker) : exact[0]" in SCREEN
-    assert "rows.find((v: any) => upper(v?.ticker) === ticker)" in SCREEN
-    assert "rows.length === 1 ? rows[0] : null" in SCREEN
+    assert "const match = ticker ? exact.find(x => tickerEqual(x.ticker, ticker)) : exact[0]" in SCREEN
+    assert "await readIdentity(isin)" in SCREEN
+    assert "VERIFIED_IDENTITY_CACHE" in SCREEN
+    assert "stored.source_name" in SCREEN
+    assert "cachedIdentity: true" in SCREEN
+    assert "tickerEqual(v?.ticker, ticker)" in SCREEN
+    assert "ticker || upper(x.ticker)" in SCREEN
 
 
 def test_open_research_cannot_degrade_a_fresh_decisive_canonical_result():
@@ -96,13 +100,28 @@ def test_research_client_never_exposes_service_role_or_mutates_portfolio_state()
     assert "/identity" in RESEARCH
     assert "/check" in RESEARCH
     assert "/runs/latest" in RESEARCH
+    assert "async function batch" in RESEARCH
+    assert "HPOS_HALAL_RESEARCH=Object.freeze({resolve,check,batch" in RESEARCH
     assert "hpos_parqet_session" in RESEARCH
     for forbidden in ["SERVICE_ROLE", "hpos_parqet_validated", "hpos_parqet_previous", "hpos_parqet_quarantine"]:
         assert forbidden not in RESEARCH
 
 
 def test_release_version_is_consistent():
-    assert "Portfolio Intelligence · v8.7.68" in HTML
-    assert "version:'8.7.68'" in RUNTIME
-    assert "app.js?v=20260915-genericresearch1" in HTML
+    assert "Portfolio Intelligence · v8.7.69" in HTML
+    assert "version:'8.7.69'" in RUNTIME
+    assert "app.js?v=20260915-unifiedhalal1" in HTML
     assert "search-guard.js?v=20260915-genericresearch1" in HTML
+
+
+def test_depot_and_watchlist_use_backend_as_single_status_authority():
+    status = (ROOT / "app/halal-status.js").read_text(encoding="utf-8")
+    register = (ROOT / "app/halal-register.js").read_text(encoding="utf-8")
+    evidence = (ROOT / "app/halal-evidence.js").read_text(encoding="utf-8")
+    autoscreen = (ROOT / "app/halal-autoscreen.js").read_text(encoding="utf-8")
+    assert HTML.index("halal-status.js") < HTML.index("app.js")
+    assert "['CANONICAL_BACKEND',canonical]" in status
+    assert "HPOS_HALAL_RESEARCH?.batch" in register
+    assert "HPOS_HALAL_AUTOSCREEN?.batch(candidates" not in register
+    assert "hasCanonical" in evidence
+    assert "setTimeout(()=>{const s=window.HPOS_STATE_SNAPSHOT?.();if(s)batch" not in autoscreen
