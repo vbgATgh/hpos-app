@@ -559,4 +559,6 @@ Dieses Dokument wird bei Änderungen an Status, Gate, Architektur, Entscheidung,
 - Parqet, Broker, Stückzahlen, Einstandsdaten, Rollback, Validierung und Quarantäne bleiben unverändert.
 - Ein aus dem offiziellen SEC-Tickerindex erzeugter Snapshot mit mehr als 12.000 Ticker-/CIK-Zuordnungen schließt die im Live-Test nachgewiesene Indexlücke der Edge-Runtime; unvollständige HTTP-200-Antworten werden ebenfalls verworfen.
 - Der Live-Test bestätigt den fail-closed Betrieb und die SEC-CIK-Auflösung über den Snapshot. Die offizielle Companyfacts-/Submissions-Beschaffung bleibt aus der Edge-Runtime unzuverlässig; als nächstes ist deshalb ein eigener Cache für regulatorische Dokumente und XBRL-Fakten umzusetzen.
+- Der Produktions-Smoke-Test nach Merge von Pull Request #77 bestätigt v8.7.68 auf GitHub Pages: `index.html`, Runtime, Research-Client, App-JavaScript und Styles stimmen per SHA-256 mit dem freigegebenen Repository-Stand überein. Health 200, fehlende Sitzung 401 und fremder Origin 403 wurden erneut live bestätigt.
 - Ausführliche Evidenz: `docs/STATUS_2026-09-15_GENERIC_IDENTITY_EVIDENCE_SERVICE.md`.
+- Produktionsnachweis: `docs/STATUS_2026-09-15_V8768_PRODUCTION_SMOKE.md`.
