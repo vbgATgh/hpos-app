@@ -37,6 +37,18 @@ def test_screen_service_is_session_guarded_and_fail_closed():
     assert "rows.length === 1 ? rows[0] : null" in SCREEN
 
 
+def test_open_research_cannot_degrade_a_fresh_decisive_canonical_result():
+    prior_read = SCREEN.index("const prior = validIsin(inputIsin) ? await readCanonical(inputIsin) : null")
+    identity_open = SCREEN.index("if (!resolved.identity?.isin)")
+    persist = SCREEN.index("await persistRun(result, startedAt, completedAt)")
+    post_run_guard = SCREEN.index('if (result.state === "OPEN_REVIEW" && isFreshDecisive(existing))')
+    assert prior_read < identity_open
+    assert "if (isFreshDecisive(prior)) return preservedCanonical" in SCREEN
+    assert persist < post_run_guard
+    assert "researchRunId" in SCREEN
+    assert "degraded: true" in SCREEN
+
+
 def test_screen_uses_traceable_account_free_sources_and_currency_guard():
     for marker in ["data.sec.gov", "include/ticker.txt", "company_tickers.json", "companyfacts", "submissions", "api.openfigi.com", "query1.finance.yahoo.com"]:
         assert marker in SCREEN
