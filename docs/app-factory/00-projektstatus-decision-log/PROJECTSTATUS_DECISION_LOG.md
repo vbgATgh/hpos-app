@@ -562,3 +562,15 @@ Dieses Dokument wird bei Änderungen an Status, Gate, Architektur, Entscheidung,
 - Der Produktions-Smoke-Test nach Merge von Pull Request #77 bestätigt v8.7.68 auf GitHub Pages: `index.html`, Runtime, Research-Client, App-JavaScript und Styles stimmen per SHA-256 mit dem freigegebenen Repository-Stand überein. Health 200, fehlende Sitzung 401 und fremder Origin 403 wurden erneut live bestätigt.
 - Ausführliche Evidenz: `docs/STATUS_2026-09-15_GENERIC_IDENTITY_EVIDENCE_SERVICE.md`.
 - Produktionsnachweis: `docs/STATUS_2026-09-15_V8768_PRODUCTION_SMOKE.md`.
+
+## 26. Statusergänzung 2026-09-15 – kanonischer Halal-Degradationsschutz
+
+**Entscheidung DEC-026 – Ein offener Research-Nachlauf darf ein frisches entscheidendes Gate-1-Ergebnis nicht degradieren**
+
+- Ein produktiver Cardinal-Energy-Screenshot zeigte den Widerspruch zwischen kanonischem `HALALKONFORM` und einem offenen Einzelprüflauf wegen nicht bestätigter externer Identität.
+- `hpos-screen` prüft bei vorhandener ISIN deshalb den kanonischen Evidenzstand vor der externen Neuauflösung.
+- Ein frisches `PASS` oder `FAIL` bleibt wirksam, wenn Identitäts- oder Evidenzbeschaffung des Nachlaufs offen endet.
+- Ein nach Identitätsauflösung technisch abgeschlossener offener Lauf bleibt im Audit erhalten und wird separat als degradierter Research-Stand zurückgegeben.
+- Offene, fehlende oder abgelaufene Altstände werden nicht geschützt.
+- Der produktive Cardinal-Request bestätigt den Fix mit `PASS`, `cached: true` und `degraded: true`; kanonischer Datensatz und Laufhistorie blieben unverändert. `hpos-screen` Version 11 ist aktiv, 53 aktive App-Regressionstests sind grün.
+- Ausführliche Evidenz: `docs/HOTFIX_2026-09-15_CANONICAL_HALAL_DEGRADATION_GUARD.md`.

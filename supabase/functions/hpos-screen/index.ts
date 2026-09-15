@@ -23,7 +23,7 @@ Deno.serve(async (req: Request) => {
   try {
     allowOrigin(origin);
     const url = new URL(req.url), path = route(url.pathname);
-    if (path === "/health") return json({ ok: true, service: "hpos-screen", version: "1.2.0", identity: "GENERIC", evidence: "SEC_XBRL_OFFICIAL", failClosed: true, auditLog: true, secTickerSnapshot: true }, 200, origin);
+    if (path === "/health") return json({ ok: true, service: "hpos-screen", version: "1.3.0", identity: "GENERIC", evidence: "SEC_XBRL_OFFICIAL", failClosed: true, auditLog: true, secTickerSnapshot: true, canonicalDegradationGuard: true }, 200, origin);
     if (path === "/identity" && req.method === "POST") {
       await requireSession(req);
       const input = cleanInput(await req.json().catch(() => ({})));
@@ -53,12 +53,20 @@ Deno.serve(async (req: Request) => {
 
 async function runCheck(input: IdentityInput, force: boolean) {
   const startedAt = new Date().toISOString();
+  const inputIsin = upper(input.isin);
+  const prior = validIsin(inputIsin) ? await readCanonical(inputIsin) : null;
   const resolved = await resolveIdentity(input);
-  if (!resolved.identity?.isin) return openResult(resolved, startedAt, ["Eindeutige kanonische ISIN"], "Die Identität konnte nicht eindeutig aufgelöst werden.");
+  if (!resolved.identity?.isin) {
+    if (isFreshDecisive(prior)) return preservedCanonical(prior, null, {
+      state: "OPEN_REVIEW", reason: "Die externe Identität konnte im aktuellen Nachlauf nicht eindeutig bestätigt werden.",
+      missingCriteria: ["Eindeutige externe Identitätsbestätigung"], checkedAt: startedAt, source: "IDENTITY_RESOLVER"
+    });
+    return openResult(resolved, startedAt, ["Eindeutige kanonische ISIN"], "Die Identität konnte nicht eindeutig aufgelöst werden.");
+  }
   const identity = resolved.identity;
   await saveIdentity(identity, resolved.candidates || []);
 
-  const existing = await readCanonical(identity.isin);
+  const existing = prior?.isin === identity.isin ? prior : await readCanonical(identity.isin);
   if (existing?.source_type === "CURATED_ISIN" && ["PASS", "FAIL"].includes(existing.state)) {
     return { runId: null, identity, state: existing.state, reason: existing.reason, missingCriteria: [], criteria: {}, evidence: existing.evidence || [], checkedAt: existing.checked_at, cached: true, source: existing.source_name };
   }
@@ -72,7 +80,23 @@ async function runCheck(input: IdentityInput, force: boolean) {
   const runId = crypto.randomUUID();
   const result = { runId, identity, ...evaluated, evidence: acquired.evidence, financial: acquired.financial, checkedAt: completedAt, source: acquired.source };
   await persistRun(result, startedAt, completedAt);
+  if (result.state === "OPEN_REVIEW" && isFreshDecisive(existing)) return preservedCanonical(existing, identity, result);
   return result;
+}
+
+function isFreshDecisive(existing: any) {
+  return !!existing && ["PASS", "FAIL"].includes(String(existing.state || ""))
+    && (!existing.expires_at || Date.parse(existing.expires_at) > Date.now());
+}
+
+function preservedCanonical(existing: any, identity: any, research: any) {
+  return {
+    runId: null, researchRunId: research?.runId || null, identity, state: existing.state, reason: existing.reason,
+    missingCriteria: [], criteria: {}, evidence: existing.evidence || [], checkedAt: existing.checked_at,
+    cached: true, degraded: true, source: existing.source_name,
+    researchState: research?.state || "OPEN_REVIEW", researchReason: research?.reason || "",
+    researchMissingCriteria: research?.missingCriteria || []
+  };
 }
 
 async function resolveIdentity(input: IdentityInput) {
