@@ -6,13 +6,16 @@ const APP_ORIGIN = "https://vbgatgh.github.io";
 const YAHOO = "https://query1.finance.yahoo.com";
 const SEC = "https://data.sec.gov";
 const OPENFIGI = "https://api.openfigi.com/v3/mapping";
+const GLEIF = "https://api.gleif.org/api/v1/lei-records";
+const ESEF = "https://filings.xbrl.org";
 const SESSION_TTL = 12 * 60 * 60 * 1000;
 const RESULT_TTL = 7 * 24 * 60 * 60 * 1000;
+const DOCUMENT_DISCOVERY_TTL = 7 * 24 * 60 * 60 * 1000;
 const SEC_AGENT = "HPOS Portfolio Intelligence contact@vbgatgh.github.io";
 const RULES = Object.freeze({ impureIncomeMax: .05, interestAssetsMax: .30, interestDebtMax: .30 });
 
 type IdentityInput = { isin?: string; ticker?: string; symbol?: string; exchange?: string; name?: string; source?: string };
-type EvidenceItem = { metric: string; value: number | string; unit: string; period: string; sourceName: string; sourceUrl: string; accession?: string; tag?: string; method?: string; quality: "OFFICIAL" | "MARKET" | "DISCOVERY" };
+type EvidenceItem = { metric: string; value: number | string; unit: string; period: string; sourceName: string; sourceUrl: string; accession?: string; tag?: string; method?: string; location?: string; quality: "OFFICIAL" | "MARKET" | "DISCOVERY" };
 type Criterion = { rule: string; state: "PASS" | "FAIL" | "OPEN"; value: number | string | null; limit: number | null; source: string };
 
 let secTickersCache: { at: number; rows: any[] } | null = null;
@@ -23,7 +26,7 @@ Deno.serve(async (req: Request) => {
   try {
     allowOrigin(origin);
     const url = new URL(req.url), path = route(url.pathname);
-    if (path === "/health") return json({ ok: true, service: "hpos-screen", version: "1.4.0", identity: "GENERIC_ALIAS_AWARE", evidence: "SEC_XBRL_OFFICIAL", failClosed: true, auditLog: true, secTickerSnapshot: true, canonicalDegradationGuard: true }, 200, origin);
+    if (path === "/health") return json({ ok: true, service: "hpos-screen", version: "1.5.0", identity: "GENERIC_ALIAS_AWARE", evidence: "SEC_AND_ESEF_XBRL_CACHE", failClosed: true, auditLog: true, secTickerSnapshot: true, regulatoryDocumentCache: true, canonicalDegradationGuard: true }, 200, origin);
     if (path === "/identity" && req.method === "POST") {
       await requireSession(req);
       const input = cleanInput(await req.json().catch(() => ({})));
@@ -126,10 +129,176 @@ async function acquireEvidence(identity: any) {
   let secCompany = null;
   try { secCompany = ticker ? await secCompanyForTicker(ticker) : null; } catch { secCompany = null; }
   if (secCompany) return acquireSecEvidence(identity, secCompany);
+  const cached = await readCachedRegulatoryEvidence(identity);
+  if (cached?.fresh) return cached.acquired;
+  try {
+    const esef = await acquireEsefEvidence(identity);
+    if (esef) return esef;
+  } catch (error) {
+    console.error("hpos-screen-esef", String((error as any)?.message || error));
+  }
+  if (cached?.acquired) return { ...cached.acquired, source: "ESEF_XBRL_CACHE_STALE" };
   const profile = await yahooProfile(ticker);
   const evidence: EvidenceItem[] = [];
   if (profile?.industry) evidence.push(item("businessProfile", `${profile.sector || ""} · ${profile.industry}`.replace(/^ · | · $/g, ""), "text", "current", "Yahoo Finance discovery profile", `${YAHOO}/v10/finance/quoteSummary/${encodeURIComponent(ticker)}`, "DISCOVERY"));
   return { source: "GENERIC_DISCOVERY_ONLY", official: false, identity, business: { state: "OPEN", description: profile?.industry || "", sic: "" }, financial: {}, evidence };
+}
+
+async function acquireEsefEvidence(identity: any) {
+  const lei = await resolveLei(identity);
+  if (!lei) return null;
+  const filingsUrl = `${ESEF}/api/filings?filter%5Bentity.identifier%5D=${encodeURIComponent(lei.lei)}&page%5Bsize%5D=8&sort=-period_end`;
+  const index = await fetchJson(filingsUrl, { "User-Agent": "HPOS/1.0" });
+  const filings = Array.isArray(index?.data) ? index.data : [];
+  for (const filing of filings.slice(0, 4)) {
+    const attributes = filing?.attributes || {}, jsonUrl = absoluteUrl(ESEF, attributes.json_url);
+    if (!jsonUrl) continue;
+    const cached = await readRegulatoryDocumentByFiling("ESEF_XBRL", String(attributes.fxo_id || filing.id || ""));
+    if (cached) return cached;
+    const report = await fetchJson(jsonUrl, { "User-Agent": "HPOS/1.0" });
+    const parsed = parseEsefAnnual(report, attributes, jsonUrl);
+    if (!parsed) continue;
+    const acquired = {
+      source: "ESEF_XBRL_REGULATORY_CACHE", official: true, identity: { ...identity, lei: lei.lei, legalName: lei.legalName },
+      business: { state: prohibitedBusinessText(parsed.businessDescription) ? "FAIL" : "OPEN", description: parsed.businessDescription, sic: "", sourceUrl: parsed.reportUrl, filingUrl: parsed.reportUrl },
+      financial: parsed.financial, evidence: parsed.evidence
+    };
+    await saveRegulatoryEvidence(identity, lei, filing, parsed, acquired);
+    return acquired;
+  }
+  return null;
+}
+
+async function resolveLei(identity: any) {
+  const name = text(identity?.name, 180);
+  if (!name) return null;
+  const queryName = companyKey(name);
+  const url = `${GLEIF}?filter%5Bentity.legalName%5D=${encodeURIComponent(queryName)}&page%5Bsize%5D=20`;
+  const body = await fetchJson(url, { "User-Agent": "HPOS/1.0" });
+  const country = upper(identity?.isin).slice(0, 2), wanted = companyKey(name);
+  const rows = (Array.isArray(body?.data) ? body.data : []).map((x: any) => {
+    const entity = x?.attributes?.entity || {}, legalName = text(entity?.legalName?.name, 180), status = upper(entity?.status), jurisdiction = upper(entity?.jurisdiction);
+    const score = (companyKey(legalName) === wanted ? 100 : 0) + (country && jurisdiction === country ? 20 : 0) + (status === "ACTIVE" ? 5 : 0);
+    return { lei: upper(x?.attributes?.lei || x?.id), legalName, jurisdiction, status, score };
+  }).filter((x: any) => /^[A-Z0-9]{20}$/.test(x.lei)).sort((a: any, b: any) => b.score - a.score);
+  return rows[0]?.score >= 120 && (!rows[1] || rows[0].score > rows[1].score) ? rows[0] : null;
+}
+
+function parseEsefAnnual(report: any, attributes: any, jsonUrl: string) {
+  const rows = xbrlRows(report), revenue = selectXbrlDuration(rows, ["Revenue", "RevenueFromContractsWithCustomers"]);
+  if (!revenue || days(revenue.start, revenue.end) < 250) return null;
+  const reportEnd = revenue.end, interestIncome = selectXbrlDuration(rows, ["InterestIncome", "FinanceIncome"], reportEnd);
+  const debt = sumXbrlPointGroups(rows, [["CurrentBorrowingsAndCurrentPortionOfNoncurrentBorrowings", "CurrentBorrowings", "ShorttermBorrowings"], ["LongtermBorrowings", "NoncurrentBorrowings"]], reportEnd);
+  const cash = selectXbrlPoint(rows, ["CashAndCashEquivalents"], reportEnd), financialAssets = selectXbrlPoint(rows, ["CurrentFinancialAssets"], reportEnd);
+  const interestAssets = financialAssets ? sumXbrlSelected([cash, financialAssets]) : sumXbrlPointGroups(rows, [["CashAndCashEquivalents"], ["CurrentFinancialAssetsAtFairValueThroughProfitOrLoss"], ["CurrentDerivativeFinancialAssets"]], reportEnd);
+  const description = selectXbrlText(rows, ["DescriptionOfNatureOfEntitysOperationsAndPrincipalActivities"], reportEnd);
+  const reportUrl = absoluteUrl(ESEF, attributes?.report_url) || jsonUrl;
+  const evidence: EvidenceItem[] = [];
+  if (description) evidence.push(xbrlItem("businessProfile", description, reportUrl));
+  evidence.push(xbrlItem("revenue", revenue, jsonUrl));
+  if (interestIncome) evidence.push(xbrlItem("interestIncome", interestIncome, jsonUrl));
+  if (debt) evidence.push(xbrlCompositeItem("totalDebt", debt, jsonUrl));
+  if (interestAssets) evidence.push(xbrlCompositeItem("interestBearingAssetsUpperBound", interestAssets, jsonUrl));
+  return {
+    reportStart: revenue.start, reportEnd, reportUrl, jsonUrl, packageUrl: absoluteUrl(ESEF, attributes?.package_url), viewerUrl: absoluteUrl(ESEF, attributes?.viewer_url),
+    businessDescription: description?.text || "", evidence,
+    financial: {
+      revenue: revenue.value, interestIncome: interestIncome?.value ?? null, interestIncomeMethod: interestIncome?.local === "InterestIncome" ? "LOWER_BOUND" : interestIncome ? "FINANCE_INCOME_UPPER_BOUND" : "MISSING", totalDebt: debt?.value ?? null,
+      interestBearingAssetsUpperBound: interestAssets?.value ?? null, marketValue36mAvg: null, marketValue36mMonths: 0,
+      currency: currencyUnit(revenue.unit || debt?.unit || interestAssets?.unit), period: reportEnd,
+      marketValueMethod: "MISSING_OFFICIAL_SHARE_HISTORY", marketCurrencyCompatible: false,
+      debtDirect: !!debt, interestAssetsUpperBound: true
+    }
+  };
+}
+
+function xbrlRows(report: any) {
+  return Object.entries(report?.facts || {}).map(([factId, raw]: [string, any]) => {
+    const dimensions = raw?.dimensions || {}, concept = String(dimensions.concept || ""), p = xbrlPeriod(dimensions.period), unit = String(dimensions.unit || ""), value = Number(raw?.value);
+    const extraDimensions = Object.keys(dimensions).filter(k => !["concept", "entity", "period", "unit", "language"].includes(k));
+    return { factId, concept, local: concept.split(":").at(-1) || concept, value: Number.isFinite(value) ? value : null, text: text(raw?.value, 3000), unit, start: p.start, end: p.end, duration: p.duration, extraDimensions };
+  }).filter((x: any) => x.concept && x.end && x.extraDimensions.length === 0);
+}
+
+function xbrlPeriod(raw: any) {
+  const value = String(raw || ""), parts = value.split("/");
+  if (parts.length === 2) {
+    const start = dateOnly(parts[0]), exclusiveEnd = dateOnly(parts[1]), end = shiftDate(exclusiveEnd, -1);
+    return { start, end, duration: start && end ? days(start, end) + 1 : 0 };
+  }
+  const instant = shiftDate(dateOnly(value), -1);
+  return { start: "", end: instant, duration: 0 };
+}
+
+function selectXbrlDuration(rows: any[], concepts: string[], preferredEnd = "") {
+  const candidates = rows.filter(x => concepts.includes(x.local) && x.value != null && x.value >= 0 && x.duration >= 250 && x.duration <= 440 && (!preferredEnd || x.end === preferredEnd));
+  return candidates.sort((a, b) => String(b.end).localeCompare(String(a.end)) || b.duration - a.duration)[0] || null;
+}
+
+function selectXbrlText(rows: any[], concepts: string[], end: string) {
+  return rows.filter(x => concepts.includes(x.local) && x.text && (!end || x.end === end)).sort((a, b) => b.text.length - a.text.length)[0] || null;
+}
+
+function selectXbrlPoint(rows: any[], concepts: string[], end: string) {
+  for (const concept of concepts) {
+    const fact = rows.filter(x => x.local === concept && x.value != null && x.value >= 0 && x.end === end && !x.start).sort((a, b) => b.value - a.value)[0];
+    if (fact) return fact;
+  }
+  return null;
+}
+
+function sumXbrlPointGroups(rows: any[], groups: string[][], end: string) {
+  return sumXbrlSelected(groups.map(group => selectXbrlPoint(rows, group, end)));
+}
+
+function sumXbrlSelected(selectedRaw: any[]) {
+  const selected = selectedRaw.filter(Boolean);
+  if (!selected.length) return null;
+  const unique = uniqueBy(selected, x => x.factId), unit = unique[0].unit;
+  if (!unit || !unique.every(x => x.unit === unit)) return null;
+  return { value: unique.reduce((n, x) => n + x.value, 0), unit, end, components: unique };
+}
+
+function xbrlItem(metric: string, x: any, url: string): EvidenceItem {
+  return { metric, value: x.value ?? x.text, unit: currencyUnit(x.unit) || (x.value == null ? "text" : x.unit), period: x.start ? `${x.start} to ${x.end}` : x.end, sourceName: `ESEF filed XBRL · ${x.concept}`, sourceUrl: url, tag: x.concept, location: `fact:${x.factId}`, quality: "OFFICIAL" };
+}
+
+function xbrlCompositeItem(metric: string, x: any, url: string): EvidenceItem {
+  return { metric, value: x.value, unit: currencyUnit(x.unit) || x.unit, period: x.end, sourceName: `ESEF filed XBRL · ${x.components.map((v: any) => v.concept).join(" + ")}`, sourceUrl: url, tag: x.components.map((v: any) => v.concept).join(" + "), location: x.components.map((v: any) => `fact:${v.factId}`).join(" + "), method: "SUM_OF_REPORTED_COMPONENTS", quality: "OFFICIAL" };
+}
+
+async function readCachedRegulatoryEvidence(identity: any) {
+  const { data: document, error } = await db().from("hpos_regulatory_documents").select("*").eq("isin", identity.isin).eq("status", "EXTRACTED").order("period_end", { ascending: false }).limit(1).maybeSingle();
+  if (error || !document) return null;
+  const acquired = await regulatoryDocumentToEvidence(identity, document);
+  return acquired ? { acquired, fresh: Date.now() - Date.parse(document.discovered_at) < DOCUMENT_DISCOVERY_TTL } : null;
+}
+
+async function readRegulatoryDocumentByFiling(sourceType: string, filingId: string) {
+  if (!filingId) return null;
+  const { data: document, error } = await db().from("hpos_regulatory_documents").select("*").eq("source_type", sourceType).eq("filing_id", filingId).eq("status", "EXTRACTED").maybeSingle();
+  return error || !document ? null : regulatoryDocumentToEvidence({ isin: document.isin, ticker: document.symbol, name: document.legal_name }, document);
+}
+
+async function regulatoryDocumentToEvidence(identity: any, document: any) {
+  const { data: facts, error } = await db().from("hpos_regulatory_facts").select("*").eq("document_id", document.id);
+  if (error || !Array.isArray(facts) || !facts.length) return null;
+  const evidence: EvidenceItem[] = facts.map((x: any) => ({ metric: x.metric, value: x.value_numeric ?? x.value_text ?? "", unit: x.unit || "", period: x.period_start ? `${x.period_start} to ${x.period_end}` : x.period_end || "", sourceName: x.source_name, sourceUrl: x.source_url, tag: x.concept, location: x.location, method: x.method || undefined, quality: x.quality }));
+  const value = (metric: string) => facts.find((x: any) => x.metric === metric)?.value_numeric ?? null;
+  const business = facts.find((x: any) => x.metric === "businessProfile")?.value_text || "";
+  const interestFact = facts.find((x: any) => x.metric === "interestIncome");
+  return { source: "ESEF_XBRL_CACHE", official: true, identity: { ...identity, lei: document.lei, legalName: document.legal_name }, business: { state: prohibitedBusinessText(business) ? "FAIL" : "OPEN", description: business, sic: "", sourceUrl: document.report_url, filingUrl: document.report_url }, financial: { revenue: value("revenue"), interestIncome: value("interestIncome"), interestIncomeMethod: String(interestFact?.concept || "").endsWith(":InterestIncome") ? "LOWER_BOUND" : interestFact ? "FINANCE_INCOME_UPPER_BOUND" : "MISSING", totalDebt: value("totalDebt"), interestBearingAssetsUpperBound: value("interestBearingAssetsUpperBound"), marketValue36mAvg: null, marketValue36mMonths: 0, currency: document.currency || "", period: document.period_end || "", marketValueMethod: "MISSING_OFFICIAL_SHARE_HISTORY", marketCurrencyCompatible: false, debtDirect: value("totalDebt") != null, interestAssetsUpperBound: true }, evidence };
+}
+
+async function saveRegulatoryEvidence(identity: any, lei: any, filing: any, parsed: any, acquired: any) {
+  const attributes = filing?.attributes || {}, filingId = String(attributes.fxo_id || filing.id || "");
+  const document = { isin: identity.isin, symbol: identity.ticker || null, lei: lei.lei, legal_name: lei.legalName, source_type: "ESEF_XBRL", source_name: "XBRL International filings repository · source package from OAM", source_url: `${ESEF}/api/filings/${filing.id}`, filing_id: filingId, document_type: "ESEF_ANNUAL_REPORT", period_start: parsed.reportStart, period_end: parsed.reportEnd, filing_date: attributes.date_added ? String(attributes.date_added).slice(0, 10) : null, report_url: parsed.reportUrl, package_url: parsed.packageUrl, json_url: parsed.jsonUrl, viewer_url: parsed.viewerUrl, sha256: attributes.sha256 || null, currency: parsed.financial.currency || null, status: "EXTRACTED", quality: "OFFICIAL_FILED_PACKAGE_COPY", raw_metadata: attributes, discovered_at: new Date().toISOString(), fetched_at: new Date().toISOString(), updated_at: new Date().toISOString() };
+  const { data: saved, error } = await db().from("hpos_regulatory_documents").upsert(document, { onConflict: "source_type,filing_id" }).select("id").single();
+  if (error || !saved?.id) throw httpError(500, "regulatory_document_store_failed");
+  const facts = (acquired.evidence || []).map((x: EvidenceItem) => ({ document_id: saved.id, isin: identity.isin, metric: x.metric, value_numeric: typeof x.value === "number" ? x.value : null, value_text: typeof x.value === "string" ? x.value : null, unit: x.unit || null, period_start: x.period.includes(" to ") ? x.period.split(" to ")[0] : null, period_end: x.period.includes(" to ") ? x.period.split(" to ")[1] : x.period || null, concept: x.tag || null, location: x.location || null, source_name: x.sourceName, source_url: x.sourceUrl, quality: x.quality, method: x.method || "REPORTED_FACT" }));
+  const s = db(), { error: deleteError } = await s.from("hpos_regulatory_facts").delete().eq("document_id", saved.id);
+  if (deleteError) throw httpError(500, "regulatory_fact_replace_failed");
+  if (facts.length) { const { error: factError } = await s.from("hpos_regulatory_facts").insert(facts); if (factError) throw httpError(500, "regulatory_fact_store_failed"); }
 }
 
 async function acquireSecEvidence(identity: any, company: any) {
@@ -166,7 +335,7 @@ async function acquireSecEvidence(identity: any, company: any) {
     source: "SEC_XBRL_GENERIC", official: true, identity: { ...identity, cik, legalName: submissions.name || company.title },
     business: { state: prohibitedSic(sic, sicDescription) ? "FAIL" : "OPEN", description: sicDescription, sic, sourceUrl: submissionsUrl, filingUrl },
     financial: {
-      revenue: revenue?.value ?? null, interestIncome: interestIncome?.value ?? null, totalDebt: totalDebt?.value ?? null,
+      revenue: revenue?.value ?? null, interestIncome: interestIncome?.value ?? null, interestIncomeMethod: interestIncome ? "LOWER_BOUND" : "MISSING", totalDebt: totalDebt?.value ?? null,
       interestBearingAssetsUpperBound: interestAssets?.value ?? null, marketValue36mAvg: mv.value || null, marketValue36mMonths: mv.months,
       currency: financialCurrency || chart.currency || "", period: reportEnd || "", marketValueMethod: mv.method, marketCurrencyCompatible,
       debtDirect: totalDebt?.direct === true, interestAssetsUpperBound: true
@@ -178,10 +347,11 @@ function evaluate(acquired: any) {
   const f = acquired.financial || {}, b = acquired.business || {};
   const ratio = (a: any, d: any) => Number.isFinite(Number(a)) && Number(a) >= 0 && Number(d) > 0 ? Number(a) / Number(d) : null;
   const impureExact = ratio(f.nonPermissibleIncome, f.revenue), impureLowerBound = ratio(f.interestIncome, f.revenue), assets = ratio(f.interestBearingAssetsUpperBound, f.marketValue36mAvg), debt = ratio(f.totalDebt, f.marketValue36mAvg);
+  const impureProxySource = f.interestIncomeMethod === "LOWER_BOUND" ? "OFFICIAL_INTEREST_INCOME_LOWER_BOUND" : f.interestIncomeMethod === "FINANCE_INCOME_UPPER_BOUND" ? "ESEF_FINANCE_INCOME_UPPER_BOUND" : "MISSING";
   const marketOk = Number(f.marketValue36mMonths) >= 30;
   const criteria: Record<string, Criterion> = {
-    business: { rule: "Zulässiges Kerngeschäft", state: b.state === "FAIL" ? "FAIL" : "OPEN", value: b.sic || b.description || null, limit: null, source: b.state === "FAIL" ? "SEC_OFFICIAL_SIC_EXCLUSION" : acquired.official ? "SEC_OFFICIAL_SIC_UNCLASSIFIED" : "UNVERIFIED_DISCOVERY" },
-    impureIncome: { rule: "Nicht-zulässige Einnahmen / Gesamtumsatz", state: impureExact == null ? (impureLowerBound != null && impureLowerBound > RULES.impureIncomeMax ? "FAIL" : "OPEN") : impureExact <= RULES.impureIncomeMax ? "PASS" : "FAIL", value: impureExact ?? impureLowerBound, limit: RULES.impureIncomeMax, source: impureExact != null ? "OFFICIAL_NON_PERMISSIBLE_INCOME" : impureLowerBound != null ? "SEC_XBRL_INTEREST_INCOME_LOWER_BOUND" : "MISSING" },
+    business: { rule: "Zulässiges Kerngeschäft", state: b.state === "FAIL" ? "FAIL" : "OPEN", value: b.sic || b.description || null, limit: null, source: b.state === "FAIL" ? "OFFICIAL_BUSINESS_EXCLUSION" : acquired.official ? "OFFICIAL_BUSINESS_DESCRIPTION_UNCLASSIFIED" : "UNVERIFIED_DISCOVERY" },
+    impureIncome: { rule: "Nicht-zulässige Einnahmen / Gesamtumsatz", state: impureExact == null ? (impureLowerBound != null && f.interestIncomeMethod === "LOWER_BOUND" && impureLowerBound > RULES.impureIncomeMax ? "FAIL" : "OPEN") : impureExact <= RULES.impureIncomeMax ? "PASS" : "FAIL", value: impureExact ?? impureLowerBound, limit: RULES.impureIncomeMax, source: impureExact != null ? "OFFICIAL_NON_PERMISSIBLE_INCOME" : impureLowerBound != null ? impureProxySource : "MISSING" },
     interestAssets: { rule: "Zinstragende Vermögenswerte / 36M Ø Marktwert", state: !marketOk || assets == null ? "OPEN" : assets <= RULES.interestAssetsMax ? "PASS" : "OPEN", value: assets, limit: RULES.interestAssetsMax, source: assets == null ? "MISSING" : "SEC_XBRL_UPPER_BOUND" },
     interestDebt: { rule: "Zinstragende Schulden / 36M Ø Marktwert", state: !marketOk || debt == null ? "OPEN" : debt <= RULES.interestDebtMax ? "PASS" : f.debtDirect ? "FAIL" : "OPEN", value: debt, limit: RULES.interestDebtMax, source: debt == null ? "MISSING" : "SEC_XBRL" }
   };
@@ -194,14 +364,14 @@ function evaluate(acquired: any) {
 }
 
 async function persistRun(result: any, startedAt: string, completedAt: string) {
-  const s = db(), run = { id: result.runId, isin: result.identity.isin, symbol: result.identity.ticker || null, state: result.state, methodology: "AAOIFI SS21 · HPOS generic evidence service v1", reason: result.reason, missing_criteria: result.missingCriteria, criteria: result.criteria, evidence: result.evidence, started_at: startedAt, completed_at: completedAt };
+  const s = db(), run = { id: result.runId, isin: result.identity.isin, symbol: result.identity.ticker || null, state: result.state, methodology: "AAOIFI SS21 · HPOS generic evidence service v1.1", reason: result.reason, missing_criteria: result.missingCriteria, criteria: result.criteria, evidence: result.evidence, started_at: startedAt, completed_at: completedAt };
   const { error: runError } = await s.from("hpos_halal_runs").insert(run);
   if (runError) throw httpError(500, "run_store_failed");
   const { data: old } = await s.from("hpos_halal_evidence").select("source_type,state,expires_at").eq("isin", result.identity.isin).maybeSingle();
   if (old?.source_type === "CURATED_ISIN") return;
   const oldFresh = !old?.expires_at || Date.parse(old.expires_at) > Date.now(), oldDecisive = ["PASS", "FAIL"].includes(String(old?.state || ""));
   if (result.state === "OPEN_REVIEW" && oldDecisive && oldFresh) return;
-  const evidence = (result.evidence || []).slice(0, 20).map((x: any) => ({ provider: x.sourceName, status: x.metric, note: `${x.period || ""}${x.value !== undefined ? ` · ${x.value} ${x.unit || ""}` : ""}`.slice(0, 500), sourceUrl: x.sourceUrl }));
+  const evidence = (result.evidence || []).slice(0, 20).map((x: any) => ({ provider: x.sourceName, status: x.metric, note: `${x.period || ""}${x.value !== undefined ? ` · ${x.value} ${x.unit || ""}` : ""}${x.location ? ` · ${x.location}` : ""}`.slice(0, 500), sourceUrl: x.sourceUrl }));
   const row = { isin: result.identity.isin, state: result.state, source_type: "HPOS_AAOIFI", source_name: "HPOS Generic Evidence Service", methodology: "AAOIFI SS21", symbol: result.identity.ticker || null, raw_status: result.state, reason: result.reason, evidence, checked_at: completedAt, expires_at: new Date(Date.parse(completedAt) + RESULT_TTL).toISOString(), updated_at: completedAt };
   const { error } = await s.from("hpos_halal_evidence").upsert(row, { onConflict: "isin" });
   if (error) throw httpError(500, "evidence_store_failed");
@@ -358,6 +528,19 @@ function prohibitedSic(sicRaw: string, description: string) {
   if ((sic >= 2082 && sic <= 2085) || (sic >= 2100 && sic <= 2199) || (sic >= 3480 && sic <= 3489) || (sic >= 3760 && sic <= 3769) || (sic >= 6020 && sic <= 6799) || sic === 7993) return true;
   return /(CASINO|GAMBLING|BREWER|DISTILL|TOBACCO|FIREARMS|AMMUNITION|DEFENSE CONTRACTOR|MORTGAGE BANK|COMMERCIAL BANK)/.test(d);
 }
+
+function prohibitedBusinessText(description: string) {
+  return /\b(CASINO|GAMBLING|BREWER(?:Y|IES)?|DISTILL(?:ERY|ER|ING)?|TOBACCO|FIREARMS?|AMMUNITION|COMMERCIAL BANK|CONVENTIONAL BANKING|PORK PROCESSING)\b/i.test(description || "");
+}
+
+function companyKey(value: string) {
+  return upper(value).replace(/&/g, " AND ").replace(/\b(A\/S|AG|SE|PLC|INC|INCORPORATED|CORP|CORPORATION|LTD|LIMITED|NV|N\.V|SA|S\.A|SPA|S\.P\.A|OYJ|AB)(?:[- ]+[A-Z])?\b/g, " ").replace(/[^A-Z0-9]+/g, " ").trim();
+}
+
+function currencyUnit(value: string) { const x = String(value || ""); return x.includes(":") ? upper(x.split(":").at(-1)) : upper(x); }
+function absoluteUrl(base: string, path: any) { const x = String(path || "").trim(); if (!x) return ""; try { return new URL(x, base).toString(); } catch { return ""; } }
+function dateOnly(value: string) { const m = String(value || "").match(/^\d{4}-\d{2}-\d{2}/); return m?.[0] || ""; }
+function shiftDate(value: string, amount: number) { if (!value) return ""; const d = new Date(`${value}T00:00:00Z`); if (!Number.isFinite(d.getTime())) return ""; d.setUTCDate(d.getUTCDate() + amount); return d.toISOString().slice(0, 10); }
 
 function newestFactEnd(facts: any) { const rows = factRows(facts, ["Assets", "AssetsCurrent", "StockholdersEquity"]); return rows.map(x => String(x.end || "")).sort().at(-1) || ""; }
 function factItem(metric: string, x: any, url: string): EvidenceItem { return { metric, value: x.value, unit: x.unit, period: `${x.start} to ${x.end}`, sourceName: `SEC EDGAR XBRL · ${x.sourceLabel}`, sourceUrl: url, accession: x.accn, tag: `${x.taxonomy}:${x.tag}`, quality: "OFFICIAL" }; }

@@ -586,3 +586,16 @@ Dieses Dokument wird bei Änderungen an Status, Gate, Architektur, Entscheidung,
 - Der produktive Test bestätigt `DK0062498333` / `NOVO-B.CO` als `VERIFIED`; der anschließende Prüflauf bleibt wegen fehlender offizieller AAOIFI-Pflichtdaten korrekt offen.
 - Supabase `hpos-screen` Version 14 / Service 1.4.0 ist aktiv.
 - Ausführliche Evidenz: `docs/STATUS_2026-09-15_UNIFIED_HALAL_IDENTITY.md`.
+
+## 28. Statusergänzung 2026-09-16 – regulatorischer Dokument- und Fakten-Cache v8.7.70
+
+**Entscheidung DEC-028 – regulatorische Dokumente und extrahierte Fakten werden getrennt, unveränderlich nachvollziehbar gespeichert**
+
+- Nicht-US-Emittenten werden nach der ISIN-Verifikation über den juristischen Namen und das ISIN-Land fail-closed zur GLEIF-LEI aufgelöst.
+- ESEF-Pakete werden als Kopien offiziell eingereichter Berichte behandelt; Aggregator, Dokument-Hash, Berichtszeitraum, Konzept und XBRL-Fact-ID bleiben sichtbar.
+- `hpos_regulatory_documents` und `hpos_regulatory_facts` sind private serverseitige Tabellen ohne Rechte für `anon` oder `authenticated`.
+- Ein Cache-Treffer hat Vorrang vor erneutem externem Abruf. Ein veralteter Cache darf bei einem Upstream-Ausfall weiter als stale Evidenz dienen, ändert aber keine fail-closed Bewertungsregel.
+- Der produktive Novo-Nordisk-Lauf speichert den ESEF-Jahresbericht 2025 und fünf nachvollziehbare Fakten. Der folgende Lauf liest bereits aus `ESEF_XBRL_CACHE`.
+- Finance Income wird als Obergrenzen-Proxy behandelt und kann nicht allein zu `PASS` oder `FAIL` führen.
+- Supabase `hpos-screen` Version 18 / Service 1.5.0 ist aktiv.
+- Ausführliche Evidenz: `docs/STATUS_2026-09-16_REGULATORY_DOCUMENT_CACHE.md`.
