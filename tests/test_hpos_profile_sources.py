@@ -34,7 +34,8 @@ def test_curated_official_report_store_is_fail_closed():
     assert "OFFICIAL_REPORT_CURATED" in autoscreen
     assert "!e.sourceUrl" in autoscreen
     assert "!period" in autoscreen
-    assert "Number(e.months)<30" in autoscreen
+    assert "marketValue36mAvg" not in autoscreen
+    assert "MARKET_CAP_AT_CHECK" in autoscreen
     assert "mergeCurated(await profile(symbol),await curatedFor(a))" in autoscreen
 
 
@@ -73,8 +74,8 @@ def test_curated_sources_are_propagated_to_criteria_and_ui():
     register = (ROOT / "app" / "halal-register.js").read_text()
     evidence = (ROOT / "app" / "halal-evidence.js").read_text()
     assert "sourceFor(f,'interestIncome','revenue')" in autoscreen
-    assert "sourceFor(f,'interestBearingAssetsUpperBound','marketValue36mAvg')" in autoscreen
-    assert "sourceFor(f,'totalDebt','marketValue36mAvg')" in autoscreen
+    assert "sourceFor(f,'interestBearingAssetsUpperBound','marketValueAtCheck')" in autoscreen
+    assert "sourceFor(f,'totalDebt','marketValueAtCheck')" in autoscreen
     assert "YAHOO_STATEMENT" not in autoscreen
     assert "OFFICIAL_REPORT_CURATED" in autoscreen
     assert "Finanzwerte belegt" in register
@@ -168,12 +169,26 @@ def test_market_value_builder_requires_no_account_or_api_key():
 def test_current_release_loads_fresh_profile_logic():
     html = (ROOT / "app" / "index.html").read_text()
     runtime = (ROOT / "app" / "runtime-config.js").read_text()
-    assert "Portfolio Intelligence · v8.7.70" in html
+    assert "Portfolio Intelligence · v8.7.71" in html
     assert "app.js?v=20260915-unifiedhalal1" in html
-    assert "halal-autoscreen.js?v=20260911-cardinal2" in html
-    assert "halal-register.js?v=20260915-unifiedhalal1" in html
-    assert "halal-evidence.js?v=20260915-unifiedhalal1" in html
-    assert "version:'8.7.70'" in runtime
+    assert "halal-autoscreen.js?v=20260916-marketcap1" in html
+    assert "halal-register.js?v=20260916-marketcap1" in html
+    assert "halal-evidence.js?v=20260916-marketcap1" in html
+    assert "version:'8.7.71'" in runtime
+
+
+def test_runtime_uses_point_in_time_market_cap_without_historical_share_service():
+    profile = source()
+    autoscreen = (ROOT / "app" / "halal-autoscreen.js").read_text()
+    screen = (ROOT / "supabase" / "functions" / "hpos-screen" / "index.ts").read_text()
+    active = profile + autoscreen + screen
+    for legacy in ["marketValue36m", "avgMarketValue36m", "yahooMonthly", "shareFacts"]:
+        assert legacy not in active
+    assert "marketValueAtCheck" in active
+    assert "YAHOO_REPORTED_MARKET_CAP_AT_CHECK" in active
+    assert "CURRENT_PRICE_X_LATEST_REPORTED_ORDINARY_SHARES" in active
+    assert "quarterlyOrdinarySharesNumber,annualOrdinarySharesNumber" in active
+    assert "Marktwert am Prüftag" in active
 
 
 def test_cardinal_profile_and_aaoifi_evidence_are_complete_and_identity_safe():

@@ -1,5 +1,7 @@
 # HPOS v8.7.41 – accountfreier 36-Monats-Marktwert
 
+> Historischer Stand. Diese aktive Methodik wurde mit DEC-029 / HPOS v8.7.71 abgelöst. Die Daten bleiben ausschließlich als Audit-Artefakt erhalten und werden von Gate 1 nicht mehr verwendet.
+
 ## Ergebnis
 
 Für das erste Evidenzpaket wurden 36 vollständige Monatsmarktwerte von September 2023 bis August 2026 berechnet. Jeder Monatswert besteht aus dem letzten Nasdaq-Handelsschlusskurs des Monats und der zuletzt vor diesem Kursdatum offiziell gemeldeten Aktienzahl aus SEC EDGAR.
@@ -34,4 +36,3 @@ Für das erste Evidenzpaket wurden 36 vollständige Monatsmarktwerte von Septemb
 - Keine Accounts, API-Keys oder kostenpflichtigen Datenquellen.
 - Keine Verwendung von yfinance oder Yahoo-Kurshistorien für den AAOIFI-Marktwert.
 - Keine Änderung an Supabase, Parqet, Portfolio-State, Cash, Rollback, Validierung oder Quarantäne.
-

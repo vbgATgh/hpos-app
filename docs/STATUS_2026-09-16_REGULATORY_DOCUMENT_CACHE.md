@@ -42,7 +42,7 @@ Der zweite produktive Lauf verwendete bereits `ESEF_XBRL_CACHE`. Der Cache ist d
 Gate 1 bleibt für Novo Nordisk korrekt `OPEN_REVIEW`.
 
 - `FinanceIncome / Umsatz = 3,13 %` ist nur ein konservativer Finance-Income-Proxy und kein vollständiger Nachweis aller nicht zulässigen Einnahmen.
-- Für die beiden Bilanzquoten fehlt noch der reproduzierbare durchschnittliche 36-Monats-Marktwert auf Basis historischer Aktienzahlen.
+- Für die beiden Bilanzquoten fehlte in diesem Stand noch ein belastbarer Marktwert-Nenner. Der anschließend geplante historische 36-Monats-Dienst wurde mit DEC-029 verworfen; aktiv verwendet HPOS den dokumentierten Marktwert am Prüftag.
 - Die offizielle Tätigkeitsbeschreibung ist vorhanden, benötigt aber noch eine belastbare regelbasierte Geschäftsmodellklassifikation.
 
 HPOS verwendet diese Teilwerte deshalb nicht als Halal-Freigabe und erzeugt auch kein falsches `FAIL` aus einem überbreiten Finance-Income-Wert.
@@ -58,4 +58,4 @@ HPOS verwendet diese Teilwerte deshalb nicht als Halal-Freigabe und erzeugt auch
 
 ## Nächstes kleines Paket
 
-Als nächstes folgt der historische Aktienzahl- und Marktwertdienst. Er muss Aktiensplits, Aktienklassen, Währung und Berichtsperioden nachvollziehbar zusammenführen, damit `interestBearingAssets / 36M-Marktwert` und `interestDebt / 36M-Marktwert` reproduzierbar berechnet werden können. Danach folgt die regelbasierte Geschäftsmodellklassifikation.
+Dieser damalige nächste Schritt ist durch DEC-029 überholt. Statt einer historischen Aktienzahl- und Marktwertreihe verwendet HPOS für beide Bilanzquoten den Marktwert am Prüftag. Danach folgt weiterhin die regelbasierte Geschäftsmodellklassifikation.

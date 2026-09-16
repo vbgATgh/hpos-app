@@ -17,7 +17,7 @@ function evaluate(id){
 function canonicalEvidence(remote){const state=window.HPOS_HALAL_STATUS?.stateOf(remote)||'';return state?{state,reason:remote.reason||'',source:remote.source_name||remote.source_type||'HPOS Backend',reviewedAt:remote.checked_at||null,evidence:Array.isArray(remote.evidence)?remote.evidence:[]}:null}
 function label(s){return s==='PASS'?'HALALKONFORM':s==='FAIL'?'NICHT HALALKONFORM':'PRÜFUNG OFFEN'}
 function cls(s){return s==='PASS'?'pos':s==='FAIL'?'neg':'warn'}
-function financialCoverage(r){const keys=['revenue','totalDebt','interestBearingAssetsUpperBound','interestIncome','marketValue36mAvg'],sources=r?.financial?.metricSources||{};return{count:keys.filter(k=>sources[k]?.sourceUrl).length,total:keys.length,sources}}
+function financialCoverage(r){const keys=['revenue','totalDebt','interestBearingAssetsUpperBound','interestIncome','marketValueAtCheck'],sources=r?.financial?.metricSources||{};return{count:keys.filter(k=>sources[k]?.sourceUrl).length,total:keys.length,sources}}
 function mount(){
  let sec=$('#halalEvidenceSection');if(sec)return sec;
  const decision=$('#assetDecision')?.closest('.section');if(!decision)return null;
