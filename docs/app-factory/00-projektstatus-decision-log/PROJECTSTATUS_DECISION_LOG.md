@@ -599,3 +599,15 @@ Dieses Dokument wird bei Änderungen an Status, Gate, Architektur, Entscheidung,
 - Finance Income wird als Obergrenzen-Proxy behandelt und kann nicht allein zu `PASS` oder `FAIL` führen.
 - Supabase `hpos-screen` Version 18 / Service 1.5.0 ist aktiv.
 - Ausführliche Evidenz: `docs/STATUS_2026-09-16_REGULATORY_DOCUMENT_CACHE.md`.
+
+## 29. Statusergänzung 2026-09-16 – AAOIFI-Marktwert am Prüftag v8.7.71
+
+**Entscheidung DEC-029 – Historische 36-Monats-Marktwerte sind kein Pflichtbestandteil von Gate 1**
+
+- DEC-022 wird für die aktive Gate-1-Methodik abgelöst. Historische Datensätze bleiben nur als Audit-Artefakte erhalten.
+- Die beiden getrennten AAOIFI-Prüfungen für zinstragende Vermögenswerte und zinstragende Schulden bleiben Pflicht.
+- Beide Quoten verwenden den dokumentierten Marktwert am Prüftag als Nenner.
+- Der Marktwert wird mit Wert, Währung, Abrufzeitpunkt, Quelle und Methode in jedem Prüflauf protokolliert.
+- Finanzkennzahl und Marktwert müssen dieselbe Währung besitzen. Fehlender Marktwert oder Währungsabweichung führt fail-closed zu `OPEN_REVIEW`.
+- Historische Kursreihen, historische Aktienzahlen und die Mindestanforderung von 30 Monatsbeobachtungen werden aus dem aktiven Backend und Frontend entfernt.
+- Ausführliche Evidenz: `docs/STATUS_2026-09-16_AAOIFI_POINT_MARKET_CAP.md`.

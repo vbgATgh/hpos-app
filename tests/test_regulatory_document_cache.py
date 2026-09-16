@@ -31,20 +31,23 @@ def test_non_sec_path_uses_gleif_and_esef_before_discovery_fallback():
     assert "(?:[- ]+[A-Z])?" in SCREEN
 
 
-def test_esef_facts_keep_exact_xbrl_fundstelle_and_fail_closed_market_value():
+def test_esef_facts_keep_exact_xbrl_fundstelle_and_attach_point_market_value_fail_closed():
     assert 'location: `fact:${x.factId}`' in SCREEN
     assert 'method: "SUM_OF_REPORTED_COMPONENTS"' in SCREEN
     assert "sumXbrlPointGroups" in SCREEN
     assert "selectXbrlPoint" in SCREEN
-    assert 'marketValueMethod: "MISSING_OFFICIAL_SHARE_HISTORY"' in SCREEN
-    assert "marketValue36mAvg: null" in SCREEN
-    assert "marketValue36mMonths: 0" in SCREEN
+    assert 'marketValueMethod: "UNAVAILABLE"' in SCREEN
+    assert "attachMarketValueAtCheck" in SCREEN
+    assert 'metric: "marketValueAtCheck"' in SCREEN
+    assert 'method: "YAHOO_REPORTED_MARKET_CAP_AT_CHECK"' in SCREEN
+    assert "marketCurrencyCompatible === true" in SCREEN
     assert '"FINANCE_INCOME_UPPER_BOUND"' in SCREEN
     assert 'f.interestIncomeMethod === "LOWER_BOUND"' in SCREEN
     assert "DOCUMENT_DISCOVERY_TTL" in SCREEN
 
 
 def test_service_release_exposes_regulatory_cache_capability():
-    assert 'version: "1.5.0"' in SCREEN
+    assert 'version: "1.6.0"' in SCREEN
     assert 'evidence: "SEC_AND_ESEF_XBRL_CACHE"' in SCREEN
     assert "regulatoryDocumentCache: true" in SCREEN
+    assert 'marketValueBasis: "MARKET_CAP_AT_CHECK"' in SCREEN

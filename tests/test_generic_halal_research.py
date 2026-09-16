@@ -59,7 +59,7 @@ def test_screen_uses_traceable_account_free_sources_and_currency_guard():
     for forbidden in ["API_KEY", "apikey=", "HALAL_TERMINAL", "portfolioValue", "cashEur"]:
         assert forbidden not in SCREEN
     assert "marketCurrencyCompatible" in SCREEN
-    assert 'method: "CURRENCY_MISMATCH"' in SCREEN
+    assert '"CURRENCY_MISMATCH"' in SCREEN
     assert "OFFICIAL_BUSINESS_DESCRIPTION_UNCLASSIFIED" in SCREEN
     assert "OFFICIAL_INTEREST_INCOME_LOWER_BOUND" in SCREEN
     assert 'direct: !String(direct.tag).includes("FinanceLease")' in SCREEN
@@ -108,8 +108,8 @@ def test_research_client_never_exposes_service_role_or_mutates_portfolio_state()
 
 
 def test_release_version_is_consistent():
-    assert "Portfolio Intelligence · v8.7.70" in HTML
-    assert "version:'8.7.70'" in RUNTIME
+    assert "Portfolio Intelligence · v8.7.71" in HTML
+    assert "version:'8.7.71'" in RUNTIME
     assert "app.js?v=20260915-unifiedhalal1" in HTML
     assert "search-guard.js?v=20260915-genericresearch1" in HTML
 

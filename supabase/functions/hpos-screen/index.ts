@@ -26,7 +26,7 @@ Deno.serve(async (req: Request) => {
   try {
     allowOrigin(origin);
     const url = new URL(req.url), path = route(url.pathname);
-    if (path === "/health") return json({ ok: true, service: "hpos-screen", version: "1.5.0", identity: "GENERIC_ALIAS_AWARE", evidence: "SEC_AND_ESEF_XBRL_CACHE", failClosed: true, auditLog: true, secTickerSnapshot: true, regulatoryDocumentCache: true, canonicalDegradationGuard: true }, 200, origin);
+    if (path === "/health") return json({ ok: true, service: "hpos-screen", version: "1.6.0", identity: "GENERIC_ALIAS_AWARE", evidence: "SEC_AND_ESEF_XBRL_CACHE", marketValueBasis: "MARKET_CAP_AT_CHECK", failClosed: true, auditLog: true, secTickerSnapshot: true, regulatoryDocumentCache: true, canonicalDegradationGuard: true }, 200, origin);
     if (path === "/identity" && req.method === "POST") {
       await requireSession(req);
       const input = cleanInput(await req.json().catch(() => ({})));
@@ -128,16 +128,16 @@ async function acquireEvidence(identity: any) {
   const ticker = upper(identity.ticker);
   let secCompany = null;
   try { secCompany = ticker ? await secCompanyForTicker(ticker) : null; } catch { secCompany = null; }
-  if (secCompany) return acquireSecEvidence(identity, secCompany);
+  if (secCompany) return attachMarketValueAtCheck(await acquireSecEvidence(identity, secCompany), identity);
   const cached = await readCachedRegulatoryEvidence(identity);
-  if (cached?.fresh) return cached.acquired;
+  if (cached?.fresh) return attachMarketValueAtCheck(cached.acquired, identity);
   try {
     const esef = await acquireEsefEvidence(identity);
-    if (esef) return esef;
+    if (esef) return attachMarketValueAtCheck(esef, identity);
   } catch (error) {
     console.error("hpos-screen-esef", String((error as any)?.message || error));
   }
-  if (cached?.acquired) return { ...cached.acquired, source: "ESEF_XBRL_CACHE_STALE" };
+  if (cached?.acquired) return attachMarketValueAtCheck({ ...cached.acquired, source: "ESEF_XBRL_CACHE_STALE" }, identity);
   const profile = await yahooProfile(ticker);
   const evidence: EvidenceItem[] = [];
   if (profile?.industry) evidence.push(item("businessProfile", `${profile.sector || ""} · ${profile.industry}`.replace(/^ · | · $/g, ""), "text", "current", "Yahoo Finance discovery profile", `${YAHOO}/v10/finance/quoteSummary/${encodeURIComponent(ticker)}`, "DISCOVERY"));
@@ -204,9 +204,9 @@ function parseEsefAnnual(report: any, attributes: any, jsonUrl: string) {
     businessDescription: description?.text || "", evidence,
     financial: {
       revenue: revenue.value, interestIncome: interestIncome?.value ?? null, interestIncomeMethod: interestIncome?.local === "InterestIncome" ? "LOWER_BOUND" : interestIncome ? "FINANCE_INCOME_UPPER_BOUND" : "MISSING", totalDebt: debt?.value ?? null,
-      interestBearingAssetsUpperBound: interestAssets?.value ?? null, marketValue36mAvg: null, marketValue36mMonths: 0,
+      interestBearingAssetsUpperBound: interestAssets?.value ?? null, marketValueAtCheck: null, marketValueAsOf: "",
       currency: currencyUnit(revenue.unit || debt?.unit || interestAssets?.unit), period: reportEnd,
-      marketValueMethod: "MISSING_OFFICIAL_SHARE_HISTORY", marketCurrencyCompatible: false,
+      marketValueMethod: "UNAVAILABLE", marketCurrencyCompatible: false,
       debtDirect: !!debt, interestAssetsUpperBound: true
     }
   };
@@ -287,7 +287,7 @@ async function regulatoryDocumentToEvidence(identity: any, document: any) {
   const value = (metric: string) => facts.find((x: any) => x.metric === metric)?.value_numeric ?? null;
   const business = facts.find((x: any) => x.metric === "businessProfile")?.value_text || "";
   const interestFact = facts.find((x: any) => x.metric === "interestIncome");
-  return { source: "ESEF_XBRL_CACHE", official: true, identity: { ...identity, lei: document.lei, legalName: document.legal_name }, business: { state: prohibitedBusinessText(business) ? "FAIL" : "OPEN", description: business, sic: "", sourceUrl: document.report_url, filingUrl: document.report_url }, financial: { revenue: value("revenue"), interestIncome: value("interestIncome"), interestIncomeMethod: String(interestFact?.concept || "").endsWith(":InterestIncome") ? "LOWER_BOUND" : interestFact ? "FINANCE_INCOME_UPPER_BOUND" : "MISSING", totalDebt: value("totalDebt"), interestBearingAssetsUpperBound: value("interestBearingAssetsUpperBound"), marketValue36mAvg: null, marketValue36mMonths: 0, currency: document.currency || "", period: document.period_end || "", marketValueMethod: "MISSING_OFFICIAL_SHARE_HISTORY", marketCurrencyCompatible: false, debtDirect: value("totalDebt") != null, interestAssetsUpperBound: true }, evidence };
+  return { source: "ESEF_XBRL_CACHE", official: true, identity: { ...identity, lei: document.lei, legalName: document.legal_name }, business: { state: prohibitedBusinessText(business) ? "FAIL" : "OPEN", description: business, sic: "", sourceUrl: document.report_url, filingUrl: document.report_url }, financial: { revenue: value("revenue"), interestIncome: value("interestIncome"), interestIncomeMethod: String(interestFact?.concept || "").endsWith(":InterestIncome") ? "LOWER_BOUND" : interestFact ? "FINANCE_INCOME_UPPER_BOUND" : "MISSING", totalDebt: value("totalDebt"), interestBearingAssetsUpperBound: value("interestBearingAssetsUpperBound"), marketValueAtCheck: null, marketValueAsOf: "", currency: document.currency || "", period: document.period_end || "", marketValueMethod: "UNAVAILABLE", marketCurrencyCompatible: false, debtDirect: value("totalDebt") != null, interestAssetsUpperBound: true }, evidence };
 }
 
 async function saveRegulatoryEvidence(identity: any, lei: any, filing: any, parsed: any, acquired: any) {
@@ -303,10 +303,9 @@ async function saveRegulatoryEvidence(identity: any, lei: any, filing: any, pars
 
 async function acquireSecEvidence(identity: any, company: any) {
   const cik = String(company.cik_str).padStart(10, "0"), companyFactsUrl = `${SEC}/api/xbrl/companyfacts/CIK${cik}.json`, submissionsUrl = `${SEC}/submissions/CIK${cik}.json`;
-  const [factsResponse, submissionsResponse, chart] = await Promise.all([
+  const [factsResponse, submissionsResponse] = await Promise.all([
     optionalJson(companyFactsUrl, { "User-Agent": SEC_AGENT }),
-    optionalJson(submissionsUrl, { "User-Agent": SEC_AGENT }),
-    yahooMonthly(identity.ticker)
+    optionalJson(submissionsUrl, { "User-Agent": SEC_AGENT })
   ]);
   const facts = factsResponse?.facts || {}, submissions = submissionsResponse || {};
   const annualForms = new Set(["10-K", "10-K/A", "20-F", "20-F/A", "40-F", "40-F/A"]);
@@ -315,10 +314,7 @@ async function acquireSecEvidence(identity: any, company: any) {
   const reportEnd = revenue?.end || newestFactEnd(facts);
   const totalDebt = debtFact(facts, reportEnd);
   const interestAssets = interestAssetFact(facts, reportEnd);
-  const shares = shareFacts(facts);
   const financialCurrency = upper(revenue?.unit || totalDebt?.unit || interestAssets?.unit);
-  const marketCurrencyCompatible = !!financialCurrency && financialCurrency === upper(chart.currency);
-  const mv = marketCurrencyCompatible ? marketValue36m(chart, shares) : { value: 0, months: 0, period: "", method: "CURRENCY_MISMATCH" };
   const recent = submissions?.filings?.recent || {}, annualIndex = Array.isArray(recent.form) ? recent.form.findIndex((x: string) => annualForms.has(x)) : -1;
   const accession = annualIndex >= 0 ? String(recent.accessionNumber?.[annualIndex] || "") : "";
   const primaryDocument = annualIndex >= 0 ? String(recent.primaryDocument?.[annualIndex] || "") : "";
@@ -330,14 +326,13 @@ async function acquireSecEvidence(identity: any, company: any) {
   if (interestIncome) evidence.push(factItem("interestIncome", interestIncome, companyFactsUrl));
   if (totalDebt) evidence.push(compositeItem("totalDebt", totalDebt, companyFactsUrl));
   if (interestAssets) evidence.push(compositeItem("interestBearingAssetsUpperBound", interestAssets, companyFactsUrl));
-  if (mv.value > 0) evidence.push({ metric: "marketValue36mAvg", value: mv.value, unit: chart.currency || revenue?.unit || "", period: mv.period, sourceName: "Yahoo monthly market prices + SEC reported shares", sourceUrl: `${YAHOO}/v8/finance/chart/${encodeURIComponent(identity.ticker)}`, method: "MONTHLY_PRICE_X_LATEST_OFFICIAL_SHARES", quality: "MARKET" });
   return {
     source: "SEC_XBRL_GENERIC", official: true, identity: { ...identity, cik, legalName: submissions.name || company.title },
     business: { state: prohibitedSic(sic, sicDescription) ? "FAIL" : "OPEN", description: sicDescription, sic, sourceUrl: submissionsUrl, filingUrl },
     financial: {
       revenue: revenue?.value ?? null, interestIncome: interestIncome?.value ?? null, interestIncomeMethod: interestIncome ? "LOWER_BOUND" : "MISSING", totalDebt: totalDebt?.value ?? null,
-      interestBearingAssetsUpperBound: interestAssets?.value ?? null, marketValue36mAvg: mv.value || null, marketValue36mMonths: mv.months,
-      currency: financialCurrency || chart.currency || "", period: reportEnd || "", marketValueMethod: mv.method, marketCurrencyCompatible,
+      interestBearingAssetsUpperBound: interestAssets?.value ?? null, marketValueAtCheck: null, marketValueAsOf: "",
+      currency: financialCurrency || "", period: reportEnd || "", marketValueMethod: "UNAVAILABLE", marketCurrencyCompatible: false,
       debtDirect: totalDebt?.direct === true, interestAssetsUpperBound: true
     }, evidence
   };
@@ -346,14 +341,14 @@ async function acquireSecEvidence(identity: any, company: any) {
 function evaluate(acquired: any) {
   const f = acquired.financial || {}, b = acquired.business || {};
   const ratio = (a: any, d: any) => Number.isFinite(Number(a)) && Number(a) >= 0 && Number(d) > 0 ? Number(a) / Number(d) : null;
-  const impureExact = ratio(f.nonPermissibleIncome, f.revenue), impureLowerBound = ratio(f.interestIncome, f.revenue), assets = ratio(f.interestBearingAssetsUpperBound, f.marketValue36mAvg), debt = ratio(f.totalDebt, f.marketValue36mAvg);
+  const impureExact = ratio(f.nonPermissibleIncome, f.revenue), impureLowerBound = ratio(f.interestIncome, f.revenue), assets = ratio(f.interestBearingAssetsUpperBound, f.marketValueAtCheck), debt = ratio(f.totalDebt, f.marketValueAtCheck);
   const impureProxySource = f.interestIncomeMethod === "LOWER_BOUND" ? "OFFICIAL_INTEREST_INCOME_LOWER_BOUND" : f.interestIncomeMethod === "FINANCE_INCOME_UPPER_BOUND" ? "ESEF_FINANCE_INCOME_UPPER_BOUND" : "MISSING";
-  const marketOk = Number(f.marketValue36mMonths) >= 30;
+  const marketOk = Number(f.marketValueAtCheck) > 0 && f.marketCurrencyCompatible === true;
   const criteria: Record<string, Criterion> = {
     business: { rule: "Zulässiges Kerngeschäft", state: b.state === "FAIL" ? "FAIL" : "OPEN", value: b.sic || b.description || null, limit: null, source: b.state === "FAIL" ? "OFFICIAL_BUSINESS_EXCLUSION" : acquired.official ? "OFFICIAL_BUSINESS_DESCRIPTION_UNCLASSIFIED" : "UNVERIFIED_DISCOVERY" },
     impureIncome: { rule: "Nicht-zulässige Einnahmen / Gesamtumsatz", state: impureExact == null ? (impureLowerBound != null && f.interestIncomeMethod === "LOWER_BOUND" && impureLowerBound > RULES.impureIncomeMax ? "FAIL" : "OPEN") : impureExact <= RULES.impureIncomeMax ? "PASS" : "FAIL", value: impureExact ?? impureLowerBound, limit: RULES.impureIncomeMax, source: impureExact != null ? "OFFICIAL_NON_PERMISSIBLE_INCOME" : impureLowerBound != null ? impureProxySource : "MISSING" },
-    interestAssets: { rule: "Zinstragende Vermögenswerte / 36M Ø Marktwert", state: !marketOk || assets == null ? "OPEN" : assets <= RULES.interestAssetsMax ? "PASS" : "OPEN", value: assets, limit: RULES.interestAssetsMax, source: assets == null ? "MISSING" : "SEC_XBRL_UPPER_BOUND" },
-    interestDebt: { rule: "Zinstragende Schulden / 36M Ø Marktwert", state: !marketOk || debt == null ? "OPEN" : debt <= RULES.interestDebtMax ? "PASS" : f.debtDirect ? "FAIL" : "OPEN", value: debt, limit: RULES.interestDebtMax, source: debt == null ? "MISSING" : "SEC_XBRL" }
+    interestAssets: { rule: "Zinstragende Vermögenswerte / Marktwert am Prüftag", state: !marketOk || assets == null ? "OPEN" : assets <= RULES.interestAssetsMax ? "PASS" : "OPEN", value: assets, limit: RULES.interestAssetsMax, source: assets == null ? "MISSING" : "OFFICIAL_FINANCIALS_AND_MARKET_CAP" },
+    interestDebt: { rule: "Zinstragende Schulden / Marktwert am Prüftag", state: !marketOk || debt == null ? "OPEN" : debt <= RULES.interestDebtMax ? "PASS" : f.debtDirect ? "FAIL" : "OPEN", value: debt, limit: RULES.interestDebtMax, source: debt == null ? "MISSING" : "OFFICIAL_FINANCIALS_AND_MARKET_CAP" }
   };
   const entries = Object.values(criteria);
   const failed = entries.filter(x => x.state === "FAIL");
@@ -364,7 +359,7 @@ function evaluate(acquired: any) {
 }
 
 async function persistRun(result: any, startedAt: string, completedAt: string) {
-  const s = db(), run = { id: result.runId, isin: result.identity.isin, symbol: result.identity.ticker || null, state: result.state, methodology: "AAOIFI SS21 · HPOS generic evidence service v1.1", reason: result.reason, missing_criteria: result.missingCriteria, criteria: result.criteria, evidence: result.evidence, started_at: startedAt, completed_at: completedAt };
+  const s = db(), run = { id: result.runId, isin: result.identity.isin, symbol: result.identity.ticker || null, state: result.state, methodology: "AAOIFI SS21 · Marktwert am Prüftag · HPOS generic evidence service v1.2", reason: result.reason, missing_criteria: result.missingCriteria, criteria: result.criteria, evidence: result.evidence, started_at: startedAt, completed_at: completedAt };
   const { error: runError } = await s.from("hpos_halal_runs").insert(run);
   if (runError) throw httpError(500, "run_store_failed");
   const { data: old } = await s.from("hpos_halal_evidence").select("source_type,state,expires_at").eq("isin", result.identity.isin).maybeSingle();
@@ -456,14 +451,51 @@ async function yahooProfile(symbol: string) {
   try { const d = await fetchJson(`${YAHOO}/v10/finance/quoteSummary/${encodeURIComponent(symbol)}?modules=assetProfile`, { "User-Agent": "Mozilla/5.0 HPOS/1.0" }); return d?.quoteSummary?.result?.[0]?.assetProfile || null; } catch { return null; }
 }
 
-async function yahooMonthly(symbol: string) {
-  if (!symbol) return { rows: [], currency: "" };
+async function attachMarketValueAtCheck(acquired: any, identity: any) {
+  const market = await yahooMarketValueAtCheck(upper(identity?.ticker));
+  const financial = { ...(acquired?.financial || {}) };
+  const financialCurrency = upper(financial.currency), marketCurrency = upper(market.currency);
+  const compatible = market.value > 0 && !!financialCurrency && financialCurrency === marketCurrency;
+  financial.marketValueAtCheck = compatible ? market.value : null;
+  financial.marketValueAsOf = market.asOf;
+  financial.marketValueMethod = compatible ? market.method : market.value > 0 ? "CURRENCY_MISMATCH" : "UNAVAILABLE";
+  financial.marketCurrencyCompatible = compatible;
+  const evidence = [...(acquired?.evidence || [])];
+  for (const support of market.supportingEvidence || []) evidence.push(support);
+  if (market.value > 0) evidence.push({ metric: "marketValueAtCheck", value: market.value, unit: market.currency, period: market.asOf, sourceName: market.method === "YAHOO_REPORTED_MARKET_CAP_AT_CHECK" ? "Yahoo Finance reported market capitalization" : "Calculated from current price and latest reported ordinary shares", sourceUrl: market.sourceUrl, method: market.method, quality: "MARKET" });
+  return { ...acquired, financial, evidence };
+}
+
+async function yahooMarketValueAtCheck(symbol: string) {
+  const quoteUrl = `${YAHOO}/v10/finance/quoteSummary/${encodeURIComponent(symbol)}?modules=price`;
+  if (!symbol) return { value: 0, currency: "", asOf: "", method: "UNAVAILABLE", sourceUrl: quoteUrl, supportingEvidence: [] };
   try {
-    const d = await fetchJson(`${YAHOO}/v8/finance/chart/${encodeURIComponent(symbol)}?range=3y&interval=1mo&events=history`, { "User-Agent": "Mozilla/5.0 HPOS/1.0" }), x = d?.chart?.result?.[0];
-    const ts = Array.isArray(x?.timestamp) ? x.timestamp : [], values = x?.indicators?.adjclose?.[0]?.adjclose || x?.indicators?.quote?.[0]?.close || [];
-    const rows = ts.map((t: number, i: number) => ({ date: new Date(t * 1000).toISOString().slice(0, 10), price: number(values[i]) })).filter((x: any) => x.price > 0).slice(-36);
-    return { rows, currency: upper(x?.meta?.currency) };
-  } catch { return { rows: [], currency: "" }; }
+    const d = await fetchJson(quoteUrl, { "User-Agent": "Mozilla/5.0 HPOS/1.0" }), price = d?.quoteSummary?.result?.[0]?.price || {};
+    const value = number(price?.marketCap?.raw ?? price?.marketCap), timestamp = number(price?.regularMarketTime?.raw ?? price?.regularMarketTime);
+    if (value > 0) return { value, currency: upper(price?.currency), asOf: timestamp > 0 ? new Date(timestamp * 1000).toISOString() : new Date().toISOString(), method: "YAHOO_REPORTED_MARKET_CAP_AT_CHECK", sourceUrl: quoteUrl, supportingEvidence: [] };
+  } catch {}
+  const chartUrl = `${YAHOO}/v8/finance/chart/${encodeURIComponent(symbol)}?range=5d&interval=1d`;
+  const period2 = Math.floor(Date.now() / 1000) + 86400, period1 = period2 - 5 * 366 * 86400;
+  const shareTypes = "quarterlyOrdinarySharesNumber,annualOrdinarySharesNumber";
+  const sharesUrl = `${YAHOO}/ws/fundamentals-timeseries/v1/finance/timeseries/${encodeURIComponent(symbol)}?symbol=${encodeURIComponent(symbol)}&type=${shareTypes}&period1=${period1}&period2=${period2}`;
+  try {
+    const [chart, series] = await Promise.all([fetchJson(chartUrl, { "User-Agent": "Mozilla/5.0 HPOS/1.0" }), fetchJson(sharesUrl, { "User-Agent": "Mozilla/5.0 HPOS/1.0" })]);
+    const x = chart?.chart?.result?.[0] || {}, meta = x?.meta || {}, closes = x?.indicators?.quote?.[0]?.close || [];
+    const price = number(meta?.regularMarketPrice) || [...closes].reverse().map(number).find((v: number) => v > 0) || 0;
+    const shareRows = (Array.isArray(series?.timeseries?.result) ? series.timeseries.result : []).flatMap((row: any) => {
+      const type = Array.isArray(row?.meta?.type) ? row.meta.type[0] : "";
+      return Array.isArray(row?.[type]) ? row[type] : [];
+    }).map((row: any) => ({ value: number(row?.reportedValue?.raw), period: dateOnly(row?.asOfDate || "") })).filter((row: any) => row.value > 0 && row.period).sort((a: any, b: any) => b.period.localeCompare(a.period));
+    const shares = shareRows[0] || null, timestamp = number(meta?.regularMarketTime), asOf = timestamp > 0 ? new Date(timestamp * 1000).toISOString() : new Date().toISOString();
+    if (price > 0 && shares) return {
+      value: price * shares.value, currency: upper(meta?.currency), asOf, method: "CURRENT_PRICE_X_LATEST_REPORTED_ORDINARY_SHARES", sourceUrl: chartUrl,
+      supportingEvidence: [
+        { metric: "marketPriceAtCheck", value: price, unit: upper(meta?.currency), period: asOf, sourceName: "Yahoo Finance current market price", sourceUrl: chartUrl, method: "LATEST_MARKET_PRICE", quality: "MARKET" },
+        { metric: "ordinarySharesLatestReported", value: shares.value, unit: "shares", period: shares.period, sourceName: "Yahoo Finance fundamentals time series", sourceUrl: sharesUrl, method: "LATEST_REPORTED_ORDINARY_SHARES", quality: "MARKET" }
+      ]
+    };
+  } catch {}
+  return { value: 0, currency: "", asOf: "", method: "UNAVAILABLE", sourceUrl: quoteUrl, supportingEvidence: [] };
 }
 
 function factRows(facts: any, tags: string[]) {
@@ -507,20 +539,6 @@ function interestAssetFact(facts: any, end: string) {
   const components = [cash, investments].filter(Boolean), unit = components[0].unit;
   if (!components.every(x => x.unit === unit)) return null;
   return { value: components.reduce((n, x) => n + x.value, 0), unit, end: components[0].end, direct: false, components };
-}
-
-function shareFacts(facts: any) {
-  return factRows(facts, ["EntityCommonStockSharesOutstanding", "CommonStockSharesOutstanding", "WeightedAverageNumberOfSharesOutstandingBasic"]).filter(x => x.value > 0 && x.end).sort((a, b) => String(a.end).localeCompare(String(b.end)));
-}
-
-function marketValue36m(chart: any, shares: any[]) {
-  const observations = (chart.rows || []).map((p: any) => {
-    const eligible = shares.filter(x => String(x.end) <= p.date && Math.abs(days(x.end, p.date)) <= 550);
-    const s = eligible.at(-1) || null;
-    return s ? { ...p, shares: s.value, value: p.price * s.value, sharesEnd: s.end } : null;
-  }).filter(Boolean).slice(-36);
-  const value = observations.length ? observations.reduce((n: number, x: any) => n + x.value, 0) / observations.length : 0;
-  return { value, months: observations.length, period: observations.length ? `${observations[0].date.slice(0, 7)} to ${observations.at(-1).date.slice(0, 7)}` : "", method: "MONTHLY_PRICE_X_LATEST_OFFICIAL_SHARES" };
 }
 
 function prohibitedSic(sicRaw: string, description: string) {

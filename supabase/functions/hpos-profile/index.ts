@@ -43,7 +43,8 @@ async function loadProfile(symbol:string){
       const bs=latest(root.balanceSheetHistoryQuarterly?.balanceSheetStatements)||latest(root.balanceSheetHistory?.balanceSheetStatements)||{};
       const inc=latest(root.incomeStatementHistoryQuarterly?.incomeStatementHistory)||latest(root.incomeStatementHistory?.incomeStatementHistory)||{};
       const shares=num(k.sharesOutstanding?.raw??k.sharesOutstanding);
-      const mv36=await avgMarketValue36m(symbol,shares);
+      const reportedMarketCap=num(p.marketCap?.raw??p.marketCap),point=reportedMarketCap>0?{value:reportedMarketCap,asOf:marketTimestamp(p.regularMarketTime?.raw??p.regularMarketTime),method:"YAHOO_REPORTED_MARKET_CAP_AT_CHECK",sourceUrl:url}:await pointMarketValue(symbol);
+      const marketValueAtCheck=point.value,marketValueAsOf=point.asOf;
       const revenue=firstNum([inc.totalRevenue,f.totalRevenue]);
       const interestIncome=firstNum([inc.interestIncomeNonOperating,inc.interestIncome,inc.netInterestIncome]);
       const totalDebt=firstNum([bs.totalDebt,f.totalDebt,bs.longTermDebtAndFinanceLeaseObligation,bs.longTermDebt]);
@@ -55,8 +56,8 @@ async function loadProfile(symbol:string){
         symbol,name:String(p.longName||p.shortName||symbol),
         sector:String(a.sector||""),industry:String(a.industry||""),businessSummary:String(a.longBusinessSummary||""),
         employees:num(a.fullTimeEmployees),website:String(a.website||""),city:String(a.city||""),country:String(a.country||""),
-        marketCap:num(p.marketCap?.raw??p.marketCap),sharesOutstanding:shares,marketValue36mAvg:mv36.value,marketValue36mMonths:mv36.months,
-        marketValue36mMethod:mv36.method,currency:String(p.currency||s.currency||""),quoteType:String(p.quoteType||""),
+        marketCap:marketValueAtCheck,sharesOutstanding:shares,marketValueAtCheck,marketValueAsOf,
+        marketValueMethod:marketValueAtCheck>0?point.method:"UNAVAILABLE",currency:String(p.currency||s.currency||""),quoteType:String(p.quoteType||""),
         trailingPE:num(s.trailingPE?.raw??s.trailingPE),forwardPE:num(k.forwardPE?.raw??k.forwardPE),dividendYield:num(s.dividendYield?.raw??s.dividendYield),
         fiftyTwoWeekHigh:num(s.fiftyTwoWeekHigh?.raw??s.fiftyTwoWeekHigh),fiftyTwoWeekLow:num(s.fiftyTwoWeekLow?.raw??s.fiftyTwoWeekLow),
         revenue,totalDebt,totalCash:num(f.totalCash?.raw??f.totalCash),cashOnly,cashAndShortTermInvestments:cashAndStInv,
@@ -66,9 +67,10 @@ async function loadProfile(symbol:string){
         debtToEquity:num(f.debtToEquity?.raw??f.debtToEquity),
         statementDate:dateOf(bs)||dateOf(inc)||"",source:"YAHOO_QUOTE_SUMMARY_UNOFFICIAL",
         profileSource:a.longBusinessSummary?"YAHOO_PROFILE":"",fetchedAt:new Date().toISOString(),
+        metricSources:marketValueAtCheck>0?{marketValueAtCheck:{sourceType:"YAHOO_MARKET_CAP_AT_CHECK",sourceName:point.method==="YAHOO_REPORTED_MARKET_CAP_AT_CHECK"?"Yahoo Finance reported market capitalization":"Current price × latest reported ordinary shares",sourceUrl:point.sourceUrl,period:marketValueAsOf,label:"Marktwert am Prüftag"}}:{},
         dataQuality:{
           profile:!!a.longBusinessSummary,revenue:!!(inc.totalRevenue||f.totalRevenue),debt:!!(bs.totalDebt||f.totalDebt||bs.longTermDebtAndFinanceLeaseObligation||bs.longTermDebt),interestAssets:!!(bs.cashCashEquivalentsAndShortTermInvestments||bs.cashAndCashEquivalents||bs.cash||f.totalCash||bs.otherShortTermInvestments||bs.investmentsAndOtherFinancialAssets||bs.availableForSaleSecurities),
-          interestIncome:!!(inc.interestIncomeNonOperating||inc.interestIncome||inc.netInterestIncome),marketValue36m:mv36.months>=30
+          interestIncome:!!(inc.interestIncomeNonOperating||inc.interestIncome||inc.netInterestIncome),marketValueAtCheck:marketValueAtCheck>0
         }
       };
       if(official){Object.assign(baseProfile,official);baseProfile.dataQuality.profile=true}
@@ -77,32 +79,34 @@ async function loadProfile(symbol:string){
     }catch{}
   }
   const search=await yahooSearch(symbol); if(!search)throw new Error("profile_missing");
-  const q=await yahooQuote(symbol),name=String(search.longname||search.shortname||q?.longName||q?.shortName||symbol),wiki=official?null:await wikipediaProfile(name);
+  const q=await yahooQuote(symbol),point=num(q?.marketCap)>0?{value:num(q?.marketCap),asOf:marketTimestamp(q?.regularMarketTime),method:"YAHOO_REPORTED_MARKET_CAP_AT_CHECK",sourceUrl:`${Y1}/v7/finance/quote?symbols=${encodeURIComponent(symbol)}`}:await pointMarketValue(symbol),name=String(search.longname||search.shortname||q?.longName||q?.shortName||symbol),wiki=official?null:await wikipediaProfile(name);
   return {symbol,name:official?.name||name,sector:official?.sector||String(search.sector||search.sectorDisp||""),industry:official?.industry||String(search.industry||search.industryDisp||""),
-    businessSummary:official?.businessSummary||String(wiki?.summary||""),employees:0,website:official?.website||"",city:"",country:official?.country||"",marketCap:num(q?.marketCap),
-    sharesOutstanding:num(q?.sharesOutstanding),marketValue36mAvg:0,marketValue36mMonths:0,currency:String(q?.currency||""),
+    businessSummary:official?.businessSummary||String(wiki?.summary||""),employees:0,website:official?.website||"",city:"",country:official?.country||"",marketCap:point.value,
+    sharesOutstanding:num(q?.sharesOutstanding),marketValueAtCheck:point.value,marketValueAsOf:point.asOf,marketValueMethod:point.value>0?point.method:"UNAVAILABLE",currency:String(q?.currency||point.currency||""),
     quoteType:String(search.quoteType||q?.quoteType||""),revenue:0,totalDebt:0,totalCash:0,cashAndShortTermInvestments:0,
     shortTermInvestments:0,interestBearingAssetsUpperBound:0,interestIncome:0,
     source:"YAHOO_SEARCH_QUOTE_FALLBACK",profileSource:official?.profileSource||wiki?.source||"",profileUrl:official?.profileUrl||wiki?.url||"",fetchedAt:new Date().toISOString(),
-    dataQuality:{profile:!!(official?.businessSummary||wiki?.summary),revenue:false,debt:false,interestAssets:false,interestIncome:false,marketValue36m:false}};
+    metricSources:point.value>0?{marketValueAtCheck:{sourceType:"YAHOO_MARKET_CAP_AT_CHECK",sourceName:point.method==="YAHOO_REPORTED_MARKET_CAP_AT_CHECK"?"Yahoo Finance reported market capitalization":"Current price × latest reported ordinary shares",sourceUrl:point.sourceUrl,period:point.asOf,label:"Marktwert am Prüftag"}}:{},
+    dataQuality:{profile:!!(official?.businessSummary||wiki?.summary),revenue:false,debt:false,interestAssets:false,interestIncome:false,marketValueAtCheck:point.value>0}};
 }
 
-async function avgMarketValue36m(symbol:string,shares:number){
- if(!(shares>0))return{value:0,months:0,method:"UNAVAILABLE"};
- for(const base of [Y1,Y2]){
-    try{
-      const r=await fetch(`${base}/v8/finance/chart/${encodeURIComponent(symbol)}?range=3y&interval=1mo&events=history`,{headers:{Accept:"application/json","User-Agent":"Mozilla/5.0 HPOS/1.0"}});
-      if(!r.ok)continue; const d=await r.json(),x=d?.chart?.result?.[0],cl=x?.indicators?.adjclose?.[0]?.adjclose||x?.indicators?.quote?.[0]?.close||[];
-      const vals=(Array.isArray(cl)?cl:[]).map((v:any)=>num(v)).filter((v:number)=>v>0).slice(-36);
-      if(vals.length){return{value:(vals.reduce((a:number,b:number)=>a+b,0)/vals.length)*shares,months:vals.length,method:"MONTHLY_PRICE_X_CURRENT_SHARES_APPROX"}}
-    }catch{}
-  }
-  return{value:0,months:0,method:"UNAVAILABLE"};
+async function pointMarketValue(symbol:string){
+ const chartUrl=`${Y1}/v8/finance/chart/${encodeURIComponent(symbol)}?range=5d&interval=1d`,period2=Math.floor(Date.now()/1000)+86400,period1=period2-5*366*86400;
+ const sharesUrl=`${Y1}/ws/fundamentals-timeseries/v1/finance/timeseries/${encodeURIComponent(symbol)}?symbol=${encodeURIComponent(symbol)}&type=quarterlyOrdinarySharesNumber,annualOrdinarySharesNumber&period1=${period1}&period2=${period2}`;
+ try{
+   const [cr,sr]=await Promise.all([fetch(chartUrl,{headers:{Accept:"application/json","User-Agent":"Mozilla/5.0 HPOS/1.0"}}),fetch(sharesUrl,{headers:{Accept:"application/json","User-Agent":"Mozilla/5.0 HPOS/1.0"}})]);if(!cr.ok||!sr.ok)throw new Error("point_market_missing");
+   const chart=await cr.json(),series=await sr.json(),x=chart?.chart?.result?.[0]||{},meta=x?.meta||{},closes=x?.indicators?.quote?.[0]?.close||[],price=num(meta.regularMarketPrice)||[...closes].reverse().map(num).find((v:number)=>v>0)||0;
+   const rows=(Array.isArray(series?.timeseries?.result)?series.timeseries.result:[]).flatMap((row:any)=>{const type=Array.isArray(row?.meta?.type)?row.meta.type[0]:"";return Array.isArray(row?.[type])?row[type]:[]}).map((row:any)=>({value:num(row?.reportedValue?.raw),period:String(row?.asOfDate||"")})).filter((row:any)=>row.value>0&&row.period).sort((a:any,b:any)=>b.period.localeCompare(a.period));
+   if(price>0&&rows[0])return{value:price*rows[0].value,currency:String(meta.currency||""),asOf:marketTimestamp(meta.regularMarketTime),method:"CURRENT_PRICE_X_LATEST_REPORTED_ORDINARY_SHARES",sourceUrl:chartUrl,sharesPeriod:rows[0].period};
+ }catch{}
+ return{value:0,currency:"",asOf:new Date().toISOString(),method:"UNAVAILABLE",sourceUrl:chartUrl,sharesPeriod:""};
 }
+
 function latest(a:any[]){return Array.isArray(a)&&a.length?a[0]:null}
 function raw(v:any){return num(v?.raw??v)}
 function firstNum(xs:any[]){for(const x of xs){const n=raw(x);if(Number.isFinite(n)&&n!==0)return n}return 0}
 function dateOf(x:any){const t=x?.endDate?.raw??x?.endDate;if(!t)return"";const n=Number(t);return Number.isFinite(n)?new Date(n*1000).toISOString().slice(0,10):String(t)}
+function marketTimestamp(v:any){const n=Number(v?.raw??v);return Number.isFinite(n)&&n>0?new Date(n*1000).toISOString():new Date().toISOString()}
 async function yahooSearch(symbol:string){for(const base of [Y1,Y2]){try{const r=await fetch(`${base}/v1/finance/search?q=${encodeURIComponent(symbol)}&quotesCount=8&newsCount=0`,{headers:{Accept:"application/json","User-Agent":"Mozilla/5.0 HPOS/1.0"}});if(!r.ok)continue;const d=await r.json(),rows=Array.isArray(d?.quotes)?d.quotes:[],exact=rows.find((q:any)=>String(q?.symbol||"").toUpperCase()===symbol);if(exact)return exact;if(rows[0])return rows[0]}catch{}}return null}
 async function yahooQuote(symbol:string){for(const base of [Y1,Y2]){try{const r=await fetch(`${base}/v7/finance/quote?symbols=${encodeURIComponent(symbol)}`,{headers:{Accept:"application/json","User-Agent":"Mozilla/5.0 HPOS/1.0"}});if(!r.ok)continue;const d=await r.json(),x=d?.quoteResponse?.result?.[0];if(x)return x}catch{}}return null}
 async function wikipediaProfile(companyName:string){
