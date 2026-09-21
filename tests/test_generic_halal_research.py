@@ -3,6 +3,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SCREEN = (ROOT / "supabase/functions/hpos-screen/index.ts").read_text(encoding="utf-8")
+BUSINESS_CLASSIFIER = (ROOT / "supabase/functions/hpos-screen/business-classifier.ts").read_text(encoding="utf-8")
 SEC_TICKERS = (ROOT / "supabase/functions/hpos-screen/sec-tickers.ts").read_text(encoding="utf-8")
 MIGRATION = (ROOT / "supabase/migrations/20260915073547_create_generic_identity_evidence_service.sql").read_text(encoding="utf-8")
 APP = (ROOT / "app/app.js").read_text(encoding="utf-8")
@@ -60,7 +61,7 @@ def test_screen_uses_traceable_account_free_sources_and_currency_guard():
         assert forbidden not in SCREEN
     assert "marketCurrencyCompatible" in SCREEN
     assert '"CURRENCY_MISMATCH"' in SCREEN
-    assert "OFFICIAL_BUSINESS_DESCRIPTION_UNCLASSIFIED" in SCREEN
+    assert "OFFICIAL_BUSINESS_DESCRIPTION_UNCLASSIFIED" in BUSINESS_CLASSIFIER
     assert "OFFICIAL_INTEREST_INCOME_LOWER_BOUND" in SCREEN
     assert 'direct: !String(direct.tag).includes("FinanceLease")' in SCREEN
     assert "optionalJson(companyFactsUrl" in SCREEN

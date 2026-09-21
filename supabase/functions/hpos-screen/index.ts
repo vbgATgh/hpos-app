@@ -1,6 +1,7 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
 import { SEC_TICKERS } from "./sec-tickers.ts";
+import { classifyBusiness } from "./business-classifier.ts";
 
 const APP_ORIGIN = "https://vbgatgh.github.io";
 const YAHOO = "https://query1.finance.yahoo.com";
@@ -160,7 +161,7 @@ async function acquireEsefEvidence(identity: any) {
     if (!parsed) continue;
     const acquired = {
       source: "ESEF_XBRL_REGULATORY_CACHE", official: true, identity: { ...identity, lei: lei.lei, legalName: lei.legalName },
-      business: { state: prohibitedBusinessText(parsed.businessDescription) ? "FAIL" : "OPEN", description: parsed.businessDescription, sic: "", sourceUrl: parsed.reportUrl, filingUrl: parsed.reportUrl },
+      business: classifyBusiness(parsed.businessDescription, "", true, parsed.reportUrl, parsed.reportUrl),
       financial: parsed.financial, evidence: parsed.evidence
     };
     await saveRegulatoryEvidence(identity, lei, filing, parsed, acquired);
@@ -287,7 +288,7 @@ async function regulatoryDocumentToEvidence(identity: any, document: any) {
   const value = (metric: string) => facts.find((x: any) => x.metric === metric)?.value_numeric ?? null;
   const business = facts.find((x: any) => x.metric === "businessProfile")?.value_text || "";
   const interestFact = facts.find((x: any) => x.metric === "interestIncome");
-  return { source: "ESEF_XBRL_CACHE", official: true, identity: { ...identity, lei: document.lei, legalName: document.legal_name }, business: { state: prohibitedBusinessText(business) ? "FAIL" : "OPEN", description: business, sic: "", sourceUrl: document.report_url, filingUrl: document.report_url }, financial: { revenue: value("revenue"), interestIncome: value("interestIncome"), interestIncomeMethod: String(interestFact?.concept || "").endsWith(":InterestIncome") ? "LOWER_BOUND" : interestFact ? "FINANCE_INCOME_UPPER_BOUND" : "MISSING", totalDebt: value("totalDebt"), interestBearingAssetsUpperBound: value("interestBearingAssetsUpperBound"), marketValueAtCheck: null, marketValueAsOf: "", currency: document.currency || "", period: document.period_end || "", marketValueMethod: "UNAVAILABLE", marketCurrencyCompatible: false, debtDirect: value("totalDebt") != null, interestAssetsUpperBound: true }, evidence };
+  return { source: "ESEF_XBRL_CACHE", official: true, identity: { ...identity, lei: document.lei, legalName: document.legal_name }, business: classifyBusiness(business, "", true, document.report_url, document.report_url), financial: { revenue: value("revenue"), interestIncome: value("interestIncome"), interestIncomeMethod: String(interestFact?.concept || "").endsWith(":InterestIncome") ? "LOWER_BOUND" : interestFact ? "FINANCE_INCOME_UPPER_BOUND" : "MISSING", totalDebt: value("totalDebt"), interestBearingAssetsUpperBound: value("interestBearingAssetsUpperBound"), marketValueAtCheck: null, marketValueAsOf: "", currency: document.currency || "", period: document.period_end || "", marketValueMethod: "UNAVAILABLE", marketCurrencyCompatible: false, debtDirect: value("totalDebt") != null, interestAssetsUpperBound: true }, evidence };
 }
 
 async function saveRegulatoryEvidence(identity: any, lei: any, filing: any, parsed: any, acquired: any) {
@@ -328,7 +329,7 @@ async function acquireSecEvidence(identity: any, company: any) {
   if (interestAssets) evidence.push(compositeItem("interestBearingAssetsUpperBound", interestAssets, companyFactsUrl));
   return {
     source: "SEC_XBRL_GENERIC", official: true, identity: { ...identity, cik, legalName: submissions.name || company.title },
-    business: { state: prohibitedSic(sic, sicDescription) ? "FAIL" : "OPEN", description: sicDescription, sic, sourceUrl: submissionsUrl, filingUrl },
+    business: classifyBusiness(sicDescription, sic, !!submissionsResponse, submissionsUrl, filingUrl),
     financial: {
       revenue: revenue?.value ?? null, interestIncome: interestIncome?.value ?? null, interestIncomeMethod: interestIncome ? "LOWER_BOUND" : "MISSING", totalDebt: totalDebt?.value ?? null,
       interestBearingAssetsUpperBound: interestAssets?.value ?? null, marketValueAtCheck: null, marketValueAsOf: "",
@@ -345,7 +346,7 @@ function evaluate(acquired: any) {
   const impureProxySource = f.interestIncomeMethod === "LOWER_BOUND" ? "OFFICIAL_INTEREST_INCOME_LOWER_BOUND" : f.interestIncomeMethod === "FINANCE_INCOME_UPPER_BOUND" ? "ESEF_FINANCE_INCOME_UPPER_BOUND" : "MISSING";
   const marketOk = Number(f.marketValueAtCheck) > 0 && f.marketCurrencyCompatible === true;
   const criteria: Record<string, Criterion> = {
-    business: { rule: "Zulässiges Kerngeschäft", state: b.state === "FAIL" ? "FAIL" : "OPEN", value: b.sic || b.description || null, limit: null, source: b.state === "FAIL" ? "OFFICIAL_BUSINESS_EXCLUSION" : acquired.official ? "OFFICIAL_BUSINESS_DESCRIPTION_UNCLASSIFIED" : "UNVERIFIED_DISCOVERY" },
+    business: { rule: "Zulässiges Kerngeschäft", state: ["PASS", "FAIL"].includes(b.state) ? b.state : "OPEN", value: b.category || b.sic || b.description || null, limit: null, source: b.method || (acquired.official ? "OFFICIAL_BUSINESS_DESCRIPTION_UNCLASSIFIED" : "UNVERIFIED_DISCOVERY") },
     impureIncome: { rule: "Nicht-zulässige Einnahmen / Gesamtumsatz", state: impureExact == null ? (impureLowerBound != null && f.interestIncomeMethod === "LOWER_BOUND" && impureLowerBound > RULES.impureIncomeMax ? "FAIL" : "OPEN") : impureExact <= RULES.impureIncomeMax ? "PASS" : "FAIL", value: impureExact ?? impureLowerBound, limit: RULES.impureIncomeMax, source: impureExact != null ? "OFFICIAL_NON_PERMISSIBLE_INCOME" : impureLowerBound != null ? impureProxySource : "MISSING" },
     interestAssets: { rule: "Zinstragende Vermögenswerte / Marktwert am Prüftag", state: !marketOk || assets == null ? "OPEN" : assets <= RULES.interestAssetsMax ? "PASS" : "OPEN", value: assets, limit: RULES.interestAssetsMax, source: assets == null ? "MISSING" : "OFFICIAL_FINANCIALS_AND_MARKET_CAP" },
     interestDebt: { rule: "Zinstragende Schulden / Marktwert am Prüftag", state: !marketOk || debt == null ? "OPEN" : debt <= RULES.interestDebtMax ? "PASS" : f.debtDirect ? "FAIL" : "OPEN", value: debt, limit: RULES.interestDebtMax, source: debt == null ? "MISSING" : "OFFICIAL_FINANCIALS_AND_MARKET_CAP" }
@@ -539,16 +540,6 @@ function interestAssetFact(facts: any, end: string) {
   const components = [cash, investments].filter(Boolean), unit = components[0].unit;
   if (!components.every(x => x.unit === unit)) return null;
   return { value: components.reduce((n, x) => n + x.value, 0), unit, end: components[0].end, direct: false, components };
-}
-
-function prohibitedSic(sicRaw: string, description: string) {
-  const sic = Number(sicRaw), d = upper(description);
-  if ((sic >= 2082 && sic <= 2085) || (sic >= 2100 && sic <= 2199) || (sic >= 3480 && sic <= 3489) || (sic >= 3760 && sic <= 3769) || (sic >= 6020 && sic <= 6799) || sic === 7993) return true;
-  return /(CASINO|GAMBLING|BREWER|DISTILL|TOBACCO|FIREARMS|AMMUNITION|DEFENSE CONTRACTOR|MORTGAGE BANK|COMMERCIAL BANK)/.test(d);
-}
-
-function prohibitedBusinessText(description: string) {
-  return /\b(CASINO|GAMBLING|BREWER(?:Y|IES)?|DISTILL(?:ERY|ER|ING)?|TOBACCO|FIREARMS?|AMMUNITION|COMMERCIAL BANK|CONVENTIONAL BANKING|PORK PROCESSING)\b/i.test(description || "");
 }
 
 function companyKey(value: string) {

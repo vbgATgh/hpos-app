@@ -8,6 +8,7 @@ CASE = (ROOT / "app/investment-case.js").read_text()
 HALAL = (ROOT / "app/halal-evidence.js").read_text()
 INTELLIGENCE = (ROOT / "app/asset-intelligence.js").read_text()
 CSS = (ROOT / "app/asset-cockpit.css").read_text()
+GLOBAL_CSS = (ROOT / "app/styles.css").read_text()
 
 
 def test_asset_header_is_compact_and_identity_centered():
@@ -69,3 +70,12 @@ def test_status_colors_have_one_consistent_meaning():
     assert ".caseVisual>span.pos" in CSS
     assert ".caseVisual>span.warn" in CSS
     assert ".caseVisual>span.neg" in CSS
+
+
+def test_gate_one_protocol_contains_long_sources_on_mobile():
+    assert ".assetCheckReport{min-width:0;max-width:100%" in GLOBAL_CSS
+    assert ".assetCheckProtocol{display:grid;min-width:0;max-width:100%" in GLOBAL_CSS
+    assert "grid-template-columns:minmax(0,1fr) minmax(0,1fr)" in GLOBAL_CSS
+    assert ".assetCheckProtocol li>*{min-width:0;overflow-wrap:anywhere;word-break:break-word}" in GLOBAL_CSS
+    assert "@media(max-width:480px){.assetCheckHead" in GLOBAL_CSS
+    assert ".assetCheckProtocol li{grid-template-columns:minmax(0,1fr)}" in GLOBAL_CSS
