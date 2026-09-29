@@ -41,13 +41,15 @@ def test_esef_facts_keep_exact_xbrl_fundstelle_and_attach_point_market_value_fai
     assert 'metric: "marketValueAtCheck"' in SCREEN
     assert 'method: "YAHOO_REPORTED_MARKET_CAP_AT_CHECK"' in SCREEN
     assert "marketCurrencyCompatible === true" in SCREEN
-    assert '"FINANCE_INCOME_UPPER_BOUND"' in SCREEN
+    assert '"FINANCE_INCOME_PROXY"' in SCREEN
+    assert '"ESEF_FINANCE_INCOME_PARTIAL_EVIDENCE"' in SCREEN
+    assert "ESEF_FINANCE_INCOME_UPPER_BOUND" not in SCREEN
     assert 'f.interestIncomeMethod === "LOWER_BOUND"' in SCREEN
     assert "DOCUMENT_DISCOVERY_TTL" in SCREEN
 
 
 def test_service_release_exposes_regulatory_cache_capability():
-    assert 'version: "1.6.0"' in SCREEN
+    assert 'version: "1.6.1"' in SCREEN
     assert 'evidence: "SEC_AND_ESEF_XBRL_CACHE"' in SCREEN
     assert "regulatoryDocumentCache: true" in SCREEN
     assert 'marketValueBasis: "MARKET_CAP_AT_CHECK"' in SCREEN

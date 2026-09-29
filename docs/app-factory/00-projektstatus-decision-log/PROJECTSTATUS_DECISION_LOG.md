@@ -611,3 +611,29 @@ Dieses Dokument wird bei Änderungen an Status, Gate, Architektur, Entscheidung,
 - Finanzkennzahl und Marktwert müssen dieselbe Währung besitzen. Fehlender Marktwert oder Währungsabweichung führt fail-closed zu `OPEN_REVIEW`.
 - Historische Kursreihen, historische Aktienzahlen und die Mindestanforderung von 30 Monatsbeobachtungen werden aus dem aktiven Backend und Frontend entfernt.
 - Ausführliche Evidenz: `docs/STATUS_2026-09-16_AAOIFI_POINT_MARKET_CAP.md`.
+
+## 30. Statusergänzung 2026-09-28 – MVP-Abschlussmodus und Trendkontext v8.7.72
+
+**Entscheidung DEC-030 – Ein erklärtes OPEN_REVIEW ist ein abgeschlossenes Ergebnis; Trendzahlen bleiben von Gate 1 getrennt**
+
+- Der MVP wird ohne zusätzliche Funktionsausweitung in vier festen Abschlussarbeitspaketen fertiggestellt.
+- Eine externe Evidenzlücke bei einem einzelnen Wertpapier blockiert den Release nicht, wenn HPOS sie reproduzierbar als `OPEN_REVIEW` benennt.
+- Ein konservativer Teilwert wie `FinanceIncome / Umsatz` darf ohne Vollständigkeitsnachweis keinen künstlichen Halal-PASS erzeugen.
+- Die bisher missverständliche technische Bezeichnung `FINANCE_INCOME_UPPER_BOUND` wird durch `FINANCE_INCOME_PROXY` beziehungsweise `ESEF_FINANCE_INCOME_PARTIAL_EVIDENCE` ersetzt.
+- Die Investment-Akte erhält eine datenbasierte Trendleiste aus Tages- und 5-Handelstage-Veränderung.
+- Trendwerte sind rückblickender Timing-Kontext. Sie sind kein Kursziel, keine Wahrscheinlichkeit und kein Kauf- oder Halal-Signal.
+- Nicht definierte Zählwerte oder Zielzonen werden nicht aus einer fremden Darstellung übernommen.
+- `hpos-api` 0.5.12 liefert die Trendwerte samt Beobachtungszahl; Serviceversion 33 ist produktiv.
+- Ausführlicher Abschlussstand: `docs/STATUS_2026-09-28_MVP_CLOSEOUT.md`.
+
+## 31. Statusergänzung 2026-09-29 – zwölf verbindliche Abschlussarbeitspakete
+
+**Entscheidung DEC-031 – Die zwölf Arbeitspakete ersetzen die bisherige grobe Vier-Pakete-Abschlussplanung**
+
+- Der formale Abnahmestand wird strikt an den zwölf benannten Abnahmekriterien gemessen; Teilimplementierungen gelten nicht mehr als abgeschlossenes Arbeitspaket.
+- Bis zum Release gilt Feature Freeze. Neue Arbeit ist nur zulässig, wenn sie AP 1–12 abschließt, einen Fehler korrigiert oder belegte Daten aktualisiert.
+- Ein erklärtes `OPEN_REVIEW` bleibt ein gültiges Ergebnis und blockiert den Release nicht allein wegen externer Evidenzlücken.
+- P0 wird vor P1 abgeschlossen; ein AP erhält erst mit reproduzierbarem Nachweis und erfülltem Abnahmekriterium den Status `ABGENOMMEN`.
+- Der vollständige lokale Testlauf weist 234 bestandene und 6 bekannte Legacy-Fehler aus. Diese müssen vor dem Release beseitigt oder begründet aus dem Releasepfad archiviert werden.
+- Zieltermin für den Release Candidate ist der 09.10.2026, sofern keine Scope-Erweiterung hinzukommt und kein reproduzierbarer Fehler bei Datenintegrität, Datenschutz oder Gate-/Kapitalentscheidung auftritt.
+- Verbindlicher Status und Reihenfolge: `docs/STATUS_2026-09-28_MVP_CLOSEOUT.md`.

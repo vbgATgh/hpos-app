@@ -1,7 +1,7 @@
 # HPOS – Security & Datenschutz Baseline
 
 Stand: 2026-09-01
-Status: SECURITY-PRÜFUNG TEILWEISE DURCHGEFÜHRT / HISTORISCHER PRIVACY-BLOCKER OFFEN
+Status: HISTORISCHER PRIVACY-BLOCKER BEREINIGT / RELEASE-SMOKE 2026-09-28 BESTANDEN
 
 ## Schutzbedarf
 HPOS verarbeitet bzw. kann verarbeiten:
@@ -31,34 +31,31 @@ Diese Daten sind nicht für das öffentliche Repository bestimmt.
 - Parqet Access-/Refresh-Tokens werden serverseitig in Supabase gespeichert; das Frontend erhält nur eine opake HPOS-Session-ID.
 - `.gitignore` wurde am 2026-09-01 zusätzlich gegen `data/bootstrap/portfolio*.json` und `data/bootstrap/*snapshot*.json` gehärtet.
 
-## Kritischer Befund: Git-Historie
-Ein realer Portfolio-Snapshot war nachweislich bereits öffentlich committed und wurde später nur aus dem aktuellen Baum gelöscht:
-- Commit `5a5edb603fdfaedb34a38b7cc74f4d6d4c2106af`: `chore(data): externalize canonical Parqet fallback snapshot`
-- Commit `fcf3ab8ec6cd8d7c2fb91caeaaed1c6c592334e4`: `Remove real portfolio snapshot from public repository`
+## Historischer Privacy-Befund
 
-Damit ist die Datei zwar nicht mehr auf `main` vorhanden, aber ohne History-Rewrite weiterhin über die öffentliche Git-Historie erreichbar. Das verletzt die verbindliche Privacy-Regel für reale Portfolio-Snapshots.
+Der frühere reale Portfolio-Snapshot wurde mit dem bereinigten Verlauf `7388d8f` aus der erreichbaren Git-Historie entfernt. Der zuvor bekannte Commit `5a5edb603fdfaedb34a38b7cc74f4d6d4c2106af` ist am 2026-09-28 weder als Commitobjekt vorhanden noch über einen Branch erreichbar. Unter `data/bootstrap/` ist über alle erreichbaren Revisionen nur der bereinigte Wiederaufbau sichtbar.
 
 ## Release-Blocker SEC-001
-**Status:** OFFEN / BLOCKIERT v9 RC
 
-Vor v9 RC muss entschieden und durchgeführt werden, wie der historische reale Portfolio-Snapshot aus der öffentlichen Git-Historie entfernt wird. Ein History-Rewrite mit Force-Push ist irreversibel/riskant und darf nicht ohne ausdrückliche Freigabe durchgeführt werden.
+**Status:** GESCHLOSSEN
 
-Nach einer Bereinigung müssen mindestens geprüft werden:
-1. Snapshot ist über bekannte historische Commits nicht mehr öffentlich abrufbar.
-2. `main` und GitHub Pages funktionieren weiterhin.
-3. kanonischer `/app/`-Pfad bootet.
-4. Supabase-Parqet-Live-Sync funktioniert weiterhin.
-5. keine Secrets oder neuen privaten Snapshots sind vorhanden.
+Der erneute Release-Smoke vom 2026-09-28 bestätigt:
+
+1. Der bekannte sensible Commit ist nicht mehr abrufbar.
+2. Der aktuelle Baum enthält keinen privaten Portfolio-Snapshot.
+3. In 841 erreichbaren Commits wurden außerhalb von Dokumentation und Berechtigungsmigrationen keine Treffer für private Schlüssel, belegte `client_secret`-Werte oder `service_role_key`-Werte gefunden.
+4. Alle sechs privaten Supabase-Tabellen haben RLS aktiviert; `anon` und `authenticated` besitzen kein Leserecht.
+5. Fremder Origin am Marktpfad wird mit HTTP 403 abgewiesen; der private Parqet-Pfad ohne Sitzung mit HTTP 401.
 
 ## Noch nicht als abgeschlossen behauptet
-- vollständiger Secret-Scan des gesamten Repository-Verlaufs nach History-Bereinigung
-- gezielter CORS-/Session-Missbrauchstest
+- externer unabhängiger Secret-Scan mit einem spezialisierten Scanner
 - Logging-/Retention-Konzept
 - Dependency-/Supply-Chain-Prüfung
 - Restore-/Gerätewechsel-Sicherheitskonzept
 
 ## Release-Bedingung
-T-020 darf erst vollständig PASS sein, wenn der historische Snapshot nicht mehr über die öffentliche Repository-Historie erreichbar ist und der anschließende Security-/Privacy-Smoke bestanden wurde.
+
+T-020 ist für den v9-RC-Umfang bestanden. Die noch offenen Betriebsaufgaben sind dokumentierte Weiterentwicklungen und kein Nachweis eines aktuellen Datenlecks.
 
 ## Quellenbasis
 - `docs/app-factory/00-projektstatus-decision-log/PROJECTSTATUS_DECISION_LOG.md`

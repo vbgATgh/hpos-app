@@ -27,7 +27,7 @@ Deno.serve(async (req: Request) => {
   try {
     allowOrigin(origin);
     const url = new URL(req.url), path = route(url.pathname);
-    if (path === "/health") return json({ ok: true, service: "hpos-screen", version: "1.6.0", identity: "GENERIC_ALIAS_AWARE", evidence: "SEC_AND_ESEF_XBRL_CACHE", marketValueBasis: "MARKET_CAP_AT_CHECK", failClosed: true, auditLog: true, secTickerSnapshot: true, regulatoryDocumentCache: true, canonicalDegradationGuard: true }, 200, origin);
+    if (path === "/health") return json({ ok: true, service: "hpos-screen", version: "1.6.1", identity: "GENERIC_ALIAS_AWARE", evidence: "SEC_AND_ESEF_XBRL_CACHE", marketValueBasis: "MARKET_CAP_AT_CHECK", failClosed: true, auditLog: true, secTickerSnapshot: true, regulatoryDocumentCache: true, canonicalDegradationGuard: true, financeIncomeIsPartialEvidence: true }, 200, origin);
     if (path === "/identity" && req.method === "POST") {
       await requireSession(req);
       const input = cleanInput(await req.json().catch(() => ({})));
@@ -204,7 +204,7 @@ function parseEsefAnnual(report: any, attributes: any, jsonUrl: string) {
     reportStart: revenue.start, reportEnd, reportUrl, jsonUrl, packageUrl: absoluteUrl(ESEF, attributes?.package_url), viewerUrl: absoluteUrl(ESEF, attributes?.viewer_url),
     businessDescription: description?.text || "", evidence,
     financial: {
-      revenue: revenue.value, interestIncome: interestIncome?.value ?? null, interestIncomeMethod: interestIncome?.local === "InterestIncome" ? "LOWER_BOUND" : interestIncome ? "FINANCE_INCOME_UPPER_BOUND" : "MISSING", totalDebt: debt?.value ?? null,
+      revenue: revenue.value, interestIncome: interestIncome?.value ?? null, interestIncomeMethod: interestIncome?.local === "InterestIncome" ? "LOWER_BOUND" : interestIncome ? "FINANCE_INCOME_PROXY" : "MISSING", totalDebt: debt?.value ?? null,
       interestBearingAssetsUpperBound: interestAssets?.value ?? null, marketValueAtCheck: null, marketValueAsOf: "",
       currency: currencyUnit(revenue.unit || debt?.unit || interestAssets?.unit), period: reportEnd,
       marketValueMethod: "UNAVAILABLE", marketCurrencyCompatible: false,
@@ -288,7 +288,7 @@ async function regulatoryDocumentToEvidence(identity: any, document: any) {
   const value = (metric: string) => facts.find((x: any) => x.metric === metric)?.value_numeric ?? null;
   const business = facts.find((x: any) => x.metric === "businessProfile")?.value_text || "";
   const interestFact = facts.find((x: any) => x.metric === "interestIncome");
-  return { source: "ESEF_XBRL_CACHE", official: true, identity: { ...identity, lei: document.lei, legalName: document.legal_name }, business: classifyBusiness(business, "", true, document.report_url, document.report_url), financial: { revenue: value("revenue"), interestIncome: value("interestIncome"), interestIncomeMethod: String(interestFact?.concept || "").endsWith(":InterestIncome") ? "LOWER_BOUND" : interestFact ? "FINANCE_INCOME_UPPER_BOUND" : "MISSING", totalDebt: value("totalDebt"), interestBearingAssetsUpperBound: value("interestBearingAssetsUpperBound"), marketValueAtCheck: null, marketValueAsOf: "", currency: document.currency || "", period: document.period_end || "", marketValueMethod: "UNAVAILABLE", marketCurrencyCompatible: false, debtDirect: value("totalDebt") != null, interestAssetsUpperBound: true }, evidence };
+  return { source: "ESEF_XBRL_CACHE", official: true, identity: { ...identity, lei: document.lei, legalName: document.legal_name }, business: classifyBusiness(business, "", true, document.report_url, document.report_url), financial: { revenue: value("revenue"), interestIncome: value("interestIncome"), interestIncomeMethod: String(interestFact?.concept || "").endsWith(":InterestIncome") ? "LOWER_BOUND" : interestFact ? "FINANCE_INCOME_PROXY" : "MISSING", totalDebt: value("totalDebt"), interestBearingAssetsUpperBound: value("interestBearingAssetsUpperBound"), marketValueAtCheck: null, marketValueAsOf: "", currency: document.currency || "", period: document.period_end || "", marketValueMethod: "UNAVAILABLE", marketCurrencyCompatible: false, debtDirect: value("totalDebt") != null, interestAssetsUpperBound: true }, evidence };
 }
 
 async function saveRegulatoryEvidence(identity: any, lei: any, filing: any, parsed: any, acquired: any) {
@@ -343,7 +343,7 @@ function evaluate(acquired: any) {
   const f = acquired.financial || {}, b = acquired.business || {};
   const ratio = (a: any, d: any) => Number.isFinite(Number(a)) && Number(a) >= 0 && Number(d) > 0 ? Number(a) / Number(d) : null;
   const impureExact = ratio(f.nonPermissibleIncome, f.revenue), impureLowerBound = ratio(f.interestIncome, f.revenue), assets = ratio(f.interestBearingAssetsUpperBound, f.marketValueAtCheck), debt = ratio(f.totalDebt, f.marketValueAtCheck);
-  const impureProxySource = f.interestIncomeMethod === "LOWER_BOUND" ? "OFFICIAL_INTEREST_INCOME_LOWER_BOUND" : f.interestIncomeMethod === "FINANCE_INCOME_UPPER_BOUND" ? "ESEF_FINANCE_INCOME_UPPER_BOUND" : "MISSING";
+  const impureProxySource = f.interestIncomeMethod === "LOWER_BOUND" ? "OFFICIAL_INTEREST_INCOME_LOWER_BOUND" : f.interestIncomeMethod === "FINANCE_INCOME_PROXY" ? "ESEF_FINANCE_INCOME_PARTIAL_EVIDENCE" : "MISSING";
   const marketOk = Number(f.marketValueAtCheck) > 0 && f.marketCurrencyCompatible === true;
   const criteria: Record<string, Criterion> = {
     business: { rule: "Zulässiges Kerngeschäft", state: ["PASS", "FAIL"].includes(b.state) ? b.state : "OPEN", value: b.category || b.sic || b.description || null, limit: null, source: b.method || (acquired.official ? "OFFICIAL_BUSINESS_DESCRIPTION_UNCLASSIFIED" : "UNVERIFIED_DISCOVERY") },
