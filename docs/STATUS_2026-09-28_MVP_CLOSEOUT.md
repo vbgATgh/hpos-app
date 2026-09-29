@@ -1,65 +1,74 @@
-# HPOS v8.7.72 – verbindlicher MVP-Abschlussstand
+# HPOS v8.7.72 – verbindlicher Abschlussplan mit 12 Arbeitspaketen
 
-Stand: 2026-09-28
+Stand: 2026-09-29
+Status: Feature Freeze; nur Abschlussarbeit, Fehlerkorrekturen und belegte Datenaktualisierungen
 
-## Ziel
+## Fertig bedeutet ab jetzt
 
-HPOS wird ab diesem Stand nicht mehr durch neue Funktionswünsche erweitert. Der Abschluss erfolgt in vier begrenzten Arbeitspaketen. Ein fachlich korrektes `OPEN_REVIEW` gilt als abgeschlossenes Prüfergebnis, wenn die fehlende Evidenz konkret benannt wird; es ist kein technischer Fehler und darf nicht durch Schätzwerte künstlich grün werden.
+HPOS gilt erst als fertig, wenn alle zwölf unten genannten Abnahmekriterien erfüllt, die releasekritischen Tests grün, der Produktions-Smoke dokumentiert und der reale iPhone/Home-Screen-Test bestanden sind.
 
-## Bereits umgesetzt
+Ein fachlich korrektes `OPEN_REVIEW` ist dabei ein gültiges Prüfergebnis, wenn die konkret fehlende Evidenz, die Quelle und der Datenstand sichtbar sind. Externe Datenlücken einzelner Aktien dürfen den Release nicht endlos blockieren und werden nicht durch Schätzwerte künstlich geschlossen.
 
-- Mobile HPOS-Oberfläche mit Depot, Watchlist, Analyse, Dividenden und Investment-Akte.
-- Parqet als kanonische Bestandsquelle mit Validierung, Quarantäne und Rollback.
-- Getrennte Marktpreis-, Portfolio- und Halal-Evidenzebenen.
-- Gate 1 mit `PASS`, `FAIL` und `OPEN_REVIEW`, privaten Prüfprotokollen und fail-closed Regeln.
-- Generische Identitätsauflösung sowie SEC- und ESEF-XBRL-Evidenzpfade.
-- Marktwert am Prüftag für die beiden AAOIFI-Bilanzquoten.
-- Regelbasierte Geschäftsmodellklassifikation ohne aktienspezifische Freigabecodes.
-- Entscheidungsgates und Entscheidungsboard ohne autonome Orderausführung.
-- Validierte Ausschüttungen und Monatsziel ohne erfundene Forward-Erträge.
-- Neue, datenbasierte Trendzahlen-Leiste in der Investment-Akte.
+## Belastbarer Ausgangsstand
 
-## Bedeutung der Trendzahlen-Leiste
+- Kanonische Oberfläche: HPOS v8.7.72.
+- Produktives `hpos-api`: Service 0.5.12 / Function Version 33.
+- Produktives `hpos-screen`: Service 1.6.1 / Function Version 22.
+- Vollständiger lokaler Testlauf: 234 bestanden, 6 bekannte Legacy-Fehler.
+- Kanonischer Halal-Bestand: 23 ISINs, davon 1 kuratierter `PASS` und 22 nachvollziehbare `OPEN_REVIEW`.
+- Repräsentativer Batchnachweis: 21 unterschiedliche Werte und 43 protokollierte Läufe ohne falschen `PASS` oder `FAIL`.
+- Datenschutz-Smoke: fremder Origin `403`, privater Parqet-Pfad ohne Sitzung `401`, private Tabellen nicht für `anon` oder `authenticated` lesbar.
+- Frontend-/Dokumentationsstand ist lokal committed (`e812c34`), aber noch nicht in das entfernte GitHub-Repository übertragen.
 
-Die Leiste zeigt ausschließlich rückblickenden Timing-Kontext:
+## Status der zwölf Arbeitspakete
+
+| AP | Priorität | Status | Bereits umgesetzt | Bis zur Abnahme fehlt |
+|---|---|---|---|---|
+| 1 Datenintegrität & Broker-Overrides | P0 | **IN ARBEIT** | Parqet-Normalisierung, Validierung, letzter gültiger Stand, Einstandspreis-Rekonstruktion, Quellenfelder und Sync-Zeitstempel | Verbindliches Broker-Override-Modell, Craneware-Override, KPI-Quellenzeile je Kennzahl und dauerhaftes Abweichungsprotokoll |
+| 2 Regelwerk & Gate-Engine | P0 | **IN ARBEIT** | Gate 1 mit `PASS`/`FAIL`/`OPEN_REVIEW`, fail-closed, Gate-2-Sperre und sichtbare Begründungen | Einheitliches Zustandsmodell für alle Gates, Hard-/Review-Gates, T90 und Nachweis, dass kein widersprüchliches Regelpaar automatisch `WAIT` oder `EIB 0` erzeugt |
+| 3 Depot- und Watchlist-Abdeckung | P0 | **IN ARBEIT** | Depot-/Watchlist-Batch, Identitätsauflösung, 23 kanonische ISINs und protokollierte Halal-Läufe | Ein gemeinsamer Coverage-Report für jede Position, jeden Watchlistwert und jeden Kandidaten mit Prüfstatus, Quelle, Aktualität und Blocker |
+| 4 Dynamische Fair-Value- und Kaufzonen | P0 | **TEILWEISE** | Fundamentaldaten-Schemata, Quellenregister und einzelne Investment Cases | Allgemeines Bewertungsmodell über Gewinn, FCF, Schulden, Wachstum, Margen und Sicherheitsabschlag; versionierte Kaufzonen mit Evidenz-Triggern |
+| 5 Thesis- und News-Agent | P1 | **TEILWEISE** | Thesis-Register, Proofpoint-/Falsifizierungsmodell, News-Ingestion, Evidence Review und Deduplizierungslogik | Einheitlicher produktiver Lauf für alle Assets, belastbare THS-Versionierung und Abnahme gegen doppelte News bzw. unbegründete THS-Änderungen |
+| 6 Halal- und Risiko-Governance | P0 | **IN ARBEIT** | AAOIFI Gate 1, Quellenkonflikte, Gültigkeit, private Prüfprotokolle, Portfolio-Regeln und Healthcare-Cap im Regelwerk | Vollständiger Musaffa/Zoya/Sharlife-Nachweis je freigegebenem Wert sowie harte Kopplung jeder Kapitalfreigabe an Halal- und Cap-Ergebnis |
+| 7 Kapitalranking & Opportunitätskosten | P0 | **TEILWEISE** | Kapitalwettbewerbs-Policy, Eligibility-Reihenfolge und Dominanzregeln | Ein berechnetes Ranking über Bestand, Aufstockung, Watchlist, Neukandidaten und Cash sowie erklärbarer Abstand zur zweitbesten Alternative bei `EIB > 0` |
+| 8 Cash, Marktregime & Investitionsreserve | P1 | **TEILWEISE** | 2-%-Floor, 3-%-Ziel, 150-Euro-Absolutfloor und Cash als Optionalität im Regelwerk | Getrennte Berechnung von hartem Floor, Ziel, Reserve, Sparplänen, Marktregime und gestaffelten Freigaben ohne starre Zielquotenblockade |
+| 9 Kleinpositionen, Verkäufe & Rotation | P1 | **OFFEN** | Unter-300-Euro-Erkennung und allgemeine Rotationsregeln | Verbindliche A/B/C-Entscheidung für Craneware, IVU, Frequentis und alle übrigen Kleinpositionen inklusive Steuer, Verkaufserlös und Reinvestition |
+| 10 Execution- und EIB-Rechner | P1 | **TEILWEISE** | Transaktionsmasken, Cashprüfung und externe Orderhoheit; fixe Gebühr ist als Nutzerregel bekannt | Gemeinsamer Vorab-Rechner für Stückzahl, Limit, 1-Euro-Gebühr, Cash danach, Gewicht, Caps, Reserve und EIB; keine automatische Order |
+| 11 Historischer Entscheidungstest | P0 | **OFFEN** | Testinfrastruktur und historische Artefakte vorhanden | Reproduzierbarer Vergleich der Läufe 24.–28.09. mit alter und korrigierter Logik, Point-in-Time-Evidenz und erklärtem Delta |
+| 12 Decision Board & täglicher Controller | P1 | **TEILWEISE** | HTML Decision Board, Investment-Akte, Gate-Anzeige und Datenstatus | Eine gemeinsame Entscheidungsgrundlage für Live-Daten, Coverage, Gates, Ranking, THS-Delta, Reserve, Trigger und Final Decision |
+
+Formaler Abnahmestand: **0 von 12 AP abgenommen**. Das ist die strenge Sicht nach den neuen Kriterien; es bestehen verwertbare Teilimplementierungen in zehn AP.
+
+## Trendzahlen-Leiste
+
+Die Trendzahlen-Leiste ist umgesetzt und abgeschlossen, aber bewusst kein eigenes Entscheidungs-Gate:
 
 - **Tagesbewegung:** Veränderung gegenüber dem letzten verfügbaren Schlusskurs.
 - **5 Handelstage:** Veränderung vom ersten zum letzten verfügbaren Schlusskurs der kurzen Reihe.
-- **Trendlage:** `AUFWÄRTS`, `ABWÄRTS`, `GEMISCHT` oder `OFFEN` aus diesen beiden belegten Werten.
+- **Trendlage:** `AUFWÄRTS`, `ABWÄRTS`, `GEMISCHT` oder `OFFEN` aus beiden belegten Werten.
+- Die Anzahl der Beobachtungen wird mitgeliefert, damit eine kurze Datenreihe sichtbar bleibt.
 
-Die Zahlen sind weder Kursziel noch Eintrittswahrscheinlichkeit. Sie verändern Gate 1, den Halal-Status und die Portfolio-Freigabe nicht. Opaque Zählwerte wie „4 T“ oder „10 W“ werden nicht kopiert, solange Definition und Datenbasis nicht nachvollziehbar sind. Eine Zielzone wird nicht aus dem Trend erfunden.
+Die Trendwerte sind rückblickender Timing-Kontext. Sie sind kein Kursziel, keine Wahrscheinlichkeit, kein Halal-Nachweis und keine Kauf- oder Kapitalfreigabe. Sie dürfen erst nach Halal, Datenqualität, Portfolio-Fit, These und Bewertung als Timing-Hinweis betrachtet werden.
 
-## Noch offene Abschlussarbeitspakete
+## Novo Nordisk: Warum weiterhin `PRÜFUNG OFFEN`
 
-| Paket | Inhalt | Fertig, wenn | Status |
-|---|---|---|---|
-| 1 | Einnahmenprüfung und Trendkontext | Keine falsche Halal-Freigabe; Trendzahlen sichtbar erklärt; Backend und Regressionstests geprüft | abgeschlossen |
-| 2 | Depot- und Watchlist-Abdeckung | Repräsentativer Batchlauf; Identitäts-, PASS/FAIL/OPEN- und Fehlerfälle dokumentiert | abgeschlossen |
-| 3 | iPhone/PWA, Fehlerfälle und Datenschutz | Installation/Persistenz, Offline-/Reconnect-Verhalten, lange Texte, private Datenpfade und Session-Ablauf geprüft | offen |
-| 4 | Release Candidate | Bekannte Restpunkte klassifiziert, Entscheidungslog aktualisiert, Produktions-Smoke und v9-RC-Freigabe dokumentiert | offen |
+Bei Novo Nordisk bestehen drei Gate-1-Teilprüfungen; offen bleibt die Einnahmenprüfung. Die angezeigten rund 3,1 % stammen nur aus dem offiziell erkannten `Finance Income` und beweisen nicht, dass sämtliche nicht zulässigen Einnahmen vollständig erfasst sind. Deshalb ist die korrekte Quellenbezeichnung jetzt `ESEF_FINANCE_INCOME_PARTIAL_EVIDENCE`. Der Wert ist nicht als haram entschieden, sondern noch nicht vollständig als halal belegt. Trendzahlen dürfen diesen Zustand nicht überschreiben.
 
-## Verbindlicher Ausblick
+## Abschlussreihenfolge und Zieltermin
 
-Ohne neue Features ist der MVP in etwa **zwei bis drei fokussierten Arbeitstagen** bis zum Release Candidate abschließbar:
+| Zeitraum | Abschlussziel |
+|---|---|
+| 29.–30.09.2026 | Phase 1: AP 1–3 abnehmen; gleichzeitig die 6 Legacy-Testfehler beseitigen oder nachweislich archivieren |
+| 01.–05.10.2026 | Phase 2: AP 4–6 abnehmen |
+| 06.–07.10.2026 | Phase 3: AP 7–9 abnehmen |
+| 08.–09.10.2026 | Phase 4: AP 10–12, historischer Vergleich, Produktions-Smoke und Release Candidate |
 
-1. Paket 1 und Produktions-Smoke: bis 0,5 Arbeitstag.
-2. Repräsentativer Depot-/Watchlist-Lauf: etwa 1 Arbeitstag.
-3. iPhone/PWA-, Datenschutz- und Fehlerfallprüfung: etwa 1 Arbeitstag.
-4. Schlussdokumentation und RC-Freigabe: bis 0,5 Arbeitstag.
+Ziel ist damit **Freitag, 09.10.2026**, sofern keine neue Funktion in den Scope aufgenommen wird. Externe Evidenzlücken bleiben als `OPEN_REVIEW` sichtbar und verschieben diesen Termin nicht. Verschieben dürfen ihn nur reproduzierbare technische Fehler, Datenverlust, Datenschutzprobleme oder falsche Kapital-/Gate-Entscheidungen.
 
-Externe Datenlücken einzelner Aktien verlängern den Release nicht. Sie bleiben sichtbar als `OPEN_REVIEW`. Verlängern dürfen den Abschluss nur reproduzierbare technische Fehler, Datenverlust, Datenschutzprobleme oder falsche Gate-Entscheidungen.
+## Verbindliche Arbeitsregel bis zum Abschluss
 
-## Aktueller Nachweis
-
-- `hpos-api` Version 33 / Service 0.5.12 ist produktiv.
-- Der produktive Novo-Nordisk-Abruf liefert Tages- und 5-Handelstage-Veränderung samt Beobachtungszahl.
-- Die bestehende Einnahmen-Evidenz von 3,13 % bleibt ein Teilbeleg und erzeugt keinen künstlichen `PASS`.
-- Die technische Quellenbezeichnung lautet deshalb nun eindeutig `ESEF_FINANCE_INCOME_PARTIAL_EVIDENCE` statt des missverständlichen Begriffs „Upper Bound“.
-- Die neue Trendanzeige nennt ausdrücklich: kein Kursziel, keine Wahrscheinlichkeit, kein Kauf- oder Halal-Signal.
-- Der produktive Batchnachweis umfasst 21 unterschiedliche Depot-/Watchlist-Werte und 43 vollständig protokollierte Läufe ohne falschen `PASS` oder `FAIL`.
-- Der kanonische Bestand umfasst 23 ISINs: 1 unverändert kuratierter `PASS` und 22 nachvollziehbare `OPEN_REVIEW`-Ergebnisse.
-- Bekannte Datenquellen-Grenze: Die SEC-Faktenbeschaffung aus der Edge-Runtime liefert für mehrere US-Werte aktuell keine Pflichtwerte. Das Ergebnis bleibt deshalb korrekt offen; die App und der Release dürfen keine Vollständigkeit vortäuschen.
-- Der Privacy-Blocker aus der alten Git-Historie ist geschlossen: der bekannte sensible Commit ist nicht mehr erreichbar, der aktuelle Baum enthält keinen privaten Snapshot und die privaten Supabase-Tabellen sind für `anon` und `authenticated` nicht lesbar.
-- CORS-/Session-Smoke: fremder Origin `403`, privater Parqet-Pfad ohne Sitzung `401`.
-- HPOS bleibt bewusst eine online benötigte Home-Screen-Web-App. Es gibt keinen Service Worker und damit keinen behaupteten Offlinebetrieb oder verdeckten veralteten App-Cache.
-- Noch offen in Paket 3 ist ausschließlich der reale Endgeräte-Smoke der neuen v8.7.72-Ansicht auf iPhone/Home-Screen; die lokale Browserautomation konnte in der Ausführungsumgebung nicht auf den lokalen Build zugreifen.
+1. Kein neues Feature außerhalb AP 1–12.
+2. Ein AP wird nur mit Test bzw. reproduzierbarem Nachweis und erfülltem Abnahmekriterium auf `ABGENOMMEN` gesetzt.
+3. P0 wird vor P1 abgeschlossen; P1-Arbeit ist nur zulässig, wenn sie einen laufenden P0-End-to-End-Pfad direkt vervollständigt.
+4. Keine autonome Order. Die finale Kapitalentscheidung bleibt beim Nutzer.
+5. Der Status wird in dieser Datei fortgeschrieben; keine parallele neue Abschluss-Roadmap.

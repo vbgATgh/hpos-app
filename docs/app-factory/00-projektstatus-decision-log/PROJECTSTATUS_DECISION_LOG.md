@@ -625,3 +625,15 @@ Dieses Dokument wird bei Änderungen an Status, Gate, Architektur, Entscheidung,
 - Nicht definierte Zählwerte oder Zielzonen werden nicht aus einer fremden Darstellung übernommen.
 - `hpos-api` 0.5.12 liefert die Trendwerte samt Beobachtungszahl; Serviceversion 33 ist produktiv.
 - Ausführlicher Abschlussstand: `docs/STATUS_2026-09-28_MVP_CLOSEOUT.md`.
+
+## 31. Statusergänzung 2026-09-29 – zwölf verbindliche Abschlussarbeitspakete
+
+**Entscheidung DEC-031 – Die zwölf Arbeitspakete ersetzen die bisherige grobe Vier-Pakete-Abschlussplanung**
+
+- Der formale Abnahmestand wird strikt an den zwölf benannten Abnahmekriterien gemessen; Teilimplementierungen gelten nicht mehr als abgeschlossenes Arbeitspaket.
+- Bis zum Release gilt Feature Freeze. Neue Arbeit ist nur zulässig, wenn sie AP 1–12 abschließt, einen Fehler korrigiert oder belegte Daten aktualisiert.
+- Ein erklärtes `OPEN_REVIEW` bleibt ein gültiges Ergebnis und blockiert den Release nicht allein wegen externer Evidenzlücken.
+- P0 wird vor P1 abgeschlossen; ein AP erhält erst mit reproduzierbarem Nachweis und erfülltem Abnahmekriterium den Status `ABGENOMMEN`.
+- Der vollständige lokale Testlauf weist 234 bestandene und 6 bekannte Legacy-Fehler aus. Diese müssen vor dem Release beseitigt oder begründet aus dem Releasepfad archiviert werden.
+- Zieltermin für den Release Candidate ist der 09.10.2026, sofern keine Scope-Erweiterung hinzukommt und kein reproduzierbarer Fehler bei Datenintegrität, Datenschutz oder Gate-/Kapitalentscheidung auftritt.
+- Verbindlicher Status und Reihenfolge: `docs/STATUS_2026-09-28_MVP_CLOSEOUT.md`.
