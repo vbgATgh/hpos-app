@@ -16,7 +16,7 @@ Deno.serve(async(req:Request)=>{
   const u=new URL(req.url),r=route(u.pathname),o=req.headers.get("Origin")||"";
   if(req.method==="OPTIONS")return new Response(null,{status:204,headers:cors(o)});
   try{
-    if(r==="/health")return j({ok:true,service:"hpos-api",version:"0.5.11",parqetConfigured:!!Deno.env.get("PARQET_CLIENT_ID"),marketProxy:true,halalMode:"ACCOUNT_FREE",parqetIncome:true,averageEntryFallback:true,moneyObjectEntrySupport:true,activityEntryReconciliation:true,parqetPurchasePriceContract:true},200,o);
+    if(r==="/health")return j({ok:true,service:"hpos-api",version:"0.5.12",parqetConfigured:!!Deno.env.get("PARQET_CLIENT_ID"),marketProxy:true,halalMode:"ACCOUNT_FREE",parqetIncome:true,averageEntryFallback:true,moneyObjectEntrySupport:true,activityEntryReconciliation:true,parqetPurchasePriceContract:true,marketTrendContext:true},200,o);
 
     if(r==="/"&&u.searchParams.get("s")==="yahoo"){
       origin(o);
@@ -87,7 +87,10 @@ async function marketQuote(symbolRaw:string){
   const price=n(meta.regularMarketPrice)||n(closes.at(-1));
   if(price<=0)throw err(502,"market_quote_price_missing");
   const previousClose=n(meta.chartPreviousClose)||n(meta.previousClose)||(closes.length>1?n(closes.at(-2)):0);
-  return {symbol,price,previousClose,currency:String(meta.currency||""),exchange:String(meta.exchangeName||meta.fullExchangeName||""),marketTime:n(meta.regularMarketTime)};
+  const firstClose=n(closes[0]);
+  const dailyChangePercent=previousClose>0?(price/previousClose-1)*100:null;
+  const fiveDayChangePercent=closes.length>=2&&firstClose>0?(price/firstClose-1)*100:null;
+  return {symbol,price,previousClose,dailyChangePercent,fiveDayChangePercent,trendObservations:closes.length,currency:String(meta.currency||""),exchange:String(meta.exchangeName||meta.fullExchangeName||""),marketTime:n(meta.regularMarketTime)};
 }
 
 async function marketSearch(qRaw:string){

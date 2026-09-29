@@ -63,6 +63,18 @@ def test_long_asset_sections_use_progressive_disclosure():
     assert ".assetDisclosure>summary" in CSS
 
 
+def test_trend_numbers_are_explained_and_cannot_override_gate_one():
+    api = (ROOT / "supabase/functions/hpos-api/index.ts").read_text()
+    assert "dailyChangePercent" in api
+    assert "fiveDayChangePercent" in api
+    assert "trendObservations" in api
+    assert "function trendHtml(q)" in INTELLIGENCE
+    assert "Kein Kursziel, keine Wahrscheinlichkeit und kein Kauf- oder Halal-Signal" in INTELLIGENCE
+    assert "Sie verändern weder Gate 1 noch die Halal-Einstufung" in INTELLIGENCE
+    assert ".trendStrip" in CSS
+    assert "asset-intelligence.js?v=20260928-trendcontext1" in HTML
+
+
 def test_status_colors_have_one_consistent_meaning():
     assert ".caseDecision.pos" in CSS
     assert ".caseDecision.warn" in CSS
