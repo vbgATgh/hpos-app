@@ -1,4 +1,4 @@
-# HPOS v8.7.72 – verbindlicher Abschlussplan mit 12 Arbeitspaketen
+# HPOS v8.7.73 – verbindlicher Abschlussplan mit 12 Arbeitspaketen
 
 Stand: 2026-09-29
 Status: Feature Freeze; nur Abschlussarbeit, Fehlerkorrekturen und belegte Datenaktualisierungen
@@ -11,20 +11,20 @@ Ein fachlich korrektes `OPEN_REVIEW` ist dabei ein gültiges Prüfergebnis, wenn
 
 ## Belastbarer Ausgangsstand
 
-- Kanonische Oberfläche: HPOS v8.7.72.
+- Kanonische Oberfläche im Arbeitsbranch: HPOS v8.7.73.
 - Produktives `hpos-api`: Service 0.5.12 / Function Version 33.
 - Produktives `hpos-screen`: Service 1.6.1 / Function Version 22.
-- Vollständiger lokaler Testlauf: 234 bestanden, 6 bekannte Legacy-Fehler.
+- Vollständiger lokaler Testlauf: 238 bestanden, 6 bekannte Legacy-Fehler.
 - Kanonischer Halal-Bestand: 23 ISINs, davon 1 kuratierter `PASS` und 22 nachvollziehbare `OPEN_REVIEW`.
 - Repräsentativer Batchnachweis: 21 unterschiedliche Werte und 43 protokollierte Läufe ohne falschen `PASS` oder `FAIL`.
 - Datenschutz-Smoke: fremder Origin `403`, privater Parqet-Pfad ohne Sitzung `401`, private Tabellen nicht für `anon` oder `authenticated` lesbar.
-- Frontend-/Dokumentationsstand ist lokal committed (`e812c34`), aber noch nicht in das entfernte GitHub-Repository übertragen.
+- Der Stand bis v8.7.72 liegt auf dem entfernten Arbeitsbranch; AP 1 / v8.7.73 ist lokal umgesetzt und noch nicht veröffentlicht.
 
 ## Status der zwölf Arbeitspakete
 
 | AP | Priorität | Status | Bereits umgesetzt | Bis zur Abnahme fehlt |
 |---|---|---|---|---|
-| 1 Datenintegrität & Broker-Overrides | P0 | **IN ARBEIT** | Parqet-Normalisierung, Validierung, letzter gültiger Stand, Einstandspreis-Rekonstruktion, Quellenfelder und Sync-Zeitstempel | Verbindliches Broker-Override-Modell, Craneware-Override, KPI-Quellenzeile je Kennzahl und dauerhaftes Abweichungsprotokoll |
+| 1 Datenintegrität & Broker-Overrides | P0 | **ABNAHMEBEREIT** | Parqet-Normalisierung, Validierung und Rollback; feldbezogene lokale Broker-Overrides; Craneware-Korrekturfluss; Quellen-/Standanzeige für Positions- und Portfolio-KPIs; dauerhaftes lokales Abweichungsprotokoll; 4 neue AP-1-Tests | Veröffentlichung, einmalige lokale Erfassung des bestätigten Craneware-Brokerstands und Produktions-Smoke |
 | 2 Regelwerk & Gate-Engine | P0 | **IN ARBEIT** | Gate 1 mit `PASS`/`FAIL`/`OPEN_REVIEW`, fail-closed, Gate-2-Sperre und sichtbare Begründungen | Einheitliches Zustandsmodell für alle Gates, Hard-/Review-Gates, T90 und Nachweis, dass kein widersprüchliches Regelpaar automatisch `WAIT` oder `EIB 0` erzeugt |
 | 3 Depot- und Watchlist-Abdeckung | P0 | **IN ARBEIT** | Depot-/Watchlist-Batch, Identitätsauflösung, 23 kanonische ISINs und protokollierte Halal-Läufe | Ein gemeinsamer Coverage-Report für jede Position, jeden Watchlistwert und jeden Kandidaten mit Prüfstatus, Quelle, Aktualität und Blocker |
 | 4 Dynamische Fair-Value- und Kaufzonen | P0 | **TEILWEISE** | Fundamentaldaten-Schemata, Quellenregister und einzelne Investment Cases | Allgemeines Bewertungsmodell über Gewinn, FCF, Schulden, Wachstum, Margen und Sicherheitsabschlag; versionierte Kaufzonen mit Evidenz-Triggern |

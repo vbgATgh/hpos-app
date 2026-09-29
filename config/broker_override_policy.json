@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "privacyBoundary": "LOCAL_ONLY",
+  "precedence": ["BROKER_CONFIRMED", "USER_CONFIRMED", "PARQET", "MARKET_DATA"],
+  "allowedFields": ["shares", "currentPrice", "currentValue", "avgEntryPrice", "broker"],
+  "defaultExpiryPolicy": "SOURCE_NEWER",
+  "rules": [
+    {
+      "assetKey": "CRANEWARE",
+      "isin": "GB00B2425G68",
+      "purpose": "A newer locally stored broker-confirmed value supersedes the stale Parqet activity price without publishing private position data.",
+      "requiredFields": ["confirmedAt", "source", "field", "value"],
+      "neverCommitValues": true
+    }
+  ]
+}

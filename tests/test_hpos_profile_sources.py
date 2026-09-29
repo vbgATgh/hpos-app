@@ -169,8 +169,8 @@ def test_market_value_builder_requires_no_account_or_api_key():
 def test_current_release_loads_fresh_profile_logic():
     html = (ROOT / "app" / "index.html").read_text()
     runtime = (ROOT / "app" / "runtime-config.js").read_text()
-    assert "Portfolio Intelligence · v8.7.72" in html
-    assert "app.js?v=20260915-unifiedhalal1" in html
+    assert "Portfolio Intelligence · v8.7.73" in html
+    assert "app.js?v=20260929-ap1" in html
     assert "halal-autoscreen.js?v=20260916-marketcap1" in html
     assert "halal-register.js?v=20260916-marketcap1" in html
     assert "halal-evidence.js?v=20260916-marketcap1" in html
