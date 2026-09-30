@@ -126,8 +126,9 @@ def test_button_check_acquires_validated_curated_official_evidence_before_discov
     assert 'source: "CURATED_OFFICIAL_REPORTS"' in SCREEN
     assert 'nonPermissibleIncome: interpretation === "NON_PERMISSIBLE_INCOME_UPPER_BOUND"' in SCREEN
     assert "officialHttpsUrl" in SCREEN
-    assert 'version: "1.7.0"' in SCREEN
+    assert 'version: "1.7.1"' in SCREEN
     assert "curatedOfficialFallback: true" in SCREEN
+    assert "(?:NATURAL )?GAS (?:EXPLORATION|PRODUCTION|PRODUCER|PRODUCING)" in BUSINESS_CLASSIFIER
 
 
 def test_depot_and_watchlist_use_backend_as_single_status_authority():
