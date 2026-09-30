@@ -6,9 +6,9 @@
   "asOf": "2026-09-12",
   "evidenceCutoff": "2026-09-12",
   "gate1": {
-    "state": "PASS",
-    "label": "HALALKONFORM",
-    "basis": "HPOS AAOIFI Rule Engine mit vollständiger offizieller Finanz- und Geschäftsfeldevidenz."
+    "state": "OPEN_REVIEW",
+    "label": "PRÜFUNG OFFEN",
+    "basis": "Die kanonische Halal-Evidenz ist aktuell nicht vollständig. Ein früherer lokaler PASS darf die offene AAOIFI-Prüfung nicht überschreiben."
   },
   "gate2": {
     "state": "REVIEW",

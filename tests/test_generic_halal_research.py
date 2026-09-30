@@ -109,8 +109,8 @@ def test_research_client_never_exposes_service_role_or_mutates_portfolio_state()
 
 
 def test_release_version_is_consistent():
-    assert "Portfolio Intelligence · v8.7.74" in HTML
-    assert "version:'8.7.74'" in RUNTIME
+    assert "Portfolio Intelligence · v8.7.75" in HTML
+    assert "version:'8.7.75'" in RUNTIME
     assert "app.js?v=20260929-ap2" in HTML
     assert "search-guard.js?v=20260915-genericresearch1" in HTML
 

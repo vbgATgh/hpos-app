@@ -7,7 +7,8 @@ CSS = (ROOT / "app/investment-case.css").read_text()
 
 
 def test_every_valid_isin_gets_the_new_case_shell():
-    assert "const c=genericCase(id);active=c;applyGates(c);renderGenericCase(c)" in JS
+    assert "reconcileCanonicalHalal(genericCase(id),id)" in JS
+    assert "active=c;applyGates(c);renderGenericCase(c)" in JS
     assert "if(!id){clearCase();return}" in JS
     assert "$('#investmentCaseSection')?.remove();" not in JS
 

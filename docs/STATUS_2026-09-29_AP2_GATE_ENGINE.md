@@ -1,7 +1,7 @@
 # AP 2 – Regelwerk & Gate-Engine
 
 Stand: 2026-09-29  
-Release-Kandidat: HPOS v8.7.74  
+Release-Kandidat: HPOS v8.7.75
 Status: ABNAHMEBEREIT, noch nicht veröffentlicht
 
 ## Umgesetzt
@@ -26,7 +26,7 @@ Status: ABNAHMEBEREIT, noch nicht veröffentlicht
 
 ## Noch vor formaler Abnahme
 
-1. v8.7.74 veröffentlichen.
+1. v8.7.75 veröffentlichen und den Cardinal-Hotfix im Produktions-Smoke bestätigen.
 2. Produktions-Smoke auf dem iPhone durchführen.
 3. Einen offenen Wert, einen halalkonformen Wert und Cardinal Energy prüfen.
 4. Bestätigen, dass T90 nur als Review-Hinweis erscheint und kein automatisches `WAIT` oder `EIB 0` erzeugt.
