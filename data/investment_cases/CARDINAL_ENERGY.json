@@ -70,7 +70,7 @@
     "basis": "Der Marktwert liegt über dem vorsteuerlichen 2P-NPV10 der gebuchten Reserven. Nicht gebuchte Thermalprojekte schaffen Upside, während die H1-Hochrechnung stark vom Ölpreis abhängt. Daraus folgt kein Sicherheitsabschlag für eine Aufstockung."
   },
   "gate6": {
-    "state": "WAIT",
+    "state": "WAIT_TRIGGER",
     "label": "ABWARTEN · NICHT HINTERHERLAUFEN",
     "marketPriceCad": 12.23,
     "metrics": [
@@ -92,10 +92,10 @@
   "gate8": {
     "state": "EXTERNAL_ONLY",
     "label": "NUR EXTERN BEIM BROKER",
-    "basis": "HPOS erzeugt keine Order. Wegen Gate 2 REVIEW und Gate 6 WAIT besteht keine Aufstockungsfreigabe."
+    "basis": "HPOS erzeugt keine Order. Gate 2 verlangt eine fachliche Review; Gate 6 wartet separat auf einen definierten Timing-Trigger."
   },
   "decision": {
-    "state": "HOLD_REVIEW",
+    "state": "REVIEW_REQUIRED",
     "label": "BESTAND BEOBACHTEN",
     "summary": "Operativ und fundamental verbessert, aber Portfolio-Fit nicht freigegeben und Timing ohne Sicherheitsmarge. Keine automatische Aufstockung.",
     "nextStep": "Q3-Bericht am 5. November 2026 gegen Reford-2-Zeitplan, Nettoverschuldung und Cashflow-Deckung der Dividende prüfen."

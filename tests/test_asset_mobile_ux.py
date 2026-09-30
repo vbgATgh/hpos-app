@@ -33,7 +33,10 @@ def test_gate_progress_is_derived_from_the_eight_real_states():
     assert "for(const g of gates)" in CASE
     assert "if(!g||pending.includes(g.state))break" in CASE
     assert "8 von 8 Gates bewertet" in CASE
-    assert "keine Aufstockungsfreigabe" in CASE
+    assert "EIB wurde noch nicht berechnet" in CASE
+    assert "kein automatisches WAIT" in CASE
+    assert "syncCanonicalDecision" in CASE
+    assert "dataset.eibStatus" in CASE
     assert CASE.count("${progressVisual(c)}") == 2
 
 
