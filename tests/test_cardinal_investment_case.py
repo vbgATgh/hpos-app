@@ -17,12 +17,14 @@ SIGNAL_BUILDER = (ROOT / "scripts/build_thesis_signals.py").read_text()
 def test_cardinal_case_is_isin_centered_and_loaded():
     assert CASE["isin"] == "CA14150G4007"
     assert INDEX["casesByIsin"][CASE["isin"]] == "CARDINAL_ENERGY.json"
-    assert 'investment-case.js?v=20260929-ap2' in HTML
+    assert 'investment-case.js?v=20260930-ap2fix' in HTML
     assert 'investment-case.css?v=20260913-finalmobile1' in HTML
 
 
-def test_all_eight_gates_have_explicit_non_open_states():
-    for number in range(1, 9):
+def test_cardinal_keeps_gate_one_open_until_canonical_evidence_is_complete():
+    assert CASE["gate1"]["state"] == "OPEN_REVIEW"
+    assert CASE["gate1"]["label"] == "PRÜFUNG OFFEN"
+    for number in range(2, 9):
         gate = CASE[f"gate{number}"]
         assert gate["state"] not in {"OPEN_REVIEW", "UNKNOWN", "NOT_EVALUATED"}
         assert gate["label"]
@@ -49,7 +51,8 @@ def test_gate_details_are_not_rebuilt_when_they_are_opened():
     assert "active?.isin===id&&$('#investmentCaseSection')" in JS
     assert "e.target.closest('#investmentCaseSection')" in JS
     portfolio_fit = (ROOT / "app/portfolio-fit.js").read_text()
-    assert "window.HPOS_INVESTMENT_CASE?.current?.()" in portfolio_fit
+    assert "window.HPOS_INVESTMENT_CASE?.current?.()" not in portfolio_fit
+    assert "window.HPOS_HALAL_EVIDENCE.evaluateIsin(isin)" in portfolio_fit
 
 
 def test_mobile_decision_cockpit_has_progressive_disclosure():
@@ -71,6 +74,16 @@ def test_case_keeps_decision_and_evidence_separate():
     assert CASE["decision"]["state"] == "REVIEW_REQUIRED"
     assert "Keine automatische Aufstockung" in CASE["decision"]["summary"]
     assert "setGate(7,c.gate8)" in JS
+
+
+def test_curated_case_uses_canonical_halal_in_every_view():
+    portfolio_fit = (ROOT / "app/portfolio-fit.js").read_text()
+    assert "reconcileCanonicalHalal" in JS
+    assert "HPOS_HALAL_EVIDENCE?.evaluateIsin?.(id)" in JS
+    assert "gate2=state==='PASS'?c.gate2" in JS
+    assert '<b class="${tone(c.gate1.state)}">${esc(c.gate1.label)}</b>' in JS
+    assert "HPOS_INVESTMENT_CASE?.current" not in portfolio_fit
+    assert "HPOS_HALAL_EVIDENCE.evaluateIsin(isin)" in portfolio_fit
 
 
 def test_cardinal_has_bucket_thesis_and_primary_sources():

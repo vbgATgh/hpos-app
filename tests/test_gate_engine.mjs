@@ -25,7 +25,7 @@ assert.equal(conflict.eib.status,'NOT_CALCULATED');
 
 const cardinal=JSON.parse(fs.readFileSync('data/investment_cases/CARDINAL_ENERGY.json','utf8'));
 const cardinalResult=engine.evaluate(cardinal);
-assert.equal(cardinalResult.decision.state,'REVIEW_REQUIRED');
-assert.equal(cardinalResult.decision.blockingGate,2);
+assert.equal(cardinalResult.decision.state,'EVIDENCE_REQUIRED');
+assert.equal(cardinalResult.decision.blockingGate,1);
 
 console.log('AP2 gate-engine behavior tests passed');
