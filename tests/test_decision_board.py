@@ -14,9 +14,10 @@ def test_decision_board_is_mounted_and_versioned():
     assert 'id="decisionBoardFilters"' in HTML
     assert 'id="decisionBoard"' in HTML
     assert 'decision-board.css?v=20260911-board2' in HTML
-    assert 'decision-board.js?v=20260911-board2' in HTML
-    assert "Portfolio Intelligence · v8.7.73" in HTML
-    assert "version:'8.7.72'" in RUNTIME
+    assert 'decision-board.js?v=20260929-ap2' in HTML
+    assert 'gate-engine.js?v=20260929-ap2' in HTML
+    assert "Portfolio Intelligence · v8.7.74" in HTML
+    assert "version:'8.7.74'" in RUNTIME
 
 
 def test_gate_order_is_fail_closed():
@@ -31,7 +32,7 @@ def test_gate_order_is_fail_closed():
 def test_board_explains_each_template_without_trade_instruction():
     for label in ["Gewinnende Regel", "Blockierende Regel", "Kleinster nächster Schritt"]:
         assert label in BOARD
-    for status in ["OPEN_REVIEW", "FREEZE", "REVIEW", "EXIT_REVIEW"]:
+    for status in ["OPEN_REVIEW", "WAIT_TRIGGER", "READY", "REVIEW", "EXIT_REVIEW"]:
         assert status in BOARD
     assert "BUY" not in BOARD
     assert "SELL" not in BOARD
@@ -54,6 +55,6 @@ def test_mobile_board_defaults_to_top_five_and_keeps_details_optional():
 
 def test_completed_case_is_used_before_generic_small_position_review():
     assert "data/investment_cases/index.json" in BOARD
-    assert "if(investmentCase)return" in BOARD
-    assert BOARD.index("if(investmentCase)return") < BOARD.index("if(value<300)")
-    assert "Gate 2 geprüft · keine Aufstockungsfreigabe" in BOARD
+    assert "if(investmentCase){" in BOARD
+    assert BOARD.index("if(investmentCase){") < BOARD.index("if(value<300)")
+    assert "window.HPOS_GATE_ENGINE?.evaluate?.(investmentCase)" in BOARD

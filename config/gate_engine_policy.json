@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "version": "1.0",
+  "decisionStates": [
+    "HARD_BLOCKED",
+    "EVIDENCE_REQUIRED",
+    "REVIEW_REQUIRED",
+    "WAIT_TRIGGER",
+    "READY_FOR_RANKING"
+  ],
+  "gateTypes": {
+    "gate1": "HARD",
+    "gate2": "HARD",
+    "gate3": "REVIEW",
+    "gate4": "REVIEW",
+    "gate5": "REVIEW",
+    "gate6": "REVIEW",
+    "gate7": "REVIEW",
+    "gate8": "EXECUTION"
+  },
+  "rules": {
+    "missingEvidence": "EVIDENCE_REQUIRED",
+    "contradictoryEvidence": "EVIDENCE_REQUIRED",
+    "t90": "REVIEW_FLAG_ONLY",
+    "wait": "ONLY_EXPLICIT_TRIGGER",
+    "eib": "NEVER_CALCULATED_BY_GATE_ENGINE",
+    "orders": "EXTERNAL_ONLY"
+  }
+}

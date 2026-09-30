@@ -17,7 +17,7 @@ SIGNAL_BUILDER = (ROOT / "scripts/build_thesis_signals.py").read_text()
 def test_cardinal_case_is_isin_centered_and_loaded():
     assert CASE["isin"] == "CA14150G4007"
     assert INDEX["casesByIsin"][CASE["isin"]] == "CARDINAL_ENERGY.json"
-    assert 'investment-case.js?v=20260913-finalmobile1' in HTML
+    assert 'investment-case.js?v=20260929-ap2' in HTML
     assert 'investment-case.css?v=20260913-finalmobile1' in HTML
 
 
@@ -27,7 +27,7 @@ def test_all_eight_gates_have_explicit_non_open_states():
         assert gate["state"] not in {"OPEN_REVIEW", "UNKNOWN", "NOT_EVALUATED"}
         assert gate["label"]
     assert CASE["gate2"]["state"] == "REVIEW"
-    assert CASE["gate6"]["state"] == "WAIT"
+    assert CASE["gate6"]["state"] == "WAIT_TRIGGER"
     assert CASE["gate8"]["state"] == "EXTERNAL_ONLY"
 
 
@@ -68,7 +68,7 @@ def test_mobile_decision_cockpit_has_progressive_disclosure():
 
 def test_case_keeps_decision_and_evidence_separate():
     assert CASE["gate3"]["signal"] == "STRENGTHENING"
-    assert CASE["decision"]["state"] == "HOLD_REVIEW"
+    assert CASE["decision"]["state"] == "REVIEW_REQUIRED"
     assert "Keine automatische Aufstockung" in CASE["decision"]["summary"]
     assert "setGate(7,c.gate8)" in JS
 
