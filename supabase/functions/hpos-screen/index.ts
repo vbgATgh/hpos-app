@@ -9,6 +9,7 @@ const SEC = "https://data.sec.gov";
 const OPENFIGI = "https://api.openfigi.com/v3/mapping";
 const GLEIF = "https://api.gleif.org/api/v1/lei-records";
 const ESEF = "https://filings.xbrl.org";
+const CURATED_OFFICIAL_EVIDENCE = `${APP_ORIGIN}/hpos-app/data/halal_financial_evidence.json`;
 const SESSION_TTL = 12 * 60 * 60 * 1000;
 const RESULT_TTL = 7 * 24 * 60 * 60 * 1000;
 const DOCUMENT_DISCOVERY_TTL = 7 * 24 * 60 * 60 * 1000;
@@ -20,6 +21,7 @@ type EvidenceItem = { metric: string; value: number | string; unit: string; peri
 type Criterion = { rule: string; state: "PASS" | "FAIL" | "OPEN"; value: number | string | null; limit: number | null; source: string };
 
 let secTickersCache: { at: number; rows: any[] } | null = null;
+let curatedEvidenceCache: { at: number; body: any } | null = null;
 
 Deno.serve(async (req: Request) => {
   const origin = req.headers.get("Origin") || "";
@@ -27,7 +29,7 @@ Deno.serve(async (req: Request) => {
   try {
     allowOrigin(origin);
     const url = new URL(req.url), path = route(url.pathname);
-    if (path === "/health") return json({ ok: true, service: "hpos-screen", version: "1.6.1", identity: "GENERIC_ALIAS_AWARE", evidence: "SEC_AND_ESEF_XBRL_CACHE", marketValueBasis: "MARKET_CAP_AT_CHECK", failClosed: true, auditLog: true, secTickerSnapshot: true, regulatoryDocumentCache: true, canonicalDegradationGuard: true, financeIncomeIsPartialEvidence: true }, 200, origin);
+    if (path === "/health") return json({ ok: true, service: "hpos-screen", version: "1.7.0", identity: "GENERIC_ALIAS_AWARE", evidence: "SEC_ESEF_AND_CURATED_OFFICIAL", marketValueBasis: "MARKET_CAP_AT_CHECK", failClosed: true, auditLog: true, secTickerSnapshot: true, regulatoryDocumentCache: true, curatedOfficialFallback: true, canonicalDegradationGuard: true, financeIncomeIsPartialEvidence: true }, 200, origin);
     if (path === "/identity" && req.method === "POST") {
       await requireSession(req);
       const input = cleanInput(await req.json().catch(() => ({})));
@@ -138,11 +140,60 @@ async function acquireEvidence(identity: any) {
   } catch (error) {
     console.error("hpos-screen-esef", String((error as any)?.message || error));
   }
+  try {
+    const curated = await acquireCuratedOfficialEvidence(identity);
+    if (curated) return attachMarketValueAtCheck(curated, identity);
+  } catch (error) {
+    console.error("hpos-screen-curated", String((error as any)?.message || error));
+  }
   if (cached?.acquired) return attachMarketValueAtCheck({ ...cached.acquired, source: "ESEF_XBRL_CACHE_STALE" }, identity);
   const profile = await yahooProfile(ticker);
   const evidence: EvidenceItem[] = [];
   if (profile?.industry) evidence.push(item("businessProfile", `${profile.sector || ""} · ${profile.industry}`.replace(/^ · | · $/g, ""), "text", "current", "Yahoo Finance discovery profile", `${YAHOO}/v10/finance/quoteSummary/${encodeURIComponent(ticker)}`, "DISCOVERY"));
   return { source: "GENERIC_DISCOVERY_ONLY", official: false, identity, business: { state: "OPEN", description: profile?.industry || "", sic: "" }, financial: {}, evidence };
+}
+
+async function acquireCuratedOfficialEvidence(identity: any) {
+  if (!validIsin(identity?.isin)) return null;
+  if (!curatedEvidenceCache || Date.now() - curatedEvidenceCache.at > 60 * 60 * 1000) {
+    const body = await fetchJson(CURATED_OFFICIAL_EVIDENCE, { "User-Agent": "HPOS/1.0" });
+    if (body?.schemaVersion !== 1 || body?.policy?.officialSourcesOnly !== true || !body?.assets || typeof body.assets !== "object") throw new Error("curated_evidence_manifest_invalid");
+    curatedEvidenceCache = { at: Date.now(), body };
+  }
+  const record = curatedEvidenceCache.body.assets[identity.isin];
+  if (!record) return null;
+  const periodEnd = dateOnly(record.periodEnd), checkedAt = dateOnly(record.checkedAt);
+  if (!periodEnd || !checkedAt || Date.now() - Date.parse(periodEnd) > 730 * 86400000 || Date.parse(checkedAt) > Date.now() + 7 * 86400000) throw new Error("curated_evidence_period_invalid");
+  const profile = record.businessProfile || {}, description = text(profile.description, 3000), profileUrl = officialHttpsUrl(profile.sourceUrl);
+  if (!description || !profileUrl || !text(profile.period, 80)) throw new Error("curated_business_evidence_incomplete");
+  const required = ["revenue", "totalDebt", "interestBearingAssetsUpperBound", "interestIncome"];
+  const metrics: Record<string, any> = {};
+  for (const key of required) {
+    const metric = record.metrics?.[key], value = Number(metric?.value), sourceUrl = officialHttpsUrl(metric?.sourceUrl), unit = upper(metric?.unit), period = text(metric?.period, 80);
+    if (!Number.isFinite(value) || value < 0 || !sourceUrl || !unit || !period) throw new Error(`curated_metric_invalid_${key}`);
+    metrics[key] = { ...metric, value, sourceUrl, unit, period };
+  }
+  const currencies = new Set(required.map(key => metrics[key].unit));
+  if (currencies.size !== 1) throw new Error("curated_evidence_currency_mismatch");
+  const interpretation = upper(metrics.interestIncome.interpretation);
+  const evidence: EvidenceItem[] = [
+    { metric: "businessProfile", value: description, unit: "text", period: text(profile.period, 80), sourceName: text(profile.sourceName, 180), sourceUrl: profileUrl, location: profile.page ? `page:${Number(profile.page)}` : undefined, method: "OFFICIAL_REPORT_CURATED", quality: "OFFICIAL" },
+    ...required.map(key => ({ metric: key, value: metrics[key].value, unit: metrics[key].unit, period: metrics[key].period, sourceName: text(metrics[key].sourceName, 180), sourceUrl: metrics[key].sourceUrl, location: metrics[key].page ? `page:${Number(metrics[key].page)}` : undefined, method: interpretation === "NON_PERMISSIBLE_INCOME_UPPER_BOUND" && key === "interestIncome" ? interpretation : "OFFICIAL_REPORTED_OR_CONSERVATIVE_VALUE", quality: "OFFICIAL" as const }))
+  ];
+  return {
+    source: "CURATED_OFFICIAL_REPORTS", official: true, identity,
+    business: classifyBusiness(description, "", true, profileUrl, profileUrl),
+    financial: {
+      revenue: metrics.revenue.value,
+      interestIncome: metrics.interestIncome.value,
+      nonPermissibleIncome: interpretation === "NON_PERMISSIBLE_INCOME_UPPER_BOUND" ? metrics.interestIncome.value : null,
+      interestIncomeMethod: interpretation === "NON_PERMISSIBLE_INCOME_UPPER_BOUND" ? interpretation : "LOWER_BOUND",
+      totalDebt: metrics.totalDebt.value,
+      interestBearingAssetsUpperBound: metrics.interestBearingAssetsUpperBound.value,
+      marketValueAtCheck: null, marketValueAsOf: "", currency: [...currencies][0], period: periodEnd,
+      marketValueMethod: "UNAVAILABLE", marketCurrencyCompatible: false, debtDirect: true, interestAssetsUpperBound: true
+    }, evidence
+  };
 }
 
 async function acquireEsefEvidence(identity: any) {
@@ -548,6 +599,7 @@ function companyKey(value: string) {
 
 function currencyUnit(value: string) { const x = String(value || ""); return x.includes(":") ? upper(x.split(":").at(-1)) : upper(x); }
 function absoluteUrl(base: string, path: any) { const x = String(path || "").trim(); if (!x) return ""; try { return new URL(x, base).toString(); } catch { return ""; } }
+function officialHttpsUrl(value: any) { try { const url = new URL(String(value || "")); return url.protocol === "https:" && !url.username && !url.password ? url.toString() : ""; } catch { return ""; } }
 function dateOnly(value: string) { const m = String(value || "").match(/^\d{4}-\d{2}-\d{2}/); return m?.[0] || ""; }
 function shiftDate(value: string, amount: number) { if (!value) return ""; const d = new Date(`${value}T00:00:00Z`); if (!Number.isFinite(d.getTime())) return ""; d.setUTCDate(d.getUTCDate() + amount); return d.toISOString().slice(0, 10); }
 

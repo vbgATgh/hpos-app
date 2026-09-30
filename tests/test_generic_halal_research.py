@@ -109,10 +109,25 @@ def test_research_client_never_exposes_service_role_or_mutates_portfolio_state()
 
 
 def test_release_version_is_consistent():
-    assert "Portfolio Intelligence · v8.7.75" in HTML
-    assert "version:'8.7.75'" in RUNTIME
-    assert "app.js?v=20260929-ap2" in HTML
+    assert "Portfolio Intelligence · v8.7.76" in HTML
+    assert "version:'8.7.76'" in RUNTIME
+    assert "app.js?v=20260930-halalevidence1" in HTML
     assert "search-guard.js?v=20260915-genericresearch1" in HTML
+
+
+def test_button_check_acquires_validated_curated_official_evidence_before_discovery():
+    esef = SCREEN.index("acquireEsefEvidence(identity)")
+    curated = SCREEN.index("acquireCuratedOfficialEvidence(identity)", esef)
+    discovery = SCREEN.index("yahooProfile(ticker)", curated)
+    assert esef < curated < discovery
+    assert 'CURATED_OFFICIAL_EVIDENCE' in SCREEN
+    assert 'body?.policy?.officialSourcesOnly !== true' in SCREEN
+    assert 'required = ["revenue", "totalDebt", "interestBearingAssetsUpperBound", "interestIncome"]' in SCREEN
+    assert 'source: "CURATED_OFFICIAL_REPORTS"' in SCREEN
+    assert 'nonPermissibleIncome: interpretation === "NON_PERMISSIBLE_INCOME_UPPER_BOUND"' in SCREEN
+    assert "officialHttpsUrl" in SCREEN
+    assert 'version: "1.7.0"' in SCREEN
+    assert "curatedOfficialFallback: true" in SCREEN
 
 
 def test_depot_and_watchlist_use_backend_as_single_status_authority():
