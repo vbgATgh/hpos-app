@@ -78,7 +78,7 @@ def test_curated_sources_are_propagated_to_criteria_and_ui():
     assert "sourceFor(f,'totalDebt','marketValueAtCheck')" in autoscreen
     assert "YAHOO_STATEMENT" not in autoscreen
     assert "OFFICIAL_REPORT_CURATED" in autoscreen
-    assert "Finanzwerte belegt" in register
+    assert "Pflichtdaten belegt" in register
     assert "Offizielle Finanzkennzahlen" in evidence
     assert "target=\"_blank\"" in evidence
 
@@ -169,12 +169,12 @@ def test_market_value_builder_requires_no_account_or_api_key():
 def test_current_release_loads_fresh_profile_logic():
     html = (ROOT / "app" / "index.html").read_text()
     runtime = (ROOT / "app" / "runtime-config.js").read_text()
-    assert "Portfolio Intelligence · v8.7.76" in html
+    assert "Portfolio Intelligence · v8.7.77" in html
     assert "app.js?v=20260930-halalevidence1" in html
     assert "halal-autoscreen.js?v=20260916-marketcap1" in html
-    assert "halal-register.js?v=20260916-marketcap1" in html
+    assert "halal-register.js?v=20261001-ap3coverage1" in html
     assert "halal-evidence.js?v=20260916-marketcap1" in html
-    assert "version:'8.7.76'" in runtime
+    assert "version:'8.7.77'" in runtime
 
 
 def test_runtime_uses_point_in_time_market_cap_without_historical_share_service():

@@ -29,7 +29,7 @@ Deno.serve(async (req: Request) => {
   try {
     allowOrigin(origin);
     const url = new URL(req.url), path = route(url.pathname);
-    if (path === "/health") return json({ ok: true, service: "hpos-screen", version: "1.7.1", identity: "GENERIC_ALIAS_AWARE", evidence: "SEC_ESEF_AND_CURATED_OFFICIAL", marketValueBasis: "MARKET_CAP_AT_CHECK", failClosed: true, auditLog: true, secTickerSnapshot: true, regulatoryDocumentCache: true, curatedOfficialFallback: true, canonicalDegradationGuard: true, financeIncomeIsPartialEvidence: true }, 200, origin);
+    if (path === "/health") return json({ ok: true, service: "hpos-screen", version: "1.8.0", identity: "GENERIC_ALIAS_AWARE", evidence: "MERGED_SEC_ESEF_AND_CURATED_OFFICIAL", marketValueBasis: "MARKET_CAP_AT_CHECK", failClosed: true, auditLog: true, secTickerSnapshot: true, regulatoryDocumentCache: true, curatedOfficialFallback: true, metricLevelEvidenceMerge: true, coverageReport: true, canonicalDegradationGuard: true, financeIncomeIsPartialEvidence: true }, 200, origin);
     if (path === "/identity" && req.method === "POST") {
       await requireSession(req);
       const input = cleanInput(await req.json().catch(() => ({})));
@@ -84,7 +84,7 @@ async function runCheck(input: IdentityInput, force: boolean) {
   const evaluated = evaluate(acquired);
   const completedAt = new Date().toISOString();
   const runId = crypto.randomUUID();
-  const result = { runId, identity, ...evaluated, evidence: acquired.evidence, financial: acquired.financial, checkedAt: completedAt, source: acquired.source };
+  const result = { runId, identity, ...evaluated, evidence: acquired.evidence, financial: acquired.financial, coverage: acquired.coverage, checkedAt: completedAt, source: acquired.source };
   await persistRun(result, startedAt, completedAt);
   if (result.state === "OPEN_REVIEW" && isFreshDecisive(existing)) return preservedCanonical(existing, identity, result);
   return result;
@@ -129,29 +129,75 @@ async function resolveIdentity(input: IdentityInput) {
 
 async function acquireEvidence(identity: any) {
   const ticker = upper(identity.ticker);
+  const sources: any[] = [];
   let secCompany = null;
   try { secCompany = ticker ? await secCompanyForTicker(ticker) : null; } catch { secCompany = null; }
-  if (secCompany) return attachMarketValueAtCheck(await acquireSecEvidence(identity, secCompany), identity);
+  if (secCompany) {
+    try { sources.push(await acquireSecEvidence(identity, secCompany)); }
+    catch (error) { console.error("hpos-screen-sec", String((error as any)?.message || error)); }
+  }
   const cached = await readCachedRegulatoryEvidence(identity);
-  if (cached?.fresh) return attachMarketValueAtCheck(cached.acquired, identity);
+  if (cached?.fresh) sources.push(cached.acquired);
   try {
     const esef = await acquireEsefEvidence(identity);
-    if (esef) return attachMarketValueAtCheck(esef, identity);
+    if (esef) sources.push(esef);
   } catch (error) {
     console.error("hpos-screen-esef", String((error as any)?.message || error));
   }
   try {
     const curated = await acquireCuratedOfficialEvidence(identity);
-    if (curated) return attachMarketValueAtCheck(curated, identity);
+    if (curated) sources.push(curated);
   } catch (error) {
     console.error("hpos-screen-curated", String((error as any)?.message || error));
   }
-  if (cached?.acquired) return attachMarketValueAtCheck({ ...cached.acquired, source: "ESEF_XBRL_CACHE_STALE" }, identity);
+  if (!cached?.fresh && cached?.acquired) sources.push({ ...cached.acquired, source: "ESEF_XBRL_CACHE_STALE" });
+  if (sources.length) return attachMarketValueAtCheck(mergeEvidenceSources(identity, sources), identity);
   const profile = await yahooProfile(ticker);
   const evidence: EvidenceItem[] = [];
   if (profile?.industry) evidence.push(item("businessProfile", `${profile.sector || ""} · ${profile.industry}`.replace(/^ · | · $/g, ""), "text", "current", "Yahoo Finance discovery profile", `${YAHOO}/v10/finance/quoteSummary/${encodeURIComponent(ticker)}`, "DISCOVERY"));
-  return { source: "GENERIC_DISCOVERY_ONLY", official: false, identity, business: { state: "OPEN", description: profile?.industry || "", sic: "" }, financial: {}, evidence };
+  return { source: "GENERIC_DISCOVERY_ONLY", official: false, identity, business: { state: "OPEN", description: profile?.industry || "", sic: "" }, financial: {}, evidence, coverage: evidenceCoverage([], ["GENERIC_DISCOVERY_ONLY"]) };
 }
+
+function mergeEvidenceSources(identity: any, sources: any[]) {
+  const uniqueSources = uniqueBy(sources.filter(Boolean), x => `${x.source}|${x.financial?.period || ""}`);
+  const decisiveBusiness = uniqueSources.map(x => x.business).filter(Boolean).sort((a, b) => businessRank(b?.state) - businessRank(a?.state))[0] || { state: "OPEN", description: "", sic: "" };
+  const financialSources = uniqueSources.filter(x => x.financial && typeof x.financial === "object");
+  const exactImpureSource = financialSources.find(x => finiteNonNegative(x.financial.nonPermissibleIncome) && finitePositive(x.financial.revenue));
+  const base = exactImpureSource || financialSources.find(x => finitePositive(x.financial.revenue)) || financialSources[0];
+  const currency = upper(base?.financial?.currency), period = base?.financial?.period || "";
+  const pick = (key: string) => {
+    const compatible = financialSources.find(x => upper(x.financial.currency) === currency && finiteNonNegative(x.financial[key]));
+    const any = financialSources.find(x => finiteNonNegative(x.financial[key]));
+    return (compatible || any)?.financial?.[key] ?? null;
+  };
+  const interestSource = financialSources.find(x => upper(x.financial.currency) === currency && finiteNonNegative(x.financial.interestIncome)) || financialSources.find(x => finiteNonNegative(x.financial.interestIncome));
+  const debtSource = financialSources.find(x => upper(x.financial.currency) === currency && finiteNonNegative(x.financial.totalDebt)) || financialSources.find(x => finiteNonNegative(x.financial.totalDebt));
+  const evidence = uniqueBy(uniqueSources.flatMap(x => Array.isArray(x.evidence) ? x.evidence : []), x => `${x.metric}|${x.sourceUrl}|${x.period}|${x.value}`);
+  const financial = {
+    revenue: base?.financial?.revenue ?? pick("revenue"),
+    interestIncome: interestSource?.financial?.interestIncome ?? null,
+    nonPermissibleIncome: exactImpureSource?.financial?.nonPermissibleIncome ?? null,
+    interestIncomeMethod: exactImpureSource?.financial?.interestIncomeMethod || interestSource?.financial?.interestIncomeMethod || "MISSING",
+    totalDebt: debtSource?.financial?.totalDebt ?? null,
+    interestBearingAssetsUpperBound: pick("interestBearingAssetsUpperBound"),
+    marketValueAtCheck: null, marketValueAsOf: "", currency, period,
+    marketValueMethod: "UNAVAILABLE", marketCurrencyCompatible: false,
+    debtDirect: debtSource?.financial?.debtDirect === true,
+    interestAssetsUpperBound: financialSources.some(x => x.financial.interestAssetsUpperBound === true)
+  };
+  const sourceNames = uniqueSources.map(x => String(x.source || "")).filter(Boolean);
+  return { source: `MERGED:${sourceNames.join("+")}`, official: uniqueSources.some(x => x.official === true), identity, business: decisiveBusiness, financial, evidence, coverage: evidenceCoverage(evidence, sourceNames) };
+}
+
+function evidenceCoverage(evidence: EvidenceItem[], sources: string[]) {
+  const required = ["businessProfile", "revenue", "totalDebt", "interestBearingAssetsUpperBound", "interestIncome", "marketValueAtCheck"];
+  const found = required.filter(metric => evidence.some(x => x.metric === metric && (metric === "marketValueAtCheck" ? x.quality === "MARKET" : x.quality === "OFFICIAL") && officialHttpsUrl(x.sourceUrl)));
+  return { required, found, missing: required.filter(x => !found.includes(x)), sourceAttempts: [...new Set(sources)], complete: found.length === required.length };
+}
+
+function businessRank(state: any) { return upper(state) === "FAIL" ? 3 : upper(state) === "PASS" ? 2 : 1; }
+function finiteNonNegative(value: any) { return value !== null && value !== undefined && value !== "" && Number.isFinite(Number(value)) && Number(value) >= 0; }
+function finitePositive(value: any) { return Number.isFinite(Number(value)) && Number(value) > 0; }
 
 async function acquireCuratedOfficialEvidence(identity: any) {
   if (!validIsin(identity?.isin)) return null;
@@ -515,7 +561,14 @@ async function attachMarketValueAtCheck(acquired: any, identity: any) {
   const evidence = [...(acquired?.evidence || [])];
   for (const support of market.supportingEvidence || []) evidence.push(support);
   if (market.value > 0) evidence.push({ metric: "marketValueAtCheck", value: market.value, unit: market.currency, period: market.asOf, sourceName: market.method === "YAHOO_REPORTED_MARKET_CAP_AT_CHECK" ? "Yahoo Finance reported market capitalization" : "Calculated from current price and latest reported ordinary shares", sourceUrl: market.sourceUrl, method: market.method, quality: "MARKET" });
-  return { ...acquired, financial, evidence };
+  const sourceAttempts = acquired?.coverage?.sourceAttempts || [String(acquired?.source || "")].filter(Boolean);
+  const coverage = evidenceCoverage(evidence, sourceAttempts);
+  if (!compatible) {
+    coverage.found = coverage.found.filter((x: string) => x !== "marketValueAtCheck");
+    if (!coverage.missing.includes("marketValueAtCheck")) coverage.missing.push("marketValueAtCheck");
+    coverage.complete = false;
+  }
+  return { ...acquired, financial, evidence, coverage };
 }
 
 async function yahooMarketValueAtCheck(symbol: string) {
