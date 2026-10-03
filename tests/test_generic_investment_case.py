@@ -31,10 +31,19 @@ def test_generic_case_uses_the_same_three_view_tabs():
     assert ".casePendingList" in CSS
 
 
-def test_generic_case_is_explicit_about_incomplete_sources():
-    assert "noch keine vollständige, ISIN-zentrierte Investment-Akte" in JS
+def test_generic_case_separates_complete_halal_sources_from_incomplete_investment_case():
+    assert "function halalPrimarySources(evidence)" in JS
+    assert "Halal-Primärquellen" in JS
+    assert "Gate 1 ist separat dokumentiert; die Investment-Akte für Gates 2 bis 7 ist noch nicht vollständig." in JS
+    assert "Noch zu ergänzen" in JS
     assert "Nur verifizierte Quellen und vollständige Pflichtdaten" in JS
     assert "HPOS führt keine Order aus" in JS
+
+
+def test_halal_sources_do_not_mark_the_whole_investment_case_complete():
+    assert "data-source-kind" in JS
+    assert '.caseSources[data-source-kind="investment"]' in JS
+    assert "sources(halalSources,'halal')" in JS
 
 
 def test_switching_assets_reuses_only_the_matching_case():
