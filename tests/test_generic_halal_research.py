@@ -109,8 +109,8 @@ def test_research_client_never_exposes_service_role_or_mutates_portfolio_state()
 
 
 def test_release_version_is_consistent():
-    assert "Portfolio Intelligence · v8.7.81" in HTML
-    assert "version:'8.7.81'" in RUNTIME
+    assert "Portfolio Intelligence · v8.7.82" in HTML
+    assert "version:'8.7.82'" in RUNTIME
     assert "app.js?v=20260930-halalevidence1" in HTML
     assert "search-guard.js?v=20260915-genericresearch1" in HTML
 
@@ -128,11 +128,12 @@ def test_button_check_acquires_generic_official_reports_before_transitional_over
     assert 'source: "CURATED_OFFICIAL_REPORTS"' in SCREEN
     assert 'nonPermissibleIncome: interpretation === "NON_PERMISSIBLE_INCOME_UPPER_BOUND"' in SCREEN
     assert "officialHttpsUrl" in SCREEN
-    assert 'version: "1.9.0"' in SCREEN
+    assert 'const ENGINE_VERSION = "1.9.1"' in SCREEN
     assert 'curatedOfficialFallback: "TRANSITIONAL_ONLY"' in SCREEN
     assert "genericIssuerReportDiscovery: true" in SCREEN
     assert "nullIsNeverZero: true" in SCREEN
     assert "if (!hasMachineEvidence)" in SCREEN
+    assert "existing.methodology === CURRENT_METHODOLOGY" in SCREEN
     assert "metricLevelEvidenceMerge: true" in SCREEN
     assert "mergeEvidenceSources(identity, sources)" in SCREEN
     assert 'source: `MERGED:${sourceNames.join("+")}`' in SCREEN
