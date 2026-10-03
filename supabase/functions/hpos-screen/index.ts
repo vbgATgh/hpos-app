@@ -15,6 +15,8 @@ const SESSION_TTL = 12 * 60 * 60 * 1000;
 const RESULT_TTL = 7 * 24 * 60 * 60 * 1000;
 const DOCUMENT_DISCOVERY_TTL = 7 * 24 * 60 * 60 * 1000;
 const SEC_AGENT = "HPOS Portfolio Intelligence contact@vbgatgh.github.io";
+const ENGINE_VERSION = "1.9.1";
+const CURRENT_METHODOLOGY = `AAOIFI SS21 · HPOS evidence ${ENGINE_VERSION}`;
 const RULES = Object.freeze({ impureIncomeMax: .05, interestAssetsMax: .30, interestDebtMax: .30 });
 
 type IdentityInput = { isin?: string; ticker?: string; symbol?: string; exchange?: string; name?: string; source?: string };
@@ -30,7 +32,7 @@ Deno.serve(async (req: Request) => {
   try {
     allowOrigin(origin);
     const url = new URL(req.url), path = route(url.pathname);
-    if (path === "/health") return json({ ok: true, service: "hpos-screen", version: "1.9.0", identity: "GENERIC_ALIAS_AWARE", evidence: "SEC_ESEF_AND_GENERIC_ISSUER_REPORTS", marketValueBasis: "MARKET_CAP_AT_CHECK_WITH_METHOD_REVIEW", failClosed: true, auditLog: true, secTickerSnapshot: true, regulatoryDocumentCache: true, genericIssuerReportDiscovery: true, curatedOfficialFallback: "TRANSITIONAL_ONLY", metricLevelEvidenceMerge: true, coverageReport: true, canonicalDegradationGuard: true, financeIncomeIsPartialEvidence: true, nullIsNeverZero: true }, 200, origin);
+    if (path === "/health") return json({ ok: true, service: "hpos-screen", version: ENGINE_VERSION, identity: "GENERIC_ALIAS_AWARE", evidence: "SEC_ESEF_AND_GENERIC_ISSUER_REPORTS", marketValueBasis: "MARKET_CAP_AT_CHECK_WITH_METHOD_REVIEW", failClosed: true, auditLog: true, secTickerSnapshot: true, regulatoryDocumentCache: true, genericIssuerReportDiscovery: true, curatedOfficialFallback: "TRANSITIONAL_ONLY", metricLevelEvidenceMerge: true, coverageReport: true, canonicalDegradationGuard: "CURRENT_METHODOLOGY_ONLY", financeIncomeIsPartialEvidence: true, nullIsNeverZero: true }, 200, origin);
     if (path === "/identity" && req.method === "POST") {
       await requireSession(req);
       const input = cleanInput(await req.json().catch(() => ({})));
@@ -93,7 +95,8 @@ async function runCheck(input: IdentityInput, force: boolean) {
 
 function isFreshDecisive(existing: any) {
   return !!existing && ["PASS", "FAIL"].includes(String(existing.state || ""))
-    && (!existing.expires_at || Date.parse(existing.expires_at) > Date.now());
+    && (!existing.expires_at || Date.parse(existing.expires_at) > Date.now())
+    && (existing.source_type === "CURATED_ISIN" || existing.methodology === CURRENT_METHODOLOGY);
 }
 
 function preservedCanonical(existing: any, identity: any, research: any) {
@@ -475,15 +478,15 @@ function evaluate(acquired: any) {
 }
 
 async function persistRun(result: any, startedAt: string, completedAt: string) {
-  const s = db(), run = { id: result.runId, isin: result.identity.isin, symbol: result.identity.ticker || null, state: result.state, methodology: "AAOIFI SS21 · Marktwert am Prüftag · HPOS generic evidence service v1.2", reason: result.reason, missing_criteria: result.missingCriteria, criteria: result.criteria, evidence: result.evidence, started_at: startedAt, completed_at: completedAt };
+  const s = db(), run = { id: result.runId, isin: result.identity.isin, symbol: result.identity.ticker || null, state: result.state, methodology: CURRENT_METHODOLOGY, reason: result.reason, missing_criteria: result.missingCriteria, criteria: result.criteria, evidence: result.evidence, started_at: startedAt, completed_at: completedAt };
   const { error: runError } = await s.from("hpos_halal_runs").insert(run);
   if (runError) throw httpError(500, "run_store_failed");
-  const { data: old } = await s.from("hpos_halal_evidence").select("source_type,state,expires_at").eq("isin", result.identity.isin).maybeSingle();
+  const { data: old } = await s.from("hpos_halal_evidence").select("source_type,state,expires_at,methodology").eq("isin", result.identity.isin).maybeSingle();
   if (old?.source_type === "CURATED_ISIN") return;
   const oldFresh = !old?.expires_at || Date.parse(old.expires_at) > Date.now(), oldDecisive = ["PASS", "FAIL"].includes(String(old?.state || ""));
-  if (result.state === "OPEN_REVIEW" && oldDecisive && oldFresh) return;
+  if (result.state === "OPEN_REVIEW" && oldDecisive && oldFresh && (old?.source_type === "CURATED_ISIN" || old?.methodology === CURRENT_METHODOLOGY)) return;
   const evidence = (result.evidence || []).slice(0, 20).map((x: any) => ({ provider: x.sourceName, status: x.metric, note: `${x.period || ""}${x.value !== undefined ? ` · ${x.value} ${x.unit || ""}` : ""}${x.location ? ` · ${x.location}` : ""}`.slice(0, 500), sourceUrl: x.sourceUrl }));
-  const row = { isin: result.identity.isin, state: result.state, source_type: "HPOS_AAOIFI", source_name: "HPOS Generic Evidence Service", methodology: "AAOIFI SS21", symbol: result.identity.ticker || null, raw_status: result.state, reason: result.reason, evidence, checked_at: completedAt, expires_at: new Date(Date.parse(completedAt) + RESULT_TTL).toISOString(), updated_at: completedAt };
+  const row = { isin: result.identity.isin, state: result.state, source_type: "HPOS_AAOIFI", source_name: "HPOS Generic Evidence Service", methodology: CURRENT_METHODOLOGY, symbol: result.identity.ticker || null, raw_status: result.state, reason: result.reason, evidence, checked_at: completedAt, expires_at: new Date(Date.parse(completedAt) + RESULT_TTL).toISOString(), updated_at: completedAt };
   const { error } = await s.from("hpos_halal_evidence").upsert(row, { onConflict: "isin" });
   if (error) throw httpError(500, "evidence_store_failed");
 }

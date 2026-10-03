@@ -49,7 +49,7 @@ def test_esef_facts_keep_exact_xbrl_fundstelle_and_attach_point_market_value_fai
 
 
 def test_service_release_exposes_regulatory_cache_capability():
-    assert 'version: "1.9.0"' in SCREEN
+    assert 'const ENGINE_VERSION = "1.9.1"' in SCREEN
     assert 'evidence: "SEC_ESEF_AND_GENERIC_ISSUER_REPORTS"' in SCREEN
     assert "regulatoryDocumentCache: true" in SCREEN
     assert 'marketValueBasis: "MARKET_CAP_AT_CHECK_WITH_METHOD_REVIEW"' in SCREEN
