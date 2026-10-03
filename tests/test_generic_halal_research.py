@@ -109,8 +109,8 @@ def test_research_client_never_exposes_service_role_or_mutates_portfolio_state()
 
 
 def test_release_version_is_consistent():
-    assert "Portfolio Intelligence · v8.7.79" in HTML
-    assert "version:'8.7.79'" in RUNTIME
+    assert "Portfolio Intelligence · v8.7.80" in HTML
+    assert "version:'8.7.80'" in RUNTIME
     assert "app.js?v=20260930-halalevidence1" in HTML
     assert "search-guard.js?v=20260915-genericresearch1" in HTML
 
@@ -126,7 +126,7 @@ def test_button_check_acquires_validated_curated_official_evidence_before_discov
     assert 'source: "CURATED_OFFICIAL_REPORTS"' in SCREEN
     assert 'nonPermissibleIncome: interpretation === "NON_PERMISSIBLE_INCOME_UPPER_BOUND"' in SCREEN
     assert "officialHttpsUrl" in SCREEN
-    assert 'version: "1.8.0"' in SCREEN
+    assert 'version: "1.8.1"' in SCREEN
     assert "curatedOfficialFallback: true" in SCREEN
     assert "metricLevelEvidenceMerge: true" in SCREEN
     assert "mergeEvidenceSources(identity, sources)" in SCREEN
