@@ -109,25 +109,30 @@ def test_research_client_never_exposes_service_role_or_mutates_portfolio_state()
 
 
 def test_release_version_is_consistent():
-    assert "Portfolio Intelligence · v8.7.80" in HTML
-    assert "version:'8.7.80'" in RUNTIME
+    assert "Portfolio Intelligence · v8.7.81" in HTML
+    assert "version:'8.7.81'" in RUNTIME
     assert "app.js?v=20260930-halalevidence1" in HTML
     assert "search-guard.js?v=20260915-genericresearch1" in HTML
 
 
-def test_button_check_acquires_validated_curated_official_evidence_before_discovery():
+def test_button_check_acquires_generic_official_reports_before_transitional_overrides():
     esef = SCREEN.index("acquireEsefEvidence(identity)")
-    curated = SCREEN.index("acquireCuratedOfficialEvidence(identity)", esef)
-    discovery = SCREEN.index("yahooProfile(ticker)", curated)
-    assert esef < curated < discovery
+    discovery = SCREEN.index("yahooProfile(ticker)", esef)
+    generic = SCREEN.index("acquireIssuerReportEvidence(identity, discoveryProfile)", discovery)
+    curated = SCREEN.index("acquireCuratedOfficialEvidence(identity)", generic)
+    assert esef < discovery < generic < curated
+    assert 'import { acquireIssuerReportEvidence } from "./issuer-report.js"' in SCREEN
     assert 'CURATED_OFFICIAL_EVIDENCE' in SCREEN
     assert 'body?.policy?.officialSourcesOnly !== true' in SCREEN
     assert 'required = ["revenue", "totalDebt", "interestBearingAssetsUpperBound", "interestIncome"]' in SCREEN
     assert 'source: "CURATED_OFFICIAL_REPORTS"' in SCREEN
     assert 'nonPermissibleIncome: interpretation === "NON_PERMISSIBLE_INCOME_UPPER_BOUND"' in SCREEN
     assert "officialHttpsUrl" in SCREEN
-    assert 'version: "1.8.1"' in SCREEN
-    assert "curatedOfficialFallback: true" in SCREEN
+    assert 'version: "1.9.0"' in SCREEN
+    assert 'curatedOfficialFallback: "TRANSITIONAL_ONLY"' in SCREEN
+    assert "genericIssuerReportDiscovery: true" in SCREEN
+    assert "nullIsNeverZero: true" in SCREEN
+    assert "if (!hasMachineEvidence)" in SCREEN
     assert "metricLevelEvidenceMerge: true" in SCREEN
     assert "mergeEvidenceSources(identity, sources)" in SCREEN
     assert 'source: `MERGED:${sourceNames.join("+")}`' in SCREEN
