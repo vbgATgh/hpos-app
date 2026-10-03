@@ -32,7 +32,7 @@ Deno.serve(async(req:Request)=>{
 
 async function loadProfile(symbol:string){
   const official=OFFICIAL_PROFILES[symbol];
-  const modules="assetProfile,price,summaryDetail,defaultKeyStatistics,financialData,balanceSheetHistory,balanceSheetHistoryQuarterly,incomeStatementHistory,incomeStatementHistoryQuarterly";
+  const modules="assetProfile,price,summaryDetail,defaultKeyStatistics,financialData,balanceSheetHistory,balanceSheetHistoryQuarterly,incomeStatementHistory,incomeStatementHistoryQuarterly,cashflowStatementHistory,cashflowStatementHistoryQuarterly";
   for(const base of [Y1,Y2]){
     try{
       const url=`${base}/v10/finance/quoteSummary/${encodeURIComponent(symbol)}?modules=${modules}`;
@@ -52,6 +52,7 @@ async function loadProfile(symbol:string){
       const cashAndStInv=firstNum([bs.cashCashEquivalentsAndShortTermInvestments]);
       const shortInvest=firstNum([bs.otherShortTermInvestments,bs.investmentsAndOtherFinancialAssets,bs.availableForSaleSecurities]);
       const interestAssets=Math.max(cashAndStInv,Math.max(cashOnly,0)+Math.max(shortInvest,0));
+      const valuationEvidence=buildValuationEvidence(root,url,p,f,shares);
       const baseProfile:any={
         symbol,name:String(p.longName||p.shortName||symbol),
         sector:String(a.sector||""),industry:String(a.industry||""),businessSummary:String(a.longBusinessSummary||""),
@@ -66,7 +67,7 @@ async function loadProfile(symbol:string){
         profitMargins:num(f.profitMargins?.raw??f.profitMargins),operatingMargins:num(f.operatingMargins?.raw??f.operatingMargins),
         debtToEquity:num(f.debtToEquity?.raw??f.debtToEquity),
         statementDate:dateOf(bs)||dateOf(inc)||"",source:"YAHOO_QUOTE_SUMMARY_UNOFFICIAL",
-        profileSource:a.longBusinessSummary?"YAHOO_PROFILE":"",fetchedAt:new Date().toISOString(),
+        profileSource:a.longBusinessSummary?"YAHOO_PROFILE":"",fetchedAt:new Date().toISOString(),valuationEvidence,
         metricSources:marketValueAtCheck>0?{marketValueAtCheck:{sourceType:"YAHOO_MARKET_CAP_AT_CHECK",sourceName:point.method==="YAHOO_REPORTED_MARKET_CAP_AT_CHECK"?"Yahoo Finance reported market capitalization":"Current price × latest reported ordinary shares",sourceUrl:point.sourceUrl,period:marketValueAsOf,label:"Marktwert am Prüftag"}}:{},
         dataQuality:{
           profile:!!a.longBusinessSummary,revenue:!!(inc.totalRevenue||f.totalRevenue),debt:!!(bs.totalDebt||f.totalDebt||bs.longTermDebtAndFinanceLeaseObligation||bs.longTermDebt),interestAssets:!!(bs.cashCashEquivalentsAndShortTermInvestments||bs.cashAndCashEquivalents||bs.cash||f.totalCash||bs.otherShortTermInvestments||bs.investmentsAndOtherFinancialAssets||bs.availableForSaleSecurities),
@@ -80,14 +81,15 @@ async function loadProfile(symbol:string){
   }
   const search=await yahooSearch(symbol); if(!search)throw new Error("profile_missing");
   const q=await yahooQuote(symbol),point=num(q?.marketCap)>0?{value:num(q?.marketCap),asOf:marketTimestamp(q?.regularMarketTime),method:"YAHOO_REPORTED_MARKET_CAP_AT_CHECK",sourceUrl:`${Y1}/v7/finance/quote?symbols=${encodeURIComponent(symbol)}`}:await pointMarketValue(symbol),name=String(search.longname||search.shortname||q?.longName||q?.shortName||symbol),wiki=official?null:await wikipediaProfile(name);
+  const pointPrice=num((point as any).price),derivedShares=num(q?.sharesOutstanding)||num((point as any).shares)||((point.value>0&&(num(q?.regularMarketPrice)||pointPrice)>0)?point.value/(num(q?.regularMarketPrice)||pointPrice):0),valuationEvidence=await timeseriesValuationEvidence(symbol,{...q,regularMarketPrice:num(q?.regularMarketPrice)||pointPrice,currency:String(q?.currency||(point as any).currency||"")},derivedShares),latestPeriod=valuationEvidence.periods?.[0]||{};
   return {symbol,name:official?.name||name,sector:official?.sector||String(search.sector||search.sectorDisp||""),industry:official?.industry||String(search.industry||search.industryDisp||""),
     businessSummary:official?.businessSummary||String(wiki?.summary||""),employees:0,website:official?.website||"",city:"",country:official?.country||"",marketCap:point.value,
-    sharesOutstanding:num(q?.sharesOutstanding),marketValueAtCheck:point.value,marketValueAsOf:point.asOf,marketValueMethod:point.value>0?point.method:"UNAVAILABLE",currency:String(q?.currency||point.currency||""),
-    quoteType:String(search.quoteType||q?.quoteType||""),revenue:0,totalDebt:0,totalCash:0,cashAndShortTermInvestments:0,
-    shortTermInvestments:0,interestBearingAssetsUpperBound:0,interestIncome:0,
+    sharesOutstanding:derivedShares,marketValueAtCheck:point.value,marketValueAsOf:point.asOf,marketValueMethod:point.value>0?point.method:"UNAVAILABLE",currency:String(q?.currency||point.currency||""),
+    quoteType:String(search.quoteType||q?.quoteType||""),revenue:num(latestPeriod.revenue),totalDebt:num(valuationEvidence.totalDebt),totalCash:num(valuationEvidence.totalCash),cashAndShortTermInvestments:num(valuationEvidence.totalCash),
+    shortTermInvestments:0,interestBearingAssetsUpperBound:num(valuationEvidence.totalCash),interestIncome:0,valuationEvidence,
     source:"YAHOO_SEARCH_QUOTE_FALLBACK",profileSource:official?.profileSource||wiki?.source||"",profileUrl:official?.profileUrl||wiki?.url||"",fetchedAt:new Date().toISOString(),
     metricSources:point.value>0?{marketValueAtCheck:{sourceType:"YAHOO_MARKET_CAP_AT_CHECK",sourceName:point.method==="YAHOO_REPORTED_MARKET_CAP_AT_CHECK"?"Yahoo Finance reported market capitalization":"Current price × latest reported ordinary shares",sourceUrl:point.sourceUrl,period:point.asOf,label:"Marktwert am Prüftag"}}:{},
-    dataQuality:{profile:!!(official?.businessSummary||wiki?.summary),revenue:false,debt:false,interestAssets:false,interestIncome:false,marketValueAtCheck:point.value>0}};
+    dataQuality:{profile:!!(official?.businessSummary||wiki?.summary),revenue:num(latestPeriod.revenue)>0,debt:num(valuationEvidence.totalDebt)>0,interestAssets:num(valuationEvidence.totalCash)>0,interestIncome:false,marketValueAtCheck:point.value>0}};
 }
 
 async function pointMarketValue(symbol:string){
@@ -97,12 +99,38 @@ async function pointMarketValue(symbol:string){
    const [cr,sr]=await Promise.all([fetch(chartUrl,{headers:{Accept:"application/json","User-Agent":"Mozilla/5.0 HPOS/1.0"}}),fetch(sharesUrl,{headers:{Accept:"application/json","User-Agent":"Mozilla/5.0 HPOS/1.0"}})]);if(!cr.ok||!sr.ok)throw new Error("point_market_missing");
    const chart=await cr.json(),series=await sr.json(),x=chart?.chart?.result?.[0]||{},meta=x?.meta||{},closes=x?.indicators?.quote?.[0]?.close||[],price=num(meta.regularMarketPrice)||[...closes].reverse().map(num).find((v:number)=>v>0)||0;
    const rows=(Array.isArray(series?.timeseries?.result)?series.timeseries.result:[]).flatMap((row:any)=>{const type=Array.isArray(row?.meta?.type)?row.meta.type[0]:"";return Array.isArray(row?.[type])?row[type]:[]}).map((row:any)=>({value:num(row?.reportedValue?.raw),period:String(row?.asOfDate||"")})).filter((row:any)=>row.value>0&&row.period).sort((a:any,b:any)=>b.period.localeCompare(a.period));
-   if(price>0&&rows[0])return{value:price*rows[0].value,currency:String(meta.currency||""),asOf:marketTimestamp(meta.regularMarketTime),method:"CURRENT_PRICE_X_LATEST_REPORTED_ORDINARY_SHARES",sourceUrl:chartUrl,sharesPeriod:rows[0].period};
+   if(price>0&&rows[0])return{value:price*rows[0].value,price,shares:rows[0].value,currency:String(meta.currency||""),asOf:marketTimestamp(meta.regularMarketTime),method:"CURRENT_PRICE_X_LATEST_REPORTED_ORDINARY_SHARES",sourceUrl:chartUrl,sharesPeriod:rows[0].period};
  }catch{}
- return{value:0,currency:"",asOf:new Date().toISOString(),method:"UNAVAILABLE",sourceUrl:chartUrl,sharesPeriod:""};
+ return{value:0,price:0,shares:0,currency:"",asOf:new Date().toISOString(),method:"UNAVAILABLE",sourceUrl:chartUrl,sharesPeriod:""};
 }
 
 function latest(a:any[]){return Array.isArray(a)&&a.length?a[0]:null}
+function buildValuationEvidence(root:any,sourceUrl:string,price:any,financial:any,currentShares:number){
+ const incomeRows=Array.isArray(root?.incomeStatementHistory?.incomeStatementHistory)?root.incomeStatementHistory.incomeStatementHistory:[];
+ const cashRows=Array.isArray(root?.cashflowStatementHistory?.cashflowStatements)?root.cashflowStatementHistory.cashflowStatements:[];
+ const cashByPeriod=new Map<string,any>(cashRows.map((row:any)=>[dateOf(row),row]));
+ const periods=incomeRows.map((income:any)=>{
+   const periodEnd=dateOf(income),cash:any=cashByPeriod.get(periodEnd)||{},revenue=raw(income?.totalRevenue),netIncome=raw(income?.netIncome),operatingIncome=raw(income?.operatingIncome);
+   const operatingCashFlow=firstNum([cash?.totalCashFromOperatingActivities,cash?.operatingCashFlow]),capitalExpenditure=Math.abs(firstNum([cash?.capitalExpenditures,cash?.capitalExpenditure]));
+   const reportedFreeCashFlow=firstNum([cash?.freeCashFlow]),freeCashFlow=reportedFreeCashFlow||((operatingCashFlow>0&&capitalExpenditure>=0)?operatingCashFlow-capitalExpenditure:0);
+   const dilutedAverageShares=firstNum([income?.dilutedAverageShares,income?.basicAverageShares])||currentShares;
+   return{periodEnd,revenue,netIncome,operatingIncome,operatingCashFlow,capitalExpenditure,freeCashFlow,dilutedAverageShares};
+ }).filter((row:any)=>row.periodEnd&&row.revenue>0).sort((a:any,b:any)=>b.periodEnd.localeCompare(a.periodEnd)).slice(0,4);
+ return{
+   schemaVersion:1,sourceTier:"MARKET_AGGREGATOR",sourceName:"Yahoo Finance annual statements",sourceUrl,currency:String(price?.currency||financial?.financialCurrency||""),
+   observedAt:new Date().toISOString(),currentPrice:raw(price?.regularMarketPrice),sharesOutstanding:currentShares,totalDebt:raw(financial?.totalDebt),totalCash:raw(financial?.totalCash),
+   revenueGrowth:raw(financial?.revenueGrowth),earningsGrowth:raw(financial?.earningsGrowth),operatingMargin:raw(financial?.operatingMargins),periods
+ };
+}
+async function timeseriesValuationEvidence(symbol:string,quote:any,currentShares:number){
+ const types=["annualTotalRevenue","annualNetIncome","annualOperatingIncome","annualOperatingCashFlow","annualCapitalExpenditure","annualFreeCashFlow","annualDilutedAverageShares","annualTotalDebt","annualCashCashEquivalentsAndShortTermInvestments"],period2=Math.floor(Date.now()/1000)+86400,period1=period2-6*366*86400,endpointUrl=`${Y1}/ws/fundamentals-timeseries/v1/finance/timeseries/${encodeURIComponent(symbol)}?symbol=${encodeURIComponent(symbol)}&type=${types.join(",")}&period1=${period1}&period2=${period2}`,sourceUrl=`https://finance.yahoo.com/quote/${encodeURIComponent(symbol)}/financials/`;
+ try{
+  const r=await fetch(endpointUrl,{headers:{Accept:"application/json","User-Agent":"Mozilla/5.0 HPOS/1.0"}});if(!r.ok)throw new Error("valuation_timeseries_missing");const d=await r.json(),rows=Array.isArray(d?.timeseries?.result)?d.timeseries.result:[],byDate=new Map<string,any>(),latestByType=new Map<string,number>();
+  for(const series of rows){const type=String(Array.isArray(series?.meta?.type)?series.meta.type[0]:""),items=Array.isArray(series?.[type])?series[type]:[];for(const item of items){const periodEnd=String(item?.asOfDate||"");const value=num(item?.reportedValue?.raw);if(!periodEnd||!Number.isFinite(value))continue;latestByType.set(type,value);if(!type.startsWith("annual")||["annualTotalDebt","annualCashCashEquivalentsAndShortTermInvestments"].includes(type))continue;const row=byDate.get(periodEnd)||{periodEnd};row[type]=value;byDate.set(periodEnd,row)}}
+  const periods=[...byDate.values()].map((x:any)=>{const operatingCashFlow=num(x.annualOperatingCashFlow),capitalExpenditure=Math.abs(num(x.annualCapitalExpenditure)),reportedFcf=num(x.annualFreeCashFlow);return{periodEnd:x.periodEnd,revenue:num(x.annualTotalRevenue),netIncome:num(x.annualNetIncome),operatingIncome:num(x.annualOperatingIncome),operatingCashFlow,capitalExpenditure,freeCashFlow:reportedFcf||((operatingCashFlow>0)?operatingCashFlow-capitalExpenditure:0),dilutedAverageShares:num(x.annualDilutedAverageShares)||currentShares}}).filter((x:any)=>x.revenue>0).sort((a:any,b:any)=>b.periodEnd.localeCompare(a.periodEnd)).slice(0,4);
+  return{schemaVersion:1,sourceTier:"MARKET_AGGREGATOR",sourceName:"Yahoo Finance annual fundamentals time series",sourceUrl,currency:String(quote?.currency||""),observedAt:new Date().toISOString(),currentPrice:num(quote?.regularMarketPrice),sharesOutstanding:currentShares,totalDebt:num(latestByType.get("annualTotalDebt")),totalCash:num(latestByType.get("annualCashCashEquivalentsAndShortTermInvestments")),revenueGrowth:num(quote?.revenueGrowth),earningsGrowth:num(quote?.earningsGrowth),operatingMargin:0,periods};
+ }catch{return{schemaVersion:1,sourceTier:"MARKET_AGGREGATOR",sourceName:"Yahoo Finance annual fundamentals time series",sourceUrl,currency:String(quote?.currency||""),observedAt:new Date().toISOString(),currentPrice:num(quote?.regularMarketPrice),sharesOutstanding:currentShares,totalDebt:0,totalCash:0,revenueGrowth:0,earningsGrowth:0,operatingMargin:0,periods:[]}}
+}
 function raw(v:any){return num(v?.raw??v)}
 function firstNum(xs:any[]){for(const x of xs){const n=raw(x);if(Number.isFinite(n)&&n!==0)return n}return 0}
 function dateOf(x:any){const t=x?.endDate?.raw??x?.endDate;if(!t)return"";const n=Number(t);return Number.isFinite(n)?new Date(n*1000).toISOString().slice(0,10):String(t)}

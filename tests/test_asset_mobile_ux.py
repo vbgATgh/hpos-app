@@ -75,7 +75,7 @@ def test_trend_numbers_are_explained_and_cannot_override_gate_one():
     assert "Kein Kursziel, keine Wahrscheinlichkeit und kein Kauf- oder Halal-Signal" in INTELLIGENCE
     assert "Sie verändern weder Gate 1 noch die Halal-Einstufung" in INTELLIGENCE
     assert ".trendStrip" in CSS
-    assert "asset-intelligence.js?v=20260928-trendcontext1" in HTML
+    assert "asset-intelligence.js?v=20261003-ap4valuation1" in HTML
 
 
 def test_status_colors_have_one_consistent_meaning():

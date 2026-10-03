@@ -17,7 +17,8 @@ SIGNAL_BUILDER = (ROOT / "scripts/build_thesis_signals.py").read_text()
 def test_cardinal_case_is_isin_centered_and_loaded():
     assert CASE["isin"] == "CA14150G4007"
     assert INDEX["casesByIsin"][CASE["isin"]] == "CARDINAL_ENERGY.json"
-    assert 'investment-case.js?v=20261003-ap3sourcehandoff1' in HTML
+    assert 'investment-case.js?v=20261003-ap4valuation1' in HTML
+    assert 'valuation-engine.js?v=20261003-ap4valuation1' in HTML
     assert 'investment-case.css?v=20260913-finalmobile1' in HTML
 
 
@@ -62,7 +63,7 @@ def test_mobile_decision_cockpit_has_progressive_disclosure():
     assert 'data-case-tab="evidence"' in JS
     assert "caseFitTrack" in JS
     assert "caseWhy" in JS
-    assert "caseValuationScale" in JS
+    assert "caseValueGrid" in JS
     assert "detail('Depotgewicht')" in JS
     assert "return positionWeight(isin())" in JS
     assert ".caseEnhanced .caseLegacyStatus" in css
