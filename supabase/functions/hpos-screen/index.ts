@@ -2,6 +2,7 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
 import { SEC_TICKERS } from "./sec-tickers.ts";
 import { classifyBusiness } from "./business-classifier.ts";
+import { acquireIssuerReportEvidence } from "./issuer-report.js";
 
 const APP_ORIGIN = "https://vbgatgh.github.io";
 const YAHOO = "https://query1.finance.yahoo.com";
@@ -29,7 +30,7 @@ Deno.serve(async (req: Request) => {
   try {
     allowOrigin(origin);
     const url = new URL(req.url), path = route(url.pathname);
-    if (path === "/health") return json({ ok: true, service: "hpos-screen", version: "1.8.1", identity: "GENERIC_ALIAS_AWARE", evidence: "MERGED_SEC_ESEF_AND_CURATED_OFFICIAL", marketValueBasis: "MARKET_CAP_AT_CHECK", failClosed: true, auditLog: true, secTickerSnapshot: true, regulatoryDocumentCache: true, curatedOfficialFallback: true, metricLevelEvidenceMerge: true, coverageReport: true, canonicalDegradationGuard: true, financeIncomeIsPartialEvidence: true, issuerReportBatch: "SAVARIA_2025" }, 200, origin);
+    if (path === "/health") return json({ ok: true, service: "hpos-screen", version: "1.9.0", identity: "GENERIC_ALIAS_AWARE", evidence: "SEC_ESEF_AND_GENERIC_ISSUER_REPORTS", marketValueBasis: "MARKET_CAP_AT_CHECK_WITH_METHOD_REVIEW", failClosed: true, auditLog: true, secTickerSnapshot: true, regulatoryDocumentCache: true, genericIssuerReportDiscovery: true, curatedOfficialFallback: "TRANSITIONAL_ONLY", metricLevelEvidenceMerge: true, coverageReport: true, canonicalDegradationGuard: true, financeIncomeIsPartialEvidence: true, nullIsNeverZero: true }, 200, origin);
     if (path === "/identity" && req.method === "POST") {
       await requireSession(req);
       const input = cleanInput(await req.json().catch(() => ({})));
@@ -130,6 +131,7 @@ async function resolveIdentity(input: IdentityInput) {
 async function acquireEvidence(identity: any) {
   const ticker = upper(identity.ticker);
   const sources: any[] = [];
+  let discoveryProfile: any = null;
   let secCompany = null;
   try { secCompany = ticker ? await secCompanyForTicker(ticker) : null; } catch { secCompany = null; }
   if (secCompany) {
@@ -144,15 +146,30 @@ async function acquireEvidence(identity: any) {
   } catch (error) {
     console.error("hpos-screen-esef", String((error as any)?.message || error));
   }
-  try {
-    const curated = await acquireCuratedOfficialEvidence(identity);
-    if (curated) sources.push(curated);
-  } catch (error) {
-    console.error("hpos-screen-curated", String((error as any)?.message || error));
+  if (!secCompany) {
+    try {
+      discoveryProfile = await yahooProfile(ticker);
+      const issuer = await acquireIssuerReportEvidence(identity, discoveryProfile);
+      if (issuer) {
+        issuer.business = classifyBusiness(issuer.businessDescription || "", "", true, issuer.reportUrl, issuer.reportUrl);
+        sources.push(issuer);
+      }
+    } catch (error) {
+      console.error("hpos-screen-issuer-report", String((error as any)?.message || error));
+    }
+  }
+  const hasMachineEvidence = sources.some(source => ["SEC_XBRL_GENERIC", "ESEF_XBRL_REGULATORY_CACHE", "ISSUER_REPORT_GENERIC"].includes(String(source?.source || "")));
+  if (!hasMachineEvidence) {
+    try {
+      const curated = await acquireCuratedOfficialEvidence(identity);
+      if (curated) sources.push(curated);
+    } catch (error) {
+      console.error("hpos-screen-curated", String((error as any)?.message || error));
+    }
   }
   if (!cached?.fresh && cached?.acquired) sources.push({ ...cached.acquired, source: "ESEF_XBRL_CACHE_STALE" });
   if (sources.length) return attachMarketValueAtCheck(mergeEvidenceSources(identity, sources), identity);
-  const profile = await yahooProfile(ticker);
+  const profile = discoveryProfile || await yahooProfile(ticker);
   const evidence: EvidenceItem[] = [];
   if (profile?.industry) evidence.push(item("businessProfile", `${profile.sector || ""} · ${profile.industry}`.replace(/^ · | · $/g, ""), "text", "current", "Yahoo Finance discovery profile", `${YAHOO}/v10/finance/quoteSummary/${encodeURIComponent(ticker)}`, "DISCOVERY"));
   return { source: "GENERIC_DISCOVERY_ONLY", official: false, identity, business: { state: "OPEN", description: profile?.industry || "", sic: "" }, financial: {}, evidence, coverage: evidenceCoverage([], ["GENERIC_DISCOVERY_ONLY"]) };
@@ -438,7 +455,7 @@ async function acquireSecEvidence(identity: any, company: any) {
 
 function evaluate(acquired: any) {
   const f = acquired.financial || {}, b = acquired.business || {};
-  const ratio = (a: any, d: any) => Number.isFinite(Number(a)) && Number(a) >= 0 && Number(d) > 0 ? Number(a) / Number(d) : null;
+  const ratio = (a: any, d: any) => finiteNonNegative(a) && finitePositive(d) ? Number(a) / Number(d) : null;
   const impureExact = ratio(f.nonPermissibleIncome, f.revenue), impureLowerBound = ratio(f.interestIncome, f.revenue), assets = ratio(f.interestBearingAssetsUpperBound, f.marketValueAtCheck), debt = ratio(f.totalDebt, f.marketValueAtCheck);
   const impureProxySource = f.interestIncomeMethod === "LOWER_BOUND" ? "OFFICIAL_INTEREST_INCOME_LOWER_BOUND" : f.interestIncomeMethod === "FINANCE_INCOME_PROXY" ? "ESEF_FINANCE_INCOME_PARTIAL_EVIDENCE" : "MISSING";
   const marketOk = Number(f.marketValueAtCheck) > 0 && f.marketCurrencyCompatible === true;
@@ -446,14 +463,15 @@ function evaluate(acquired: any) {
     business: { rule: "Zulässiges Kerngeschäft", state: ["PASS", "FAIL"].includes(b.state) ? b.state : "OPEN", value: b.category || b.sic || b.description || null, limit: null, source: b.method || (acquired.official ? "OFFICIAL_BUSINESS_DESCRIPTION_UNCLASSIFIED" : "UNVERIFIED_DISCOVERY") },
     impureIncome: { rule: "Nicht-zulässige Einnahmen / Gesamtumsatz", state: impureExact == null ? (impureLowerBound != null && f.interestIncomeMethod === "LOWER_BOUND" && impureLowerBound > RULES.impureIncomeMax ? "FAIL" : "OPEN") : impureExact <= RULES.impureIncomeMax ? "PASS" : "FAIL", value: impureExact ?? impureLowerBound, limit: RULES.impureIncomeMax, source: impureExact != null ? "OFFICIAL_NON_PERMISSIBLE_INCOME" : impureLowerBound != null ? impureProxySource : "MISSING" },
     interestAssets: { rule: "Zinstragende Vermögenswerte / Marktwert am Prüftag", state: !marketOk || assets == null ? "OPEN" : assets <= RULES.interestAssetsMax ? "PASS" : "OPEN", value: assets, limit: RULES.interestAssetsMax, source: assets == null ? "MISSING" : "OFFICIAL_FINANCIALS_AND_MARKET_CAP" },
-    interestDebt: { rule: "Zinstragende Schulden / Marktwert am Prüftag", state: !marketOk || debt == null ? "OPEN" : debt <= RULES.interestDebtMax ? "PASS" : f.debtDirect ? "FAIL" : "OPEN", value: debt, limit: RULES.interestDebtMax, source: debt == null ? "MISSING" : "OFFICIAL_FINANCIALS_AND_MARKET_CAP" }
+    interestDebt: { rule: "Zinstragende Schulden / Marktwert", state: !marketOk || debt == null ? "OPEN" : debt <= RULES.interestDebtMax ? "PASS" : "OPEN", value: debt, limit: RULES.interestDebtMax, source: debt == null ? "MISSING" : debt > RULES.interestDebtMax ? "METHOD_REVIEW_CURRENT_MARKET_CAP" : "OFFICIAL_FINANCIALS_AND_MARKET_CAP" }
   };
   const entries = Object.values(criteria);
   const failed = entries.filter(x => x.state === "FAIL");
   const missingCriteria = entries.filter(x => x.state === "OPEN").map(x => x.rule);
   if (failed.length) return { state: "FAIL", standard: "AAOIFI SS21", criteria, missingCriteria: [], reason: `Nicht halalkonform: ${failed.map(x => x.rule).join("; ")} überschreitet das freigegebene Kriterium oder fällt unter ein ausgeschlossenes Kerngeschäft.` };
   if (entries.every(x => x.state === "PASS")) return { state: "PASS", standard: "AAOIFI SS21", criteria, missingCriteria: [], reason: "Halalkonform: Kerngeschäft und alle drei AAOIFI-Finanzkriterien sind mit nachvollziehbarer Evidenz bestanden." };
-  return { state: "OPEN_REVIEW", standard: "AAOIFI SS21", criteria, missingCriteria, reason: `Prüfung offen. Fehlende oder nicht hinreichend belastbare Kriterien: ${missingCriteria.join("; ")}.` };
+  const methodReview = entries.some(x => x.source === "METHOD_REVIEW_CURRENT_MARKET_CAP");
+  return { state: "OPEN_REVIEW", standard: "AAOIFI SS21", criteria, missingCriteria, reason: methodReview ? `Fachliche Prüfung nötig: Die Schuldenquote überschreitet auf Basis des Marktwerts am Prüftag die interne Grenze. Vor einem endgültigen Halal-Urteil muss die freigegebene Marktwertmethode beziehungsweise externe Primärevidenz abgeglichen werden.` : `Prüfung offen. Fehlende oder nicht hinreichend belastbare Kriterien: ${missingCriteria.join("; ")}.` };
 }
 
 async function persistRun(result: any, startedAt: string, completedAt: string) {

@@ -51,7 +51,6 @@ def test_first_curated_report_batch_has_only_traceable_partial_metrics():
         "US94106L1098": 4,
         "US4781601046": 4,
         "CA14150G4007": 5,
-        "CA8051121090": 4,
     }
     assert set(assets) == set(expected_coverage)
     for isin, expected in expected_coverage.items():
@@ -171,12 +170,12 @@ def test_market_value_builder_requires_no_account_or_api_key():
 def test_current_release_loads_fresh_profile_logic():
     html = (ROOT / "app" / "index.html").read_text()
     runtime = (ROOT / "app" / "runtime-config.js").read_text()
-    assert "Portfolio Intelligence · v8.7.80" in html
+    assert "Portfolio Intelligence · v8.7.81" in html
     assert "app.js?v=20260930-halalevidence1" in html
     assert "halal-autoscreen.js?v=20260916-marketcap1" in html
     assert "halal-register.js?v=20261003-ap3coverage2" in html
     assert "halal-evidence.js?v=20260916-marketcap1" in html
-    assert "version:'8.7.80'" in runtime
+    assert "version:'8.7.81'" in runtime
 
 
 def test_runtime_uses_point_in_time_market_cap_without_historical_share_service():

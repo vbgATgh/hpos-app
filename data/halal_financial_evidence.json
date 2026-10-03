@@ -439,58 +439,6 @@
           "label": "36-month weighted average market value from issuer-reported average share prices and weighted-average shares"
         }
       }
-    },
-    "CA8051121090": {
-      "name": "Savaria Corporation",
-      "ticker": "SIS.TO",
-      "checkedAt": "2026-10-03",
-      "periodEnd": "2025-12-31",
-      "businessProfile": {
-        "description": "Global accessibility company providing accessibility products for people with mobility challenges and patient-care solutions, including stairlifts, platform lifts, home elevators, ceiling lifts and therapeutic support surfaces.",
-        "sourceName": "Savaria 2025 Annual Report",
-        "sourceUrl": "https://corp.savaria.com/resource/dm/3785595561275323837?inline=yes",
-        "period": "FY 2025",
-        "page": 16
-      },
-      "metrics": {
-        "revenue": {
-          "value": 913527000,
-          "unit": "CAD",
-          "period": "FY 2025",
-          "sourceName": "Savaria 2025 Annual Report",
-          "sourceUrl": "https://corp.savaria.com/resource/dm/3785595561275323837?inline=yes",
-          "page": 43,
-          "label": "Revenue"
-        },
-        "totalDebt": {
-          "value": 210134000,
-          "unit": "CAD",
-          "period": "FY 2025",
-          "sourceName": "Savaria 2025 Annual Report",
-          "sourceUrl": "https://corp.savaria.com/resource/dm/3785595561275323837?inline=yes",
-          "page": 25,
-          "label": "Issuer-defined total debt including revolving facility, acquisition notes, letters of credit and lease liabilities"
-        },
-        "interestBearingAssetsUpperBound": {
-          "value": 296910000,
-          "unit": "CAD",
-          "period": "FY 2025",
-          "sourceName": "Savaria 2025 Annual Report",
-          "sourceUrl": "https://corp.savaria.com/resource/dm/3785595561275323837?inline=yes",
-          "page": 42,
-          "label": "All current assets; deliberately conservative upper bound for interest-bearing assets"
-        },
-        "interestIncome": {
-          "value": 497000,
-          "unit": "CAD",
-          "period": "FY 2025",
-          "sourceName": "Savaria 2025 Annual Report",
-          "sourceUrl": "https://corp.savaria.com/resource/dm/3785595561275323837?inline=yes",
-          "page": 67,
-          "label": "Conservative non-permissible-income upper bound: Note 22 interest income; remaining finance components are expenses or losses",
-          "interpretation": "NON_PERMISSIBLE_INCOME_UPPER_BOUND"
-        }
-      }
     }
   }
 }
