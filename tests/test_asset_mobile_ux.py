@@ -41,7 +41,7 @@ def test_gate_progress_is_derived_from_the_eight_real_states():
 
 
 def test_complete_case_avoids_duplicate_halal_evidence_but_generic_case_keeps_it():
-    assert "classList.toggle('caseComplete',!!s.querySelector('.caseSources'))" in CASE
+    assert "classList.toggle('caseComplete',!!s.querySelector('.caseSources[data-source-kind=\"investment\"]'))" in CASE
     assert "classList.remove('caseEnhanced','caseComplete')" in CASE
     assert ".caseComplete #halalEvidenceSection{display:none}" in (ROOT / "app/investment-case.css").read_text()
 
