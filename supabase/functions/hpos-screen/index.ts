@@ -29,7 +29,7 @@ Deno.serve(async (req: Request) => {
   try {
     allowOrigin(origin);
     const url = new URL(req.url), path = route(url.pathname);
-    if (path === "/health") return json({ ok: true, service: "hpos-screen", version: "1.8.0", identity: "GENERIC_ALIAS_AWARE", evidence: "MERGED_SEC_ESEF_AND_CURATED_OFFICIAL", marketValueBasis: "MARKET_CAP_AT_CHECK", failClosed: true, auditLog: true, secTickerSnapshot: true, regulatoryDocumentCache: true, curatedOfficialFallback: true, metricLevelEvidenceMerge: true, coverageReport: true, canonicalDegradationGuard: true, financeIncomeIsPartialEvidence: true }, 200, origin);
+    if (path === "/health") return json({ ok: true, service: "hpos-screen", version: "1.8.1", identity: "GENERIC_ALIAS_AWARE", evidence: "MERGED_SEC_ESEF_AND_CURATED_OFFICIAL", marketValueBasis: "MARKET_CAP_AT_CHECK", failClosed: true, auditLog: true, secTickerSnapshot: true, regulatoryDocumentCache: true, curatedOfficialFallback: true, metricLevelEvidenceMerge: true, coverageReport: true, canonicalDegradationGuard: true, financeIncomeIsPartialEvidence: true, issuerReportBatch: "SAVARIA_2025" }, 200, origin);
     if (path === "/identity" && req.method === "POST") {
       await requireSession(req);
       const input = cleanInput(await req.json().catch(() => ({})));

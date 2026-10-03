@@ -49,7 +49,7 @@ def test_esef_facts_keep_exact_xbrl_fundstelle_and_attach_point_market_value_fai
 
 
 def test_service_release_exposes_regulatory_cache_capability():
-    assert 'version: "1.8.0"' in SCREEN
+    assert 'version: "1.8.1"' in SCREEN
     assert 'evidence: "MERGED_SEC_ESEF_AND_CURATED_OFFICIAL"' in SCREEN
     assert "regulatoryDocumentCache: true" in SCREEN
     assert 'marketValueBasis: "MARKET_CAP_AT_CHECK"' in SCREEN
