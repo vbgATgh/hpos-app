@@ -10,6 +10,7 @@ on:
       - 'scripts/fetch_hpos_news_portfolio.py'
       - 'scripts/fetch_hpos_direct_news.py'
       - 'scripts/fetch_hpos_market.py'
+      - 'scripts/build_thesis_news_agent.py'
       - 'scripts/apply_hpos_ux42.py'
       - 'scripts/apply_hpos_alpha43.py'
       - 'scripts/apply_hpos_alpha431.py'
@@ -34,6 +35,7 @@ on:
       - 'data/asset_catalog.json'
       - 'data/fundamental/thesis_signals.json'
       - 'tests/test_news_fetch.py'
+      - 'tests/test_thesis_news_agent.py'
       - 'tests/test_alpha432_sources.py'
       - 'tests/test_alpha432_version_patch.py'
       - 'tests/test_alpha433_privacy.py'
@@ -136,6 +138,10 @@ jobs:
         id: direct
         continue-on-error: true
         run: python scripts/fetch_hpos_direct_news.py
+      - name: News gegen Thesis und Falsifizierungen prüfen
+        run: |
+          python scripts/build_thesis_news_agent.py
+          python tests/test_thesis_news_agent.py
       - name: Kurs- und EUR-Snapshots aktualisieren
         id: market
         continue-on-error: true
@@ -143,7 +149,7 @@ jobs:
       - name: Snapshots committen
         shell: bash
         run: |
-          git add alpha41/index.html data/news data/market || true
+          git add alpha41/index.html data/news data/market data/fundamental/thesis_agent.json || true
           if git diff --cached --quiet; then echo 'Keine Änderungen.'; exit 0; fi
           git config user.name 'hpos-data-bot'
           git config user.email 'hpos-data-bot@users.noreply.github.com'
