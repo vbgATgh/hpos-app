@@ -21,6 +21,9 @@ on:
       - 'tests/test_decision_board.py'
       - 'tests/test_gate_engine.mjs'
       - 'tests/test_generic_halal_research.py'
+      - 'tests/test_thesis_news_agent.py'
+      - 'scripts/build_thesis_news_agent.py'
+      - 'data/fundamental/thesis_agent.json'
       - '.github/workflows/hpos-current-app-ci.yml'
   pull_request:
     paths:
@@ -41,6 +44,9 @@ on:
       - 'tests/test_decision_board.py'
       - 'tests/test_gate_engine.mjs'
       - 'tests/test_generic_halal_research.py'
+      - 'tests/test_thesis_news_agent.py'
+      - 'scripts/build_thesis_news_agent.py'
+      - 'data/fundamental/thesis_agent.json'
       - '.github/workflows/hpos-current-app-ci.yml'
 
 permissions:
@@ -74,3 +80,4 @@ jobs:
           tests/test_parqet_income_sync.py
           tests/test_decision_board.py
           tests/test_generic_halal_research.py
+          tests/test_thesis_news_agent.py
