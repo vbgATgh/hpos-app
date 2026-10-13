@@ -129,3 +129,10 @@ Diese Leitplanken bei jedem neuen HPOS-Arbeitspaket zuerst beachten. Änderungen
 - Commit 5f2cf564 korrigiert drei Bedingungen in hpos-screen: Non-curated Ergebnisse werden nicht mehr nur nach Ablaufdatum als decisive gecached, Methodikgleichheit reicht nicht als Vertrauensbeleg, OPEN_REVIEW kann nicht-kuratierte alte Entscheidungen ersetzen.
 - GitHub-Quellcode nach Update statisch kontrolliert. Keine produktive Auslieferung oder Browserabnahme. Datenbank: 10 Gate-Audits, 0 VALIDATED.
 - Offen: unabhängige Quellenvalidierung, Validator-Integration, API-/Gate-Konsistenz, Owner-Authentifizierung und End-to-End-Tests.
+
+## Evidenz-Vorvalidator Integration (2026-10-13)
+- PR #99 Branch: Commit 4551619c integriert den bestehenden fail-closed Vorvalidator in `hpos-screen` nach der Quellenbeschaffung und vor dem Persistieren. Fehlende serverseitige Attestierung erzwingt OPEN_REVIEW; eine neue entscheidende PASS-/FAIL-Klassifikation ist über diesen Pfad derzeit nicht möglich.
+- Der neue Run speichert Vorprüfungsdetails und SHA-256-Fingerprint in `hpos_halal_runs.criteria`. Fingerprint dokumentiert nur die Daten, keine Quellenwahrheit.
+- GitHub-Datei nach Commit erneut gelesen: Import, Aufruf, OPEN_REVIEW-Guard, Audit- und Fingerprint-Verknüpfung statisch vorhanden. Keine Laufzeit-/CI-/HTTP-Tests ausgeführt; keine produktive Bereitstellung.
+- Kritische offene Punkte: echte serverseitige Verifikation von Herkunft, Identität, Berichtsperioden und 36-Monats-Marktwertmethode; danach attestierte PASS-/FAIL-Freigabe. Der derzeitige Adapter setzt sourceVerified absichtlich false und blockiert daher alle neuen nicht-kuratierten entscheidenden Ergebnisse. Vor produktiver Auslieferung muss die notwendige fachliche Prüftiefe und Benutzerwirkung abgenommen werden.
+- Weitere Abhängigkeiten: Auth-/Owner-Prüfung, Gates G1-G5, Prüfbutton, PRs #97/#98 und End-to-End-Regressionssuite.
