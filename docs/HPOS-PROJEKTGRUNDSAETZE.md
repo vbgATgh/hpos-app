@@ -37,3 +37,11 @@ Diese Leitplanken bei jedem neuen HPOS-Arbeitspaket zuerst beachten. Änderungen
 - Wesentliche Grenze: Parqet-Session ist aktuell der Zugriffsnachweis, nicht eine explizite Eigentümer-Identität. Nur ein persönlicher Nutzer ist daher nicht nachgewiesen; Zugriff mit gültigem Session-Token bleibt möglich. Vor privater Nutzungsfreigabe Eigentümerbindung und Token-Verwahrung prüfen.
 - Keine Live-HTTP- oder iPhone-End-to-End-Tests in diesem Schritt; kein Go-live-Test bestanden behauptet.
 - Nachgelagerte Freigabeansichten wurden zuvor für anon/authenticated gesperrt; die vollständige Frontend-/Backend-Anbindung bleibt offen.
+
+## P1 – Authentifizierungsdesign, konkretisiert (2026-10-13)
+- OAuth-Callback in hpos-api speichert Parqet-Token und zufällige session_id in hpos_parqet_sessions und gibt die session_id im URL-Fragment an die PWA zurück. Die private API nutzt diese Bearer-Session; hpos-screen prüft dieselbe Session.
+- Aktuelles Schema hpos_parqet_sessions enthält keine explizite owner_user_id / provider_account_id; eindeutige Bindung an das eine Eigentümerkonto ist daher **nicht nachgewiesen**.
+- 35 Sessions gespeichert, davon zum Prüfzeitpunkt 1 innerhalb der letzten 12 Stunden angelegt. Keine Tokenwerte ausgelesen oder offengelegt. Bereinigung und Widerruf alter Sessions ist ein separates, vorab zu prüfendes Arbeitspaket.
+- hpos-screen.requireSession prüft created_at gegen 12h, aber nicht expires_at; hpos-api.access verwendet den Refresh-Token bei Ablauf des Access-Tokens. Die unterschiedliche Behandlung muss auf gewünschte Semantik geprüft werden, bevor sie vereinheitlicht wird.
+- Geplanter Fix: Parqet-Identität serverseitig am OAuth-Callback ermitteln und gegen eine ausschließlich serverseitige, nicht aus Clientdaten manipulierbare Eigentümerkennung prüfen; bei fehlender Identitätsquelle nicht blind Sessions akzeptieren. Keine zusätzliche Benutzerregistrierung einführen.
+- Kein produktiver Auth-Fix ausgerollt: Die Identität des Eigentümerkontos und ein belastbarer Parqet-Identitätsendpunkt sind noch nicht verifiziert. Bis dahin private Go-live-Freigabe gesperrt.
