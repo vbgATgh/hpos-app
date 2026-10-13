@@ -65,3 +65,8 @@ Diese Leitplanken bei jedem neuen HPOS-Arbeitspaket zuerst beachten. Änderungen
 - app/parqet-supabase-adapter.js exportiert HPOS_PARQET_ADAPTER.normalizedPortfolio; app/app.js::syncParqet ruft die Methode direkt auf, statt den Legacy-Worker mit Token im Querystring anzusprechen.
 - Statische Prüfung erfolgreich: Adapterexport, direkter Aufruf, fehlender-Adapter-Abbruch, Bearer-Header, bisherige Validierung/Quarantäne. Kein echter iPhone-/Browser-End-to-End-Test; kein Merge und kein Go-live.
 - Offene Prüfung vor Merge: echter Parqet-Sync, Reauth nach Ablauf, Fehlerfälle, Browser-Konsole, Quarantäne bei unplausiblen Depotdaten.
+
+## P2 – Reauth-Nachbesserung (2026-10-13)
+- PR #97 um HPOS_PARQET_ADAPTER.syncPortfolio() erweitert: delegiert an normalizedPortfolio() und löst bei REAUTH dieselbe bisherige reconnect('refresh_401')-Logik aus.
+- app.js::syncParqet ruft jetzt syncPortfolio() auf. Acht statische Invarianten überprüft: kein Legacy-Worker in syncParqet, direkter Aufruf, Export, Reauth, Fail-Closed, Datenvalidierung, Quarantäne, Bearer-Header.
+- PR bleibt Draft, ungemergt. Noch keine Live-OAuth-/iPhone-Tests. Produktive App nicht geändert.
