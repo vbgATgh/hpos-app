@@ -59,3 +59,9 @@ Diese Leitplanken bei jedem neuen HPOS-Arbeitspaket zuerst beachten. Änderungen
 - Wichtig: Ohne erfolgreich geladenen Adapter kann app.js den alten Worker direkt ansprechen. Ein aktiver Parqet-Token ist im vorgesehenen Adapterbetrieb nicht als COMPAT_KEY hinterlegt, aber die Fallback-Abhängigkeit ist zu beseitigen.
 - Geplanter eng begrenzter Fix: app.js::syncParqet direkt über eine explizit exportierte Adapterfunktion (ohne Legacy-URL, ohne Token im Querystring) an Supabase anbinden; bei fehlendem Adapter sicher abbrechen statt an Worker ausweichen. Bestehende Plausibilitätsprüfung, Quarantäne und Portfolio-Integrität erhalten. Vor Live-Änderung isolierte Tests für gültige Session, abgelaufene Session, Adapter fehlt, ungültige Antwort, Portfolio-Quarantäne.
 - Diese Erkenntnis korrigiert die erste Vermutung eines direkten Cloudflare-Tokenversands; die tatsächliche Laufzeit-Umleitung wurde durch Codeprüfung festgestellt, nicht durch einen Browser-Netzwerkmitschnitt bestätigt.
+
+## P2 – Implementierung in Prüfbranch (2026-10-13)
+- PR #97 (Draft): https://github.com/vbgATgh/hpos-app/pull/97, Branch fix/parqet-direct-adapter-20261013.
+- app/parqet-supabase-adapter.js exportiert HPOS_PARQET_ADAPTER.normalizedPortfolio; app/app.js::syncParqet ruft die Methode direkt auf, statt den Legacy-Worker mit Token im Querystring anzusprechen.
+- Statische Prüfung erfolgreich: Adapterexport, direkter Aufruf, fehlender-Adapter-Abbruch, Bearer-Header, bisherige Validierung/Quarantäne. Kein echter iPhone-/Browser-End-to-End-Test; kein Merge und kein Go-live.
+- Offene Prüfung vor Merge: echter Parqet-Sync, Reauth nach Ablauf, Fehlerfälle, Browser-Konsole, Quarantäne bei unplausiblen Depotdaten.
