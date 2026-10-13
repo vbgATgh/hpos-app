@@ -79,7 +79,7 @@ async function runCheck(input: IdentityInput, force: boolean) {
   if (existing?.source_type === "CURATED_ISIN" && ["PASS", "FAIL"].includes(existing.state)) {
     return { runId: null, identity, state: existing.state, reason: existing.reason, missingCriteria: [], criteria: {}, evidence: existing.evidence || [], checkedAt: existing.checked_at, cached: true, source: existing.source_name };
   }
-  if (!force && existing && ["PASS", "FAIL"].includes(existing.state) && (!existing.expires_at || Date.parse(existing.expires_at) > Date.now())) {
+  if (!force && isFreshDecisive(existing)) {
     return { runId: null, identity, state: existing.state, reason: existing.reason, missingCriteria: [], criteria: {}, evidence: existing.evidence || [], checkedAt: existing.checked_at, cached: true, source: existing.source_name };
   }
 
@@ -96,7 +96,7 @@ async function runCheck(input: IdentityInput, force: boolean) {
 function isFreshDecisive(existing: any) {
   return !!existing && ["PASS", "FAIL"].includes(String(existing.state || ""))
     && (!existing.expires_at || Date.parse(existing.expires_at) > Date.now())
-    && (existing.source_type === "CURATED_ISIN" || existing.methodology === CURRENT_METHODOLOGY);
+    && existing.source_type === "CURATED_ISIN";
 }
 
 function preservedCanonical(existing: any, identity: any, research: any) {
@@ -484,7 +484,7 @@ async function persistRun(result: any, startedAt: string, completedAt: string) {
   const { data: old } = await s.from("hpos_halal_evidence").select("source_type,state,expires_at,methodology").eq("isin", result.identity.isin).maybeSingle();
   if (old?.source_type === "CURATED_ISIN") return;
   const oldFresh = !old?.expires_at || Date.parse(old.expires_at) > Date.now(), oldDecisive = ["PASS", "FAIL"].includes(String(old?.state || ""));
-  if (result.state === "OPEN_REVIEW" && oldDecisive && oldFresh && (old?.source_type === "CURATED_ISIN" || old?.methodology === CURRENT_METHODOLOGY)) return;
+  if (result.state === "OPEN_REVIEW" && oldDecisive && oldFresh && old?.source_type === "CURATED_ISIN") return;
   const evidence = (result.evidence || []).slice(0, 20).map((x: any) => ({ provider: x.sourceName, status: x.metric, note: `${x.period || ""}${x.value !== undefined ? ` · ${x.value} ${x.unit || ""}` : ""}${x.location ? ` · ${x.location}` : ""}`.slice(0, 500), sourceUrl: x.sourceUrl }));
   const row = { isin: result.identity.isin, state: result.state, source_type: "HPOS_AAOIFI", source_name: "HPOS Generic Evidence Service", methodology: CURRENT_METHODOLOGY, symbol: result.identity.ticker || null, raw_status: result.state, reason: result.reason, evidence, checked_at: completedAt, expires_at: new Date(Date.parse(completedAt) + RESULT_TTL).toISOString(), updated_at: completedAt };
   const { error } = await s.from("hpos_halal_evidence").upsert(row, { onConflict: "isin" });
