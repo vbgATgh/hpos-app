@@ -52,3 +52,10 @@ Diese Leitplanken bei jedem neuen HPOS-Arbeitspaket zuerst beachten. Änderungen
 - SQL-Kontrolle: anon_exec=false, auth_exec=false, service_exec=true.
 - Security Advisor erneut ausgeführt: nur INFO-Befund „RLS enabled, no policy“ für 8 backendverwaltete Tabellen. Dies ist bei bewusst ausschließlich service_role-gesteuertem Zugriff kein unmittelbarer Fehler; keine pauschalen RLS-Policies hinzufügen.
 - Noch offen: tatsächliche Bindung von Parqet OAuth an ein festes Eigentümerkonto, Client-Token-Speicherung, API-/PWA-End-to-End-Test und GitHub-Pages-Zugriffsschutz. Keine private Go-live-Freigabe.
+
+## P2 – Frontend-Parqet-Datenweg, Quellcodeprüfung (2026-10-13)
+- app/app.js::syncParqet enthält noch einen Legacy-Aufruf an hpos-proxy.vbginbox.workers.dev mit lokalem Kompatibilitätswert hpos_parqet_token als URL-Parameter.
+- app/parqet-supabase-adapter.js wird **vor** app.js geladen und überschreibt window.fetch; Legacy-Host + s=parqet wird auf hpos-api/api/parqet/normalized mit Authorization: Bearer <session_id> umgeleitet. Kompatibilitätswert wird beim OAuth-Callback auf SUPABASE_ADAPTER gesetzt. Der Legacy-Aufruf sendet unter normalem Ladepfad deshalb keinen Parqet-Zugangstoken an Cloudflare.
+- Wichtig: Ohne erfolgreich geladenen Adapter kann app.js den alten Worker direkt ansprechen. Ein aktiver Parqet-Token ist im vorgesehenen Adapterbetrieb nicht als COMPAT_KEY hinterlegt, aber die Fallback-Abhängigkeit ist zu beseitigen.
+- Geplanter eng begrenzter Fix: app.js::syncParqet direkt über eine explizit exportierte Adapterfunktion (ohne Legacy-URL, ohne Token im Querystring) an Supabase anbinden; bei fehlendem Adapter sicher abbrechen statt an Worker ausweichen. Bestehende Plausibilitätsprüfung, Quarantäne und Portfolio-Integrität erhalten. Vor Live-Änderung isolierte Tests für gültige Session, abgelaufene Session, Adapter fehlt, ungültige Antwort, Portfolio-Quarantäne.
+- Diese Erkenntnis korrigiert die erste Vermutung eines direkten Cloudflare-Tokenversands; die tatsächliche Laufzeit-Umleitung wurde durch Codeprüfung festgestellt, nicht durch einen Browser-Netzwerkmitschnitt bestätigt.
