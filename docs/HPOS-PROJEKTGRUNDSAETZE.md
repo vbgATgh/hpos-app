@@ -28,3 +28,12 @@ Stand: 2026-10-13. Status: Vom Auftraggeber ausdrücklich bekräftigte, dauerhaf
 4. Nach erfolgreichem privatem End-to-End-Test persönliche Nutzungsfreigabe; fachlich offene Aktien bleiben OPEN_REVIEW.
 
 Diese Leitplanken bei jedem neuen HPOS-Arbeitspaket zuerst beachten. Änderungen nur ausdrücklich und dokumentiert.
+
+## P1 – Tatsächliche Bestandsaufnahme der Edge-Authentifizierung (2026-10-13)
+- Quellcode der aktiven Funktionen hpos-api v33, hpos-profile v16, hpos-screen v28 geprüft. Alle sind mit verify_jwt=false deployt.
+- hpos-api: private Parqet-/Halal-Endpunkte verlangen Bearer-Session und prüfen diese in hpos_parqet_sessions; /health, Marktsuche/-kurse und OAuth-Start sind ohne Session erreichbar. OAuth-Start erzeugt einen ausstehenden Zustand; Parqet-Autorisierung ist für Token nötig.
+- hpos-screen: /identity, /check, /runs/latest verlangen Session-ID aus hpos_parqet_sessions; /health ohne Session. Origin-Prüfung ist zusätzlich vorhanden.
+- hpos-profile: nur Origin-Prüfung, keine Sessionprüfung. Liefert öffentliche Emittenten-/Marktdaten, keine persönlichen Portfoliodaten nach aktuellem Codebefund. Origin/CORS ist keine Authentifizierung.
+- Wesentliche Grenze: Parqet-Session ist aktuell der Zugriffsnachweis, nicht eine explizite Eigentümer-Identität. Nur ein persönlicher Nutzer ist daher nicht nachgewiesen; Zugriff mit gültigem Session-Token bleibt möglich. Vor privater Nutzungsfreigabe Eigentümerbindung und Token-Verwahrung prüfen.
+- Keine Live-HTTP- oder iPhone-End-to-End-Tests in diesem Schritt; kein Go-live-Test bestanden behauptet.
+- Nachgelagerte Freigabeansichten wurden zuvor für anon/authenticated gesperrt; die vollständige Frontend-/Backend-Anbindung bleibt offen.
