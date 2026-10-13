@@ -70,3 +70,9 @@ Diese Leitplanken bei jedem neuen HPOS-Arbeitspaket zuerst beachten. Änderungen
 - PR #97 um HPOS_PARQET_ADAPTER.syncPortfolio() erweitert: delegiert an normalizedPortfolio() und löst bei REAUTH dieselbe bisherige reconnect('refresh_401')-Logik aus.
 - app.js::syncParqet ruft jetzt syncPortfolio() auf. Acht statische Invarianten überprüft: kein Legacy-Worker in syncParqet, direkter Aufruf, Export, Reauth, Fail-Closed, Datenvalidierung, Quarantäne, Bearer-Header.
 - PR bleibt Draft, ungemergt. Noch keine Live-OAuth-/iPhone-Tests. Produktive App nicht geändert.
+
+## Gate-Abnahme: verifizierter Iststand und Testfolge (2026-10-13)
+- Live-SQL der hpos_capital_release_live_v1: Masterflex SE und technotrans SE jeweils present_gates=5, validated_gates=0, investment_release_status=OPEN_REVIEW, order_release_status=NOT RELEASED, investment_eligible=false. Damit ist die Sperrlogik für diese beiden realen Datensätze lesend überprüft; kein vollständiger End-to-End-Test.
+- Frontend app/gate-engine.js enthält acht historische Gates (Halal, Portfolio Fit, Investmentthese, Fundamentaldaten, Bewertung, Timing, News-Evidenz, Ausführung), die nicht 1:1 der verbindlichen Backend-Struktur G1 Halal, G2 Financial Data Verified, G3 Quality & Thesis, G4 Valuation, G5 Portfolio Fit plus separatem O1 Timing entsprechen.
+- Blocker für iPhone-Gate-Abnahme: einheitliche Gate-Mapping-/API-Projektion, sichere Session-/Eigentümerbindung, Detailansicht und klickbare Gate-Abschnitte, Fehlerevidenz, Aktualisierung durch den Halal-Prüfbutton, negative Tests.
+- Reihenfolge: (1) PR #97 Laufzeit-/Reauth-Test, (2) Backend-Gate-Leseendpunkt nur mit privater Session, (3) UI mit 5 Gates + O1 und Evidenzdetails, (4) automatische Prüfung aller Gates und fehlender Halal-Evidenz, (5) iPhone-Abnahme. Kein fixes Lieferdatum; grobe Schätzung 1–2 fokussierte Entwicklungstage bis erste Gate-Testversion, 3–5 bis iPhone-Abnahme, abhängig von Tests und Zugriff.
