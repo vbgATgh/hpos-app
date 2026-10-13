@@ -88,3 +88,8 @@ Diese Leitplanken bei jedem neuen HPOS-Arbeitspaket zuerst beachten. Änderungen
 - Andere private hpos-api-Endpunkte sind noch nicht gleichermaßen an das Eigentümerportfolio gebunden. P1 bleibt offen; insbesondere OAuth-Callback und private Parqet-/Halal-Routen.
 - PR #98 app/live-gates.js nachgebessert: Session-Ablaufzeit geprüft; positive Freigabeanzeige nur bei serverseitigem Investment-Release, investment_eligible=true, validated_gates=5 sowie fünf PASS-Gates mit vollständiger Evidenz; sonst bei Widerspruch OPEN_REVIEW.
 - Deploy v35 bestätigt, Code statisch geprüft. Echter HTTP-/Parqet-/iPhone-Test noch nicht möglich/erfolgt; Produktiv-Freigabe weiterhin gesperrt.
+
+## PR #97/#98 – Blocker aus Quellcodeprüfung (2026-10-13)
+- Bestätigter Regressionsverdacht: syncPortfolio() in app/parqet-supabase-adapter.js gibt rohe normalizedPortfolio()-Daten zurück; der bisherige Legacy-Fetch-Adapter konvertiert diese zuvor mittels appHoldings() und appDividends(). Das neue app.js::syncParqet() übernimmt die Rohdaten in extractPortfolio(); Einstandspreise/Dividenden können dadurch abweichen. Vor Merge exakt dieselbe Konvertierung in syncPortfolio() wiederherstellen.
+- Direkte GitHub-Dateiaktualisierung wurde zweimal durch Tool-Sicherheitsprüfung blockiert; kein erfolgreicher Fix am Adapter. Ein experimentelles, derzeit nicht in index.html eingebundenes app/parqet-direct-compat.js wurde im Testbranch erstellt; nicht als Lösung abgenommen oder produktiv aktiv.
+- PRs #97 und #98 bleiben Draft und dürfen bis zum Mapping-Fix sowie Test nicht gemergt werden.
