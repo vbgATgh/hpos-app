@@ -124,3 +124,8 @@ Diese Leitplanken bei jedem neuen HPOS-Arbeitspaket zuerst beachten. Änderungen
 - Datenbankabfrage: 10 Gate-Audit-Zeilen, 0 VALIDATED. Kein Anlass, PASS künstlich zu setzen oder Freigaben zu erzeugen.
 - Sicherheitsadvisor: keine WARN, acht INFO für bewusst RLS-geschützte, service-role-gesteuerte Tabellen ohne Client-Policies.
 - Offene Vertrauenslücke: validation_status/fingerprint sind Datenfelder, nicht kryptografisch oder fachlich verifizierte Quellenbelege. Bevor ein Collector VALIDATED schreibt, müssen serverseitige Provenance, ISIN-Bindung, Dokumenten- und Kennzahlenprüfung implementiert und getestet werden. Keine automatische Promotion aus bestehenden ungeprüften Einträgen.
+
+## Cache-Pruefung im Entwicklungsbranch (2026-10-13)
+- Commit 5f2cf564 korrigiert drei Bedingungen in hpos-screen: Non-curated Ergebnisse werden nicht mehr nur nach Ablaufdatum als decisive gecached, Methodikgleichheit reicht nicht als Vertrauensbeleg, OPEN_REVIEW kann nicht-kuratierte alte Entscheidungen ersetzen.
+- GitHub-Quellcode nach Update statisch kontrolliert. Keine produktive Auslieferung oder Browserabnahme. Datenbank: 10 Gate-Audits, 0 VALIDATED.
+- Offen: unabhängige Quellenvalidierung, Validator-Integration, API-/Gate-Konsistenz, Owner-Authentifizierung und End-to-End-Tests.
