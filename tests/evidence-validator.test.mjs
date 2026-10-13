@@ -1,0 +1,17 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import {validIsin,validateEvidence,evidenceFingerprint} from "../supabase/functions/_shared/evidence-validator.mjs";
+const now=Date.parse("2026-10-13T12:00:00Z"),isin="CA14150G4007";
+const base=()=>({isin,identity:{isin,status:"VERIFIED",quoteType:"EQUITY"},acquisition:{mode:"SERVER",verified:true},business:{isin,state:"PASS",sourceVerified:true,sourceUrl:"https://example.com/report"},facts:["revenue","totalDebt","interestBearingAssetsUpperBound","interestIncome","marketValueAtCheck"].map(metric=>({isin,metric,value:100,currency:"CAD",periodEnd:metric==="marketValueAtCheck"?"2026-10-12":"2025-12-31",sourceUrl:"https://example.com/report",sourceName:"Annual report",sourceVerified:true,quality:"OFFICIAL"}))});
+test("ISIN checksum",()=>{assert.equal(validIsin(isin),true);assert.equal(validIsin("CA14150G4008"),false)});
+test("complete preflight never returns PASS",()=>{const r=validateEvidence(base(),now);assert.equal(r.ready,true);assert.equal(r.state,"OPEN_REVIEW")});
+test("missing fact blocks",()=>{const b=base();b.facts.pop();assert.ok(validateEvidence(b,now).blockers.includes("MISSING_marketValueAtCheck"))});
+test("stale market value blocks",()=>{const b=base();b.facts.at(-1).periodEnd="2026-09-01";assert.ok(validateEvidence(b,now).blockers.includes("MARKET_VALUE_STALE"))});
+test("ISIN mismatch blocks",()=>{const b=base();b.facts[0].isin="US0000000000";assert.ok(validateEvidence(b,now).blockers.includes("FACT_IDENTITY_MISMATCH_revenue"))});
+test("currency mismatch blocks",()=>{const b=base();b.facts[0].currency="USD";assert.ok(validateEvidence(b,now).blockers.includes("CURRENCY_MISMATCH_REQUIRES_CONVERSION"))});
+test("duplicates block",()=>{const b=base();b.facts.push({...b.facts[0]});assert.ok(validateEvidence(b,now).blockers.includes("AMBIGUOUS_revenue"))});
+test("browser provenance blocks",()=>{const b=base();b.acquisition.mode="BROWSER";assert.ok(validateEvidence(b,now).blockers.includes("SOURCE_NOT_SERVER_VERIFIED"))});
+test("ETF unsupported",()=>{const b=base();b.identity.quoteType="ETF";assert.ok(validateEvidence(b,now).blockers.includes("UNSUPPORTED_SECURITY_TYPE"))});
+test("NaN blocks",()=>{const b=base();b.facts[0].value=NaN;assert.ok(validateEvidence(b,now).blockers.includes("INVALID_VALUE_revenue"))});
+test("unverified business blocks",()=>{const b=base();b.business.sourceVerified=false;assert.ok(validateEvidence(b,now).blockers.includes("BUSINESS_UNVERIFIED"))});
+test("fingerprint deterministic",async()=>{assert.equal(await evidenceFingerprint(base()),await evidenceFingerprint(base()))});
