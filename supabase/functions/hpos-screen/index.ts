@@ -3,6 +3,7 @@ import { createClient } from "jsr:@supabase/supabase-js@2";
 import { SEC_TICKERS } from "./sec-tickers.ts";
 import { classifyBusiness } from "./business-classifier.ts";
 import { acquireIssuerReportEvidence } from "./issuer-report.js";
+import { validateEvidence, evidenceFingerprint } from "../_shared/evidence-validator.mjs";
 
 const APP_ORIGIN = "https://vbgatgh.github.io";
 const YAHOO = "https://query1.finance.yahoo.com";
@@ -84,10 +85,32 @@ async function runCheck(input: IdentityInput, force: boolean) {
   }
 
   const acquired = await acquireEvidence(identity);
-  const evaluated = evaluate(acquired);
+  const preflight = validateEvidence({
+    isin: identity.isin,
+    identity,
+    acquisition: { mode: "SERVER", verified: acquired.official === true },
+    business: { isin: identity.isin, state: acquired.business?.state, sourceVerified: false, sourceUrl: "" },
+    facts: (acquired.evidence || []).filter((e: any) =>
+      ["revenue", "totalDebt", "interestBearingAssetsUpperBound", "interestIncome", "marketValueAtCheck"].includes(e.metric)
+    ).map((e: any) => ({
+      isin: identity.isin, metric: e.metric, value: e.value,
+      currency: e.unit, periodEnd: e.period, sourceUrl: e.sourceUrl,
+      sourceName: e.sourceName, quality: e.quality,
+      sourceVerified: false
+    }))
+  });
+  // Until source authenticity, issuer binding and the approved market-value period
+  // are independently attested, this run cannot produce a decisive halal verdict.
+  const rawEvaluation = evaluate(acquired);
+  const evaluated = preflight.ready ? rawEvaluation : {
+    ...rawEvaluation, state: "OPEN_REVIEW",
+    missingCriteria: [...new Set([...(rawEvaluation.missingCriteria || []), ...preflight.blockers])],
+    reason: "Serverseitige Evidenzvalidierung offen: " + preflight.blockers.join("; ")
+  };
   const completedAt = new Date().toISOString();
   const runId = crypto.randomUUID();
-  const result = { runId, identity, ...evaluated, evidence: acquired.evidence, financial: acquired.financial, coverage: acquired.coverage, checkedAt: completedAt, source: acquired.source };
+  const fingerprint = await evidenceFingerprint({ isin: identity.isin, methodology: CURRENT_METHODOLOGY, checkedAt: completedAt, evidence: acquired.evidence });
+  const result = { runId, identity, ...evaluated, evidence: acquired.evidence, financial: acquired.financial, coverage: acquired.coverage, preflight, evidenceFingerprint: fingerprint, checkedAt: completedAt, source: acquired.source };
   await persistRun(result, startedAt, completedAt);
   if (result.state === "OPEN_REVIEW" && isFreshDecisive(existing)) return preservedCanonical(existing, identity, result);
   return result;
@@ -478,7 +501,7 @@ function evaluate(acquired: any) {
 }
 
 async function persistRun(result: any, startedAt: string, completedAt: string) {
-  const s = db(), run = { id: result.runId, isin: result.identity.isin, symbol: result.identity.ticker || null, state: result.state, methodology: CURRENT_METHODOLOGY, reason: result.reason, missing_criteria: result.missingCriteria, criteria: result.criteria, evidence: result.evidence, started_at: startedAt, completed_at: completedAt };
+  const s = db(), run = { id: result.runId, isin: result.identity.isin, symbol: result.identity.ticker || null, state: result.state, methodology: CURRENT_METHODOLOGY, reason: result.reason, missing_criteria: result.missingCriteria, criteria: { ...result.criteria, evidencePreflight: result.preflight, evidenceFingerprint: result.evidenceFingerprint }, evidence: result.evidence, started_at: startedAt, completed_at: completedAt };
   const { error: runError } = await s.from("hpos_halal_runs").insert(run);
   if (runError) throw httpError(500, "run_store_failed");
   const { data: old } = await s.from("hpos_halal_evidence").select("source_type,state,expires_at,methodology").eq("isin", result.identity.isin).maybeSingle();
