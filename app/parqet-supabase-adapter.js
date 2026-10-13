@@ -30,7 +30,8 @@ function applyNormalized(data){const now=new Date().toISOString(),old=localStora
 function installRefreshHook(){/* canonical3+: app.js owns refresh timing/UI; this adapter owns Parqet transport */}
 async function refreshAfterOAuth(){try{applyNormalized(await normalizedPortfolio());location.reload()}catch(e){if(e?.code==='REAUTH')return;console.warn('HPOS OAuth refresh',String(e?.message||e))}}
 
-window.HPOS_PARQET_ADAPTER=Object.freeze({normalizedPortfolio});
+async function syncPortfolio(){try{return await normalizedPortfolio()}catch(e){if(e?.code==='REAUTH')setTimeout(()=>reconnect('refresh_401'),0);throw e}}
+window.HPOS_PARQET_ADAPTER=Object.freeze({syncPortfolio});
 cleanStoredDividends();
 const JUST_CONNECTED=captureOAuthSession();
 if(!localStorage.getItem(COMPAT_KEY))localStorage.setItem(COMPAT_KEY,'SUPABASE_ADAPTER');
