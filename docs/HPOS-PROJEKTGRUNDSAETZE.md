@@ -45,3 +45,10 @@ Diese Leitplanken bei jedem neuen HPOS-Arbeitspaket zuerst beachten. Änderungen
 - hpos-screen.requireSession prüft created_at gegen 12h, aber nicht expires_at; hpos-api.access verwendet den Refresh-Token bei Ablauf des Access-Tokens. Die unterschiedliche Behandlung muss auf gewünschte Semantik geprüft werden, bevor sie vereinheitlicht wird.
 - Geplanter Fix: Parqet-Identität serverseitig am OAuth-Callback ermitteln und gegen eine ausschließlich serverseitige, nicht aus Clientdaten manipulierbare Eigentümerkennung prüfen; bei fehlender Identitätsquelle nicht blind Sessions akzeptieren. Keine zusätzliche Benutzerregistrierung einführen.
 - Kein produktiver Auth-Fix ausgerollt: Die Identität des Eigentümerkontos und ein belastbarer Parqet-Identitätsendpunkt sind noch nicht verifiziert. Bis dahin private Go-live-Freigabe gesperrt.
+
+## P1 – Supabase Security Advisor, behobener Befund (2026-10-13)
+- Supabase Security Advisor meldete public.hpos_sync_capital_gates() als SECURITY DEFINER-Funktion mit EXECUTE-Recht für anon/authenticated. Dies ist eine ältere Triggerfunktion und wird vom aktuellen hpos_gate_audit_sync-Trigger nicht verwendet.
+- Migration hpos_private_revoke_legacy_definer_rpc angewendet: EXECUTE für PUBLIC, anon, authenticated entzogen; service_role behält EXECUTE.
+- SQL-Kontrolle: anon_exec=false, auth_exec=false, service_exec=true.
+- Security Advisor erneut ausgeführt: nur INFO-Befund „RLS enabled, no policy“ für 8 backendverwaltete Tabellen. Dies ist bei bewusst ausschließlich service_role-gesteuertem Zugriff kein unmittelbarer Fehler; keine pauschalen RLS-Policies hinzufügen.
+- Noch offen: tatsächliche Bindung von Parqet OAuth an ein festes Eigentümerkonto, Client-Token-Speicherung, API-/PWA-End-to-End-Test und GitHub-Pages-Zugriffsschutz. Keine private Go-live-Freigabe.
