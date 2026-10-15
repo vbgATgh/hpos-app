@@ -4,6 +4,7 @@ import { SEC_TICKERS } from "./sec-tickers.ts";
 import { classifyBusiness } from "./business-classifier.ts";
 import { acquireIssuerReportEvidence } from "./issuer-report.js";
 import { validateEvidence, evidenceFingerprint } from "../_shared/evidence-validator.mjs";
+import { assessIndependentProxy } from "../_shared/independent-halal-proxy.mjs";
 
 const APP_ORIGIN = "https://vbgatgh.github.io";
 const YAHOO = "https://query1.finance.yahoo.com";
@@ -101,6 +102,20 @@ async function runCheck(input: IdentityInput, force: boolean) {
   });
   // Until source authenticity, issuer binding and the approved market-value period
   // are independently attested, this run cannot produce a decisive halal verdict.
+  // The independent v0.1 engine is a parallel, non-authoritative reference calculation,
+  // not a second collector and never an investment-release signal.
+  const f = acquired.financial || {};
+  const proxy = assessIndependentProxy({
+    company: identity.name, period: f.period || null,
+    source_url: (acquired.evidence || []).find((e: any) => e.quality === "OFFICIAL")?.sourceUrl || null,
+    source_date: null, revenue: typeof f.revenue === "number" ? f.revenue : null,
+    market_cap: typeof f.marketValueAtCheck === "number" ? f.marketValueAtCheck : null,
+    market_cap_asof: f.marketValueAsOf || null,
+    interest_bearing_debt: null, // totalDebt is not automatically interest-bearing debt
+    cash_and_interest_investments: null, // no verified accounting classification
+    receivables: null, impermissible_income: typeof f.nonPermissibleIncome === "number" ? f.nonPermissibleIncome : null,
+    business_activity_status: "WAIT", activity_evidence: null
+  });
   const rawEvaluation = evaluate(acquired);
   const evaluated = preflight.ready ? rawEvaluation : {
     ...rawEvaluation, state: "OPEN_REVIEW",
@@ -110,7 +125,7 @@ async function runCheck(input: IdentityInput, force: boolean) {
   const completedAt = new Date().toISOString();
   const runId = crypto.randomUUID();
   const fingerprint = await evidenceFingerprint({ isin: identity.isin, methodology: CURRENT_METHODOLOGY, checkedAt: completedAt, evidence: acquired.evidence });
-  const result = { runId, identity, ...evaluated, evidence: acquired.evidence, financial: acquired.financial, coverage: acquired.coverage, preflight, evidenceFingerprint: fingerprint, checkedAt: completedAt, source: acquired.source };
+  const result = { runId, identity, ...evaluated, independentProxy: proxy, evidence: acquired.evidence, financial: acquired.financial, coverage: acquired.coverage, preflight, evidenceFingerprint: fingerprint, checkedAt: completedAt, source: acquired.source };
   await persistRun(result, startedAt, completedAt);
   if (result.state === "OPEN_REVIEW" && isFreshDecisive(existing)) return preservedCanonical(existing, identity, result);
   return result;
@@ -501,7 +516,7 @@ function evaluate(acquired: any) {
 }
 
 async function persistRun(result: any, startedAt: string, completedAt: string) {
-  const s = db(), run = { id: result.runId, isin: result.identity.isin, symbol: result.identity.ticker || null, state: result.state, methodology: CURRENT_METHODOLOGY, reason: result.reason, missing_criteria: result.missingCriteria, criteria: { ...result.criteria, evidencePreflight: result.preflight, evidenceFingerprint: result.evidenceFingerprint }, evidence: result.evidence, started_at: startedAt, completed_at: completedAt };
+  const s = db(), run = { id: result.runId, isin: result.identity.isin, symbol: result.identity.ticker || null, state: result.state, methodology: CURRENT_METHODOLOGY, reason: result.reason, missing_criteria: result.missingCriteria, criteria: { ...result.criteria, evidencePreflight: result.preflight, independentProxy: result.independentProxy, evidenceFingerprint: result.evidenceFingerprint }, evidence: result.evidence, started_at: startedAt, completed_at: completedAt };
   const { error: runError } = await s.from("hpos_halal_runs").insert(run);
   if (runError) throw httpError(500, "run_store_failed");
   const { data: old } = await s.from("hpos_halal_evidence").select("source_type,state,expires_at,methodology").eq("isin", result.identity.isin).maybeSingle();
