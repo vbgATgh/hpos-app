@@ -161,3 +161,10 @@ Diese Leitplanken bei jedem neuen HPOS-Arbeitspaket zuerst beachten. Änderungen
 - Masterflex, Netcall und technotrans sind lediglich Regressionstest-Fälle, **keine** fest codierten Sonderbehandlungen.
 - Diese Produktentscheidung gilt für alle weiteren APs 3–8. Abweichungen nur nach expliziter Entscheidung und dokumentierter Begründung.
 - Nächster technischer Schritt: AP 3 (Originalquellenbeschaffung/Attestierung) vollständig schließen, dann AP 4. Implementierung, Tests und produktiver Status müssen getrennt ausgewiesen werden.
+
+## AP3.1 Fortsetzung (2026-10-16)
+- Zusätzliche Commits im Entwurfs-PR #101: DNS- und HTTP-Transport testbar injizierbar, DNS-Ausfall/Redirect-Tests, PDF-/HTML-Downloads mit hartem Streaming-Byte-Limit und MIME-Prüfung.
+- Tests in `tests/issuer-source-trust.test.mjs` und `tests/issuer-download-limits.test.mjs` ergänzt. **In diesem Arbeitsdurchlauf noch keine Ausführung der vollständigen Repository-Testdateien oder Supabase-Edge-Tests bestätigt.** Kein Deployment.
+- Architekturentscheidung: eine generische automatisierte Halal-Prüfmaschine für jede Aktie, keine manuell codierten Wertpapiere, gilt unverändert.
+- Offene AP3.1-Grenzen: DNS-Preflight ist keine DNS-Pinning-Garantie; öffentliche IPv6-Ziele derzeit fail-closed; externe offizielle CDNs benötigen vertrauenswürdige Delegation; reale issuer-übergreifende Quellenabdeckung und Integrationstests offen.
+- AP3.2 weiterhin offen: fachliche Quellenattestierung, Kennzahlen-/Einheitenvalidierung, Periodenabgleich, Konflikterkennung und Quellenprüfungen an echten Originalberichten.
