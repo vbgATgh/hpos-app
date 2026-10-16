@@ -18,15 +18,17 @@ export function issuerHostMatches(issuerWebsite, candidate) {
   const a=origin.hostname.toLowerCase(),b=target.hostname.toLowerCase();
   return a===b || b.endsWith('.'+a) || a.endsWith('.'+b);
 }
-export async function fetchIssuerResource(url, issuerWebsite, options={}) {
+export async function fetchIssuerResource(url, issuerWebsite, options={}, dependencies={}) {
+  const resolvePublicDns = dependencies.resolvePublicDns || hasPublicDns;
+  const httpFetch = dependencies.fetch || fetch;
   if (!issuerHostMatches(issuerWebsite,url)) return null;
   let current=url;
   for(let hops=0;hops<=3;hops++){
     if(!issuerHostMatches(issuerWebsite,current)) return null;
     // DNS pinning is not supported by the Edge fetch API. Reject hostnames
     // resolving to non-public addresses before each request (best effort).
-    if (!await hasPublicDns(current)) return null;
-    const response=await fetch(current,{...options,redirect:'manual'});
+    if (!await resolvePublicDns(current)) return null;
+    const response=await httpFetch(current,{...options,redirect:'manual'});
     if([301,302,303,307,308].includes(response.status)){
       const location=response.headers.get('location');if(!location)return null;
       current=new URL(location,current).toString();continue;
