@@ -143,3 +143,11 @@ Diese Leitplanken bei jedem neuen HPOS-Arbeitspaket zuerst beachten. Änderungen
 - Draft PR #100 (abhängig von #99): JS-Port `supabase/functions/_shared/independent-halal-proxy.mjs`, 10 Node-Testfälle und nicht-autoritative Integration in hpos-screen mit Audit-Feld independentProxy. Nicht nachgewiesene Bilanzklassifizierungen bleiben null und führen WAIT_EVIDENCE. Keine Überschreibung von Curated-Overrides oder Handelsfreigabe.
 - Verifiziert: GitHub Commits df51b20c, a86da8c6, e210b8d8; Python Netcall-Test und sieben lokale Python-Szenarien bestanden. Die neuen Node-Tests sind im GitHub-Branch angelegt, aber noch nicht in CI ausgeführt. Keine Supabase-Deployment-/Frontend-/Scheduler-/E2E-Abnahme.
 - Offene Umsetzung: belegte Kennzahlenextraktion aus Originaldokumenten, Quellenattestierung, verbindliche AAOIFI-Methodik inklusive 36-Monats-Marktwert, Auth/Owner-Prüfung, Job-Orchestrierung, Gate-/Button-/Scanner-Integration, Tests und Freigabe.
+
+## AP3 Originalquellen – Sicherheits-/Provenienzinkrement (2026-10-16)
+- Branch `feature/ap3-issuer-source-hardening-20261016` auf PR #100 (abhängig von PR #99). Bestehenden Issuer-Report-Collector wiederverwendet; keine parallele Engine.
+- Sicherheitsfix: issuergebundene HTTPS-URL-Prüfung für HTML-Crawl und PDF-Download; maximal drei kontrollierte Redirects, fremde PDF-Hosts und IP-Literale abgewiesen. Externe legitime CDN-Hosts benötigen künftig explizite verifizierte Delegation, nicht blindes Freischalten.
+- PDF-Finanz-Evidenz speichert zusätzlich ursprünglichen Zahlentoken, Kontextausschnitt, Fundseite und Report-Quellseite; `validationStatus: UNATTESTED` verhindert den falschen Eindruck einer vollständigen fachlichen Attestierung.
+- Tatsächlich lokal mit Node v22 ausgeführt: 16/16 Sicherheits-Unit-Tests bestanden (inklusive SSRF-/Redirect-Mocks); GitHub-Testdatei angelegt. Noch keine komplette CI-/Deno-/Edge-Integration oder produktive Verifikation.
+- Offene Risiken: DNS-Rebinding/öffentliche DNS-Auflösung, sichere CDN-Delegation, Content-Type-/Byte-Streaming, Berichtskonflikte, Kennzahlenklassifizierung, echte Quellenattestierung, Marktwertzeitreihe, Benutzerbindung und Gate-/Button-E2E.
+- Keine produktive Datenbankänderung und kein Deployment; vollständiges AP3-Abnahmekriterium NICHT erreicht.
