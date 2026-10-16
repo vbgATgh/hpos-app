@@ -130,6 +130,10 @@ export function extractOfficialReportText(rawText, meta = {}) {
     sourceUrl: reportUrl,
     location: `page:${value.page}`,
     method: label,
+    originalText: value.originalText,
+    extractedValue: value.rawValue,
+    sourcePageUrl: meta.sourcePageUrl || "",
+    validationStatus: "UNATTESTED",
     quality: "OFFICIAL"
   }));
   const description = businessDescription(text, identity?.name);
@@ -144,7 +148,7 @@ function metric(text, patterns, multiplier) {
     const value = parseAmount(match[1]) * multiplier;
     if (!Number.isFinite(value) || value < 0) continue;
     const page = pageAt(text, match.index);
-    return { value, page };
+    return { value, page, rawValue: match[1], originalText: text.slice(Math.max(0, match.index - 100), Math.min(text.length, match.index + match[0].length + 100)).trim() };
   }
   return null;
 }
