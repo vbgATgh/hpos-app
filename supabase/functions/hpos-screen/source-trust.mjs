@@ -38,7 +38,7 @@ export async function fetchIssuerResource(url, issuerWebsite, options={}) {
 
 export function isPublicIp(ip) {
   const v=String(ip||'').trim();
-  if (!/^\\d{1,3}(?:\\.\\d{1,3}){3}$/.test(v)) return false;
+  if (!/^[0-9]{1,3}(?:[.][0-9]{1,3}){3}$/.test(v)) return false;
   const p=v.split('.').map(Number);
   if(p.some(n=>n>255)) return false;
   const [a,b]=p;
