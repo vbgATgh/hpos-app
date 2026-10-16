@@ -151,3 +151,13 @@ Diese Leitplanken bei jedem neuen HPOS-Arbeitspaket zuerst beachten. Änderungen
 - Tatsächlich lokal mit Node v22 ausgeführt: 16/16 Sicherheits-Unit-Tests bestanden (inklusive SSRF-/Redirect-Mocks); GitHub-Testdatei angelegt. Noch keine komplette CI-/Deno-/Edge-Integration oder produktive Verifikation.
 - Offene Risiken: DNS-Rebinding/öffentliche DNS-Auflösung, sichere CDN-Delegation, Content-Type-/Byte-Streaming, Berichtskonflikte, Kennzahlenklassifizierung, echte Quellenattestierung, Marktwertzeitreihe, Benutzerbindung und Gate-/Button-E2E.
 - Keine produktive Datenbankänderung und kein Deployment; vollständiges AP3-Abnahmekriterium NICHT erreicht.
+
+## Verbindliche Architekturentscheidung: Generische automatisierte Halal-Prüfmaschine (2026-10-16)
+**Entscheidung: ausdrücklich durch den Auftraggeber bestätigt.**
+- HPOS prüft **jede** Aktie dynamisch anhand einer validierten Identität (vorzugsweise ISIN), nicht über individuell programmierte Aktienlisten, manuelle Kennzahleneinträge oder je Release ergänzte Sonderfälle.
+- Ein gemeinsamer, wiederverwendbarer Ablauf verbindet Identitätsauflösung, sichere Originalquellenbeschaffung, Dokumenten-/Quellenattestierung, periodengerechte Finanzdatenextraktion, versionierte AAOIFI-basierte Regeln, Gate-Auswertung und vollständige Audit-Evidenz.
+- Depot, Watchlist, Einzelprüfung und Frühscanner nutzen dieselbe Prüfmaschine. Der manuelle Prüfbutton startet denselben vollständigen Backend-Prozess wie geplante automatische Aktualisierungen.
+- Unvollständige oder widersprüchliche Evidenz führt zu WAIT_EVIDENCE bzw. REVIEW, **niemals** zu erfundenen Kennzahlen oder einem unbelegten PASS/FAIL. Vorhandene autorisierte Halal-Einstufungen dürfen nicht durch fehlerhafte automatische Daten überschrieben werden.
+- Masterflex, Netcall und technotrans sind lediglich Regressionstest-Fälle, **keine** fest codierten Sonderbehandlungen.
+- Diese Produktentscheidung gilt für alle weiteren APs 3–8. Abweichungen nur nach expliziter Entscheidung und dokumentierter Begründung.
+- Nächster technischer Schritt: AP 3 (Originalquellenbeschaffung/Attestierung) vollständig schließen, dann AP 4. Implementierung, Tests und produktiver Status müssen getrennt ausgewiesen werden.
