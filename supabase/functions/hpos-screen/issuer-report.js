@@ -179,18 +179,18 @@ function metric(text, patterns, multiplier) {
 function detectUnit(text) {
   const head = text.slice(0, Math.min(text.length, 160000));
   const currencies = [
-    ["CAD", /(?:thousands|millions)?\\s+of\\s+canadian dollars|\\bCAD\\b/i],
-    ["USD", /(?:thousands|millions)?\\s+of\\s+(?:u\\.s\\.?|us) dollars|\\bUSD\\b/i],
-    ["EUR", /(?:thousands|millions)?\\s+of\\s+euros?|\\bEUR\\b/i],
-    ["GBP", /pounds sterling|\\bGBP\\b/i]
+    ["CAD", /(?:thousands|millions)?\s+of\s+canadian dollars|\bCAD\b/i],
+    ["USD", /(?:thousands|millions)?\s+of\s+(?:u\.s\.?|us) dollars|\bUSD\b/i],
+    ["EUR", /(?:thousands|millions)?\s+of\s+euros?|\bEUR\b/i],
+    ["GBP", /pounds sterling|\bGBP\b/i]
   ].filter(([, re]) => re.test(head)).map(([code]) => code);
-  const million = /(?:amounts|figures|tabular amounts)?[^.\\n]{0,80}\\bin millions\\b|\\(\\s*in millions/i.test(head);
-  const thousand = /(?:amounts|figures|tabular amounts)?[^.\\n]{0,80}\\bin thousands\\b|\\(\\s*in thousands/i.test(head);
+  const million = /(?:amounts|figures|tabular amounts)?[^.\n]{0,80}\bin millions\b|\(\s*in millions/i.test(head);
+  const thousand = /(?:amounts|figures|tabular amounts)?[^.\n]{0,80}\bin thousands\b|\(\s*in thousands/i.test(head);
   return { currency: currencies.length === 1 ? currencies[0] : "", multiplier: million ? 1_000_000 : thousand ? 1_000 : 1, ambiguous: currencies.length !== 1 || (million && thousand) };
 }
 
 function detectPeriodEnds(text) {
-  return [...new Set([...text.slice(0, 220000).matchAll(/(?:year|fiscal year|twelve months)\\s+ended\\s+(?:on\\s+)?(january|february|march|april|may|june|july|august|september|october|november|december)\\s+(\\d{1,2}),\\s+(20\\d{2})/gi)]
+  return [...new Set([...text.slice(0, 220000).matchAll(/(?:year|fiscal year|twelve months)\s+ended\s+(?:on\s+)?(january|february|march|april|may|june|july|august|september|october|november|december)\s+(\d{1,2}),\s+(20\d{2})/gi)]
     .map(x => `${x[3]}-${String(monthNumber(x[1])).padStart(2, "0")}-${String(Number(x[2])).padStart(2, "0")}`)
     .filter(x => Date.parse(x) <= Date.now() + 31 * 86400000))].sort().reverse();
 }
