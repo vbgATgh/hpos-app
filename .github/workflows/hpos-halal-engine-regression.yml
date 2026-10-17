@@ -20,4 +20,4 @@ jobs:
         with:
           node-version: '22'
       - name: Run evidence, proxy, source and attestation tests
-        run: node --test tests/evidence-validator.test.mjs tests/independent-halal-proxy.test.mjs tests/issuer-source-trust.test.mjs tests/issuer-download-limits.test.mjs tests/report-attestation.test.mjs
+        run: node --test tests/evidence-validator.test.mjs tests/independent-halal-proxy.test.mjs tests/issuer-source-trust.test.mjs tests/issuer-download-limits.test.mjs tests/report-attestation.test.mjs tests/issuer-extraction-conflicts.test.mjs
