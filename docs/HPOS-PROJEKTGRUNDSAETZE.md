@@ -177,3 +177,11 @@ Cache-Pruefung im Entwicklungsbranch (2026-10-13)
 - Architekturentscheidung: eine generische automatisierte Halal-Prüfmaschine für jede Aktie, keine manuell codierten Wertpapiere, gilt unverändert.
 - Offene AP3.1-Grenzen: DNS-Preflight ist keine DNS-Pinning-Garantie; öffentliche IPv6-Ziele derzeit fail-closed; externe offizielle CDNs benötigen vertrauenswürdige Delegation; reale issuer-übergreifende Quellenabdeckung und Integrationstests offen.
 - AP3.2 weiterhin offen: fachliche Quellenattestierung, Kennzahlen-/Einheitenvalidierung, Periodenabgleich, Konflikterkennung und Quellenprüfungen an echten Originalberichten.
+
+
+## AP 3.2 – Integration und Prüfstand (2026-10-17)
+- PR #106 und #107 in `main` zusammengeführt: generischer Evidenzvalidator, unabhängiger nicht-autoritativer Proxy, sichere Originalquellenbeschaffung, Streaming-Größenbegrenzungen, SHA-256-PDF-Fingerabdruck und pro Evidenzeintrag `UNATTESTED`.
+- PR #108 in `main` zusammengeführt: widersprüchliche gleich benannte Finanzkennzahlen werden nicht willkürlich übernommen, sondern als fehlend/konfliktbehaftet behandelt; entsprechende Tests hinzugefügt.
+- GitHub Actions `HPOS Halal Engine Regression` und `HPOS Current App CI` für PR #108 erfolgreich. Ein veralteter Python-Test wurde an die fail-closed Cache-Entscheidung angepasst; das alte Akzeptieren allein anhand Methodik ist ausdrücklich nicht wiederhergestellt.
+- **Noch offen:** Originalbericht-/Emittenten-Attestierung über Metadaten hinaus, Berichtsjahr-/Spaltenzuordnung, Einheitentrennung, unabhängige Quellenverifikation, End-to-End-Backend- und Browserprüfungen, Supabase-Deployment. Kein App-Abnahmeaufruf.
+- Konfliktbehandlung ist bewusst konservativ und kann bei Vergleichszahlen zu `OPEN_REVIEW` führen; dies ist kein endgültiger fachlicher Parser.
