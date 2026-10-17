@@ -124,3 +124,56 @@ Diese Leitplanken bei jedem neuen HPOS-Arbeitspaket zuerst beachten. Änderungen
 - Datenbankabfrage: 10 Gate-Audit-Zeilen, 0 VALIDATED. Kein Anlass, PASS künstlich zu setzen oder Freigaben zu erzeugen.
 - Sicherheitsadvisor: keine WARN, acht INFO für bewusst RLS-geschützte, service-role-gesteuerte Tabellen ohne Client-Policies.
 - Offene Vertrauenslücke: validation_status/fingerprint sind Datenfelder, nicht kryptografisch oder fachlich verifizierte Quellenbelege. Bevor ein Collector VALIDATED schreibt, müssen serverseitige Provenance, ISIN-Bindung, Dokumenten- und Kennzahlenprüfung implementiert und getestet werden. Keine automatische Promotion aus bestehenden ungeprüften Einträgen.
+
+## AP Evidenzvalidator – Entwicklungsstand (2026-10-13, 21:58 MESZ)
+- hpos-screen v28 ist bereits eine generische Identity/Evidence-Engine mit SEC, ESEF und Issuer-Report-Beschaffung, AAOIFI-Teilregeln und hpos_halal_runs; keine redundante neue Engine erstellen.
+- Kritischer Befund: runCheck() cached bei force=false HPOS_AAOIFI-PASS/FAIL allein anhand Methodik und Ablaufdatum; isFreshDecisive()/preservedCanonical() können nicht serverseitig attestierte Entscheidungsdaten erhalten. API v38 maskiert solche Daten, aber hpos-screen-Antwort kann abweichen. Separat absichern und testen.
+- Draft PR #99 https://github.com/vbgATgh/hpos-app/pull/99: isolierter, generischer, fail-closed Evidenz-Vorvalidator mit ISIN-Prüfziffer, Typ-/Identitätsbindung, Quellen-Metadaten, Kennzahlen, Aktualität, Währungs- und Geschäftsprofilprüfung; Rückgabe nur ready/OPEN_REVIEW, niemals Gate-PASS. 12 Regressionstests im PR. Eine substanziell gleichwertige lokale Implementierung bestand 12/12 Node-22-Tests; exakt committete Bytes/CI noch nicht ausgeführt.
+- PR nicht gemergt oder deployed. Notwendige Integration: echte serverseitige Quellenvalidierung statt vertrauensbasierter sourceVerified-Flags; historischer Marktwert gemäß freigegebener Methodik, runId/idempotente Jobs, Audit-Fingerprint mit stabiler Kanonisierung, owner-gebundene hpos-screen-Authentifizierung, Gate-Status und Prüfbutton; danach echte HTTP-/Browser-/Parqet-Regressionstests.
+- Produktentscheidung: Keine Freigabe durch Vorvalidator; vorhandene CURATED_ISIN-Regeln nicht stillschweigend überschreiben. Keine Änderung der produktiven Version 38 in dieser Runde.
+
+
+## Übernommene Entwicklungsprotokolle aus PR #99–#101
+Cache-Pruefung im Entwicklungsbranch (2026-10-13)
+- Commit 5f2cf564 korrigiert drei Bedingungen in hpos-screen: Non-curated Ergebnisse werden nicht mehr nur nach Ablaufdatum als decisive gecached, Methodikgleichheit reicht nicht als Vertrauensbeleg, OPEN_REVIEW kann nicht-kuratierte alte Entscheidungen ersetzen.
+- GitHub-Quellcode nach Update statisch kontrolliert. Keine produktive Auslieferung oder Browserabnahme. Datenbank: 10 Gate-Audits, 0 VALIDATED.
+- Offen: unabhängige Quellenvalidierung, Validator-Integration, API-/Gate-Konsistenz, Owner-Authentifizierung und End-to-End-Tests.
+
+## Evidenz-Vorvalidator Integration (2026-10-13)
+- PR #99 Branch: Commit 4551619c integriert den bestehenden fail-closed Vorvalidator in `hpos-screen` nach der Quellenbeschaffung und vor dem Persistieren. Fehlende serverseitige Attestierung erzwingt OPEN_REVIEW; eine neue entscheidende PASS-/FAIL-Klassifikation ist über diesen Pfad derzeit nicht möglich.
+- Der neue Run speichert Vorprüfungsdetails und SHA-256-Fingerprint in `hpos_halal_runs.criteria`. Fingerprint dokumentiert nur die Daten, keine Quellenwahrheit.
+- GitHub-Datei nach Commit erneut gelesen: Import, Aufruf, OPEN_REVIEW-Guard, Audit- und Fingerprint-Verknüpfung statisch vorhanden. Keine Laufzeit-/CI-/HTTP-Tests ausgeführt; keine produktive Bereitstellung.
+- Kritische offene Punkte: echte serverseitige Verifikation von Herkunft, Identität, Berichtsperioden und 36-Monats-Marktwertmethode; danach attestierte PASS-/FAIL-Freigabe. Der derzeitige Adapter setzt sourceVerified absichtlich false und blockiert daher alle neuen nicht-kuratierten entscheidenden Ergebnisse. Vor produktiver Auslieferung muss die notwendige fachliche Prüftiefe und Benutzerwirkung abgenommen werden.
+- Weitere Abhängigkeiten: Auth-/Owner-Prüfung, Gates G1-G5, Prüfbutton, PRs #97/#98 und End-to-End-Regressionssuite.
+
+## Independent Halal Verification Engine v0.1 (2026-10-15)
+- Original ZIP mit Python-Engine, README, Netcall-Input und Referenzresultat geprüft. Python-Referenztest tatsächlich ausgeführt: Netcall plc FY2026 ergibt WAIT_EVIDENCE, fehlend market_cap, interest_bearing_debt, impermissible_income; vier Quoten WAIT. Kein finaler AAOIFI-Befund.
+- Original-Engine ist ausdrücklich ein AAOIFI-inspirierter Proxy; offene Definitionen von Schulden, Cash, Forderungen, Marktwertmethodik. Python enthält eine Eingabevalidierungslücke: negative Schuld wird als PASS_PRELIMINARY akzeptiert. Lokaler Reproduktionstest bestätigt.
+- Draft PR #100 (abhängig von #99): JS-Port `supabase/functions/_shared/independent-halal-proxy.mjs`, 10 Node-Testfälle und nicht-autoritative Integration in hpos-screen mit Audit-Feld independentProxy. Nicht nachgewiesene Bilanzklassifizierungen bleiben null und führen WAIT_EVIDENCE. Keine Überschreibung von Curated-Overrides oder Handelsfreigabe.
+- Verifiziert: GitHub Commits df51b20c, a86da8c6, e210b8d8; Python Netcall-Test und sieben lokale Python-Szenarien bestanden. Die neuen Node-Tests sind im GitHub-Branch angelegt, aber noch nicht in CI ausgeführt. Keine Supabase-Deployment-/Frontend-/Scheduler-/E2E-Abnahme.
+- Offene Umsetzung: belegte Kennzahlenextraktion aus Originaldokumenten, Quellenattestierung, verbindliche AAOIFI-Methodik inklusive 36-Monats-Marktwert, Auth/Owner-Prüfung, Job-Orchestrierung, Gate-/Button-/Scanner-Integration, Tests und Freigabe.
+
+## AP3 Originalquellen – Sicherheits-/Provenienzinkrement (2026-10-16)
+- Branch `feature/ap3-issuer-source-hardening-20261016` auf PR #100 (abhängig von PR #99). Bestehenden Issuer-Report-Collector wiederverwendet; keine parallele Engine.
+- Sicherheitsfix: issuergebundene HTTPS-URL-Prüfung für HTML-Crawl und PDF-Download; maximal drei kontrollierte Redirects, fremde PDF-Hosts und IP-Literale abgewiesen. Externe legitime CDN-Hosts benötigen künftig explizite verifizierte Delegation, nicht blindes Freischalten.
+- PDF-Finanz-Evidenz speichert zusätzlich ursprünglichen Zahlentoken, Kontextausschnitt, Fundseite und Report-Quellseite; `validationStatus: UNATTESTED` verhindert den falschen Eindruck einer vollständigen fachlichen Attestierung.
+- Tatsächlich lokal mit Node v22 ausgeführt: 16/16 Sicherheits-Unit-Tests bestanden (inklusive SSRF-/Redirect-Mocks); GitHub-Testdatei angelegt. Noch keine komplette CI-/Deno-/Edge-Integration oder produktive Verifikation.
+- Offene Risiken: DNS-Rebinding/öffentliche DNS-Auflösung, sichere CDN-Delegation, Content-Type-/Byte-Streaming, Berichtskonflikte, Kennzahlenklassifizierung, echte Quellenattestierung, Marktwertzeitreihe, Benutzerbindung und Gate-/Button-E2E.
+- Keine produktive Datenbankänderung und kein Deployment; vollständiges AP3-Abnahmekriterium NICHT erreicht.
+
+## Verbindliche Architekturentscheidung: Generische automatisierte Halal-Prüfmaschine (2026-10-16)
+**Entscheidung: ausdrücklich durch den Auftraggeber bestätigt.**
+- HPOS prüft **jede** Aktie dynamisch anhand einer validierten Identität (vorzugsweise ISIN), nicht über individuell programmierte Aktienlisten, manuelle Kennzahleneinträge oder je Release ergänzte Sonderfälle.
+- Ein gemeinsamer, wiederverwendbarer Ablauf verbindet Identitätsauflösung, sichere Originalquellenbeschaffung, Dokumenten-/Quellenattestierung, periodengerechte Finanzdatenextraktion, versionierte AAOIFI-basierte Regeln, Gate-Auswertung und vollständige Audit-Evidenz.
+- Depot, Watchlist, Einzelprüfung und Frühscanner nutzen dieselbe Prüfmaschine. Der manuelle Prüfbutton startet denselben vollständigen Backend-Prozess wie geplante automatische Aktualisierungen.
+- Unvollständige oder widersprüchliche Evidenz führt zu WAIT_EVIDENCE bzw. REVIEW, **niemals** zu erfundenen Kennzahlen oder einem unbelegten PASS/FAIL. Vorhandene autorisierte Halal-Einstufungen dürfen nicht durch fehlerhafte automatische Daten überschrieben werden.
+- Masterflex, Netcall und technotrans sind lediglich Regressionstest-Fälle, **keine** fest codierten Sonderbehandlungen.
+- Diese Produktentscheidung gilt für alle weiteren APs 3–8. Abweichungen nur nach expliziter Entscheidung und dokumentierter Begründung.
+- Nächster technischer Schritt: AP 3 (Originalquellenbeschaffung/Attestierung) vollständig schließen, dann AP 4. Implementierung, Tests und produktiver Status müssen getrennt ausgewiesen werden.
+
+## AP3.1 Fortsetzung (2026-10-16)
+- Zusätzliche Commits im Entwurfs-PR #101: DNS- und HTTP-Transport testbar injizierbar, DNS-Ausfall/Redirect-Tests, PDF-/HTML-Downloads mit hartem Streaming-Byte-Limit und MIME-Prüfung.
+- Tests in `tests/issuer-source-trust.test.mjs` und `tests/issuer-download-limits.test.mjs` ergänzt. **In diesem Arbeitsdurchlauf noch keine Ausführung der vollständigen Repository-Testdateien oder Supabase-Edge-Tests bestätigt.** Kein Deployment.
+- Architekturentscheidung: eine generische automatisierte Halal-Prüfmaschine für jede Aktie, keine manuell codierten Wertpapiere, gilt unverändert.
+- Offene AP3.1-Grenzen: DNS-Preflight ist keine DNS-Pinning-Garantie; öffentliche IPv6-Ziele derzeit fail-closed; externe offizielle CDNs benötigen vertrauenswürdige Delegation; reale issuer-übergreifende Quellenabdeckung und Integrationstests offen.
+- AP3.2 weiterhin offen: fachliche Quellenattestierung, Kennzahlen-/Einheitenvalidierung, Periodenabgleich, Konflikterkennung und Quellenprüfungen an echten Originalberichten.

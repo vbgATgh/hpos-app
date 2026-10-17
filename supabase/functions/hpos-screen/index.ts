@@ -3,6 +3,8 @@ import { createClient } from "jsr:@supabase/supabase-js@2";
 import { SEC_TICKERS } from "./sec-tickers.ts";
 import { classifyBusiness } from "./business-classifier.ts";
 import { acquireIssuerReportEvidence } from "./issuer-report.js";
+import { validateEvidence, evidenceFingerprint } from "../_shared/evidence-validator.mjs";
+import { assessIndependentProxy } from "../_shared/independent-halal-proxy.mjs";
 
 const APP_ORIGIN = "https://vbgatgh.github.io";
 const YAHOO = "https://query1.finance.yahoo.com";
@@ -79,15 +81,51 @@ async function runCheck(input: IdentityInput, force: boolean) {
   if (existing?.source_type === "CURATED_ISIN" && ["PASS", "FAIL"].includes(existing.state)) {
     return { runId: null, identity, state: existing.state, reason: existing.reason, missingCriteria: [], criteria: {}, evidence: existing.evidence || [], checkedAt: existing.checked_at, cached: true, source: existing.source_name };
   }
-  if (!force && existing && ["PASS", "FAIL"].includes(existing.state) && (!existing.expires_at || Date.parse(existing.expires_at) > Date.now())) {
+  if (!force && isFreshDecisive(existing)) {
     return { runId: null, identity, state: existing.state, reason: existing.reason, missingCriteria: [], criteria: {}, evidence: existing.evidence || [], checkedAt: existing.checked_at, cached: true, source: existing.source_name };
   }
 
   const acquired = await acquireEvidence(identity);
-  const evaluated = evaluate(acquired);
+  const preflight = validateEvidence({
+    isin: identity.isin,
+    identity,
+    acquisition: { mode: "SERVER", verified: acquired.official === true },
+    business: { isin: identity.isin, state: acquired.business?.state, sourceVerified: false, sourceUrl: "" },
+    facts: (acquired.evidence || []).filter((e: any) =>
+      ["revenue", "totalDebt", "interestBearingAssetsUpperBound", "interestIncome", "marketValueAtCheck"].includes(e.metric)
+    ).map((e: any) => ({
+      isin: identity.isin, metric: e.metric, value: e.value,
+      currency: e.unit, periodEnd: e.period, sourceUrl: e.sourceUrl,
+      sourceName: e.sourceName, quality: e.quality,
+      sourceVerified: false
+    }))
+  });
+  // Until source authenticity, issuer binding and the approved market-value period
+  // are independently attested, this run cannot produce a decisive halal verdict.
+  // The independent v0.1 engine is a parallel, non-authoritative reference calculation,
+  // not a second collector and never an investment-release signal.
+  const f = acquired.financial || {};
+  const proxy = assessIndependentProxy({
+    company: identity.name, period: f.period || null,
+    source_url: (acquired.evidence || []).find((e: any) => e.quality === "OFFICIAL")?.sourceUrl || null,
+    source_date: null, revenue: typeof f.revenue === "number" ? f.revenue : null,
+    market_cap: typeof f.marketValueAtCheck === "number" ? f.marketValueAtCheck : null,
+    market_cap_asof: f.marketValueAsOf || null,
+    interest_bearing_debt: null, // totalDebt is not automatically interest-bearing debt
+    cash_and_interest_investments: null, // no verified accounting classification
+    receivables: null, impermissible_income: typeof f.nonPermissibleIncome === "number" ? f.nonPermissibleIncome : null,
+    business_activity_status: "WAIT", activity_evidence: null
+  });
+  const rawEvaluation = evaluate(acquired);
+  const evaluated = preflight.ready ? rawEvaluation : {
+    ...rawEvaluation, state: "OPEN_REVIEW",
+    missingCriteria: [...new Set([...(rawEvaluation.missingCriteria || []), ...preflight.blockers])],
+    reason: "Serverseitige Evidenzvalidierung offen: " + preflight.blockers.join("; ")
+  };
   const completedAt = new Date().toISOString();
   const runId = crypto.randomUUID();
-  const result = { runId, identity, ...evaluated, evidence: acquired.evidence, financial: acquired.financial, coverage: acquired.coverage, checkedAt: completedAt, source: acquired.source };
+  const fingerprint = await evidenceFingerprint({ isin: identity.isin, methodology: CURRENT_METHODOLOGY, checkedAt: completedAt, evidence: acquired.evidence });
+  const result = { runId, identity, ...evaluated, independentProxy: proxy, evidence: acquired.evidence, financial: acquired.financial, coverage: acquired.coverage, preflight, evidenceFingerprint: fingerprint, checkedAt: completedAt, source: acquired.source };
   await persistRun(result, startedAt, completedAt);
   if (result.state === "OPEN_REVIEW" && isFreshDecisive(existing)) return preservedCanonical(existing, identity, result);
   return result;
@@ -96,7 +134,7 @@ async function runCheck(input: IdentityInput, force: boolean) {
 function isFreshDecisive(existing: any) {
   return !!existing && ["PASS", "FAIL"].includes(String(existing.state || ""))
     && (!existing.expires_at || Date.parse(existing.expires_at) > Date.now())
-    && (existing.source_type === "CURATED_ISIN" || existing.methodology === CURRENT_METHODOLOGY);
+    && existing.source_type === "CURATED_ISIN";
 }
 
 function preservedCanonical(existing: any, identity: any, research: any) {
@@ -478,13 +516,13 @@ function evaluate(acquired: any) {
 }
 
 async function persistRun(result: any, startedAt: string, completedAt: string) {
-  const s = db(), run = { id: result.runId, isin: result.identity.isin, symbol: result.identity.ticker || null, state: result.state, methodology: CURRENT_METHODOLOGY, reason: result.reason, missing_criteria: result.missingCriteria, criteria: result.criteria, evidence: result.evidence, started_at: startedAt, completed_at: completedAt };
+  const s = db(), run = { id: result.runId, isin: result.identity.isin, symbol: result.identity.ticker || null, state: result.state, methodology: CURRENT_METHODOLOGY, reason: result.reason, missing_criteria: result.missingCriteria, criteria: { ...result.criteria, evidencePreflight: result.preflight, independentProxy: result.independentProxy, evidenceFingerprint: result.evidenceFingerprint }, evidence: result.evidence, started_at: startedAt, completed_at: completedAt };
   const { error: runError } = await s.from("hpos_halal_runs").insert(run);
   if (runError) throw httpError(500, "run_store_failed");
   const { data: old } = await s.from("hpos_halal_evidence").select("source_type,state,expires_at,methodology").eq("isin", result.identity.isin).maybeSingle();
   if (old?.source_type === "CURATED_ISIN") return;
   const oldFresh = !old?.expires_at || Date.parse(old.expires_at) > Date.now(), oldDecisive = ["PASS", "FAIL"].includes(String(old?.state || ""));
-  if (result.state === "OPEN_REVIEW" && oldDecisive && oldFresh && (old?.source_type === "CURATED_ISIN" || old?.methodology === CURRENT_METHODOLOGY)) return;
+  if (result.state === "OPEN_REVIEW" && oldDecisive && oldFresh && old?.source_type === "CURATED_ISIN") return;
   const evidence = (result.evidence || []).slice(0, 20).map((x: any) => ({ provider: x.sourceName, status: x.metric, note: `${x.period || ""}${x.value !== undefined ? ` · ${x.value} ${x.unit || ""}` : ""}${x.location ? ` · ${x.location}` : ""}`.slice(0, 500), sourceUrl: x.sourceUrl }));
   const row = { isin: result.identity.isin, state: result.state, source_type: "HPOS_AAOIFI", source_name: "HPOS Generic Evidence Service", methodology: CURRENT_METHODOLOGY, symbol: result.identity.ticker || null, raw_status: result.state, reason: result.reason, evidence, checked_at: completedAt, expires_at: new Date(Date.parse(completedAt) + RESULT_TTL).toISOString(), updated_at: completedAt };
   const { error } = await s.from("hpos_halal_evidence").upsert(row, { onConflict: "isin" });
