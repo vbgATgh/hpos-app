@@ -191,3 +191,11 @@ Cache-Pruefung im Entwicklungsbranch (2026-10-13)
 - Generische PDF-Extraktion lehnt gemischte Währungen, gleichzeitig erkannte Tausender-/Millionen-Skalierung sowie mehrere unterschiedliche Geschäftsjahresenden vorsorglich ab. Keine ungesicherte Umrechnung und kein willkürliches Vergleichsjahr.
 - Ein Syntaxfehler bei den neuen Regex-Ausdrücken wurde nach einem fehlgeschlagenen CI-Lauf behoben. Danach waren `HPOS Halal Engine Regression` und `HPOS Current App CI` erfolgreich. PR #110 in `main` integriert.
 - **Bewusste Grenze:** Diese Prüfung ist ein konservativer Zwischenstand, kein spalten-/tabellensensitiver Parser. Sie kann valide Berichte mit Vergleichsjahren oder mehreren Darstellungswährungen ablehnen. Die korrekte Lösung erfordert positionsgebundene Tabellenextraktion, quellenspezifische Einheiten und attestierte Berichtsperioden. Kein Supabase-Deployment, keine Browser-/Live-Abnahme.
+
+
+## AP 3.2 – Metadatenattestierung weiter gehärtet (2026-10-17, PR #112)
+- ISIN-Metadaten werden generisch mittels ISO-6166-Prüfziffer geprüft; lediglich formal passende Zeichenketten reichen nicht.
+- Berichts-URL und Emittentenwebsite verwenden die gemeinsame HTTPS-/Issuer-Host-Prüfung. URLs mit Zugangsdaten werden verworfen.
+- Berichtsdatum muss ein tatsächlich existierendes Kalenderdatum sein. Ungültige Datumswerte werden nicht attestiert.
+- Zusätzliche Regressionstests; `HPOS Current App CI` und `HPOS Halal Engine Regression` bestanden. PR #112 in `main` integriert.
+- Status: **Metadatenprüfung**, keine unabhängige Prüfung der finanziellen Werte oder vollständige Tabellen-/Periodenextraktion; keine bestätigte Produktivbereitstellung und keine Browserabnahme.
