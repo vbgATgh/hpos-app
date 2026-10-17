@@ -143,3 +143,28 @@ Diese Leitplanken bei jedem neuen HPOS-Arbeitspaket zuerst beachten. Änderungen
 - Draft PR #100 (abhängig von #99): JS-Port `supabase/functions/_shared/independent-halal-proxy.mjs`, 10 Node-Testfälle und nicht-autoritative Integration in hpos-screen mit Audit-Feld independentProxy. Nicht nachgewiesene Bilanzklassifizierungen bleiben null und führen WAIT_EVIDENCE. Keine Überschreibung von Curated-Overrides oder Handelsfreigabe.
 - Verifiziert: GitHub Commits df51b20c, a86da8c6, e210b8d8; Python Netcall-Test und sieben lokale Python-Szenarien bestanden. Die neuen Node-Tests sind im GitHub-Branch angelegt, aber noch nicht in CI ausgeführt. Keine Supabase-Deployment-/Frontend-/Scheduler-/E2E-Abnahme.
 - Offene Umsetzung: belegte Kennzahlenextraktion aus Originaldokumenten, Quellenattestierung, verbindliche AAOIFI-Methodik inklusive 36-Monats-Marktwert, Auth/Owner-Prüfung, Job-Orchestrierung, Gate-/Button-/Scanner-Integration, Tests und Freigabe.
+
+## AP3 Originalquellen – Sicherheits-/Provenienzinkrement (2026-10-16)
+- Branch `feature/ap3-issuer-source-hardening-20261016` auf PR #100 (abhängig von PR #99). Bestehenden Issuer-Report-Collector wiederverwendet; keine parallele Engine.
+- Sicherheitsfix: issuergebundene HTTPS-URL-Prüfung für HTML-Crawl und PDF-Download; maximal drei kontrollierte Redirects, fremde PDF-Hosts und IP-Literale abgewiesen. Externe legitime CDN-Hosts benötigen künftig explizite verifizierte Delegation, nicht blindes Freischalten.
+- PDF-Finanz-Evidenz speichert zusätzlich ursprünglichen Zahlentoken, Kontextausschnitt, Fundseite und Report-Quellseite; `validationStatus: UNATTESTED` verhindert den falschen Eindruck einer vollständigen fachlichen Attestierung.
+- Tatsächlich lokal mit Node v22 ausgeführt: 16/16 Sicherheits-Unit-Tests bestanden (inklusive SSRF-/Redirect-Mocks); GitHub-Testdatei angelegt. Noch keine komplette CI-/Deno-/Edge-Integration oder produktive Verifikation.
+- Offene Risiken: DNS-Rebinding/öffentliche DNS-Auflösung, sichere CDN-Delegation, Content-Type-/Byte-Streaming, Berichtskonflikte, Kennzahlenklassifizierung, echte Quellenattestierung, Marktwertzeitreihe, Benutzerbindung und Gate-/Button-E2E.
+- Keine produktive Datenbankänderung und kein Deployment; vollständiges AP3-Abnahmekriterium NICHT erreicht.
+
+## Verbindliche Architekturentscheidung: Generische automatisierte Halal-Prüfmaschine (2026-10-16)
+**Entscheidung: ausdrücklich durch den Auftraggeber bestätigt.**
+- HPOS prüft **jede** Aktie dynamisch anhand einer validierten Identität (vorzugsweise ISIN), nicht über individuell programmierte Aktienlisten, manuelle Kennzahleneinträge oder je Release ergänzte Sonderfälle.
+- Ein gemeinsamer, wiederverwendbarer Ablauf verbindet Identitätsauflösung, sichere Originalquellenbeschaffung, Dokumenten-/Quellenattestierung, periodengerechte Finanzdatenextraktion, versionierte AAOIFI-basierte Regeln, Gate-Auswertung und vollständige Audit-Evidenz.
+- Depot, Watchlist, Einzelprüfung und Frühscanner nutzen dieselbe Prüfmaschine. Der manuelle Prüfbutton startet denselben vollständigen Backend-Prozess wie geplante automatische Aktualisierungen.
+- Unvollständige oder widersprüchliche Evidenz führt zu WAIT_EVIDENCE bzw. REVIEW, **niemals** zu erfundenen Kennzahlen oder einem unbelegten PASS/FAIL. Vorhandene autorisierte Halal-Einstufungen dürfen nicht durch fehlerhafte automatische Daten überschrieben werden.
+- Masterflex, Netcall und technotrans sind lediglich Regressionstest-Fälle, **keine** fest codierten Sonderbehandlungen.
+- Diese Produktentscheidung gilt für alle weiteren APs 3–8. Abweichungen nur nach expliziter Entscheidung und dokumentierter Begründung.
+- Nächster technischer Schritt: AP 3 (Originalquellenbeschaffung/Attestierung) vollständig schließen, dann AP 4. Implementierung, Tests und produktiver Status müssen getrennt ausgewiesen werden.
+
+## AP3.1 Fortsetzung (2026-10-16)
+- Zusätzliche Commits im Entwurfs-PR #101: DNS- und HTTP-Transport testbar injizierbar, DNS-Ausfall/Redirect-Tests, PDF-/HTML-Downloads mit hartem Streaming-Byte-Limit und MIME-Prüfung.
+- Tests in `tests/issuer-source-trust.test.mjs` und `tests/issuer-download-limits.test.mjs` ergänzt. **In diesem Arbeitsdurchlauf noch keine Ausführung der vollständigen Repository-Testdateien oder Supabase-Edge-Tests bestätigt.** Kein Deployment.
+- Architekturentscheidung: eine generische automatisierte Halal-Prüfmaschine für jede Aktie, keine manuell codierten Wertpapiere, gilt unverändert.
+- Offene AP3.1-Grenzen: DNS-Preflight ist keine DNS-Pinning-Garantie; öffentliche IPv6-Ziele derzeit fail-closed; externe offizielle CDNs benötigen vertrauenswürdige Delegation; reale issuer-übergreifende Quellenabdeckung und Integrationstests offen.
+- AP3.2 weiterhin offen: fachliche Quellenattestierung, Kennzahlen-/Einheitenvalidierung, Periodenabgleich, Konflikterkennung und Quellenprüfungen an echten Originalberichten.
