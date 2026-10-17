@@ -185,3 +185,9 @@ Cache-Pruefung im Entwicklungsbranch (2026-10-13)
 - GitHub Actions `HPOS Halal Engine Regression` und `HPOS Current App CI` für PR #108 erfolgreich. Ein veralteter Python-Test wurde an die fail-closed Cache-Entscheidung angepasst; das alte Akzeptieren allein anhand Methodik ist ausdrücklich nicht wiederhergestellt.
 - **Noch offen:** Originalbericht-/Emittenten-Attestierung über Metadaten hinaus, Berichtsjahr-/Spaltenzuordnung, Einheitentrennung, unabhängige Quellenverifikation, End-to-End-Backend- und Browserprüfungen, Supabase-Deployment. Kein App-Abnahmeaufruf.
 - Konfliktbehandlung ist bewusst konservativ und kann bei Vergleichszahlen zu `OPEN_REVIEW` führen; dies ist kein endgültiger fachlicher Parser.
+
+
+## AP 3.2 – Einheiten- und Periodenabsicherung (2026-10-17, PR #110)
+- Generische PDF-Extraktion lehnt gemischte Währungen, gleichzeitig erkannte Tausender-/Millionen-Skalierung sowie mehrere unterschiedliche Geschäftsjahresenden vorsorglich ab. Keine ungesicherte Umrechnung und kein willkürliches Vergleichsjahr.
+- Ein Syntaxfehler bei den neuen Regex-Ausdrücken wurde nach einem fehlgeschlagenen CI-Lauf behoben. Danach waren `HPOS Halal Engine Regression` und `HPOS Current App CI` erfolgreich. PR #110 in `main` integriert.
+- **Bewusste Grenze:** Diese Prüfung ist ein konservativer Zwischenstand, kein spalten-/tabellensensitiver Parser. Sie kann valide Berichte mit Vergleichsjahren oder mehreren Darstellungswährungen ablehnen. Die korrekte Lösung erfordert positionsgebundene Tabellenextraktion, quellenspezifische Einheiten und attestierte Berichtsperioden. Kein Supabase-Deployment, keine Browser-/Live-Abnahme.
