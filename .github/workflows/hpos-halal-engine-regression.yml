@@ -1,0 +1,23 @@
+name: HPOS Halal Engine Regression
+on:
+  push:
+    branches:
+      - integration/hpos-ap3-merge-resolved-20261017
+  pull_request:
+    paths:
+      - 'supabase/functions/hpos-screen/**'
+      - 'supabase/functions/_shared/**'
+      - 'tests/**'
+      - '.github/workflows/hpos-halal-engine-regression.yml'
+permissions:
+  contents: read
+jobs:
+  node-regression:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run evidence, proxy, source and attestation tests
+        run: node --test tests/evidence-validator.test.mjs tests/independent-halal-proxy.test.mjs tests/issuer-source-trust.test.mjs tests/issuer-download-limits.test.mjs tests/report-attestation.test.mjs
