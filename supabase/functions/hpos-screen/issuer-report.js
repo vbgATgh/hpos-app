@@ -111,12 +111,12 @@ export function extractOfficialReportText(rawText, meta = {}) {
   const currentAssets = metric(text, [new RegExp(`\\btotal current assets\\s+\\$?\\s*\\(?${amount}\\)?`, "i")], multiplier);
   const interestIncome = metric(text, [new RegExp(`\\binterest income\\s+\\$?\\s*\\(?${amount}\\)?`, "i"), new RegExp(`\\bfinance income\\s+\\$?\\s*\\(?${amount}\\)?`, "i")], multiplier);
   const financial = {
-    revenue: revenue?.value ?? null,
-    interestIncome: interestIncome?.value ?? null,
-    interestIncomeMethod: interestIncome ? "LOWER_BOUND" : "MISSING",
+    revenue: revenue && !revenue.conflict ? revenue.value : null,
+    interestIncome: interestIncome && !interestIncome.conflict ? interestIncome.value : null,
+    interestIncomeMethod: interestIncome && !interestIncome.conflict ? "LOWER_BOUND" : "MISSING",
     nonPermissibleIncome: null,
-    totalDebt: totalDebt?.value ?? null,
-    interestBearingAssetsUpperBound: currentAssets?.value ?? null,
+    totalDebt: totalDebt && !totalDebt.conflict ? totalDebt.value : null,
+    interestBearingAssetsUpperBound: currentAssets && !currentAssets.conflict ? currentAssets.value : null,
     marketValueAtCheck: null,
     marketValueAsOf: "",
     currency,
@@ -124,7 +124,8 @@ export function extractOfficialReportText(rawText, meta = {}) {
     marketValueMethod: "UNAVAILABLE",
     marketCurrencyCompatible: false,
     debtDirect: false,
-    interestAssetsUpperBound: !!currentAssets
+    interestAssetsUpperBound: !!currentAssets && !currentAssets.conflict,
+    extractionConflicts: [revenue, totalDebt, currentAssets, interestIncome].some(x => x?.conflict === true)
   };
   const specs = [
     ["revenue", revenue, "Reported revenue"],
@@ -132,7 +133,7 @@ export function extractOfficialReportText(rawText, meta = {}) {
     ["interestBearingAssetsUpperBound", currentAssets, "Total current assets; conservative upper bound"],
     ["interestIncome", interestIncome, "Reported interest or finance income; lower bound"]
   ];
-  const evidence = specs.filter(([, value]) => value).map(([metricName, value, label]) => ({
+  const evidence = specs.filter(([, value]) => value && !value.conflict).map(([metricName, value, label]) => ({
     metric: metricName,
     value: value.value,
     unit: currency,
@@ -153,15 +154,20 @@ export function extractOfficialReportText(rawText, meta = {}) {
 }
 
 function metric(text, patterns, multiplier) {
+  // Multiple differing figures for the same label can indicate prior-year
+  // comparatives, another segment or a different unit. Never pick the first.
+  const matches = [];
   for (const pattern of patterns) {
-    const match = pattern.exec(text);
-    if (!match) continue;
-    const value = parseAmount(match[1]) * multiplier;
-    if (!Number.isFinite(value) || value < 0) continue;
-    const page = pageAt(text, match.index);
-    return { value, page, rawValue: match[1], originalText: text.slice(Math.max(0, match.index - 100), Math.min(text.length, match.index + match[0].length + 100)).trim() };
+    const all = new RegExp(pattern.source, 'gi');
+    for (const match of text.matchAll(all)) {
+      const value = parseAmount(match[1]) * multiplier;
+      if (!Number.isFinite(value) || value < 0) continue;
+      matches.push({ value, page: pageAt(text, match.index), rawValue: match[1], originalText: text.slice(Math.max(0, match.index - 100), Math.min(text.length, match.index + match[0].length + 100)).trim() });
+    }
   }
-  return null;
+  if (!matches.length) return null;
+  if (new Set(matches.map(m => m.value)).size > 1) return { conflict: true, candidateCount: matches.length };
+  return matches[0];
 }
 
 function detectUnit(text) {
