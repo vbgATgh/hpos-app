@@ -133,7 +133,7 @@ def test_button_check_acquires_generic_official_reports_before_transitional_over
     assert "genericIssuerReportDiscovery: true" in SCREEN
     assert "nullIsNeverZero: true" in SCREEN
     assert "if (!hasMachineEvidence)" in SCREEN
-    assert "existing.methodology === CURRENT_METHODOLOGY" in SCREEN
+    assert "isFreshDecisive(existing)" in SCREEN  # Fail-closed: methodology alone is not sufficient
     assert "metricLevelEvidenceMerge: true" in SCREEN
     assert "mergeEvidenceSources(identity, sources)" in SCREEN
     assert 'source: `MERGED:${sourceNames.join("+")}`' in SCREEN
