@@ -1,0 +1,12 @@
+import test from "node:test";import assert from "node:assert/strict";import {assessIndependentProxy as assess} from "../supabase/functions/_shared/independent-halal-proxy.mjs";
+const base={company:"Test",period:"FY2026",source_url:"https://example.com/report",source_date:"2026-10-01",revenue:100,market_cap:1000,market_cap_asof:"2026-10-01",interest_bearing_debt:100,cash_and_interest_investments:100,receivables:100,impermissible_income:1,business_activity_status:"PASS",activity_evidence:"https://example.com/report"};
+test("complete preliminary pass never claims certification",()=>{const r=assess(base,"2026-10-15");assert.equal(r.halal_gate,"PASS_PRELIMINARY");assert.match(r.warning,/final Sharia ruling/)});
+test("debt fail",()=>assert.equal(assess({...base,interest_bearing_debt:400}).halal_gate,"HARD_FAIL"));
+test("business fail",()=>assert.equal(assess({...base,business_activity_status:"FAIL"}).halal_gate,"HARD_FAIL"));
+test("missing market cap waits",()=>assert.equal(assess({...base,market_cap:null}).halal_gate,"WAIT_EVIDENCE"));
+test("missing income waits",()=>assert.equal(assess({...base,impermissible_income:null}).halal_gate,"WAIT_EVIDENCE"));
+test("invalid negative input requires review",()=>assert.equal(assess({...base,interest_bearing_debt:-1}).halal_gate,"REVIEW"));
+test("NaN input requires review",()=>assert.equal(assess({...base,revenue:NaN}).halal_gate,"REVIEW"));
+test("threshold boundary fails",()=>assert.equal(assess({...base,interest_bearing_debt:300}).halal_gate,"HARD_FAIL"));
+test("missing activity evidence waits",()=>assert.equal(assess({...base,activity_evidence:null}).halal_gate,"WAIT_EVIDENCE"));
+test("Netcall reference from supplied ZIP",()=>{const r=assess({company:"Netcall plc",period:"FY2026 (30 June 2026)",source_url:"https://www.netcall.com/investors/reports-and-results/",source_date:"2026-10-07",revenue:57.670,cash_and_interest_investments:21.007,receivables:8.222,interest_bearing_debt:null,impermissible_income:null,market_cap:null,market_cap_asof:null,business_activity_status:"WAIT",activity_evidence:null},"2026-10-15");assert.equal(r.halal_gate,"WAIT_EVIDENCE");assert.deepEqual(r.missing_fields,["market_cap","interest_bearing_debt","impermissible_income"]);assert.ok(r.tests.every(t=>t.status==="WAIT"))});
