@@ -100,7 +100,13 @@ export function extractOfficialReportText(rawText, meta = {}) {
   const identity = meta.identity || {};
   if (!companyTextMatches(text, identity?.name)) return null;
   const unit = detectUnit(text), currency = unit.currency, multiplier = unit.multiplier;
+  // A single global multiplier/currency cannot safely describe a mixed-unit report.
+  // Reject extraction until each statement/table has been independently scoped.
+  if (unit.ambiguous) return null;
   const periodEnd = detectPeriodEnd(text);
+  // Multiple fiscal-year-end dates can represent comparatives or unrelated sections.
+  // Never assign one period to all extracted metrics without column-level evidence.
+  if (detectPeriodEnds(text).length !== 1) return null;
   if (!currency || !periodEnd) return null;
   const reportUrl = publicHttps(meta.reportUrl || "");
   if (!reportUrl) return null;
@@ -172,18 +178,23 @@ function metric(text, patterns, multiplier) {
 
 function detectUnit(text) {
   const head = text.slice(0, Math.min(text.length, 160000));
-  const currency = /(?:thousands|millions)?\s+of\s+canadian dollars|\bCAD\b/i.test(head) ? "CAD" : /(?:thousands|millions)?\s+of\s+(?:u\.s\.?|us) dollars|\bUSD\b/i.test(head) ? "USD" : /(?:thousands|millions)?\s+of\s+euros?|\bEUR\b/i.test(head) ? "EUR" : /pounds sterling|\bGBP\b/i.test(head) ? "GBP" : "";
-  const multiplier = /(?:amounts|figures|tabular amounts)?[^.\n]{0,80}\bin millions\b|\(\s*in millions/i.test(head) ? 1_000_000 : /(?:amounts|figures|tabular amounts)?[^.\n]{0,80}\bin thousands\b|\(\s*in thousands/i.test(head) ? 1_000 : 1;
-  return { currency, multiplier };
+  const currencies = [
+    ["CAD", /(?:thousands|millions)?\s+of\s+canadian dollars|\bCAD\b/i],
+    ["USD", /(?:thousands|millions)?\s+of\s+(?:u\.s\.?|us) dollars|\bUSD\b/i],
+    ["EUR", /(?:thousands|millions)?\s+of\s+euros?|\bEUR\b/i],
+    ["GBP", /pounds sterling|\bGBP\b/i]
+  ].filter(([, re]) => re.test(head)).map(([code]) => code);
+  const million = /(?:amounts|figures|tabular amounts)?[^.\n]{0,80}\bin millions\b|\(\s*in millions/i.test(head);
+  const thousand = /(?:amounts|figures|tabular amounts)?[^.\n]{0,80}\bin thousands\b|\(\s*in thousands/i.test(head);
+  return { currency: currencies.length === 1 ? currencies[0] : "", multiplier: million ? 1_000_000 : thousand ? 1_000 : 1, ambiguous: currencies.length !== 1 || (million && thousand) };
 }
 
-function detectPeriodEnd(text) {
-  const candidates = [...text.slice(0, 220000).matchAll(/(?:year|fiscal year|twelve months)\s+ended\s+(?:on\s+)?(january|february|march|april|may|june|july|august|september|october|november|december)\s+(\d{1,2}),\s+(20\d{2})/gi)]
+function detectPeriodEnds(text) {
+  return [...new Set([...text.slice(0, 220000).matchAll(/(?:year|fiscal year|twelve months)\s+ended\s+(?:on\s+)?(january|february|march|april|may|june|july|august|september|october|november|december)\s+(\d{1,2}),\s+(20\d{2})/gi)]
     .map(x => `${x[3]}-${String(monthNumber(x[1])).padStart(2, "0")}-${String(Number(x[2])).padStart(2, "0")}`)
-    .filter(x => Date.parse(x) <= Date.now() + 31 * 86400000)
-    .sort().reverse();
-  return candidates[0] || "";
+    .filter(x => Date.parse(x) <= Date.now() + 31 * 86400000))].sort().reverse();
 }
+function detectPeriodEnd(text) { return detectPeriodEnds(text)[0] || ""; }
 
 function businessDescription(text, name) {
   const clean = text.replace(/\[PAGE \d+\]/g, " ");
