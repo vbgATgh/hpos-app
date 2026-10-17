@@ -23,6 +23,7 @@ export async function acquireIssuerReportEvidence(identity, profile) {
   if (!parsed || !Object.keys(parsed.financial).some(key => parsed.financial[key] != null)) return null;
   parsed.attestation = attestReportMetadata({ identity, reportUrl: extracted.url, issuerWebsite: website, period: parsed.financial.period, currency: parsed.financial.currency, pages: extracted.pageCount, sha256: extracted.sha256 });
   parsed.extraction.sha256 = extracted.sha256;
+  parsed.evidence = (parsed.evidence || []).map(item => ({ ...item, documentSha256: extracted.sha256, validationStatus: "UNATTESTED" }));
   // Metadata checks are NOT independent financial-statement attestation.
   return parsed;
 }
