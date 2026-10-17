@@ -1,3 +1,4 @@
+import { attestReportMetadata } from "./report-attestation.mjs";
 import { trustedHttpsUrl, issuerHostMatches, fetchIssuerResource } from "./source-trust.mjs";
 const MAX_HTML_BYTES = 1_500_000;
 const MAX_PDF_BYTES = 14_000_000;
@@ -15,9 +16,14 @@ export async function acquireIssuerReportEvidence(identity, profile) {
     identity,
     reportUrl: extracted.url,
     sourcePageUrl: discovered.sourcePageUrl,
-    pageCount: extracted.pageCount
+    pageCount: extracted.pageCount,
+    sha256: extracted.sha256,
+    issuerWebsite: website
   });
   if (!parsed || !Object.keys(parsed.financial).some(key => parsed.financial[key] != null)) return null;
+  parsed.attestation = attestReportMetadata({ identity, reportUrl: extracted.url, issuerWebsite: website, period: parsed.financial.period, currency: parsed.financial.currency, pages: extracted.pageCount, sha256: extracted.sha256 });
+  parsed.extraction.sha256 = extracted.sha256;
+  // Metadata checks are NOT independent financial-statement attestation.
   return parsed;
 }
 
@@ -81,7 +87,9 @@ async function extractPdf(url, issuerWebsite) {
       const content = await page.getTextContent();
       pages.push(content.items.map(item => String(item?.str || "")).join(" "));
     }
-    return { url: finalUrl, pageCount: pdf.numPages, text: pages.map((page, i) => `\n[PAGE ${i + 1}]\n${page}`).join("\n") };
+    const digest = new Uint8Array(await crypto.subtle.digest("SHA-256", bytes));
+    const sha256 = Array.from(digest, b => b.toString(16).padStart(2, "0")).join("");
+    return { url: finalUrl, sha256, pageCount: pdf.numPages, text: pages.map((page, i) => `\n[PAGE ${i + 1}]\n${page}`).join("\n") };
   } catch { return null; }
 }
 
