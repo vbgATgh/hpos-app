@@ -1,22 +1,29 @@
+import { attestReportMetadata } from "./report-attestation.mjs";
+import { trustedHttpsUrl, issuerHostMatches, fetchIssuerResource } from "./source-trust.mjs";
 const MAX_HTML_BYTES = 1_500_000;
 const MAX_PDF_BYTES = 14_000_000;
 const MAX_CRAWL_PAGES = 5;
 const MAX_PDF_PAGES = 90;
 
 export async function acquireIssuerReportEvidence(identity, profile) {
-  const website = publicHttps(profile?.website || "");
+  const website = trustedHttpsUrl(profile?.website || "")?.toString() || "";
   if (!website) return null;
   const discovered = await discoverReport(website);
   if (!discovered?.url) return null;
-  const extracted = await extractPdf(discovered.url);
+  const extracted = await extractPdf(discovered.url, website);
   if (!extracted?.text) return null;
   const parsed = extractOfficialReportText(extracted.text, {
     identity,
     reportUrl: extracted.url,
     sourcePageUrl: discovered.sourcePageUrl,
-    pageCount: extracted.pageCount
+    pageCount: extracted.pageCount,
+    sha256: extracted.sha256,
+    issuerWebsite: website
   });
   if (!parsed || !Object.keys(parsed.financial).some(key => parsed.financial[key] != null)) return null;
+  parsed.attestation = attestReportMetadata({ identity, reportUrl: extracted.url, issuerWebsite: website, period: parsed.financial.period, currency: parsed.financial.currency, pages: extracted.pageCount, sha256: extracted.sha256 });
+  parsed.extraction.sha256 = extracted.sha256;
+  // Metadata checks are NOT independent financial-statement attestation.
   return parsed;
 }
 
@@ -29,7 +36,7 @@ async function discoverReport(website) {
     const pageUrl = queue.shift();
     if (!pageUrl || seen.has(pageUrl)) continue;
     seen.add(pageUrl);
-    const html = await fetchLimitedText(pageUrl, "text/html,application/xhtml+xml");
+    const html = await fetchLimitedText(pageUrl, "text/html,application/xhtml+xml", website);
     if (!html) continue;
     for (const link of linksFromHtml(html, pageUrl)) {
       if (!trustedLink(origin, link.url)) continue;
@@ -60,13 +67,16 @@ function linksFromHtml(html, base) {
   return unique(out, x => x.url);
 }
 
-async function extractPdf(url) {
+async function extractPdf(url, issuerWebsite) {
   try {
-    const response = await fetch(url, { headers: { Accept: "application/pdf", "User-Agent": "HPOS/1.0 official-report-research" }, redirect: "follow", signal: AbortSignal.timeout(20000) });
-    const finalUrl = publicHttps(response.url) || "";
+    const response = await fetchIssuerResource(url, issuerWebsite, { headers: { Accept: "application/pdf", "User-Agent": "HPOS/1.0 official-report-research" }, signal: AbortSignal.timeout(20000) });
+    if (!response) return null;
+    const finalUrl = issuerHostMatches(issuerWebsite, response.url) ? response.url : "";
     const length = Number(response.headers.get("content-length") || 0);
-    if (!response.ok || !finalUrl || (length && length > MAX_PDF_BYTES)) return null;
-    const bytes = new Uint8Array(await response.arrayBuffer());
+    const contentType = String(response.headers.get("content-type") || "").toLowerCase();
+    if (!response.ok || !finalUrl || (contentType && !contentType.includes("application/pdf") && !contentType.includes("application/octet-stream")) || (length && length > MAX_PDF_BYTES)) return null;
+    const bytes = await readLimitedBytes(response, MAX_PDF_BYTES);
+    if (!bytes) return null;
     if (bytes.byteLength < 500 || bytes.byteLength > MAX_PDF_BYTES || String.fromCharCode(...bytes.slice(0, 4)) !== "%PDF") return null;
     const pdfjs = await import("npm:pdfjs-dist@4.10.38/legacy/build/pdf.mjs");
     const pdf = await pdfjs.getDocument({ data: bytes, disableWorker: true, isEvalSupported: false, useSystemFonts: true }).promise;
@@ -77,7 +87,9 @@ async function extractPdf(url) {
       const content = await page.getTextContent();
       pages.push(content.items.map(item => String(item?.str || "")).join(" "));
     }
-    return { url: finalUrl, pageCount: pdf.numPages, text: pages.map((page, i) => `\n[PAGE ${i + 1}]\n${page}`).join("\n") };
+    const digest = new Uint8Array(await crypto.subtle.digest("SHA-256", bytes));
+    const sha256 = Array.from(digest, b => b.toString(16).padStart(2, "0")).join("");
+    return { url: finalUrl, sha256, pageCount: pdf.numPages, text: pages.map((page, i) => `\n[PAGE ${i + 1}]\n${page}`).join("\n") };
   } catch { return null; }
 }
 
@@ -128,6 +140,10 @@ export function extractOfficialReportText(rawText, meta = {}) {
     sourceUrl: reportUrl,
     location: `page:${value.page}`,
     method: label,
+    originalText: value.originalText,
+    extractedValue: value.rawValue,
+    sourcePageUrl: meta.sourcePageUrl || "",
+    validationStatus: "UNATTESTED",
     quality: "OFFICIAL"
   }));
   const description = businessDescription(text, identity?.name);
@@ -142,7 +158,7 @@ function metric(text, patterns, multiplier) {
     const value = parseAmount(match[1]) * multiplier;
     if (!Number.isFinite(value) || value < 0) continue;
     const page = pageAt(text, match.index);
-    return { value, page };
+    return { value, page, rawValue: match[1], originalText: text.slice(Math.max(0, match.index - 100), Math.min(text.length, match.index + match[0].length + 100)).trim() };
   }
   return null;
 }
@@ -197,7 +213,32 @@ function normalizeText(value) { return String(value || "").replace(/\u00a0/g, " 
 function stripHtml(value) { return decodeHtml(String(value || "").replace(/<[^>]+>/g, " ")).replace(/\s+/g, " ").trim(); }
 function decodeHtml(value) { return String(value || "").replace(/&amp;/gi, "&").replace(/&quot;/gi, '"').replace(/&#39;|&apos;/gi, "'").replace(/&lt;/gi, "<").replace(/&gt;/gi, ">"); }
 function rootDomain(host) { const parts = String(host || "").toLowerCase().split(".").filter(Boolean); return parts.slice(-2).join("."); }
-function trustedLink(origin, value) { try { const url = new URL(value); return !!publicHttps(url.toString()) && (rootDomain(url.hostname) === rootDomain(origin.hostname) || /\.pdf(?:$|[?#])/i.test(url.toString())); } catch { return false; } }
-function publicHttps(value) { try { const url = new URL(String(value || "")); const host = url.hostname.toLowerCase(); if (url.protocol !== "https:" || url.username || url.password || host === "localhost" || host.endsWith(".local") || /^127\.|^10\.|^192\.168\.|^169\.254\.|^172\.(1[6-9]|2\d|3[01])\./.test(host)) return ""; return url.toString(); } catch { return ""; } }
+function trustedLink(origin, value) { return issuerHostMatches(origin.toString(), value); }
+function publicHttps(value) { return trustedHttpsUrl(value)?.toString() || ""; }
 function unique(items, key) { const seen = new Set(); return items.filter(item => { const value = key(item); if (!value || seen.has(value)) return false; seen.add(value); return true; }); }
-async function fetchLimitedText(url, accept) { try { const response = await fetch(url, { headers: { Accept: accept, "User-Agent": "Mozilla/5.0 HPOS/1.0 official-report-research" }, redirect: "follow", signal: AbortSignal.timeout(10000) }); const length = Number(response.headers.get("content-length") || 0); if (!response.ok || !publicHttps(response.url) || (length && length > MAX_HTML_BYTES)) return ""; const text = await response.text(); return text.length <= MAX_HTML_BYTES ? text : ""; } catch { return ""; } }
+async function fetchLimitedText(url, accept, issuerWebsite) { try { const response = await fetchIssuerResource(url, issuerWebsite, { headers: { Accept: accept, "User-Agent": "Mozilla/5.0 HPOS/1.0 official-report-research" }, signal: AbortSignal.timeout(10000) }); if (!response) return ""; const length = Number(response.headers.get("content-length") || 0); if (length && length > MAX_HTML_BYTES) return ""; const contentType=String(response.headers.get("content-type")||"").toLowerCase(); if(contentType && !contentType.includes("text/html") && !contentType.includes("application/xhtml+xml"))return ""; const bytes=await readLimitedBytes(response,MAX_HTML_BYTES); if(!bytes)return ""; return new TextDecoder().decode(bytes); } catch { return ""; } }
+
+/** Bound memory even when Content-Length is absent or dishonest. */
+export async function readLimitedBytes(response, maxBytes) {
+  if (!Number.isSafeInteger(maxBytes) || maxBytes < 1) return null;
+  const declared=Number(response.headers?.get?.("content-length")||0);
+  if (declared > maxBytes) return null;
+  if (!response.body?.getReader) {
+    const bytes=new Uint8Array(await response.arrayBuffer());
+    return bytes.byteLength <= maxBytes ? bytes : null;
+  }
+  const reader=response.body.getReader();
+  const parts=[];let total=0;
+  try {
+    while(true){
+      const {value,done}=await reader.read();
+      if(done)break;
+      total+=value.byteLength;
+      if(total>maxBytes){await reader.cancel().catch(()=>{});return null;}
+      parts.push(value);
+    }
+    const out=new Uint8Array(total);let offset=0;
+    for(const part of parts){out.set(part,offset);offset+=part.byteLength;}
+    return out;
+  }finally{try{reader.releaseLock()}catch{}}
+}
