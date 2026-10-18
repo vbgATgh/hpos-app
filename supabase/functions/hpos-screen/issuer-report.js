@@ -104,15 +104,14 @@ export function extractOfficialReportText(rawText, meta = {}) {
   // Reject extraction until each statement/table has been independently scoped.
   if (unit.ambiguous) return null;
   const periodEnd = detectPeriodEnd(text);
-  // Multiple fiscal-year-end dates can represent comparatives or unrelated sections.
-  // Never assign one period to all extracted metrics without column-level evidence.
-  if (detectPeriodEnds(text).length !== 1) return null;
+  // Multiple periods may be present, but figures must then carry their own
+  // unambiguous column/period binding before they can be accepted.
   if (!currency || !periodEnd) return null;
   const reportUrl = publicHttps(meta.reportUrl || "");
   if (!reportUrl) return null;
   const sourceName = `${String(identity?.name || "Issuer").trim()} official annual report`;
   const amount = "(\\d{1,3}(?:[,.]\\d{3})+|\\d+)";
-  const revenue = metric(text, [new RegExp(`\\b(?:total\\s+)?revenue(?:s)?\\s+\\$?\\s*\\(?${amount}\\)?`, "i"), new RegExp(`\\bnet sales\\s+\\$?\\s*\\(?${amount}\\)?`, "i")], multiplier);
+  const revenue = metric(text, [new RegExp(`\\b(?:total\\s+)?revenue(?:s)?\\s+\\$?\\s*\\(?${amount}\\)?`, "i"), new RegExp(`\\bnet sales\\s+\\$?\\s*\\(?${amount}\\)?`, "i")], multiplier, periodEnd);
   const totalDebt = metric(text, [new RegExp(`\\btotal debt\\*?\\s+\\$?\\s*\\(?${amount}\\)?`, "i"), new RegExp(`\\bborrowings and lease liabilities\\s+\\$?\\s*\\(?${amount}\\)?`, "i")], multiplier);
   const currentAssets = metric(text, [new RegExp(`\\btotal current assets\\s+\\$?\\s*\\(?${amount}\\)?`, "i")], multiplier);
   const interestIncome = metric(text, [new RegExp(`\\binterest income\\s+\\$?\\s*\\(?${amount}\\)?`, "i"), new RegExp(`\\bfinance income\\s+\\$?\\s*\\(?${amount}\\)?`, "i")], multiplier);
@@ -159,7 +158,7 @@ export function extractOfficialReportText(rawText, meta = {}) {
   return { source: "ISSUER_REPORT_GENERIC", official: true, identity, businessDescription: description, reportUrl, financial, evidence, extraction: { sourcePageUrl: meta.sourcePageUrl || "", pageCount: Number(meta.pageCount || 0), parser: "PDFJS_STRICT_LABELS_V1" } };
 }
 
-function metric(text, patterns, multiplier) {
+function metric(text, patterns, multiplier, periodEnd) {
   // Multiple differing figures for the same label can indicate prior-year
   // comparatives, another segment or a different unit. Never pick the first.
   const matches = [];
@@ -168,7 +167,13 @@ function metric(text, patterns, multiplier) {
     for (const match of text.matchAll(all)) {
       const value = parseAmount(match[1]) * multiplier;
       if (!Number.isFinite(value) || value < 0) continue;
-      matches.push({ value, page: pageAt(text, match.index), rawValue: match[1], originalText: text.slice(Math.max(0, match.index - 100), Math.min(text.length, match.index + match[0].length + 100)).trim() });
+      const page = pageAt(text, match.index);
+      const pageText = pageBodyAt(text, match.index);
+      const periodsOnPage = detectPeriodEnds(pageText);
+      // An entire report can contain prior-year comparatives. A metric is
+      // safe only when its page has exactly one documented fiscal period.
+      if (periodsOnPage.length !== 1 || periodsOnPage[0] !== periodEnd) continue;
+      matches.push({ value, page, rawValue: match[1], originalText: text.slice(Math.max(0, match.index - 100), Math.min(text.length, match.index + match[0].length + 100)).trim() });
     }
   }
   if (!matches.length) return null;
@@ -211,6 +216,7 @@ function companyTextMatches(text, name) {
 }
 
 function companyWords(value) { return String(value || "").toUpperCase().replace(/&/g, " AND ").split(/[^A-Z0-9]+/).filter(x => x.length >= 4 && !["CORPORATION", "COMPANY", "LIMITED", "HOLDINGS", "GROUP", "INCORPORATED"].includes(x)); }
+function pageBodyAt(text, index) { const start = text.lastIndexOf("[PAGE ", index); const next = text.indexOf("[PAGE ", index + 1); return text.slice(start >= 0 ? start : 0, next >= 0 ? next : undefined); }
 function pageAt(text, index) { const matches = [...text.slice(0, index).matchAll(/\[PAGE (\d+)\]/g)]; return Number(matches.at(-1)?.[1] || 1); }
 function parseAmount(value) {
   const clean = String(value || "").replace(/\s/g, "").replace(/[^0-9,.-]/g, "");

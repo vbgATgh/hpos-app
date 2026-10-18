@@ -8,4 +8,7 @@ test('repeated identical financial values are not treated as conflicting',()=>{c
 
 test('mixed currencies do not produce financial evidence',()=>assert.equal(extractOfficialReportText(report('Revenue 125. EUR USD. Total debt 40'),meta),null));
 test('mixed thousand and million scales do not produce evidence',()=>assert.equal(extractOfficialReportText(report('In millions. In thousands. Revenue 125 Total debt 40'),meta),null));
-test('two distinct fiscal periods do not silently mix metrics',()=>assert.equal(extractOfficialReportText(report('Fiscal year ended December 31, 2024. Revenue 125 Total debt 40'),meta),null));
+test('different periods on the same page do not yield financial metrics',()=>{const r=extractOfficialReportText(report('Fiscal year ended December 31, 2024. Revenue 125 Total debt 40'),meta);assert.ok(r);assert.equal(r.financial.revenue,null);assert.equal(r.financial.totalDebt,null)});
+
+test('metrics on a uniquely dated latest-year page are accepted while older page is ignored',()=>{const raw=report('Revenue 125 Total debt 40')+'\n[PAGE 2] Fiscal year ended December 31, 2024. Revenue 110 Total debt 39';const r=extractOfficialReportText(raw,meta);assert.ok(r);assert.equal(r.financial.period,'2025-12-31');assert.equal(r.financial.revenue,125);assert.equal(r.financial.totalDebt,null)});
+test('metrics on an undated page are not assigned the latest report period',()=>{const raw=report('')+'\n[PAGE 2] Revenue 125 Total debt 40';const r=extractOfficialReportText(raw,meta);assert.ok(r);assert.equal(r.financial.revenue,null)});
