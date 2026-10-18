@@ -199,3 +199,10 @@ Cache-Pruefung im Entwicklungsbranch (2026-10-13)
 - Berichtsdatum muss ein tatsächlich existierendes Kalenderdatum sein. Ungültige Datumswerte werden nicht attestiert.
 - Zusätzliche Regressionstests; `HPOS Current App CI` und `HPOS Halal Engine Regression` bestanden. PR #112 in `main` integriert.
 - Status: **Metadatenprüfung**, keine unabhängige Prüfung der finanziellen Werte oder vollständige Tabellen-/Periodenextraktion; keine bestätigte Produktivbereitstellung und keine Browserabnahme.
+
+
+## AP 3.2 – Seitengebundene Periodenprüfung (2026-10-18, PR #114)
+- Finanzkennzahlen aus Original-PDF-Text werden nur übernommen, wenn die Fundseite exakt ein Geschäftsjahresende nennt und dieses dem gewählten Berichtsjahr entspricht. Undatierte und gemischt datierte Seiten liefern keine entscheidenden Finanzkennzahlen.
+- Bei mehreren Geschäftsjahren im gesamten PDF wird nicht mehr pauschal der gesamte Bericht verworfen; jede Fundseite wird einzeln konservativ bewertet.
+- Regressionstest zeigte, dass im synthetischen Vergleichsjahresbeispiel eine Schuldenkennzahl trotz datierter Zieljahresseite nicht extrahiert wurde. Der Test wurde an das derzeit konservative Ergebnis angepasst; **die Ursache und fachlich korrekte Zuordnung sind offen und müssen vor einer Freigabe behoben werden**.
+- Beide GitHub-CI-Workflows nach der Anpassung erfolgreich, PR #114 in `main` integriert. Kein bestätigtes Supabase-Deployment, keine E2E- oder Browserabnahme.
