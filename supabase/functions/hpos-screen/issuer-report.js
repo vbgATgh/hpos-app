@@ -202,7 +202,7 @@ function detectUnit(text) {
 function detectPeriodEnds(text) {
   return [...new Set([...text.slice(0, 220000).matchAll(/(?:year|fiscal year|twelve months)\s+ended\s+(?:on\s+)?(january|february|march|april|may|june|july|august|september|october|november|december)\s+(\d{1,2}),\s+(20\d{2})/gi)]
     .map(x => `${x[3]}-${String(monthNumber(x[1])).padStart(2, "0")}-${String(Number(x[2])).padStart(2, "0")}`)
-    .filter(x => Date.parse(x) <= Date.now() + 31 * 86400000))].sort().reverse();
+    .filter(x => { const parsed = new Date(x); return !Number.isNaN(parsed.getTime()) && parsed.toISOString().slice(0, 10) === x && parsed.getTime() <= Date.now(); }))].sort().reverse();
 }
 function detectPeriodEnd(text) { return detectPeriodEnds(text)[0] || ""; }
 
