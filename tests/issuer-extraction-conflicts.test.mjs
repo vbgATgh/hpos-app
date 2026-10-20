@@ -18,3 +18,6 @@ test('mixed-year page debt and interest must not be used even if revenue is avai
 
 test('unbound comparative columns do not become latest-year revenue',()=>{const r=extractOfficialReportText(report('Revenue 125 115 Total debt 40'),meta);assert.ok(r);assert.equal(r.financial.revenue,null);assert.equal(r.evidence.some(e=>e.metric==='revenue'),false)});
 test('single figure still accepted',()=>{const r=extractOfficialReportText(report('Revenue 125'),meta);assert.ok(r);assert.equal(r.financial.revenue,125)});
+
+test('impossible fiscal date cannot be used to label financial evidence',()=>{const raw=report('Revenue 125').replace('December 31, 2025','February 31, 2025');assert.equal(extractOfficialReportText(raw,meta),null)});
+test('future fiscal date cannot be used to label financial evidence',()=>{const raw=report('Revenue 125').replace('December 31, 2025','December 31, 2099');assert.equal(extractOfficialReportText(raw,meta),null)});
