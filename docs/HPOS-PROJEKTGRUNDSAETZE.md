@@ -206,3 +206,10 @@ Cache-Pruefung im Entwicklungsbranch (2026-10-13)
 - Bei mehreren Geschäftsjahren im gesamten PDF wird nicht mehr pauschal der gesamte Bericht verworfen; jede Fundseite wird einzeln konservativ bewertet.
 - Regressionstest zeigte, dass im synthetischen Vergleichsjahresbeispiel eine Schuldenkennzahl trotz datierter Zieljahresseite nicht extrahiert wurde. Der Test wurde an das derzeit konservative Ergebnis angepasst; **die Ursache und fachlich korrekte Zuordnung sind offen und müssen vor einer Freigabe behoben werden**.
 - Beide GitHub-CI-Workflows nach der Anpassung erfolgreich, PR #114 in `main` integriert. Kein bestätigtes Supabase-Deployment, keine E2E- oder Browserabnahme.
+
+
+## AP 3.2 – Ursache der fehlenden Schulden-/Zinswerte behoben (2026-10-20, PR #116)
+- Root Cause aus PR #114: `metric(..., periodEnd)` wurde nur für `revenue` aufgerufen. `totalDebt`, `currentAssets` und `interestIncome` erhielten `undefined` als Berichtsjahr und wurden trotz eindeutiger Fundseite verworfen.
+- PR #116 übergibt nun das erkannte Geschäftsjahresende an **alle vier** Kennzahlenextraktionen. Vergleichsjahresregressionen prüfen Zieljahreswerte und den Ausschluss alter/undatierter Seiten.
+- Ein erster CI-Lauf zeigte zwei widersprüchliche Testannahmen; korrigiert. Anschließend `HPOS Halal Engine Regression` und `HPOS Current App CI` erfolgreich, PR #116 in `main` integriert.
+- Noch offen: zuverlässige Spalten-/Tabellenzuordnung, unabhängige fachliche Quellenattestierung, Backend-Deployment und Ende-zu-Ende-Abnahme. Die Testfälle sind synthetisch; keine Aussage über Live-Abdeckung sämtlicher Emittenten.
