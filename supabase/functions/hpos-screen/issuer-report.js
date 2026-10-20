@@ -165,6 +165,11 @@ function metric(text, patterns, multiplier, periodEnd) {
   for (const pattern of patterns) {
     const all = new RegExp(pattern.source, 'gi');
     for (const match of text.matchAll(all)) {
+      // A row may contain multiple year columns or parentheses for negative
+      // values. Without column binding, no decisive metric may be emitted.
+      const trailing = pageBodyAt(text, match.index).slice(match.index - Math.max(0, text.lastIndexOf("[PAGE ", match.index)));
+      const afterValue = trailing.slice(match[0].length);
+      if (/^\s*[),]?\s+\(?-?\d{1,3}(?:[,.]\d{3})*(?:[,.]\d+)?\)?(?=\s|$)/.test(afterValue)) continue;
       const value = parseAmount(match[1]) * multiplier;
       if (!Number.isFinite(value) || value < 0) continue;
       const page = pageAt(text, match.index);
