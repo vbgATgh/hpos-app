@@ -86,7 +86,7 @@ async function extractPdf(url, issuerWebsite) {
     for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber++) {
       const page = await pdf.getPage(pageNumber);
       const content = await page.getTextContent();
-      pages.push(content.items.map(item => String(item?.str || "")).join(" "));
+      pages.push(content.items.map(item => `${String(item?.str || "")}${item?.hasEOL ? "\\n" : " "}`).join("").replace(/\\n /g, "\\n"));
     }
     const digest = new Uint8Array(await crypto.subtle.digest("SHA-256", bytes));
     const sha256 = Array.from(digest, b => b.toString(16).padStart(2, "0")).join("");
@@ -165,6 +165,9 @@ function metric(text, patterns, multiplier, periodEnd) {
   for (const pattern of patterns) {
     const all = new RegExp(pattern.source, 'gi');
     for (const match of text.matchAll(all)) {
+      // A financial label and its value must be on the same extracted PDF row.
+      // Flattened cross-row matches can silently attach an unrelated number.
+      if (match[0].includes("\\n")) continue;
       // A row may contain multiple year columns or parentheses for negative
       // values. Without column binding, no decisive metric may be emitted.
       const trailing = pageBodyAt(text, match.index).slice(match.index - Math.max(0, text.lastIndexOf("[PAGE ", match.index)));
