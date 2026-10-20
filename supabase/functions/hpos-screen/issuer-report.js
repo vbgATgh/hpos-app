@@ -112,9 +112,9 @@ export function extractOfficialReportText(rawText, meta = {}) {
   const sourceName = `${String(identity?.name || "Issuer").trim()} official annual report`;
   const amount = "(\\d{1,3}(?:[,.]\\d{3})+|\\d+)";
   const revenue = metric(text, [new RegExp(`\\b(?:total\\s+)?revenue(?:s)?\\s+\\$?\\s*\\(?${amount}\\)?`, "i"), new RegExp(`\\bnet sales\\s+\\$?\\s*\\(?${amount}\\)?`, "i")], multiplier, periodEnd);
-  const totalDebt = metric(text, [new RegExp(`\\btotal debt\\*?\\s+\\$?\\s*\\(?${amount}\\)?`, "i"), new RegExp(`\\bborrowings and lease liabilities\\s+\\$?\\s*\\(?${amount}\\)?`, "i")], multiplier);
-  const currentAssets = metric(text, [new RegExp(`\\btotal current assets\\s+\\$?\\s*\\(?${amount}\\)?`, "i")], multiplier);
-  const interestIncome = metric(text, [new RegExp(`\\binterest income\\s+\\$?\\s*\\(?${amount}\\)?`, "i"), new RegExp(`\\bfinance income\\s+\\$?\\s*\\(?${amount}\\)?`, "i")], multiplier);
+  const totalDebt = metric(text, [new RegExp(`\\btotal debt\\*?\\s+\\$?\\s*\\(?${amount}\\)?`, "i"), new RegExp(`\\bborrowings and lease liabilities\\s+\\$?\\s*\\(?${amount}\\)?`, "i")], multiplier, periodEnd);
+  const currentAssets = metric(text, [new RegExp(`\\btotal current assets\\s+\\$?\\s*\\(?${amount}\\)?`, "i")], multiplier, periodEnd);
+  const interestIncome = metric(text, [new RegExp(`\\binterest income\\s+\\$?\\s*\\(?${amount}\\)?`, "i"), new RegExp(`\\bfinance income\\s+\\$?\\s*\\(?${amount}\\)?`, "i")], multiplier, periodEnd);
   const financial = {
     revenue: revenue && !revenue.conflict ? revenue.value : null,
     interestIncome: interestIncome && !interestIncome.conflict ? interestIncome.value : null,
