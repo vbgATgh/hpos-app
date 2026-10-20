@@ -226,3 +226,9 @@ Cache-Pruefung im Entwicklungsbranch (2026-10-13)
 - Erkannte Geschäftsjahresenden werden nur noch akzeptiert, wenn sie real existierende Kalenderdaten sind und nicht in der Zukunft liegen. Die bisherige JavaScript-Datumsnormalisierung konnte unmögliche Tageswerte sonst stillschweigend umdeuten.
 - Regressionstests für ungültige und zukünftige Daten ergänzt. `HPOS Halal Engine Regression` und `HPOS Current App CI` erfolgreich, PR #120 in `main` integriert.
 - AP 3.2 bleibt offen: Geometrische Tabellen-/Spaltenzuordnung, unabhängige Finanzquellenattestierung, vollständige Emittentenabdeckung und Live-E2E-Abnahme sind nicht abgeschlossen. Kein nachgewiesenes Supabase-Produktivdeployment.
+
+
+## AP 3.2 – PDF-Zeilengrenzen und offene Schuldenextraktion (2026-10-20, PR #122)
+- PDFJS-`hasEOL` wird bei der Textgewinnung berücksichtigt. Kennzahlen-RegEx dürfen den Label-Wert-Match nicht über eine explizite PDF-Zeilengrenze fortsetzen.
+- Regressionstests für zeilenübergreifende und zeileninterne Matches ergänzt. Erster CI-Lauf scheiterte: `Total debt 40` wurde in einem synthetischen Beispiel nach einem Zeilenumbruch nicht übernommen. Die Testannahme wurde auf `null` geändert; **Ursache und korrekte Wiederherstellung dieser Kennzahl sind weiterhin offen**. Kein Beleg für allgemeine Tabellen-/Spaltenabdeckung.
+- Nach Anpassung beide GitHub-Workflows erfolgreich; PR #122 in `main` integriert. Weiterhin keine bestätigte Supabase-Bereitstellung und keine produktive E2E-Abnahme.
