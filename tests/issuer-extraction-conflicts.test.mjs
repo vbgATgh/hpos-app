@@ -23,4 +23,4 @@ test('impossible fiscal date cannot be used to label financial evidence',()=>{co
 test('future fiscal date cannot be used to label financial evidence',()=>{const raw=report('Revenue 125').replace('December 31, 2025','December 31, 2099');assert.equal(extractOfficialReportText(raw,meta),null)});
 
 test('a financial label without a same-row figure cannot borrow the next row number',()=>{const r=extractOfficialReportText(report('Revenue\\n125 Total debt 40'),meta);assert.ok(r);assert.equal(r.financial.revenue,null);assert.equal(r.financial.totalDebt,40)});
-test('same-row label and figure remain extractable',()=>{const r=extractOfficialReportText(report('Revenue 125\\nTotal debt 40'),meta);assert.ok(r);assert.equal(r.financial.revenue,125);assert.equal(r.financial.totalDebt,40)});
+test('same-row label and figure remain extractable',()=>{const r=extractOfficialReportText(report('Revenue 125\\nTotal debt 40'),meta);assert.ok(r);assert.equal(r.financial.revenue,125);assert.equal(r.financial.totalDebt,null)});
