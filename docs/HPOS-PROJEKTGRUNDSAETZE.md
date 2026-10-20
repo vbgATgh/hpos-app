@@ -220,3 +220,9 @@ Cache-Pruefung im Entwicklungsbranch (2026-10-13)
 - Ein JavaScript-RegEx-Syntaxfehler im ersten CI-Lauf wurde korrigiert. Danach `HPOS Halal Engine Regression` und `HPOS Current App CI` erfolgreich; PR #118 in `main` integriert.
 - Die Schutzprüfung ist **keine** vollständige Tabellenextraktion: Mehrspaltige und layoutabhängige PDF-Tabellen können weiterhin unerkannt bleiben. Weiterhin nötig sind echte Zeilen-/Spaltengeometrie, eindeutige Periodenbindung je Zelle, Quellenevidenzattestierung und Live-Integrationstests.
 - Keine nachgewiesene Supabase-Produktivbereitstellung oder App-End-to-End-Abnahme.
+
+
+## AP 3.2 – Strikte Kalenderprüfung von Berichtsperioden (2026-10-20, PR #120)
+- Erkannte Geschäftsjahresenden werden nur noch akzeptiert, wenn sie real existierende Kalenderdaten sind und nicht in der Zukunft liegen. Die bisherige JavaScript-Datumsnormalisierung konnte unmögliche Tageswerte sonst stillschweigend umdeuten.
+- Regressionstests für ungültige und zukünftige Daten ergänzt. `HPOS Halal Engine Regression` und `HPOS Current App CI` erfolgreich, PR #120 in `main` integriert.
+- AP 3.2 bleibt offen: Geometrische Tabellen-/Spaltenzuordnung, unabhängige Finanzquellenattestierung, vollständige Emittentenabdeckung und Live-E2E-Abnahme sind nicht abgeschlossen. Kein nachgewiesenes Supabase-Produktivdeployment.
