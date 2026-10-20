@@ -213,3 +213,10 @@ Cache-Pruefung im Entwicklungsbranch (2026-10-13)
 - PR #116 übergibt nun das erkannte Geschäftsjahresende an **alle vier** Kennzahlenextraktionen. Vergleichsjahresregressionen prüfen Zieljahreswerte und den Ausschluss alter/undatierter Seiten.
 - Ein erster CI-Lauf zeigte zwei widersprüchliche Testannahmen; korrigiert. Anschließend `HPOS Halal Engine Regression` und `HPOS Current App CI` erfolgreich, PR #116 in `main` integriert.
 - Noch offen: zuverlässige Spalten-/Tabellenzuordnung, unabhängige fachliche Quellenattestierung, Backend-Deployment und Ende-zu-Ende-Abnahme. Die Testfälle sind synthetisch; keine Aussage über Live-Abdeckung sämtlicher Emittenten.
+
+
+## AP 3.2 – Vergleichsspalten ohne Periodenbindung (2026-10-20, PR #118)
+- Der generische PDF-Textparser verwirft Kennzahlen, wenn direkt nach dem erkannten Wert eine weitere nicht zugeordnete Zahlenspalte folgt. Dadurch wird bei vereinfachten Tabellenzeilen wie `Revenue 125 115` nicht mehr ungeprüft der erste Wert als Zieljahreswert übernommen.
+- Ein JavaScript-RegEx-Syntaxfehler im ersten CI-Lauf wurde korrigiert. Danach `HPOS Halal Engine Regression` und `HPOS Current App CI` erfolgreich; PR #118 in `main` integriert.
+- Die Schutzprüfung ist **keine** vollständige Tabellenextraktion: Mehrspaltige und layoutabhängige PDF-Tabellen können weiterhin unerkannt bleiben. Weiterhin nötig sind echte Zeilen-/Spaltengeometrie, eindeutige Periodenbindung je Zelle, Quellenevidenzattestierung und Live-Integrationstests.
+- Keine nachgewiesene Supabase-Produktivbereitstellung oder App-End-to-End-Abnahme.
