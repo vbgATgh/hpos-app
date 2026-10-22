@@ -232,3 +232,10 @@ Cache-Pruefung im Entwicklungsbranch (2026-10-13)
 - PDFJS-`hasEOL` wird bei der Textgewinnung berücksichtigt. Kennzahlen-RegEx dürfen den Label-Wert-Match nicht über eine explizite PDF-Zeilengrenze fortsetzen.
 - Regressionstests für zeilenübergreifende und zeileninterne Matches ergänzt. Erster CI-Lauf scheiterte: `Total debt 40` wurde in einem synthetischen Beispiel nach einem Zeilenumbruch nicht übernommen. Die Testannahme wurde auf `null` geändert; **Ursache und korrekte Wiederherstellung dieser Kennzahl sind weiterhin offen**. Kein Beleg für allgemeine Tabellen-/Spaltenabdeckung.
 - Nach Anpassung beide GitHub-Workflows erfolgreich; PR #122 in `main` integriert. Weiterhin keine bestätigte Supabase-Bereitstellung und keine produktive E2E-Abnahme.
+
+
+## AP 3.2 – Auflösung PR #124: Zeilenbezogene Finanzkennzahlen (2026-10-22)
+- In PR #124 wurden die Vergleichsspaltenprüfungen auf globale Match-Offsets innerhalb der tatsächlichen Textzeile umgestellt. Zusätzliche numerische Werte werden weiterhin fail-closed behandelt.
+- **Root Cause der zunächst roten Regressionen:** Die neuen Test-Fixtures enthielten die wörtlichen Zeichen `\\n` statt echter Zeilenumbrüche. Die Korrektur der fünf Escape-Vorkommen stellte die beabsichtigten Tests für separate Umsatz-, Schulden- und Zinszeilen her.
+- GitHub Actions auf Head `162aa6d63ef9e0689a78993a9a9c68290ee3ea39`: `HPOS Halal Engine Regression` und `HPOS Current App CI` erfolgreich; PR #124 in `main` integriert (Merge `f6d3600e500a1dc0cd5532e492086d595a66aa67`).
+- **Offen:** PDFJS-Koordinaten-basierte Zeilen-/Spaltenzuordnung, Prüfung realer Vergleichstabellen und unabhängige Attestierung von Kennzahlen. Tests sind synthetisch; kein nachgewiesenes produktives Supabase-Deployment oder E2E-Abnahme.
