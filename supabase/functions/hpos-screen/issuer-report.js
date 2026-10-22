@@ -170,9 +170,11 @@ function metric(text, patterns, multiplier, periodEnd) {
       if (match[0].includes("\n")) continue;
       // A row may contain multiple year columns or parentheses for negative
       // values. Without column binding, no decisive metric may be emitted.
-      const trailing = pageBodyAt(text, match.index).slice(match.index - Math.max(0, text.lastIndexOf("[PAGE ", match.index)));
-      const afterValue = trailing.slice(match[0].length);
-      if (/^\s*[),]?\s+\(?-?\d{1,3}(?:[,.]\d{3})*(?:[,.]\d+)?\)?(?=\s|$)/.test(afterValue)) continue;
+      // Use absolute match offsets; page-local offsets can shift when [PAGE] headers
+      // and their newlines are present, causing false comparative-column matches.
+      const rowEnd = text.indexOf("\n", match.index + match[0].length);
+      const afterValue = text.slice(match.index + match[0].length, rowEnd < 0 ? text.length : rowEnd);
+      if (/^[ \t]+\(?-?\d{1,3}(?:[,.]\d{3})*(?:[,.]\d+)?\)?(?=[ \t]|$)/.test(afterValue)) continue;
       const value = parseAmount(match[1]) * multiplier;
       if (!Number.isFinite(value) || value < 0) continue;
       const page = pageAt(text, match.index);
