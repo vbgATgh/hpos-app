@@ -27,3 +27,26 @@ export function comparativeYearHeaders(rows) {
     return [{ rowIndex, columns: years.map(cell => ({ x: cell.x, year: Number(cell.text) })) }];
   });
 }
+
+/**
+ * Conservative year-column binding for one row of a PDF table.
+ * Returns no value unless there is one unique header, one unique target-year
+ * column and exactly one numeric cell within the configured x tolerance.
+ * Never interprets the number as an audited financial metric.
+ */
+export function bindYearColumnCell(rows, headerIndex, dataIndex, year, tolerance = 12) {
+  if (!Array.isArray(rows) || !Number.isInteger(headerIndex) || !Number.isInteger(dataIndex) ||
+      dataIndex <= headerIndex || !Number.isInteger(year) ||
+      !Number.isFinite(tolerance) || tolerance <= 0) return null;
+  const headers = comparativeYearHeaders(rows).filter(h => h.rowIndex === headerIndex);
+  if (headers.length !== 1 || !rows[dataIndex]?.cells) return null;
+  const columns = headers[0].columns;
+  if (new Set(columns.map(c => c.year)).size !== columns.length ||
+      columns.filter(c => c.year === year).length !== 1) return null;
+  const target = columns.find(c => c.year === year);
+  const near = rows[dataIndex].cells.filter(c => Math.abs(c.x - target.x) <= tolerance);
+  if (near.length !== 1 || !/^-?\\d+(?:[.,]\\d+)?$/.test(near[0].text)) return null;
+  // A number must not fit two competing year headers.
+  if (columns.some(c => c.year !== year && Math.abs(c.x - near[0].x) <= tolerance)) return null;
+  return { year, valueText: near[0].text, x: near[0].x, headerRow: headerIndex, dataRow: dataIndex };
+}
