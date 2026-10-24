@@ -239,3 +239,9 @@ Cache-Pruefung im Entwicklungsbranch (2026-10-13)
 - **Root Cause der zunächst roten Regressionen:** Die neuen Test-Fixtures enthielten die wörtlichen Zeichen `\\n` statt echter Zeilenumbrüche. Die Korrektur der fünf Escape-Vorkommen stellte die beabsichtigten Tests für separate Umsatz-, Schulden- und Zinszeilen her.
 - GitHub Actions auf Head `162aa6d63ef9e0689a78993a9a9c68290ee3ea39`: `HPOS Halal Engine Regression` und `HPOS Current App CI` erfolgreich; PR #124 in `main` integriert (Merge `f6d3600e500a1dc0cd5532e492086d595a66aa67`).
 - **Offen:** PDFJS-Koordinaten-basierte Zeilen-/Spaltenzuordnung, Prüfung realer Vergleichstabellen und unabhängige Attestierung von Kennzahlen. Tests sind synthetisch; kein nachgewiesenes produktives Supabase-Deployment oder E2E-Abnahme.
+
+
+## AP 3.2 – Vergleichsjahres-Header ohne Spaltenbindung (2026-10-24, PR #126)
+- Ein zusätzlicher Fail-Closed-Guard verhindert die Übernahme von Finanzkennzahlen auf PDF-Seiten mit direkt benachbarten nackten Jahreszahlen (z. B. `2025 2024`). Ohne Koordinaten-/Spaltenzuordnung darf kein Zieljahr geraten werden. Einzelne Jahresnennungen in Fließtext lösen diese Prüfung nicht aus.
+- Erster CI-Lauf: Regression rot wegen fehlerhaft escaptem RegEx-Literal; Korrektur auf Head `a3405bd0cc918e301668bab174ac43fe1b97e5c1`. Danach `HPOS Halal Engine Regression` und `HPOS Current App CI` erfolgreich; PR #126 in `main` integriert (Merge `b8506352816c5649a38de0454952c4536a29e9d2`).
+- Die Prüfung ist absichtlich konservativ und kann auf betroffenen Seiten auch korrekte Kennzahlen blockieren. Geometriebasierte Tabellen-/Spaltenzuordnung, belastbare Quellenevidenz und Live-E2E-Tests bleiben offen; keine nachgewiesene Supabase-Produktivbereitstellung.
