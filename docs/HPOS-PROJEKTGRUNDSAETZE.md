@@ -245,3 +245,9 @@ Cache-Pruefung im Entwicklungsbranch (2026-10-13)
 - Ein zusätzlicher Fail-Closed-Guard verhindert die Übernahme von Finanzkennzahlen auf PDF-Seiten mit direkt benachbarten nackten Jahreszahlen (z. B. `2025 2024`). Ohne Koordinaten-/Spaltenzuordnung darf kein Zieljahr geraten werden. Einzelne Jahresnennungen in Fließtext lösen diese Prüfung nicht aus.
 - Erster CI-Lauf: Regression rot wegen fehlerhaft escaptem RegEx-Literal; Korrektur auf Head `a3405bd0cc918e301668bab174ac43fe1b97e5c1`. Danach `HPOS Halal Engine Regression` und `HPOS Current App CI` erfolgreich; PR #126 in `main` integriert (Merge `b8506352816c5649a38de0454952c4536a29e9d2`).
 - Die Prüfung ist absichtlich konservativ und kann auf betroffenen Seiten auch korrekte Kennzahlen blockieren. Geometriebasierte Tabellen-/Spaltenzuordnung, belastbare Quellenevidenz und Live-E2E-Tests bleiben offen; keine nachgewiesene Supabase-Produktivbereitstellung.
+
+
+## AP 3.2 – PDFJS-Koordinatenadapter (2026-10-24)
+- Neuer isolierter Adapter `pdf-coordinate-rows.mjs`: gruppiert PDFJS-Textobjekte nach y-Basislinie, sortiert Textzellen nach x-Position und erkennt benachbarte Jahrgangsspalten als **Kandidaten**.
+- Tests mit künstlichen PDFJS-Textobjekten prüfen Zeilenreihenfolge, x-Sortierung, tolerierte y-Abweichung, ungültige Koordinaten und mehrdeutige Jahresüberschriften.
+- **Nicht in die produktive Finanzkennzahlenextraktion eingebunden.** Die Zuordnung von Zahlen zu Jahres-Spalten benötigt zusätzliche Grenzen, Header-/Tabellen-Scope, realistische PDF-Testfälle und unabhängige Evidenzprüfung. Bestehende Fail-Closed-Gates bleiben unverändert. Kein Supabase-Deployment oder E2E-Test behauptet.
