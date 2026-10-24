@@ -180,6 +180,10 @@ function metric(text, patterns, multiplier, periodEnd) {
       const page = pageAt(text, match.index);
       const pageText = pageBodyAt(text, match.index);
       const periodsOnPage = detectPeriodEnds(pageText);
+      // Comparative statement headers may list bare fiscal years (e.g. 2025 2024)
+      // without repeating "fiscal year ended". Never assign a value to a
+      // year column until PDF geometry establishes the correct column.
+      if (hasComparativeYearColumns(pageText)) continue;
       // An entire report can contain prior-year comparatives. A metric is
       // safe only when its page has exactly one documented fiscal period.
       if (periodsOnPage.length !== 1 || periodsOnPage[0] !== periodEnd) continue;
@@ -202,6 +206,11 @@ function detectUnit(text) {
   const million = /(?:amounts|figures|tabular amounts)?[^.\n]{0,80}\bin millions\b|\(\s*in millions/i.test(head);
   const thousand = /(?:amounts|figures|tabular amounts)?[^.\n]{0,80}\bin thousands\b|\(\s*in thousands/i.test(head);
   return { currency: currencies.length === 1 ? currencies[0] : "", multiplier: million ? 1_000_000 : thousand ? 1_000 : 1, ambiguous: currencies.length !== 1 || (million && thousand) };
+}
+
+function hasComparativeYearColumns(pageText) {
+  // Only reject explicit adjacent year headers, not years mentioned in prose.
+  return /\b20\d{2}[ \t]+20\d{2}\b/.test(pageText);
 }
 
 function detectPeriodEnds(text) {

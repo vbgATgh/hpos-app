@@ -27,3 +27,6 @@ test('same-row label and figure remain extractable',()=>{const r=extractOfficial
 
 test('debt on its own row remains extractable after preceding revenue',()=>{const r=extractOfficialReportText(report('Revenue 125\nTotal debt 40\nInterest income 2'),meta);assert.ok(r);assert.equal(r.financial.revenue,125);assert.equal(r.financial.totalDebt,40);assert.equal(r.financial.interestIncome,2)});
 test('two values on same financial row still fail closed',()=>{const r=extractOfficialReportText(report('Revenue 125 115\nTotal debt 40'),meta);assert.ok(r);assert.equal(r.financial.revenue,null);assert.equal(r.financial.totalDebt,40)});
+
+test('bare comparative year columns block unbound financial evidence',()=>{const r=extractOfficialReportText(report('Statement of income 2025 2024\nRevenue 125\nTotal debt 40'),meta);assert.ok(r);assert.equal(r.financial.revenue,null);assert.equal(r.financial.totalDebt,null);assert.equal(r.evidence.some(e=>e.metric==='revenue'),false)});
+test('year mentions in ordinary prose do not block a single-period metric',()=>{const r=extractOfficialReportText(report('Management discussed 2025 and 2024 separately.\nRevenue 125'),meta);assert.ok(r);assert.equal(r.financial.revenue,125)});
