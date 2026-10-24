@@ -210,7 +210,7 @@ function detectUnit(text) {
 
 function hasComparativeYearColumns(pageText) {
   // Only reject explicit adjacent year headers, not years mentioned in prose.
-  return /\\b20\\d{2}[ \\t]+20\\d{2}\\b/.test(pageText);
+  return /\b20\d{2}[ \t]+20\d{2}\b/.test(pageText);
 }
 
 function detectPeriodEnds(text) {
