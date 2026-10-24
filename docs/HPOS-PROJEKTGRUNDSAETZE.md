@@ -251,3 +251,9 @@ Cache-Pruefung im Entwicklungsbranch (2026-10-13)
 - Neuer isolierter Adapter `pdf-coordinate-rows.mjs`: gruppiert PDFJS-Textobjekte nach y-Basislinie, sortiert Textzellen nach x-Position und erkennt benachbarte Jahrgangsspalten als **Kandidaten**.
 - Tests mit künstlichen PDFJS-Textobjekten prüfen Zeilenreihenfolge, x-Sortierung, tolerierte y-Abweichung, ungültige Koordinaten und mehrdeutige Jahresüberschriften.
 - **Nicht in die produktive Finanzkennzahlenextraktion eingebunden.** Die Zuordnung von Zahlen zu Jahres-Spalten benötigt zusätzliche Grenzen, Header-/Tabellen-Scope, realistische PDF-Testfälle und unabhängige Evidenzprüfung. Bestehende Fail-Closed-Gates bleiben unverändert. Kein Supabase-Deployment oder E2E-Test behauptet.
+
+
+## AP 3.2 – Jahrgangsspalten per PDF-Koordinate binden (2026-10-24)
+- Isolierter Adapter `bindYearColumnCell`: Liefert nur bei eindeutigem Jahrgangs-Header, eindeutiger x-Position und exakt einer numerischen Tabellenzelle einen Kandidaten mit `year`, `valueText`, x-Position und Zeilenindizes.
+- Verweigert Zuordnung bei doppelten Jahreszahlen, konkurrierenden Spalten, überlappenden Zellen, fehlenden Zahlen oder ungültigen Indizes. Synthetische Tests hinzugefügt.
+- Noch **keine** produktive Integration in die PDFJS-Erfassung oder die finanzielle Gate-Engine: Eine eindeutige Zelle ist nicht automatisch eine validierte Kennzahl. Tabellenkontext, Skalierung, Dokument-/Perioden-Attestierung und reale PDF-Fixtures bleiben offen. Keine Live-Bereitstellung bestätigt.
