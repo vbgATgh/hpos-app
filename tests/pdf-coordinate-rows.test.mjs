@@ -44,3 +44,10 @@ test('refuses ambiguous year columns when their x ranges overlap',()=>{
   const rows=pdfCoordinateRows([item('2025',300,730),item('2024',307,730),item('125',303,700)]);
   assert.equal(bindYearColumnCell(rows,0,1,2025),null);
 });
+
+test('year binding rejects nonnumeric cells and accepts a decimal numeric cell',()=>{
+  const rows=pdfCoordinateRows([item('2025',300,730),item('2024',410,730),item('Revenue',30,700),item('125.50',300,700),item('115',410,700)]);
+  assert.equal(bindYearColumnCell(rows,0,1,2025)?.valueText,'125.50');
+  const invalid=pdfCoordinateRows([item('2025',300,730),item('2024',410,730),item('N/A',300,700)]);
+  assert.equal(bindYearColumnCell(invalid,0,1,2025),null);
+});

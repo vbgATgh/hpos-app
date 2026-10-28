@@ -45,7 +45,7 @@ export function bindYearColumnCell(rows, headerIndex, dataIndex, year, tolerance
       columns.filter(c => c.year === year).length !== 1) return null;
   const target = columns.find(c => c.year === year);
   const near = rows[dataIndex].cells.filter(c => Math.abs(c.x - target.x) <= tolerance);
-  if (near.length !== 1 || !/^-?\\d+(?:[.,]\\d+)?$/.test(near[0].text)) return null;
+  if (near.length !== 1 || !/^-?\d+(?:[.,]\d+)?$/.test(near[0].text)) return null;
   // A number must not fit two competing year headers.
   if (columns.some(c => c.year !== year && Math.abs(c.x - near[0].x) <= tolerance)) return null;
   return { year, valueText: near[0].text, x: near[0].x, headerRow: headerIndex, dataRow: dataIndex };
