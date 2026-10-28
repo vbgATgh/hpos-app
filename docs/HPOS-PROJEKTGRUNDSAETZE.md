@@ -257,3 +257,9 @@ Cache-Pruefung im Entwicklungsbranch (2026-10-13)
 - Isolierter Adapter `bindYearColumnCell`: Liefert nur bei eindeutigem Jahrgangs-Header, eindeutiger x-Position und exakt einer numerischen Tabellenzelle einen Kandidaten mit `year`, `valueText`, x-Position und Zeilenindizes.
 - Verweigert Zuordnung bei doppelten Jahreszahlen, konkurrierenden Spalten, überlappenden Zellen, fehlenden Zahlen oder ungültigen Indizes. Synthetische Tests hinzugefügt.
 - Noch **keine** produktive Integration in die PDFJS-Erfassung oder die finanzielle Gate-Engine: Eine eindeutige Zelle ist nicht automatisch eine validierte Kennzahl. Tabellenkontext, Skalierung, Dokument-/Perioden-Attestierung und reale PDF-Fixtures bleiben offen. Keine Live-Bereitstellung bestätigt.
+
+
+## AP 3.2 – Numerische Koordinatenbindung (28.10.2026)
+- PR #130 behebt doppelte RegEx-Escapes im numerischen PDF-Spaltenadapter.
+- Dezimal- und Negativtests ergaenzt. Beide GitHub-CI-Workflows bestanden; Merge f6e5f2ac221ef80e6e068f69cb006e6e1883e6d3.
+- Adapter noch nicht in die produktive Finanzbewertung eingebunden. Reale PDF-E2E-Tests und Supabase-Deployment offen.
